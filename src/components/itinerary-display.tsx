@@ -6,44 +6,19 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Share2, Wand2, PartyPopper } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import ItineraryLoader from './itinerary-loader';
+import ItineraryCalendar from './itinerary-calendar';
+import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 
 type ItineraryDisplayProps = {
-  itinerary: string | null;
+  itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null;
   isLoading: boolean;
   error: string | null;
 };
-
-const parseItinerary = (text: string) => {
-  const dayRegex = /Day\s+(\d+):\s*(.*)/g;
-  const days = text.split(dayRegex);
-  
-  if (days.length <= 1) {
-    // Fallback for non-standard format
-    return [{ day: '1', title: 'Your Itinerary', details: text }];
-  }
-
-  const result = [];
-  for (let i = 1; i < days.length; i += 3) {
-    result.push({
-      day: days[i],
-      title: days[i+1]?.trim(),
-      details: days[i+2]?.trim() || 'No details provided.',
-    });
-  }
-  return result;
-};
-
 
 export default function ItineraryDisplay({
   itinerary,
@@ -91,8 +66,6 @@ export default function ItineraryDisplay({
     );
   }
 
-  const parsedDays = parseItinerary(itinerary);
-
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -117,21 +90,7 @@ export default function ItineraryDisplay({
         </div>
       </CardHeader>
       <CardContent>
-        <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
-          {parsedDays.map((day, index) => (
-            <AccordionItem value={`item-${index + 1}`} key={index}>
-              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                <span className="text-accent mr-2">Day {day.day}:</span>
-                {day.title}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="whitespace-pre-line text-muted-foreground pl-2 border-l-2 border-accent ml-2">
-                  {day.details}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <ItineraryCalendar dailyPlans={itinerary} />
       </CardContent>
     </Card>
   );

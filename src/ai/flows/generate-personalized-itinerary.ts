@@ -16,31 +16,60 @@ import {z} from 'genkit';
 const GeneratePersonalizedItineraryInputSchema = z.object({
   destination: z.string().describe('The destination for the itinerary.'),
   travelDates: z.string().describe('The travel dates for the itinerary.'),
-  workRequirements: z.string().describe('The work requirements during the trip.'),
+  workRequirements: z
+    .string()
+    .describe('The work requirements during the trip.'),
   visaStatus: z.string().describe('The visa status for the destination.'),
   budget: z.string().describe('The budget for the trip.'),
-  lifestylePreferences: z.string().describe('The lifestyle preferences for the trip.'),
+  lifestylePreferences: z
+    .string()
+    .describe('The lifestyle preferences for the trip.'),
 });
 
-export type GeneratePersonalizedItineraryInput = z.infer<typeof GeneratePersonalizedItineraryInputSchema>;
+export type GeneratePersonalizedItineraryInput = z.infer<
+  typeof GeneratePersonalizedItineraryInputSchema
+>;
+
+const ActivitySchema = z.object({
+  time: z.string().describe('The time of the activity (e.g., "9:00 AM", "Afternoon").'),
+  description: z.string().describe('A description of the activity.'),
+  category: z.enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation']).describe('The category of the activity.'),
+});
+
+const DailyItinerarySchema = z.object({
+  day: z.number().describe('The day number of the itinerary (e.g., 1).'),
+  date: z.string().describe('The date of the itinerary day in YYYY-MM-DD format.'),
+  title: z.string().describe('A title for the day (e.g., "Arrival and Settling In").'),
+  activities: z.array(ActivitySchema).describe('A list of activities for the day.'),
+});
+
 
 const GeneratePersonalizedItineraryOutputSchema = z.object({
-  itinerary: z.string().describe('The generated day-by-day itinerary.'),
+  itinerary: z.array(DailyItinerarySchema).describe('The generated day-by-day itinerary.'),
 });
 
-export type GeneratePersonalizedItineraryOutput = z.infer<typeof GeneratePersonalizedItineraryOutputSchema>;
+export type GeneratePersonalizedItineraryOutput = z.infer<
+  typeof GeneratePersonalizedItineraryOutputSchema
+>;
 
-export async function generatePersonalizedItinerary(input: GeneratePersonalizedItineraryInput): Promise<GeneratePersonalizedItineraryOutput> {
+export async function generatePersonalizedItinerary(
+  input: GeneratePersonalizedItineraryInput
+): Promise<GeneratePersonalizedItineraryOutput> {
   return generatePersonalizedItineraryFlow(input);
 }
 
 const decideOnEventOrLocation = ai.defineTool(
   {
     name: 'decideOnEventOrLocation',
-    description: 'Decides whether to incorporate a particular event or location into the itinerary based on user preferences.',
+    description:
+      'Decides whether to incorporate a particular event or location into the itinerary based on user preferences.',
     inputSchema: z.object({
-      eventOrLocation: z.string().describe('The event or location to consider.'),
-      userPreferences: z.string().describe('The user’s lifestyle preferences and interests.'),
+      eventOrLocation: z
+        .string()
+        .describe('The event or location to consider.'),
+      userPreferences: z
+        .string()
+        .describe('The user’s lifestyle preferences and interests.'),
     }),
     outputSchema: z.boolean(),
   },
@@ -48,7 +77,7 @@ const decideOnEventOrLocation = ai.defineTool(
     // A real implementation would compare the event/location to user preferences.
     // For now, we'll just include everything.
     return true;
-  },
+  }
 );
 
 const prompt = ai.definePrompt({
@@ -56,7 +85,7 @@ const prompt = ai.definePrompt({
   input: {schema: GeneratePersonalizedItineraryInputSchema},
   output: {schema: GeneratePersonalizedItineraryOutputSchema},
   tools: [decideOnEventOrLocation],
-  prompt: `You are a travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary.
+  prompt: `You are a travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
 
   Based on the following information, generate a detailed day-by-day itinerary:
   Destination: {{{destination}}}
@@ -66,23 +95,11 @@ const prompt = ai.definePrompt({
   Budget: {{{budget}}}
   Lifestyle Preferences: {{{lifestylePreferences}}}
 
-  Incorporate coworking spaces, cafes with WiFi, and local nomad community events into the itinerary. Use the decideOnEventOrLocation tool to determine whether a given event or location aligns with the user's preferences.
+  Today's date is ${new Date().toLocaleDateString()}. Make sure the dates in the itinerary are correct based on the user's travel dates.
 
-  Structure your output as a day-by-day plan. For example:
-  Day 1: Arrival and Settling In
-  - Arrive at the airport, clear customs.
-  - Take a taxi to your accommodation.
-  - Check into your apartment and unpack.
-  - Afternoon: Explore the local neighborhood.
-  - Evening: Dinner at a recommended local restaurant.
+  Incorporate coworking spaces, cafes with reliable WiFi, and local nomad community events into the itinerary. Use the decideOnEventOrLocation tool to determine whether a given event or location aligns with the user's preferences.
 
-  Day 2: Work and Exploration
-  - Morning: Work session at 'Coworking Space Example'.
-  - Lunch: Grab a bite at 'Cafe Example'.
-  - Afternoon: Visit the 'Museum of Modern Art'.
-  - Evening: Attend a local tech meetup.
-
-  Ensure every day has a clear title and a list of activities.
+  For each activity, provide a time, a description, and a category from the available options ('Work', 'Leisure', 'Food', 'Travel', 'Accommodation'). Ensure every day has a clear title, date, and a list of activities.
   `,
 });
 
@@ -92,11 +109,11 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     inputSchema: GeneratePersonalizedItineraryInputSchema,
     outputSchema: GeneratePersonalizedItineraryOutputSchema,
   },
-  async input => {
+  async (input) => {
     const {output} = await prompt(input);
     
     if (!output) {
-      return { itinerary: "Could not generate an itinerary based on the provided information. Please try again with different preferences." };
+      return { itinerary: [] };
     }
     
     return output;

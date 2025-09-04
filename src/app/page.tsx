@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { z } from 'zod';
-import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
+import { generatePersonalizedItinerary, type GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 
 import Header from '@/components/header';
 import ItineraryForm from '@/components/itinerary-form';
@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import type { formSchema } from '@/components/itinerary-form';
 
 export default function Home() {
-  const [itinerary, setItinerary] = useState<string | null>(null);
+  const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput['itinerary'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +23,7 @@ export default function Home() {
     setItinerary(null);
     try {
       const result = await generatePersonalizedItinerary(values);
-      if (result.itinerary) {
+      if (result.itinerary && result.itinerary.length > 0) {
         setItinerary(result.itinerary);
       } else {
         setError(
