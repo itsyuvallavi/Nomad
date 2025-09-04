@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -13,6 +14,9 @@ import { useToast } from '@/hooks/use-toast';
 import ItineraryLoader from './itinerary-loader';
 import ItineraryCalendar from './itinerary-calendar';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ItineraryDailyView from './itinerary-daily-view';
+import ItineraryWeeklyView from './itinerary-weekly-view';
 
 type ItineraryDisplayProps = {
   itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null;
@@ -26,6 +30,7 @@ export default function ItineraryDisplay({
   error,
 }: ItineraryDisplayProps) {
   const { toast } = useToast();
+  const [activeView, setActiveView] = useState('daily');
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -90,7 +95,22 @@ export default function ItineraryDisplay({
         </div>
       </CardHeader>
       <CardContent>
-        <ItineraryCalendar dailyPlans={itinerary} />
+        <Tabs defaultValue="daily" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="daily">Daily</TabsTrigger>
+            <TabsTrigger value="weekly">Weekly</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          </TabsList>
+          <TabsContent value="daily">
+            <ItineraryDailyView dailyPlans={itinerary} />
+          </TabsContent>
+          <TabsContent value="weekly">
+            <ItineraryWeeklyView dailyPlans={itinerary} />
+          </TabsContent>
+          <TabsContent value="calendar">
+            <ItineraryCalendar dailyPlans={itinerary} />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
