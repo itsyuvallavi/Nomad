@@ -56,7 +56,7 @@ const prompt = ai.definePrompt({
   input: {schema: GeneratePersonalizedItineraryInputSchema},
   output: {schema: GeneratePersonalizedItineraryOutputSchema},
   tools: [decideOnEventOrLocation],
-  prompt: `You are a travel agent specializing in creating personalized itineraries for nomad travelers.
+  prompt: `You are a travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary.
 
   Based on the following information, generate a detailed day-by-day itinerary:
   Destination: {{{destination}}}
@@ -67,6 +67,22 @@ const prompt = ai.definePrompt({
   Lifestyle Preferences: {{{lifestylePreferences}}}
 
   Incorporate coworking spaces, cafes with WiFi, and local nomad community events into the itinerary. Use the decideOnEventOrLocation tool to determine whether a given event or location aligns with the user's preferences.
+
+  Structure your output as a day-by-day plan. For example:
+  Day 1: Arrival and Settling In
+  - Arrive at the airport, clear customs.
+  - Take a taxi to your accommodation.
+  - Check into your apartment and unpack.
+  - Afternoon: Explore the local neighborhood.
+  - Evening: Dinner at a recommended local restaurant.
+
+  Day 2: Work and Exploration
+  - Morning: Work session at 'Coworking Space Example'.
+  - Lunch: Grab a bite at 'Cafe Example'.
+  - Afternoon: Visit the 'Museum of Modern Art'.
+  - Evening: Attend a local tech meetup.
+
+  Ensure every day has a clear title and a list of activities.
   `,
 });
 
@@ -78,6 +94,11 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    
+    if (!output) {
+      return { itinerary: "Could not generate an itinerary based on the provided information. Please try again with different preferences." };
+    }
+    
+    return output;
   }
 );
