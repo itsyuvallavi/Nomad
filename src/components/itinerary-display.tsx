@@ -13,10 +13,10 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Share2, Wand2, PartyPopper } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import ItineraryLoader from './itinerary-loader';
 
 type ItineraryDisplayProps = {
   itinerary: string | null;
@@ -61,27 +61,7 @@ export default function ItineraryDisplay({
   };
 
   if (isLoading) {
-    return (
-      <Card className="shadow-lg">
-        <CardHeader>
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-4 w-1/2 mt-2" />
-        </CardHeader>
-        <CardContent className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <ItineraryLoader />;
   }
 
   if (error) {
