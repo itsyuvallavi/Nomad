@@ -7,6 +7,8 @@ import {
   Utensils,
   Plane,
   Bed,
+  MapPin,
+  Clock,
 } from 'lucide-react';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 import {
@@ -68,18 +70,30 @@ const ItineraryDailyView = ({ dailyPlans }: ItineraryDailyViewProps) => {
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-4 ml-2 border-l-2 border-accent/50 pl-6 py-2">
+              <div className="space-y-6 ml-2 border-l-2 border-accent/50 pl-6 py-2">
                 {plan.activities.map((activity, index) => (
                   <div key={index} className="relative">
+                     {activity.travelTime && (
+                       <div className="absolute -left-12 text-xs text-muted-foreground flex items-center gap-1">
+                         <Clock className="h-3 w-3" />
+                         <span>{activity.travelTime}</span>
+                       </div>
+                     )}
                     <div className="absolute -left-8 top-1.5 h-4 w-4 rounded-full bg-accent" />
                     <p className="font-bold text-muted-foreground">
                       {activity.time}
                     </p>
-                    <div className="flex items-center gap-3">
-                      <div className="text-accent">
+                    <div className="flex items-start gap-3 mt-1">
+                      <div className="text-accent mt-1">
                         {getCategoryIcon(activity.category)}
                       </div>
-                      <p className="text-foreground/80">{activity.description}</p>
+                      <div>
+                        <p className="text-foreground/90 font-semibold">{activity.description}</p>
+                         <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>{activity.address}</span>
+                         </div>
+                      </div>
                     </div>
                      <Badge variant="outline" className="mt-2 ml-8">{activity.category}</Badge>
                   </div>

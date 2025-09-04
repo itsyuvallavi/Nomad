@@ -64,7 +64,7 @@ export default function ItineraryForm({
   });
 
   return (
-    <Card className="shadow-lg sticky top-24">
+    <>
       <CardHeader>
         <CardTitle className="font-headline text-2xl">
           Plan Your Next Adventure
@@ -150,6 +150,6 @@ export default function ItineraryForm({
           </form>
         </Form>
       </CardContent>
-    </Card>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -43,7 +43,14 @@ const getCategoryIcon = (category: Activity['category']) => {
 
 
 const ItineraryCalendar = ({ dailyPlans }: ItineraryCalendarProps) => {
-  const [currentDate, setCurrentDate] = useState(new Date(dailyPlans[0].date));
+  const [currentDate, setCurrentDate] = useState(() => new Date(dailyPlans[0].date));
+
+  useEffect(() => {
+    // When itinerary changes, reset the view to the month of the first day of the plan
+    if(dailyPlans && dailyPlans.length > 0) {
+      setCurrentDate(new Date(dailyPlans[0].date));
+    }
+  }, [dailyPlans])
 
   const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -72,13 +79,16 @@ const ItineraryCalendar = ({ dailyPlans }: ItineraryCalendarProps) => {
     const dateString = date.toISOString().split('T')[0];
     const plan = dailyPlans.find(p => {
         // AI may add timezone, so just compare dates
-        return new Date(p.date).toISOString().split('T')[0] === dateString;
+        // Also, JS dates are a pain, so add 1 to the plan date to normalize
+        const planDate = new Date(p.date);
+        planDate.setDate(planDate.getDate() + 1);
+        return planDate.toISOString().split('T')[0] === dateString;
     });
     return plan?.activities || [];
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-4">
       <div className="flex justify-between items-center">
         <Button variant="outline" size="icon" onClick={handlePrevMonth}>
           <ChevronLeft className="h-4 w-4" />

@@ -17,20 +17,27 @@ import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-pe
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ItineraryDailyView from './itinerary-daily-view';
 import ItineraryWeeklyView from './itinerary-weekly-view';
+import { refineItineraryBasedOnFeedback } from '@/ai/flows/refine-itinerary-based-on-feedback';
+import { Textarea } from './ui/textarea';
+import { Loader2 } from 'lucide-react';
+
 
 type ItineraryDisplayProps = {
   itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null;
   isLoading: boolean;
   error: string | null;
+  setItinerary: (itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null) => void;
 };
 
 export default function ItineraryDisplay({
   itinerary,
   isLoading,
   error,
+  setItinerary,
 }: ItineraryDisplayProps) {
   const { toast } = useToast();
-  const [activeView, setActiveView] = useState('daily');
+  const [isRefining, setIsRefining] = useState(false);
+  const [feedback, setFeedback] = useState('');
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -39,6 +46,32 @@ export default function ItineraryDisplay({
       description: 'Itinerary link copied to your clipboard.',
     });
   };
+
+  const handleRefine = async () => {
+    if (!feedback.trim() || !itinerary) return;
+
+    setIsRefining(true);
+    try {
+      const result = await refineItineraryBasedOnFeedback({
+        originalItinerary: JSON.stringify(itinerary, null, 2),
+        userFeedback: feedback,
+      });
+      // The output from refine is a string, so we need to parse it.
+      const refined = JSON.parse(result.refinedItinerary);
+      setItinerary(refined.itinerary);
+      setFeedback('');
+    } catch (e) {
+      console.error(e);
+      toast({
+        variant: 'destructive',
+        title: 'Error Refining Itinerary',
+        description: 'Could not apply your changes. Please try again.',
+      });
+    } finally {
+      setIsRefining(false);
+    }
+  };
+
 
   if (isLoading) {
     return <ItineraryLoader />;
@@ -80,14 +113,10 @@ export default function ItineraryDisplay({
               Your Trip Plan Is Ready!
             </CardTitle>
             <CardDescription>
-              Here&apos;s your day-by-day guide. You can refine it further if
-              needed.
+              Here&apos;s your day-by-day guide. You can refine it further below.
             </CardDescription>
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button variant="outline" size="sm" disabled>
-              <Wand2 className="mr-2 h-4 w-4" /> Refine
-            </Button>
             <Button variant="outline" size="sm" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share
             </Button>
@@ -112,6 +141,29 @@ export default function ItineraryDisplay({
           </TabsContent>
         </Tabs>
       </CardContent>
+       <CardContent>
+          <div className="space-y-4">
+            <h3 className="font-headline text-lg">Refine Your Itinerary</h3>
+            <Textarea
+              placeholder="e.g., 'Can you add more vegetarian restaurants?' or 'I'd prefer to work in the mornings.'"
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              disabled={isRefining}
+            />
+            <Button onClick={handleRefine} disabled={isRefining || !feedback.trim()}>
+              {isRefining ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Applying Changes...
+                </>
+              ) : (
+                <>
+                 <Wand2 className="mr-2 h-4 w-4" /> Refine with AI
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
     </Card>
   );
 }

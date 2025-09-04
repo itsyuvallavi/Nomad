@@ -31,21 +31,37 @@ export type GeneratePersonalizedItineraryInput = z.infer<
 >;
 
 const ActivitySchema = z.object({
-  time: z.string().describe('The time of the activity (e.g., "9:00 AM", "Afternoon").'),
+  time: z
+    .string()
+    .describe('The time of the activity (e.g., "9:00 AM", "Afternoon").'),
   description: z.string().describe('A description of the activity.'),
-  category: z.enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation']).describe('The category of the activity.'),
+  category: z
+    .enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation'])
+    .describe('The category of the activity.'),
+  address: z.string().describe('The address of the activity location.'),
+  travelTime: z
+    .string()
+    .optional()
+    .describe('Estimated travel time from the previous location.'),
 });
 
 const DailyItinerarySchema = z.object({
   day: z.number().describe('The day number of the itinerary (e.g., 1).'),
-  date: z.string().describe('The date of the itinerary day in YYYY-MM-DD format.'),
-  title: z.string().describe('A title for the day (e.g., "Arrival and Settling In").'),
-  activities: z.array(ActivitySchema).describe('A list of activities for the day.'),
+  date: z
+    .string()
+    .describe('The date of the itinerary day in YYYY-MM-DD format.'),
+  title: z
+    .string()
+    .describe('A title for the day (e.g., "Arrival and Settling In").'),
+  activities: z
+    .array(ActivitySchema)
+    .describe('A list of activities for the day.'),
 });
 
-
 const GeneratePersonalizedItineraryOutputSchema = z.object({
-  itinerary: z.array(DailyItinerarySchema).describe('The generated day-by-day itinerary.'),
+  itinerary: z
+    .array(DailyItinerarySchema)
+    .describe('The generated day-by-day itinerary.'),
 });
 
 export type GeneratePersonalizedItineraryOutput = z.infer<
@@ -99,7 +115,9 @@ const prompt = ai.definePrompt({
 
   Incorporate coworking spaces, cafes with reliable WiFi, and local nomad community events into the itinerary. Use the decideOnEventOrLocation tool to determine whether a given event or location aligns with the user's preferences.
 
-  For each activity, provide a time, a description, and a category from the available options ('Work', 'Leisure', 'Food', 'Travel', 'Accommodation'). Ensure every day has a clear title, date, and a list of activities.
+  For each activity, provide a time, a description, a category, a physical address, and an estimated travel time from the previous activity. Do not mention flights. The travel should be between locations within the destination city.
+
+  Ensure every day has a clear title, date, and a list of activities.
   `,
 });
 

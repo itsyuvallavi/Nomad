@@ -42,11 +42,16 @@ const ItineraryWeeklyView = ({ dailyPlans }: { dailyPlans: GeneratePersonalizedI
   // Create a map of dates to plans
   const plansByDate = new Map<string, typeof dailyPlans[0]>();
   dailyPlans.forEach(plan => {
-    const dateKey = new Date(plan.date).toISOString().split('T')[0];
+    const adjustedDate = new Date(plan.date);
+    adjustedDate.setDate(adjustedDate.getDate() + 1); // Fix off-by-one error
+    const dateKey = adjustedDate.toISOString().split('T')[0];
     plansByDate.set(dateKey, plan);
   });
 
-  const startDate = new Date(dailyPlans[0].date);
+  const firstDate = new Date(dailyPlans[0].date);
+  firstDate.setDate(firstDate.getDate() + 1); // Fix off-by-one
+  
+  const startDate = new Date(firstDate);
   startDate.setDate(startDate.getDate() - startDate.getDay());
 
   const weekDays = Array.from({ length: 7 }).map((_, i) => {
