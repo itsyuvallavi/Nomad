@@ -37,7 +37,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-secondary">
+    <div className="flex flex-col min-h-screen bg-transparent">
       <Header />
       <main className="flex-1 container mx-auto p-4 sm:p-6 md:p-8 flex justify-center items-start">
         <div className="w-full max-w-4xl">
@@ -49,7 +49,7 @@ export default function Home() {
                 setItinerary={setItinerary}
               />
             ) : (
-               <Card className="shadow-lg">
+               <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
                 <CardContent className="p-0">
                     <ItineraryForm
                       isSubmitting={isLoading}

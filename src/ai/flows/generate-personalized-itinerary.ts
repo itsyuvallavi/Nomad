@@ -14,16 +14,9 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
-  destination: z.string().describe('The destination for the itinerary.'),
-  travelDates: z.string().describe('The travel dates for the itinerary.'),
-  workRequirements: z
+  prompt: z
     .string()
-    .describe('The work requirements during the trip.'),
-  visaStatus: z.string().describe('The visa status for the destination.'),
-  budget: z.string().describe('The budget for the trip.'),
-  lifestylePreferences: z
-    .string()
-    .describe('The lifestyle preferences for the trip.'),
+    .describe('A natural language prompt describing the desired trip.'),
 });
 
 export type GeneratePersonalizedItineraryInput = z.infer<
@@ -103,13 +96,9 @@ const prompt = ai.definePrompt({
   tools: [decideOnEventOrLocation],
   prompt: `You are a travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
 
-  Based on the following information, generate a detailed day-by-day itinerary:
-  Destination: {{{destination}}}
-  Travel Dates: {{{travelDates}}}
-  Work Requirements: {{{workRequirements}}}
-  Visa Status: {{{visaStatus}}}
-  Budget: {{{budget}}}
-  Lifestyle Preferences: {{{lifestylePreferences}}}
+  Analyze the user's prompt to determine the destination, travel dates, work requirements, visa status, budget, and lifestyle preferences.
+
+  User's request: {{{prompt}}}
 
   Today's date is ${new Date().toLocaleDateString()}. Make sure the dates in the itinerary are correct based on the user's travel dates.
 
@@ -130,7 +119,10 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
   async (input) => {
     const {output} = await prompt(input);
     
-    if (!output) {
+    if (!output || !output.itinerary) {
+      // If the model fails, try to return a graceful empty state
+      // or a message indicating failure.
+      // Returning a valid, empty structure is often better than null/undefined.
       return { itinerary: [] };
     }
     
