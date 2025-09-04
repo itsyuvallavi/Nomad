@@ -34,15 +34,22 @@ export async function generatePersonalizedItinerary(input: GeneratePersonalizedI
   return generatePersonalizedItineraryFlow(input);
 }
 
-const decideOnEventOrLocation = ai.defineTool({
-  name: 'decideOnEventOrLocation',
-  description: 'Decides whether to incorporate a particular event or location into the itinerary based on user preferences.',
-  inputSchema: z.object({
-    eventOrLocation: z.string().describe('The event or location to consider.'),
-    userPreferences: z.string().describe('The user\u2019s lifestyle preferences and interests.'),
-  }),
-  outputSchema: z.boolean().describe('Whether to include the event or location in the itinerary.'),
-});
+const decideOnEventOrLocation = ai.defineTool(
+  {
+    name: 'decideOnEventOrLocation',
+    description: 'Decides whether to incorporate a particular event or location into the itinerary based on user preferences.',
+    inputSchema: z.object({
+      eventOrLocation: z.string().describe('The event or location to consider.'),
+      userPreferences: z.string().describe('The user’s lifestyle preferences and interests.'),
+    }),
+    outputSchema: z.boolean(),
+  },
+  async (input) => {
+    // A real implementation would compare the event/location to user preferences.
+    // For now, we'll just include everything.
+    return true;
+  },
+);
 
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedItineraryPrompt',
