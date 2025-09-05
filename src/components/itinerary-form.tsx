@@ -55,7 +55,7 @@ export default function ItineraryForm({
         setPlaceholder(currentText.substring(0, charIndex + 1));
         setCharIndex(charIndex + 1);
         if (charIndex + 1 === currentText.length) {
-          setTimeout(() => setIsDeleting(true), 2000); // Pause before deleting
+          setTimeout(() => setIsDeleting(true), 5000); // Pause before deleting
         }
       }
     };
