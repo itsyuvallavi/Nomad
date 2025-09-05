@@ -98,22 +98,42 @@ const decideOnEventOrLocation = ai.defineTool(
   }
 );
 
+const getWeatherForecast = ai.defineTool(
+    {
+        name: 'getWeatherForecast',
+        description: 'Gets the weather forecast for a specific location and date.',
+        inputSchema: z.object({
+            location: z.string().describe('The location to get the weather for (e.g., "Lisbon, Portugal").'),
+            date: z.string().describe('The date for the forecast in YYYY-MM-DD format.'),
+        }),
+        outputSchema: z.object({
+            forecast: z.string().describe('A description of the weather (e.g., "Sunny with a high of 25°C").')
+        }),
+    },
+    async (input) => {
+        // This is a mock implementation. In a real app, you would call a weather API.
+        return { forecast: "Sunny and pleasant, 22°C" };
+    }
+);
+
+
 const prompt = ai.definePrompt({
   name: 'generatePersonalizedItineraryPrompt',
   input: {schema: GeneratePersonalizedItineraryInputSchema},
   output: {schema: GeneratePersonalizedItineraryOutputSchema},
-  tools: [decideOnEventOrLocation],
-  prompt: `You are a travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
+  tools: [decideOnEventOrLocation, getWeatherForecast],
+  prompt: `You are a master travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
 
   Analyze the user's prompt to determine the destination, travel dates, work requirements, visa status, budget, and lifestyle preferences.
 
   User's request: {{{prompt}}}
 
-  **Important Rules:**
-  1.  **Select Specific Places:** You MUST choose real, specific locations for all activities, including hotels, coworking spaces, restaurants, and points of interest. Provide a full, real address for each.
-  2.  **Default Budget:** If the user does not specify a budget, you MUST assume a total daily budget of $500. This budget must cover everything for the day: hotel, three meals, transportation, and activities. Select places that fit within this budget.
-  3.  **Minimal Text:** Keep all descriptions for activities short and to the point.
-  4.  **Quick Tips:** The 'quickTips' array should contain 3-4 very brief, essential tips for the traveler.
+  **CRITICAL RULES:**
+  1.  **Select Specific Places:** You MUST choose real, specific locations for ALL activities. This includes a hotel for the stay, coworking spaces, restaurants, and points of interest. Provide a full, real address for each location. Do not use generic placeholders.
+  2.  **Default Budget:** If the user does NOT specify a budget, you MUST assume a total daily budget of $500. This budget must cover everything for the day: the hotel, three meals, transportation, and all activities. You are responsible for selecting places that fit within this budget.
+  3.  **Use Tools:** You MUST use the getWeatherForecast tool to check the weather for each day of the trip and plan activities accordingly (e.g., indoor activities for rainy days). Use the decideOnEventOrLocation tool to determine if a potential activity aligns with the user's preferences.
+  4.  **Minimal Text:** Keep all descriptions for activities and quick tips extremely short and to the point.
+  5.  **Hotel First:** The first activity for Day 1 should always be "Accommodation" and should be the check-in at the selected hotel.
 
   {{#if attachedFile}}
   The user has also attached a file for reference. Use the information in this file to inform the itinerary.
@@ -122,7 +142,7 @@ const prompt = ai.definePrompt({
 
   Today's date is ${new Date().toLocaleDateString()}. Make sure the dates in the itinerary are correct based on the user's travel dates.
 
-  Incorporate coworking spaces, cafes with reliable WiFi, and local nomad community events into the itinerary. Use the decideOnEventOrLocation tool to determine whether a given event or location aligns with the user's preferences.
+  Incorporate coworking spaces, cafes with reliable WiFi, and local nomad community events into the itinerary.
 
   For each activity, provide a time, a description, a category, a specific physical address, and an estimated travel time from the previous activity. Do not mention flights. The travel should be between locations within the destination city.
 
