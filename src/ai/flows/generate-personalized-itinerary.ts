@@ -58,9 +58,12 @@ const DailyItinerarySchema = z.object({
 });
 
 const GeneratePersonalizedItineraryOutputSchema = z.object({
+  destination: z.string().describe('The main destination of the trip (e.g., "Lisbon, Portugal").'),
+  title: z.string().describe('A catchy title for the trip (e.g., "Lisbon Work-cation Adventure").'),
   itinerary: z
     .array(DailyItinerarySchema)
     .describe('The generated day-by-day itinerary.'),
+  quickTips: z.array(z.string()).describe('A list of 3-4 quick, helpful tips for the destination (e.g., visa info, average budget, wifi quality).'),
 });
 
 export type GeneratePersonalizedItineraryOutput = z.infer<
@@ -117,6 +120,8 @@ const prompt = ai.definePrompt({
 
   For each activity, provide a time, a description, a category, a physical address, and an estimated travel time from the previous activity. Do not mention flights. The travel should be between locations within the destination city.
 
+  The final output must include a 'destination' (e.g., "Lisbon, Portugal"), a 'title' for the trip, the 'itinerary' itself, and a list of 3-4 'quickTips' relevant to the destination for a digital nomad.
+
   Ensure every day has a clear title, date, and a list of activities.
   `,
 });
@@ -134,7 +139,7 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
       // If the model fails, try to return a graceful empty state
       // or a message indicating failure.
       // Returning a valid, empty structure is often better than null/undefined.
-      return { itinerary: [] };
+      return { destination: 'Unknown', title: 'Trip', itinerary: [], quickTips: [] };
     }
     
     return output;

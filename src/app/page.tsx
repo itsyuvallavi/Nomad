@@ -27,7 +27,7 @@ function fileToDataURL(file: File): Promise<string> {
 }
 
 export default function Home() {
-  const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput['itinerary'] | null>(null);
+  const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +46,7 @@ export default function Home() {
       });
 
       if (result.itinerary && result.itinerary.length > 0) {
-        setItinerary(result.itinerary);
+        setItinerary(result);
       } else {
         setError(
           'Failed to generate itinerary. The AI may be busy or the request could not be processed. Please try again.'
@@ -115,7 +115,7 @@ export default function Home() {
             )}
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-6">
+          <div className="flex-1 flex flex-col items-center justify-center p-6 -mt-20">
             {/* Welcome Section */}
             <div className="flex flex-col items-center text-center max-w-md">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 animate-float">
@@ -126,7 +126,7 @@ export default function Home() {
             </div>
             
             {/* Input Area */}
-            <div className="w-full">
+            <div className="w-full mt-8">
               <ItineraryForm
                 isSubmitting={isLoading}
                 onSubmit={handleItineraryRequest}

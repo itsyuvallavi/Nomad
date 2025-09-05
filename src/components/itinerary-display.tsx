@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Share2, Wand2, Home, ArrowLeft } from 'lucide-react';
+import { AlertCircle, Share2, Wand2, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
@@ -9,13 +9,11 @@ import ItineraryDailyView from './itinerary-daily-view';
 import { refineItineraryBasedOnFeedback } from '@/ai/flows/refine-itinerary-based-on-feedback';
 import { Textarea } from './ui/textarea';
 import { Loader2 } from 'lucide-react';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from './ui/card';
-
 
 type ItineraryDisplayProps = {
-  itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null;
+  itinerary: GeneratePersonalizedItineraryOutput | null;
   error: string | null;
-  setItinerary: (itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null) => void;
+  setItinerary: (itinerary: GeneratePersonalizedItineraryOutput | null) => void;
   onReturn: () => void;
 };
 
@@ -48,7 +46,7 @@ export default function ItineraryDisplay({
       });
       // The output from refine is a string, so we need to parse it.
       const refined = JSON.parse(result.refinedItinerary);
-      setItinerary(refined.itinerary);
+      setItinerary(refined);
       setFeedback('');
     } catch (e) {
       console.error(e);
@@ -72,82 +70,85 @@ export default function ItineraryDisplay({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
         <Button variant="outline" size="sm" onClick={onReturn} className="mt-4 bg-slate-700 border-slate-600 hover:bg-slate-600">
-            <Home className="mr-2 h-4 w-4" /> Try Again
+            <ArrowLeft className="mr-2 h-4 w-4" /> Try Again
         </Button>
       </div>
     );
   }
 
-  if (!itinerary) {
-    // This case should ideally not be hit if loading is handled, but as a fallback.
+  if (!itinerary || !itinerary.itinerary) {
     return (
         <div className="max-w-4xl mx-auto p-6 text-center">
         <p className="text-slate-400">Something went wrong. Please try starting over.</p>
          <Button variant="outline" size="sm" onClick={onReturn} className="mt-4 bg-slate-700 border-slate-600 hover:bg-slate-600">
-            <Home className="mr-2 h-4 w-4" /> Start Over
+            <ArrowLeft className="mr-2 h-4 w-4" /> Start Over
         </Button>
       </div>
     );
   }
+  
+  const tripStartDate = itinerary.itinerary[0]?.date;
+  const tripEndDate = itinerary.itinerary[itinerary.itinerary.length - 1]?.date;
 
-  const tripHeaderInfo = {
-    destination: "Your Trip",
-    dates: `${itinerary[0]?.date} - ${itinerary[itinerary.length - 1]?.date}`
+  const formatDateRange = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const startMonth = startDate.toLocaleDateString('en-US', { month: 'short' });
+    const endMonth = endDate.toLocaleDateString('en-US', { month: 'short' });
+    
+    if (startMonth === endMonth) {
+      return `${startMonth} ${startDate.getDate()} - ${endDate.getDate()}, ${endDate.getFullYear()}`;
+    }
+    return `${startMonth} ${startDate.getDate()} - ${endMonth} ${endDate.getDate()}, ${endDate.getFullYear()}`;
   }
+
 
   return (
     <div className="px-6 pb-8 text-white">
       <div className="max-w-4xl mx-auto">
-        {/* Back Button */}
-         <Button variant="ghost" onClick={onReturn} className="mb-4 text-slate-300 hover:text-white hover:bg-slate-700">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Search
+        <Button variant="ghost" onClick={onReturn} className="mb-4 text-slate-300 hover:text-white hover:bg-slate-700">
+            <ArrowLeft className="mr-2 h-4 w-4" /> New Search
         </Button>
 
         {/* Trip Header */}
         <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white">{tripHeaderInfo.destination}</h1>
-            <p className="text-slate-400">{tripHeaderInfo.dates}</p>
+            <h1 className="text-3xl font-bold text-white">{itinerary.title}</h1>
+            <p className="text-slate-400">{itinerary.destination} • {formatDateRange(tripStartDate, tripEndDate)}</p>
         </div>
 
-        {/* Action Buttons */}
-         <div className="flex gap-2 mb-8">
-            <Button variant="outline" size="sm" onClick={handleShare} className="bg-slate-700/80 border-slate-600 hover:bg-slate-700 text-white">
-              <Share2 className="mr-2 h-4 w-4" /> Share
-            </Button>
-            {/* The refine feature is now a section below */}
-          </div>
-
-        {/* Refine Section */}
-         <div className="space-y-4 rounded-2xl bg-slate-800/50 p-6 border border-slate-700 mb-8">
-            <h3 className="text-lg font-medium text-white">Refine Your Itinerary</h3>
-            <p className="text-sm text-slate-400">Want to make some changes? Tell the AI what you'd like to adjust.</p>
+        {/* Actions & Tips */}
+         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 mb-8">
+            <div className="flex gap-2 mb-6">
+                <Button onClick={handleRefine} disabled={isRefining || !feedback.trim()} className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none">
+                  {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                  Refine
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleShare} className="bg-slate-700/80 border-slate-600 hover:bg-slate-700 text-white flex-1 sm:flex-none">
+                  <Share2 className="mr-2 h-4 w-4" /> Share
+                </Button>
+            </div>
             <Textarea
-              placeholder="e.g., 'Can you add more vegetarian restaurants?' or 'I'd prefer to work in the mornings.'"
+              placeholder="Want to make changes? e.g., 'Add more vegetarian restaurants' or 'I prefer to work in the mornings.'"
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               disabled={isRefining}
               className="bg-slate-700/80 border-slate-600 text-white placeholder:text-slate-400"
             />
-            <Button onClick={handleRefine} disabled={isRefining || !feedback.trim()} className="bg-slate-700 hover:bg-slate-600 text-white">
-              {isRefining ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Applying Changes...
-                </>
-              ) : (
-                <>
-                 <Wand2 className="mr-2 h-4 w-4" /> Refine with AI
-                </>
-              )}
-            </Button>
-          </div>
+            {itinerary.quickTips && itinerary.quickTips.length > 0 && (
+                <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
+                    <h3 className="text-white font-medium mb-2">Quick Tips for {itinerary.destination}</h3>
+                    <ul className="space-y-1 text-sm text-slate-300 list-disc list-inside">
+                        {itinerary.quickTips.map((tip, index) => <li key={index}>{tip}</li>)}
+                    </ul>
+                </div>
+            )}
+        </div>
 
         {/* Itinerary Body */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6">
             <h2 className="text-white font-medium mb-6 text-xl">Your Personalized Itinerary</h2>
-             <ItineraryDailyView dailyPlans={itinerary} />
+             <ItineraryDailyView dailyPlans={itinerary.itinerary} />
         </div>
-
       </div>
     </div>
   );
