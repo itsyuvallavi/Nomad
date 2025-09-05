@@ -92,7 +92,7 @@ export default function ItineraryForm({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="w-6 h-6 text-slate-400 hover:text-white transition-colors flex-shrink-0"
+                    className="w-8 h-8 text-slate-400 hover:text-white transition-colors flex-shrink-0 rounded-full hover:bg-slate-600"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Plus size={16} />
@@ -163,7 +163,7 @@ export default function ItineraryForm({
                   type="submit"
                   variant="ghost"
                   size="icon"
-                  className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
+                  className="w-8 h-8 text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600"
                   disabled={isSubmitting}
                 >
                   <ArrowUp size={16} />
@@ -173,7 +173,7 @@ export default function ItineraryForm({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
+                  className="w-8 h-8 text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600"
                 >
                   <Mic size={16} />
                 </Button>
