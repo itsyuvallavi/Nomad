@@ -77,10 +77,19 @@ export default {
             height: '0',
           },
         },
+        'logo-pulse': {
+          '0%, 100%': {
+            transform: 'rotate(12deg) scale(1)',
+          },
+          '50%': {
+            transform: 'rotate(57deg) scale(0.9)',
+          },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'logo-pulse': 'logo-pulse 3s ease-in-out infinite',
       },
     },
   },

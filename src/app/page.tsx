@@ -44,7 +44,7 @@ export default function Home() {
       <div className="flex items-center justify-between p-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <div className="w-4 h-4 bg-slate-800 rounded-sm transform rotate-12"></div>
+            <div className="w-4 h-4 bg-slate-800 rounded-sm transform rotate-12 animate-logo-pulse"></div>
           </div>
           <span className="text-white font-medium">Nomad Navigator</span>
         </div>
@@ -72,7 +72,7 @@ export default function Home() {
             <div className="flex-1 flex flex-col items-center justify-center px-6">
               <div className="flex flex-col items-center text-center max-w-md">
                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8">
-                  <div className="w-8 h-8 bg-slate-800 rounded-md transform rotate-12"></div>
+                  <div className="w-8 h-8 bg-slate-800 rounded-md transform rotate-12 animate-logo-pulse"></div>
                 </div>
                 <h1 className="text-white text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
                 <h2 className="text-white text-xl mb-6">Can I help you with anything?</h2>
