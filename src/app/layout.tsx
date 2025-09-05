@@ -20,7 +20,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 h-full flex flex-col">
+      <body className="font-body antialiased bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 flex flex-col">
         {children}
         <Toaster />
       </body>
