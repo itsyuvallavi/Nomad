@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Share2, Wand2, PartyPopper } from 'lucide-react';
+import { AlertCircle, Share2, Wand2, PartyPopper, Home } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import ItineraryLoader from './itinerary-loader';
@@ -45,6 +45,10 @@ export default function ItineraryDisplay({
       title: 'Link Copied!',
       description: 'Itinerary link copied to your clipboard.',
     });
+  };
+
+  const handleReturn = () => {
+    setItinerary(null);
   };
 
   const handleRefine = async () => {
@@ -117,6 +121,9 @@ export default function ItineraryDisplay({
             </CardDescription>
           </div>
           <div className="flex gap-2 shrink-0">
+             <Button variant="outline" size="sm" onClick={handleReturn}>
+              <Home className="mr-2 h-4 w-4" /> New Search
+            </Button>
             <Button variant="outline" size="sm" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share
             </Button>
