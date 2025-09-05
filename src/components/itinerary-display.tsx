@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -107,7 +108,7 @@ export default function ItineraryDisplay({
     <div className="px-6 pb-8 text-white">
       <div className="max-w-4xl mx-auto">
         <Button variant="ghost" onClick={onReturn} className="mb-4 text-slate-300 hover:text-white hover:bg-slate-700">
-            <ArrowLeft className="mr-2 h-4 w-4" /> New Search
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Search
         </Button>
 
         {/* Trip Header */}

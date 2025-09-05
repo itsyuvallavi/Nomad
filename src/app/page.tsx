@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { z } from 'zod';
 import { generatePersonalizedItinerary, type GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 import ItineraryForm from '@/components/itinerary-form';
 import ItineraryDisplay from '@/components/itinerary-display';
@@ -18,6 +17,14 @@ import {
 } from '@/components/ui/sheet';
 import ItineraryLoader from '@/components/itinerary-loader';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+interface RecentItinerary {
+  id: string;
+  title: string;
+  destination: string;
+  itinerary: GeneratePersonalizedItineraryOutput;
+}
 
 function fileToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -32,17 +39,17 @@ export default function Home() {
   const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentItineraries, setRecentItineraries] = useState<RecentItinerary[]>([]);
   const [promptValue, setPromptValue] = useState('');
 
   useEffect(() => {
     try {
-      const storedSearches = localStorage.getItem('recentSearches');
-      if (storedSearches) {
-        setRecentSearches(JSON.parse(storedSearches));
+      const storedItineraries = localStorage.getItem('recentItineraries');
+      if (storedItineraries) {
+        setRecentItineraries(JSON.parse(storedItineraries));
       }
     } catch (e) {
-      console.error("Could not parse recent searches from localStorage", e);
+      console.error("Could not parse recent itineraries from localStorage", e);
     }
   }, []);
 
@@ -52,12 +59,6 @@ export default function Home() {
     setPromptValue(''); // Clear input after submission
 
     try {
-      // Save recent search
-      const newSearch = values.prompt;
-      const updatedSearches = [newSearch, ...recentSearches.filter(s => s !== newSearch)].slice(0, 3);
-      setRecentSearches(updatedSearches);
-      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
-      
       let fileDataUrl: string | undefined = undefined;
       if (values.file) {
         fileDataUrl = await fileToDataURL(values.file);
@@ -70,6 +71,19 @@ export default function Home() {
 
       if (result.itinerary && result.itinerary.length > 0) {
         setItinerary(result);
+        
+        // Save recent itinerary
+        const newItinerary: RecentItinerary = {
+          id: new Date().toISOString(), // Simple unique ID
+          title: result.title,
+          destination: result.destination,
+          itinerary: result,
+        };
+
+        const updatedItineraries = [newItinerary, ...recentItineraries.filter(it => it.title !== newItinerary.title)].slice(0, 3);
+        setRecentItineraries(updatedItineraries);
+        localStorage.setItem('recentItineraries', JSON.stringify(updatedItineraries));
+
       } else {
         setError(
           'Failed to generate itinerary. The AI may be busy or the request could not be processed. Please try again.'
@@ -83,8 +97,8 @@ export default function Home() {
     }
   };
   
-  const handleRecentSearchClick = (search: string) => {
-    setPromptValue(search);
+  const handleRecentItineraryClick = (recentItinerary: RecentItinerary) => {
+    setItinerary(recentItinerary.itinerary);
   }
 
   const handleReturn = () => {
@@ -160,23 +174,24 @@ export default function Home() {
                 promptValue={promptValue}
                 setPromptValue={setPromptValue}
               />
-              {recentSearches.length > 0 && (
-                <div className="max-w-2xl mx-auto mt-4 text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
+              {recentItineraries.length > 0 && (
+                <div className="max-w-2xl mx-auto mt-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-3">
                      <History size={14} className="text-slate-400" />
-                     <h3 className="text-slate-400 text-sm font-medium">Recent Searches</h3>
+                     <h3 className="text-slate-400 text-sm font-medium">Recent Trips</h3>
                   </div>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    {recentSearches.map((search, index) => (
-                      <Button
-                        key={index}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRecentSearchClick(search)}
-                        className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white text-xs h-auto px-3 py-1.5"
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {recentItineraries.map((trip) => (
+                      <Card
+                        key={trip.id}
+                        onClick={() => handleRecentItineraryClick(trip)}
+                        className="bg-slate-700/50 hover:bg-slate-700 border-slate-700 cursor-pointer text-left"
                       >
-                        {search}
-                      </Button>
+                        <CardContent className="p-4">
+                          <p className="font-semibold text-white truncate">{trip.title}</p>
+                          <p className="text-sm text-slate-300 truncate">{trip.destination}</p>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
