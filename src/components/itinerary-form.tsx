@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Mic, MoreHorizontal, Plus, Paperclip, X } from 'lucide-react';
+import { Mic, ArrowUp, Plus, Paperclip, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -78,6 +78,7 @@ export default function ItineraryForm({
   });
 
   const attachedFile = form.watch('file');
+  const promptValue = form.watch('prompt');
 
   return (
     <div className="relative max-w-2xl mx-auto">
@@ -156,24 +157,27 @@ export default function ItineraryForm({
                     </FormItem>
                 )}
             />
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
-              >
-                <Mic size={16} />
-              </Button>
-              <Button
-                type="submit"
-                variant="ghost"
-                size="icon"
-                className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
-                disabled={isSubmitting}
-              >
-                <MoreHorizontal size={16} />
-              </Button>
+            <div className="flex items-center">
+              {promptValue && promptValue.length > 0 ? (
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="icon"
+                  className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
+                  disabled={isSubmitting}
+                >
+                  <ArrowUp size={16} />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
+                >
+                  <Mic size={16} />
+                </Button>
+              )}
             </div>
           </div>
         </form>
