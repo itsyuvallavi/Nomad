@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { z } from 'zod';
 import { generatePersonalizedItinerary, type GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 import ItineraryForm from '@/components/itinerary-form';
 import ItineraryDisplay from '@/components/itinerary-display';
 import type { FormValues } from '@/components/itinerary-form';
-import { Settings } from 'lucide-react';
+import { Settings, History } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -16,6 +16,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import ItineraryLoader from '@/components/itinerary-loader';
+import { Button } from '@/components/ui/button';
 
 function fileToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -30,11 +31,32 @@ export default function Home() {
   const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [promptValue, setPromptValue] = useState('');
+
+  useEffect(() => {
+    try {
+      const storedSearches = localStorage.getItem('recentSearches');
+      if (storedSearches) {
+        setRecentSearches(JSON.parse(storedSearches));
+      }
+    } catch (e) {
+      console.error("Could not parse recent searches from localStorage", e);
+    }
+  }, []);
 
   const handleItineraryRequest = async (values: FormValues) => {
     setIsLoading(true);
     setError(null);
+    setPromptValue(''); // Clear input after submission
+
     try {
+      // Save recent search
+      const newSearch = values.prompt;
+      const updatedSearches = [newSearch, ...recentSearches.filter(s => s !== newSearch)].slice(0, 3);
+      setRecentSearches(updatedSearches);
+      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      
       let fileDataUrl: string | undefined = undefined;
       if (values.file) {
         fileDataUrl = await fileToDataURL(values.file);
@@ -59,6 +81,11 @@ export default function Home() {
       setIsLoading(false);
     }
   };
+  
+  const handleRecentSearchClick = (search: string) => {
+    setPromptValue(search);
+    handleItineraryRequest({ prompt: search });
+  }
 
   const handleReturn = () => {
     setItinerary(null);
@@ -130,7 +157,30 @@ export default function Home() {
               <ItineraryForm
                 isSubmitting={isLoading}
                 onSubmit={handleItineraryRequest}
+                promptValue={promptValue}
+                setPromptValue={setPromptValue}
               />
+              {recentSearches.length > 0 && (
+                <div className="max-w-2xl mx-auto mt-4 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                     <History size={14} className="text-slate-400" />
+                     <h3 className="text-slate-400 text-sm font-medium">Recent Searches</h3>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {recentSearches.map((search, index) => (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRecentSearchClick(search)}
+                        className="bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white text-xs h-auto px-3 py-1.5"
+                      >
+                        {search}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <p className="text-slate-500 text-xs text-center mt-4">
                 Nomad Navigator may contain errors. We recommend checking important information.
               </p>

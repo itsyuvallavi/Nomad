@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Mic, ArrowUp, Plus, Paperclip, X } from 'lucide-react';
@@ -34,11 +34,15 @@ export type FormValues = z.infer<typeof formSchema>;
 type ItineraryFormProps = {
   onSubmit: (values: FormValues) => void;
   isSubmitting: boolean;
+  promptValue: string;
+  setPromptValue: (value: string) => void;
 };
 
 export default function ItineraryForm({
   onSubmit,
   isSubmitting,
+  promptValue,
+  setPromptValue,
 }: ItineraryFormProps) {
   const [placeholder, setPlaceholder] = useState(placeholderTexts[0]);
   const [textIndex, setTextIndex] = useState(0);
@@ -78,7 +82,16 @@ export default function ItineraryForm({
   });
 
   const attachedFile = form.watch('file');
-  const promptValue = form.watch('prompt');
+
+  useEffect(() => {
+    form.setValue('prompt', promptValue);
+  }, [promptValue, form]);
+  
+  const currentPromptValue = useWatch({
+      control: form.control,
+      name: 'prompt'
+  });
+
 
   return (
     <div className="relative max-w-2xl mx-auto">
@@ -136,6 +149,10 @@ export default function ItineraryForm({
                         className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         autoComplete="off"
                         {...field}
+                        onChange={(e) => {
+                            field.onChange(e);
+                            setPromptValue(e.target.value);
+                        }}
                       />
                     </div>
                   </FormControl>
@@ -159,7 +176,7 @@ export default function ItineraryForm({
                 )}
             />
             <div className="flex items-center">
-              {promptValue && promptValue.length > 0 ? (
+              {currentPromptValue && currentPromptValue.length > 0 ? (
                 <Button
                   type="submit"
                   variant="ghost"
