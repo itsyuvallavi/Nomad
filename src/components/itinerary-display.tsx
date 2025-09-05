@@ -96,33 +96,33 @@ export default function ItineraryDisplay({
             <p className="text-slate-400 text-sm">{itinerary.destination} • {formatDateRange(tripStartDate, tripEndDate)}</p>
         </div>
         
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 mb-6 flex items-center justify-between">
-            <h2 className="text-white font-medium text-lg">Your Personalized Itinerary</h2>
-            <div className="flex items-center gap-2">
-                 {itinerary.quickTips && itinerary.quickTips.length > 0 && (
-                     <Popover>
-                        <PopoverTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white h-8 w-8">
-                                <Info className="h-4 w-4" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-64 text-sm">
-                             <h3 className="font-medium text-foreground mb-2">Quick Tips</h3>
-                             <ul className="space-y-1 text-muted-foreground list-disc list-inside">
-                                {itinerary.quickTips.map((tip, index) => <li key={index}>{tip}</li>)}
-                            </ul>
-                        </PopoverContent>
-                    </Popover>
-                )}
-                 <Button variant="outline" size="sm" onClick={handleShare} className="bg-slate-700/80 border-slate-600 hover:bg-slate-700 text-white h-8">
-                  <Share2 className="mr-2 h-3 w-3" /> Share
-                </Button>
-            </div>
+         {/* Action Buttons */}
+        <div className="flex items-center gap-2 mb-4">
+            {itinerary.quickTips && itinerary.quickTips.length > 0 && (
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-700/50">
+                            <Info className="h-4 w-4 mr-2" />
+                            <span>Tips</span>
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 text-sm bg-slate-800 border-slate-700 text-white">
+                        <h3 className="font-medium text-white mb-2">Quick Tips</h3>
+                        <ul className="space-y-1 text-slate-300 list-disc list-inside">
+                            {itinerary.quickTips.map((tip, index) => <li key={index}>{tip}</li>)}
+                        </ul>
+                    </PopoverContent>
+                </Popover>
+            )}
+            <Button variant="ghost" onClick={handleShare} className="text-slate-300 hover:text-white hover:bg-slate-700/50">
+                <Share2 className="mr-2 h-4 w-4" /> Share
+            </Button>
         </div>
 
 
         {/* Itinerary Body */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4">
+             <h2 className="text-white font-medium text-lg mb-4">Your Personalized Itinerary</h2>
              <ItineraryDailyView dailyPlans={itinerary.itinerary} />
         </div>
       </div>
