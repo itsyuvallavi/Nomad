@@ -13,6 +13,7 @@ import {
   FormItem,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 export const formSchema = z.object({
   prompt: z.string().min(10, 'Please describe your trip in a bit more detail.'),
@@ -56,7 +57,7 @@ export default function ItineraryForm({
        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
-            <div className="rounded-2xl border border-input focus-within:ring-2 focus-within:ring-ring p-4 space-y-2">
+            <div className="rounded-2xl border bg-secondary/30 border-input focus-within:ring-1 focus-within:ring-ring p-4 space-y-2">
                 <FormField
                   control={form.control}
                   name="prompt"
@@ -65,8 +66,7 @@ export default function ItineraryForm({
                       <FormControl>
                         <Textarea
                           placeholder="Hey, can you help me with something?"
-                          className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base"
-                          rows={1}
+                          className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base min-h-[60px]"
                           {...field}
                         />
                       </FormControl>
@@ -75,18 +75,18 @@ export default function ItineraryForm({
                 />
 
                 <div className="flex justify-between items-center">
-                    <Button type="button" variant="outline" size="sm" className="rounded-lg">
+                    <Badge variant="outline" className="rounded-lg border-muted-foreground/50">
                         Synapse 0.11
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-2"><path d="M11.3333 6L8 9.33333L4.66667 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-                    </Button>
-                    <div className="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-2 h-4 w-4"><path d="M11.3333 6L8 9.33333L4.66667 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+                    </Badge>
+                    <div className="flex items-center gap-1">
                         <Button type="button" variant="ghost" size="icon">
-                            <Link className="h-5 w-5" />
+                            <Link className="h-5 w-5 text-muted-foreground" />
                         </Button>
                          <Button type="button" variant="ghost" size="icon">
-                            <Globe className="h-5 w-5" />
+                            <Globe className="h-5 w-5 text-muted-foreground" />
                         </Button>
-                        <Button type="submit" size="icon" className="rounded-lg bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                        <Button type="submit" size="icon" className="rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50" disabled={isSubmitting || !form.formState.isValid}>
                           {isSubmitting ? (
                               <Loader2 className="h-5 w-5 animate-spin" />
                           ) : (
@@ -100,7 +100,7 @@ export default function ItineraryForm({
 
              <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
                 {suggestionChips.map((chip, index) => (
-                    <Button key={index} type="button" variant="outline" size="sm" className="rounded-lg gap-2" onClick={() => handleChipClick(chip.text)}>
+                    <Button key={index} type="button" variant="outline" size="sm" className="rounded-lg gap-2 bg-secondary/30 border-input hover:bg-secondary/50" onClick={() => handleChipClick(chip.text)}>
                         {chip.icon}
                         {chip.text}
                     </Button>
