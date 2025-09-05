@@ -8,16 +8,8 @@ import {
   Plane,
   Bed,
   MapPin,
-  Clock,
 } from 'lucide-react';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Badge } from './ui/badge';
 
 type Activity = GeneratePersonalizedItineraryOutput['itinerary'][0]['activities'][0];
 
@@ -48,61 +40,57 @@ const ItineraryDailyView = ({ dailyPlans }: ItineraryDailyViewProps) => {
     // Adjust for timezone differences
     const userTimezoneOffset = date.getTimezoneOffset() * 60000;
     const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
-    return adjustedDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    return {
+      weekday: adjustedDate.toLocaleDateString('en-US', { weekday: 'long' }),
+      date: adjustedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    };
   };
 
   return (
-    <div className="space-y-4 pt-4">
-      <Accordion type="single" collapsible defaultValue={`day-${dailyPlans[0].day}`}>
-        {dailyPlans.map(plan => (
-          <AccordionItem key={plan.day} value={`day-${plan.day}`} className="border-slate-700">
-            <AccordionTrigger className="hover:no-underline">
-              <div className="flex flex-col items-start text-left">
-                <p className="font-semibold text-sm text-slate-400">
-                  Day {plan.day} &bull; {formatDate(plan.date)}
-                </p>
-                <h3 className="text-lg text-white">{plan.title}</h3>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-6 ml-2 border-l-2 border-slate-700 pl-6 py-2">
-                {plan.activities.map((activity, index) => (
-                  <div key={index} className="relative">
-                     {activity.travelTime && (
-                       <div className="absolute -left-12 text-xs text-slate-400 flex items-center gap-1">
-                         <Clock className="h-3 w-3" />
-                         <span>{activity.travelTime}</span>
-                       </div>
-                     )}
-                    <div className="absolute -left-8 top-1.5 h-4 w-4 rounded-full bg-slate-600" />
-                    <p className="font-bold text-slate-400">
-                      {activity.time}
-                    </p>
-                    <div className="flex items-start gap-3 mt-1">
-                      <div className="text-white mt-1">
-                        {getCategoryIcon(activity.category)}
-                      </div>
-                      <div>
-                        <p className="text-white font-semibold">{activity.description}</p>
-                         <div className="flex items-center gap-2 text-slate-400 text-sm mt-1">
-                            <MapPin className="h-4 w-4" />
-                            <span>{activity.address}</span>
-                         </div>
-                      </div>
+    <div className="space-y-8">
+      {dailyPlans.map((plan, dayIndex) => {
+        const { weekday, date } = formatDate(plan.date);
+        return (
+          <div key={plan.day}>
+            {/* Day Header */}
+            <div className="flex items-baseline gap-3 mb-4">
+              <h3 className="text-xl font-semibold text-white">{weekday}</h3>
+              <p className="text-slate-400">{date}</p>
+            </div>
+
+            {/* Timeline */}
+            <div className="space-y-6 border-l-2 border-slate-700 ml-3">
+              {plan.activities.map((activity, eventIndex) => (
+                <div key={eventIndex} className="relative pl-8">
+                  {/* Dot on the timeline */}
+                  <div className="absolute -left-[7px] top-1 h-3.5 w-3.5 rounded-full bg-slate-600 border-2 border-slate-800"></div>
+                  
+                  {/* Dotted line for travel time */}
+                  {activity.travelTime && (
+                     <div className="absolute -left-0 top-[-24px] h-[24px] w-[2px] bg-transparent">
+                       <div className="h-full w-full border-l-2 border-dashed border-slate-600"></div>
+                     </div>
+                  )}
+
+                  <p className="font-semibold text-slate-300 text-sm">{activity.time}</p>
+                  <div className="flex items-start gap-4 mt-1">
+                    <div className="text-white mt-1 p-2 bg-slate-700/50 rounded-lg">
+                      {getCategoryIcon(activity.category)}
                     </div>
-                     <Badge variant="secondary" className="mt-2 ml-8 bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600">{activity.category}</Badge>
+                    <div>
+                      <h4 className="font-bold text-white">{activity.description}</h4>
+                      <p className="flex items-center gap-2 text-slate-400 text-sm mt-1">
+                          <MapPin className="h-4 w-4" />
+                          <span>{activity.address}</span>
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
     </div>
   );
 };

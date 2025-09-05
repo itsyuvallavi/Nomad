@@ -98,11 +98,13 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         {itinerary || isLoading || error ? (
-           <div className="container mx-auto p-4 sm:p-6 md:p-8 flex-1 flex justify-center items-center">
+           <div className="flex-1 flex justify-center items-start overflow-y-auto">
             {isLoading ? (
-              <ItineraryLoader />
+              <div className="flex-1 flex items-center justify-center">
+                 <ItineraryLoader />
+              </div>
             ) : (
-              <div className="w-full max-w-4xl">
+              <div className="w-full">
                 <ItineraryDisplay
                   itinerary={itinerary}
                   error={error}
