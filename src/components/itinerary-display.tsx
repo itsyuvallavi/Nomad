@@ -131,6 +131,16 @@ export default function ItineraryDisplay({
             )}
         </div>
 
+        {/* Refinement */}
+        <div className="mb-6">
+            <ItineraryRefinementForm
+              onSubmit={handleRefinement}
+              isSubmitting={isRefining}
+            />
+            {refinementError && (
+              <p className="text-sm text-red-400 mt-2">{refinementError}</p>
+            )}
+        </div>
 
         {/* Itinerary Body */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4">
@@ -143,17 +153,6 @@ export default function ItineraryDisplay({
               ) : (
                 <ItineraryDailyView dailyPlans={itinerary.itinerary} />
               )}
-        </div>
-        
-        {/* Refinement */}
-        <div className="mt-6">
-            <ItineraryRefinementForm
-              onSubmit={handleRefinement}
-              isSubmitting={isRefining}
-            />
-            {refinementError && (
-              <p className="text-sm text-red-400 mt-2">{refinementError}</p>
-            )}
         </div>
       </div>
     </div>
