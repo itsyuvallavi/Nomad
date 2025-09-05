@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Mic, MoreHorizontal } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +15,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
+const placeholderTexts = [
+  'Plan a 7-day work-cation in Bali...',
+  'Find the best co-working spaces in Lisbon for a month...',
+  'Create a 2-week itinerary for a backpacking trip through Vietnam...',
+  'I have 3 days in New York, what are the must-see spots for a solo traveler?',
+  'Suggest a budget-friendly 5-day trip to Seoul...',
+];
 
 export const formSchema = z.object({
   prompt: z.string().min(10, 'Please describe your trip in a bit more detail.'),
@@ -28,6 +36,35 @@ export default function ItineraryForm({
   onSubmit,
   isSubmitting,
 }: ItineraryFormProps) {
+  const [placeholder, setPlaceholder] = useState(placeholderTexts[0]);
+  const [textIndex, setTextIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const type = () => {
+      const currentText = placeholderTexts[textIndex];
+      if (isDeleting) {
+        setPlaceholder(currentText.substring(0, charIndex - 1));
+        setCharIndex(charIndex - 1);
+        if (charIndex - 1 === 0) {
+          setIsDeleting(false);
+          setTextIndex((prev) => (prev + 1) % placeholderTexts.length);
+        }
+      } else {
+        setPlaceholder(currentText.substring(0, charIndex + 1));
+        setCharIndex(charIndex + 1);
+        if (charIndex + 1 === currentText.length) {
+          setTimeout(() => setIsDeleting(true), 2000); // Pause before deleting
+        }
+      }
+    };
+
+    const typingSpeed = isDeleting ? 50 : 100;
+    const timeout = setTimeout(type, typingSpeed);
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, textIndex]);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,7 +87,7 @@ export default function ItineraryForm({
                   <FormItem className="flex-1">
                     <FormControl>
                        <Input
-                        placeholder="Plan a 5-day work-cation in Tokyo..."
+                        placeholder={placeholder}
                         className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         {...field}
                       />
