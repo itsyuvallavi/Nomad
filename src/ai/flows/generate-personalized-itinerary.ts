@@ -33,11 +33,11 @@ const ActivitySchema = z.object({
   time: z
     .string()
     .describe('The time of the activity (e.g., "9:00 AM", "Afternoon").'),
-  description: z.string().describe('A description of the activity.'),
+  description: z.string().describe('A short, minimal description of the activity.'),
   category: z
     .enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation'])
     .describe('The category of the activity.'),
-  address: z.string().describe('The address of the activity location.'),
+  address: z.string().describe('The specific address of the activity location (e.g., "123 Main St, City, Country").'),
   travelTime: z
     .string()
     .optional()
@@ -63,7 +63,7 @@ const GeneratePersonalizedItineraryOutputSchema = z.object({
   itinerary: z
     .array(DailyItinerarySchema)
     .describe('The generated day-by-day itinerary.'),
-  quickTips: z.array(z.string()).describe('A list of 3-4 quick, helpful tips for the destination (e.g., visa info, average budget, wifi quality).'),
+  quickTips: z.array(z.string()).describe('A list of 3-4 very short, helpful tips for the destination.'),
 });
 
 export type GeneratePersonalizedItineraryOutput = z.infer<
@@ -109,6 +109,12 @@ const prompt = ai.definePrompt({
 
   User's request: {{{prompt}}}
 
+  **Important Rules:**
+  1.  **Select Specific Places:** You MUST choose real, specific locations for all activities, including hotels, coworking spaces, restaurants, and points of interest. Provide a full, real address for each.
+  2.  **Default Budget:** If the user does not specify a budget, you MUST assume a total daily budget of $500. This budget must cover everything for the day: hotel, three meals, transportation, and activities. Select places that fit within this budget.
+  3.  **Minimal Text:** Keep all descriptions for activities short and to the point.
+  4.  **Quick Tips:** The 'quickTips' array should contain 3-4 very brief, essential tips for the traveler.
+
   {{#if attachedFile}}
   The user has also attached a file for reference. Use the information in this file to inform the itinerary.
   Attached file: {{media url=attachedFile}}
@@ -118,9 +124,9 @@ const prompt = ai.definePrompt({
 
   Incorporate coworking spaces, cafes with reliable WiFi, and local nomad community events into the itinerary. Use the decideOnEventOrLocation tool to determine whether a given event or location aligns with the user's preferences.
 
-  For each activity, provide a time, a description, a category, a physical address, and an estimated travel time from the previous activity. Do not mention flights. The travel should be between locations within the destination city.
+  For each activity, provide a time, a description, a category, a specific physical address, and an estimated travel time from the previous activity. Do not mention flights. The travel should be between locations within the destination city.
 
-  The final output must include a 'destination' (e.g., "Lisbon, Portugal"), a 'title' for the trip, the 'itinerary' itself, and a list of 3-4 'quickTips' relevant to the destination for a digital nomad.
+  The final output must include a 'destination' (e.g., "Lisbon, Portugal"), a 'title' for the trip, the 'itinerary' itself, and a list of 'quickTips'.
 
   Ensure every day has a clear title, date, and a list of activities.
   `,

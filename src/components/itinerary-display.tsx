@@ -2,14 +2,16 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Share2, Wand2, ArrowLeft } from 'lucide-react';
+import { AlertCircle, Share2, ArrowLeft, Info, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 import ItineraryDailyView from './itinerary-daily-view';
-import { refineItineraryBasedOnFeedback } from '@/ai/flows/refine-itinerary-based-on-feedback';
-import { Textarea } from './ui/textarea';
-import { Loader2 } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 type ItineraryDisplayProps = {
   itinerary: GeneratePersonalizedItineraryOutput | null;
@@ -25,8 +27,6 @@ export default function ItineraryDisplay({
   onReturn,
 }: ItineraryDisplayProps) {
   const { toast } = useToast();
-  const [isRefining, setIsRefining] = useState(false);
-  const [feedback, setFeedback] = useState('');
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -34,31 +34,6 @@ export default function ItineraryDisplay({
       title: 'Link Copied!',
       description: 'Itinerary link copied to your clipboard.',
     });
-  };
-
-  const handleRefine = async () => {
-    if (!feedback.trim() || !itinerary) return;
-
-    setIsRefining(true);
-    try {
-      const result = await refineItineraryBasedOnFeedback({
-        originalItinerary: JSON.stringify(itinerary, null, 2),
-        userFeedback: feedback,
-      });
-      // The output from refine is a string, so we need to parse it.
-      const refined = JSON.parse(result.refinedItinerary);
-      setItinerary(refined);
-      setFeedback('');
-    } catch (e) {
-      console.error(e);
-      toast({
-        variant: 'destructive',
-        title: 'Error Refining Itinerary',
-        description: 'Could not apply your changes. Please try again.',
-      });
-    } finally {
-      setIsRefining(false);
-    }
   };
 
 
@@ -112,7 +87,7 @@ export default function ItineraryDisplay({
     <div className="px-4 pb-8 text-white">
       <div className="max-w-2xl mx-auto">
         <Button variant="ghost" onClick={onReturn} className="mb-4 text-slate-300 hover:text-white hover:bg-slate-700">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Search
+            <ArrowLeft className="mr-2 h-4 w-4" /> New Search
         </Button>
 
         {/* Trip Header */}
@@ -120,38 +95,34 @@ export default function ItineraryDisplay({
             <h1 className="text-2xl font-bold text-white">{itinerary.title}</h1>
             <p className="text-slate-400 text-sm">{itinerary.destination} • {formatDateRange(tripStartDate, tripEndDate)}</p>
         </div>
-
-        {/* Actions & Tips */}
-         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 mb-6">
-            <div className="flex gap-2 mb-4">
-                <Button onClick={handleRefine} size="sm" disabled={isRefining || !feedback.trim()} className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none">
-                  {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                  Refine
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleShare} className="bg-slate-700/80 border-slate-600 hover:bg-slate-700 text-white flex-1 sm:flex-none">
-                  <Share2 className="mr-2 h-4 w-4" /> Share
+        
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 mb-6 flex items-center justify-between">
+            <h2 className="text-white font-medium text-lg">Your Personalized Itinerary</h2>
+            <div className="flex items-center gap-2">
+                 {itinerary.quickTips && itinerary.quickTips.length > 0 && (
+                     <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white h-8 w-8">
+                                <Info className="h-4 w-4" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 text-sm">
+                             <h3 className="font-medium text-foreground mb-2">Quick Tips</h3>
+                             <ul className="space-y-1 text-muted-foreground list-disc list-inside">
+                                {itinerary.quickTips.map((tip, index) => <li key={index}>{tip}</li>)}
+                            </ul>
+                        </PopoverContent>
+                    </Popover>
+                )}
+                 <Button variant="outline" size="sm" onClick={handleShare} className="bg-slate-700/80 border-slate-600 hover:bg-slate-700 text-white h-8">
+                  <Share2 className="mr-2 h-3 w-3" /> Share
                 </Button>
             </div>
-            <Textarea
-              placeholder="Want to make changes? e.g., 'Add more vegetarian restaurants' or 'I prefer to work in the mornings.'"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              disabled={isRefining}
-              className="bg-slate-700/80 border-slate-600 text-white placeholder:text-slate-400"
-            />
-            {itinerary.quickTips && itinerary.quickTips.length > 0 && (
-                <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
-                    <h3 className="text-white font-medium mb-2 text-sm">Quick Tips for {itinerary.destination}</h3>
-                    <ul className="space-y-1 text-xs text-slate-300 list-disc list-inside">
-                        {itinerary.quickTips.map((tip, index) => <li key={index}>{tip}</li>)}
-                    </ul>
-                </div>
-            )}
         </div>
+
 
         {/* Itinerary Body */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4">
-            <h2 className="text-white font-medium mb-4 text-lg">Your Personalized Itinerary</h2>
              <ItineraryDailyView dailyPlans={itinerary.itinerary} />
         </div>
       </div>

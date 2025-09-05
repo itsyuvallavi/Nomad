@@ -30,7 +30,7 @@ export default function ItineraryEventCard({ activity }: ItineraryEventCardProps
 
   return (
     <div
-      className="bg-slate-700/50 backdrop-blur-sm rounded-lg p-3 cursor-pointer hover:bg-slate-700/70 transition-colors"
+      className="bg-slate-700/50 backdrop-blur-sm rounded-lg p-2.5 cursor-pointer hover:bg-slate-700/70 transition-colors"
       onClick={() => setIsExpanded(!isExpanded)}
     >
       <div className="flex items-start gap-3">
@@ -39,15 +39,15 @@ export default function ItineraryEventCard({ activity }: ItineraryEventCardProps
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-1">
-            <h4 className="font-semibold text-white truncate text-sm">{activity.description}</h4>
+          <div className="flex items-center justify-between">
+            <h4 className="font-medium text-white truncate text-sm">{activity.description}</h4>
             <div className="flex items-center gap-1.5 text-slate-400 text-xs flex-shrink-0 ml-2">
               <Clock className="w-3 h-3" />
               <span>{activity.time}</span>
             </div>
           </div>
           
-          <p className="text-slate-300 text-xs mb-2">{activity.category}</p>
+          <p className="text-slate-400 text-xs">{activity.category}</p>
 
           {isExpanded && (
              <div className="pt-2 mt-2 border-t border-slate-600">
@@ -70,9 +70,11 @@ export default function ItineraryEventCard({ activity }: ItineraryEventCardProps
             </div>
           )}
         </div>
-        <ChevronDown
-          className={`h-4 w-4 text-slate-400 transition-transform transform ${isExpanded ? 'rotate-180' : ''}`}
-        />
+        {!isExpanded && (
+             <ChevronDown
+                className={`h-4 w-4 text-slate-500 transition-transform transform ${isExpanded ? 'rotate-180' : ''}`}
+            />
+        )}
       </div>
     </div>
   );
