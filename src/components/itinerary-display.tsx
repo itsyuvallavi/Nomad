@@ -2,9 +2,8 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Share2, ArrowLeft, Info, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Info, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 import ItineraryDailyView from './itinerary-daily-view';
 import {
@@ -26,16 +25,6 @@ export default function ItineraryDisplay({
   setItinerary,
   onReturn,
 }: ItineraryDisplayProps) {
-  const { toast } = useToast();
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: 'Link Copied!',
-      description: 'Itinerary link copied to your clipboard.',
-    });
-  };
-
 
   if (error) {
     return (
@@ -114,9 +103,6 @@ export default function ItineraryDisplay({
                     </PopoverContent>
                 </Popover>
             )}
-            <Button variant="ghost" onClick={handleShare} className="text-slate-300 hover:text-white hover:bg-slate-700/50">
-                <Share2 className="mr-2 h-4 w-4" /> Share
-            </Button>
         </div>
 
 
