@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Plane } from 'lucide-react';
 
 const loadingMessages = [
@@ -28,14 +28,14 @@ export default function ItineraryLoader() {
   }, []);
 
   return (
-    <Card className="shadow-lg flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
+    <Card className="shadow-lg flex flex-col items-center justify-center text-center p-8 min-h-[400px] bg-slate-800/50 border-slate-700">
       <div className="relative">
-        <Plane className="h-16 w-16 text-accent animate-fly" />
+        <Plane className="h-16 w-16 text-slate-400 animate-fly" />
       </div>
-      <p className="mt-6 text-lg font-semibold text-foreground transition-opacity duration-500">
+      <p className="mt-6 text-lg font-semibold text-white transition-opacity duration-500">
         {loadingMessages[currentMessageIndex]}
       </p>
-      <p className="text-sm text-muted-foreground mt-2">
+      <p className="text-sm text-slate-400 mt-2">
         Your adventure is being crafted...
       </p>
       <style jsx>{`

@@ -12,13 +12,6 @@ import {
   Plane,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 
@@ -88,21 +81,21 @@ const ItineraryCalendar = ({ dailyPlans }: ItineraryCalendarProps) => {
   };
 
   return (
-    <div className="space-y-4 pt-4">
+    <div className="space-y-4 pt-4 text-white">
       <div className="flex justify-between items-center">
-        <Button variant="outline" size="icon" onClick={handlePrevMonth}>
+        <Button variant="outline" size="icon" onClick={handlePrevMonth} className="bg-slate-700 border-slate-600 hover:bg-slate-600">
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-xl font-headline">
+        <h2 className="text-xl">
           {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </h2>
-        <Button variant="outline" size="icon" onClick={handleNextMonth}>
+        <Button variant="outline" size="icon" onClick={handleNextMonth} className="bg-slate-700 border-slate-600 hover:bg-slate-600">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="grid grid-cols-7 border-t border-l">
+      <div className="grid grid-cols-7 border-t border-l border-slate-700">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="text-center font-semibold p-2 border-b border-r bg-muted/50 text-muted-foreground text-sm">
+          <div key={day} className="text-center font-semibold p-2 border-b border-r border-slate-700 bg-slate-900/50 text-slate-400 text-sm">
             {day}
           </div>
         ))}
@@ -115,23 +108,23 @@ const ItineraryCalendar = ({ dailyPlans }: ItineraryCalendarProps) => {
             <div
               key={date.toISOString()}
               className={cn(
-                'p-2 border-b border-r h-48 flex flex-col',
-                !isCurrentMonth && 'bg-muted/30'
+                'p-2 border-b border-r border-slate-700 h-48 flex flex-col',
+                !isCurrentMonth && 'bg-slate-800/50'
               )}
             >
               <div className={cn(
                   'font-semibold text-right mb-1',
-                   isToday && 'text-primary'
+                   isToday && 'text-white'
                    )}>
                 {date.getDate()}
                 </div>
               <div className="flex-1 overflow-y-auto space-y-1 pr-1 -mr-2 text-xs">
                 {activities.map((activity, index) => (
-                  <div key={index} className="p-1.5 rounded-md bg-secondary flex items-start gap-2">
-                    <div className="text-primary pt-0.5">{getCategoryIcon(activity.category)}</div>
+                  <div key={index} className="p-1.5 rounded-md bg-slate-700/80 flex items-start gap-2">
+                    <div className="text-white pt-0.5">{getCategoryIcon(activity.category)}</div>
                     <div>
-                      <p className="font-semibold">{activity.time}</p>
-                      <p className="text-muted-foreground leading-tight">{activity.description}</p>
+                      <p className="font-semibold text-white">{activity.time}</p>
+                      <p className="text-slate-400 leading-tight">{activity.description}</p>
                     </div>
                   </div>
                 ))}

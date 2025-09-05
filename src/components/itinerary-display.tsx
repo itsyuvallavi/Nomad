@@ -81,16 +81,16 @@ export default function ItineraryDisplay({
 
   if (error) {
     return (
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full max-w-4xl mx-auto bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
+          <Alert variant="destructive" className="bg-red-900/50 border-red-500/50 text-red-300">
+            <AlertCircle className="h-4 w-4 text-red-300" />
             <AlertTitle>Error Generating Itinerary</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" size="sm" onClick={onReturn}>
+          <Button variant="outline" size="sm" onClick={onReturn} className="bg-slate-700 border-slate-600 hover:bg-slate-600">
               <Home className="mr-2 h-4 w-4" /> Try Again
           </Button>
         </CardContent>
@@ -100,17 +100,17 @@ export default function ItineraryDisplay({
 
   if (!itinerary) {
     return (
-        <Card className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
-        <PartyPopper className="h-16 w-16 text-muted-foreground" strokeWidth={1.5} />
+        <Card className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center p-8 min-h-[400px] bg-slate-800/50 border-slate-700">
+        <PartyPopper className="h-16 w-16 text-slate-400" strokeWidth={1.5} />
         <CardHeader className="p-2">
-          <CardTitle className="font-headline text-2xl mt-4">
+          <CardTitle className="text-2xl mt-4 text-white">
             Let's Plan an Adventure!
           </CardTitle>
-          <CardDescription className="mt-2">
+          <CardDescription className="mt-2 text-slate-400">
             Something went wrong, but don't worry. Let's try again.
           </CardDescription>
         </CardHeader>
-        <Button variant="outline" size="sm" onClick={onReturn} className="mt-4">
+        <Button variant="outline" size="sm" onClick={onReturn} className="mt-4 bg-slate-700 border-slate-600 hover:bg-slate-600">
             <Home className="mr-2 h-4 w-4" /> Start Over
         </Button>
       </Card>
@@ -118,22 +118,22 @@ export default function ItineraryDisplay({
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full max-w-4xl mx-auto bg-slate-800/50 border-slate-700 text-white">
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
           <div>
-            <CardTitle className="font-headline text-2xl">
+            <CardTitle className="text-2xl text-white">
               Your Trip Plan Is Ready!
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-slate-400">
               Here&apos;s your day-by-day guide. You can refine it further below.
             </CardDescription>
           </div>
           <div className="flex gap-2 shrink-0">
-             <Button variant="outline" size="sm" onClick={onReturn}>
+             <Button variant="outline" size="sm" onClick={onReturn} className="bg-slate-700 border-slate-600 hover:bg-slate-600 text-white">
               <Home className="mr-2 h-4 w-4" /> New Search
             </Button>
-            <Button variant="outline" size="sm" onClick={handleShare}>
+            <Button variant="outline" size="sm" onClick={handleShare} className="bg-slate-700 border-slate-600 hover:bg-slate-600 text-white">
               <Share2 className="mr-2 h-4 w-4" /> Share
             </Button>
           </div>
@@ -141,10 +141,10 @@ export default function ItineraryDisplay({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="daily" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="daily">Daily</TabsTrigger>
-            <TabsTrigger value="weekly">Weekly</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-slate-700/80 text-slate-400">
+            <TabsTrigger value="daily" className="data-[state=active]:bg-slate-600/50 data-[state=active]:text-white">Daily</TabsTrigger>
+            <TabsTrigger value="weekly" className="data-[state=active]:bg-slate-600/50 data-[state=active]:text-white">Weekly</TabsTrigger>
+            <TabsTrigger value="calendar" className="data-[state=active]:bg-slate-600/50 data-[state=active]:text-white">Calendar</TabsTrigger>
           </TabsList>
           <TabsContent value="daily">
             <ItineraryDailyView dailyPlans={itinerary} />
@@ -158,16 +158,16 @@ export default function ItineraryDisplay({
         </Tabs>
       </CardContent>
        <CardContent>
-          <div className="space-y-4">
-            <h3 className="font-headline text-lg">Refine Your Itinerary</h3>
+          <div className="space-y-4 rounded-lg bg-slate-900/50 p-6 border border-slate-700">
+            <h3 className="text-lg text-white">Refine Your Itinerary</h3>
             <Textarea
               placeholder="e.g., 'Can you add more vegetarian restaurants?' or 'I'd prefer to work in the mornings.'"
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               disabled={isRefining}
-              className="bg-background/70"
+              className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-400"
             />
-            <Button onClick={handleRefine} disabled={isRefining || !feedback.trim()}>
+            <Button onClick={handleRefine} disabled={isRefining || !feedback.trim()} className="bg-slate-700 hover:bg-slate-600 text-white">
               {isRefining ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

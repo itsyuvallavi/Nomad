@@ -40,7 +40,7 @@ type ItineraryDailyViewProps = {
 
 const ItineraryDailyView = ({ dailyPlans }: ItineraryDailyViewProps) => {
   if (!dailyPlans || dailyPlans.length === 0) {
-    return <p>No itinerary available.</p>;
+    return <p className="text-slate-400 text-center py-8">No itinerary available.</p>;
   }
 
   const formatDate = (dateString: string) => {
@@ -60,42 +60,42 @@ const ItineraryDailyView = ({ dailyPlans }: ItineraryDailyViewProps) => {
     <div className="space-y-4 pt-4">
       <Accordion type="single" collapsible defaultValue={`day-${dailyPlans[0].day}`}>
         {dailyPlans.map(plan => (
-          <AccordionItem key={plan.day} value={`day-${plan.day}`}>
-            <AccordionTrigger>
+          <AccordionItem key={plan.day} value={`day-${plan.day}`} className="border-slate-700">
+            <AccordionTrigger className="hover:no-underline">
               <div className="flex flex-col items-start text-left">
-                <p className="font-semibold text-sm text-muted-foreground">
+                <p className="font-semibold text-sm text-slate-400">
                   Day {plan.day} &bull; {formatDate(plan.date)}
                 </p>
-                <h3 className="text-lg font-headline text-foreground">{plan.title}</h3>
+                <h3 className="text-lg text-white">{plan.title}</h3>
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-6 ml-2 border-l-2 border-primary/20 pl-6 py-2">
+              <div className="space-y-6 ml-2 border-l-2 border-slate-700 pl-6 py-2">
                 {plan.activities.map((activity, index) => (
                   <div key={index} className="relative">
                      {activity.travelTime && (
-                       <div className="absolute -left-12 text-xs text-muted-foreground flex items-center gap-1">
+                       <div className="absolute -left-12 text-xs text-slate-400 flex items-center gap-1">
                          <Clock className="h-3 w-3" />
                          <span>{activity.travelTime}</span>
                        </div>
                      )}
-                    <div className="absolute -left-8 top-1.5 h-4 w-4 rounded-full bg-primary/50" />
-                    <p className="font-bold text-muted-foreground">
+                    <div className="absolute -left-8 top-1.5 h-4 w-4 rounded-full bg-slate-600" />
+                    <p className="font-bold text-slate-400">
                       {activity.time}
                     </p>
                     <div className="flex items-start gap-3 mt-1">
-                      <div className="text-primary mt-1">
+                      <div className="text-white mt-1">
                         {getCategoryIcon(activity.category)}
                       </div>
                       <div>
-                        <p className="text-foreground/90 font-semibold">{activity.description}</p>
-                         <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
+                        <p className="text-white font-semibold">{activity.description}</p>
+                         <div className="flex items-center gap-2 text-slate-400 text-sm mt-1">
                             <MapPin className="h-4 w-4" />
                             <span>{activity.address}</span>
                          </div>
                       </div>
                     </div>
-                     <Badge variant="secondary" className="mt-2 ml-8">{activity.category}</Badge>
+                     <Badge variant="secondary" className="mt-2 ml-8 bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600">{activity.category}</Badge>
                   </div>
                 ))}
               </div>

@@ -36,7 +36,7 @@ const getCategoryIcon = (category: Activity['category']) => {
 
 const ItineraryWeeklyView = ({ dailyPlans }: { dailyPlans: GeneratePersonalizedItineraryOutput['itinerary'] }) => {
   if (!dailyPlans || dailyPlans.length === 0) {
-    return <p>No itinerary to display.</p>;
+    return <p className="text-slate-400 text-center py-8">No itinerary to display.</p>;
   }
 
   // Create a map of dates to plans
@@ -61,26 +61,26 @@ const ItineraryWeeklyView = ({ dailyPlans }: { dailyPlans: GeneratePersonalizedI
   });
 
   return (
-    <div className="pt-4 grid grid-cols-1 md:grid-cols-7 gap-1">
+    <div className="pt-4 grid grid-cols-1 md:grid-cols-7 gap-1 text-white">
       {weekDays.map(day => {
         const dateKey = day.toISOString().split('T')[0];
         const plan = plansByDate.get(dateKey);
         const isToday = new Date().toISOString().split('T')[0] === dateKey;
 
         return (
-          <div key={dateKey} className="border rounded-lg bg-muted/20 flex flex-col">
+          <div key={dateKey} className="border rounded-lg bg-slate-800/50 border-slate-700 flex flex-col">
             <div
               className={cn(
-                'p-2 text-center border-b',
-                isToday && 'bg-primary/10'
+                'p-2 text-center border-b border-slate-700',
+                isToday && 'bg-slate-700/50'
               )}
             >
-              <p className="text-xs font-semibold text-muted-foreground">
+              <p className="text-xs font-semibold text-slate-400">
                 {day.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
               </p>
               <p className={cn(
                 'text-lg font-bold',
-                 isToday && 'text-primary'
+                 isToday && 'text-white'
                  )}>
                 {day.getDate()}
                 </p>
@@ -88,16 +88,16 @@ const ItineraryWeeklyView = ({ dailyPlans }: { dailyPlans: GeneratePersonalizedI
             <div className="p-2 space-y-2 flex-1 overflow-y-auto h-64">
               {plan ? (
                 plan.activities.map((activity, index) => (
-                  <div key={index} className="p-1.5 rounded-md bg-background/60 flex items-start gap-2 text-xs">
-                     <div className="text-primary pt-0.5">{getCategoryIcon(activity.category)}</div>
+                  <div key={index} className="p-1.5 rounded-md bg-slate-700/80 flex items-start gap-2 text-xs">
+                     <div className="text-white pt-0.5">{getCategoryIcon(activity.category)}</div>
                      <div>
-                       <p className="font-semibold">{activity.time}</p>
-                       <p className="text-muted-foreground leading-tight">{activity.description}</p>
+                       <p className="font-semibold text-white">{activity.time}</p>
+                       <p className="text-slate-400 leading-tight">{activity.description}</p>
                      </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center text-xs text-muted-foreground pt-4">
+                <div className="text-center text-xs text-slate-500 pt-4">
                   -
                 </div>
               )}
