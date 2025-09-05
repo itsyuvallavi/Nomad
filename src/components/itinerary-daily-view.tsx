@@ -1,6 +1,6 @@
 'use client';
 
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
+import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import ItineraryEventCard from './itinerary-event-card';
 
 type DailyPlan = GeneratePersonalizedItineraryOutput['itinerary'][0];

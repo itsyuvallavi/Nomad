@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { generatePersonalizedItinerary, type GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
+import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
+import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import ItineraryForm from '@/components/itinerary-form';
 import ItineraryDisplay from '@/components/itinerary-display';
 import type { FormValues } from '@/components/itinerary-form';
@@ -109,7 +110,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between p-6">
+      <header className="flex items-center justify-between p-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center animate-float">
             <div className="w-4 h-4 bg-slate-800 rounded-sm animate-rotate-and-breathe"></div>
@@ -134,27 +135,30 @@ export default function Home() {
             </div>
           </SheetContent>
         </Sheet>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col">
-        {itinerary || isLoading || error ? (
-           <div className="flex-1 flex justify-center items-start overflow-y-auto">
-            {isLoading ? (
-              <div className="flex-1 flex items-center justify-center">
-                 <ItineraryLoader />
-              </div>
-            ) : (
-              <div className="w-full">
-                <ItineraryDisplay
-                  itinerary={itinerary}
-                  error={error}
-                  setItinerary={setItinerary}
-                  onReturn={handleReturn}
-                />
-              </div>
-            )}
+       <main className="flex-1 flex flex-col">
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <ItineraryLoader />
           </div>
+        ) : error ? (
+           <div className="flex-1 flex items-center justify-center">
+            <ItineraryDisplay
+              itinerary={null}
+              error={error}
+              setItinerary={setItinerary}
+              onReturn={handleReturn}
+            />
+          </div>
+        ) : itinerary ? (
+          <ItineraryDisplay
+            itinerary={itinerary}
+            error={null}
+            setItinerary={setItinerary}
+            onReturn={handleReturn}
+          />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-6">
             {/* Welcome Section */}

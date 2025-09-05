@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ArrowLeft, Info, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
+import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import ItineraryDailyView from './itinerary-daily-view';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import ItineraryRefinementForm from './itinerary-refinement-form';
+import { refineItineraryBasedOnFeedback } from '@/ai/flows/refine-itinerary-based-on-feedback';
 
 type ItineraryDisplayProps = {
   itinerary: GeneratePersonalizedItineraryOutput | null;
@@ -25,6 +27,29 @@ export default function ItineraryDisplay({
   setItinerary,
   onReturn,
 }: ItineraryDisplayProps) {
+  const [isRefining, setIsRefining] = useState(false);
+  const [refinementError, setRefinementError] = useState<string | null>(null);
+
+  const handleRefinement = async (feedback: string) => {
+    if (!itinerary) return;
+
+    setIsRefining(true);
+    setRefinementError(null);
+
+    try {
+      const refinedItinerary = await refineItineraryBasedOnFeedback({
+        originalItinerary: itinerary,
+        userFeedback: feedback,
+      });
+      setItinerary(refinedItinerary);
+    } catch (e) {
+      console.error(e);
+      setRefinementError('There was an error refining your itinerary. Please try again.');
+    } finally {
+      setIsRefining(false);
+    }
+  };
+
 
   if (error) {
     return (
@@ -56,6 +81,7 @@ export default function ItineraryDisplay({
   const tripEndDate = itinerary.itinerary[itinerary.itinerary.length - 1]?.date;
 
   const formatDateRange = (start: string, end: string) => {
+    if (!start || !end) return '';
     const startDate = new Date(start);
     const endDate = new Date(end);
     const userTimezoneOffset = startDate.getTimezoneOffset() * 60000;
@@ -109,7 +135,25 @@ export default function ItineraryDisplay({
         {/* Itinerary Body */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4">
              <h2 className="text-white font-medium text-lg mb-4">Your Personalized Itinerary</h2>
-             <ItineraryDailyView dailyPlans={itinerary.itinerary} />
+             {isRefining ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 text-slate-400 animate-spin" />
+                  <p className="ml-4 text-slate-400">Refining your itinerary...</p>
+                </div>
+              ) : (
+                <ItineraryDailyView dailyPlans={itinerary.itinerary} />
+              )}
+        </div>
+        
+        {/* Refinement */}
+        <div className="mt-6">
+            <ItineraryRefinementForm
+              onSubmit={handleRefinement}
+              isSubmitting={isRefining}
+            />
+            {refinementError && (
+              <p className="text-sm text-red-400 mt-2">{refinementError}</p>
+            )}
         </div>
       </div>
     </div>

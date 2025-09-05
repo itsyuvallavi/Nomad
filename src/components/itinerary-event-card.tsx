@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Briefcase, Camera, Coffee, Utensils, Plane, Bed, MapPin, Clock, ExternalLink, ChevronDown } from 'lucide-react';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
+import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 
 type Activity = GeneratePersonalizedItineraryOutput['itinerary'][0]['activities'][0];
 
