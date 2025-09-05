@@ -3,23 +3,14 @@
 import { Card } from "./ui/card";
 import { BrainCircuit, Image as ImageIcon, FileText } from "lucide-react";
 
-const recentChatData = [
-  {
-    icon: <BrainCircuit className="h-5 w-5 text-foreground" />,
-    title: "Brainstorming session",
-  },
-  {
-    icon: <ImageIcon className="h-5 w-5 text-foreground" />,
-    title: "Image generation for a new social media campaign",
-  },
-  {
-    icon: <FileText className="h-5 w-5 text-foreground" />,
-    title: "Summarize notes from the last meeting",
-  }
-];
+const recentChatData: { icon: JSX.Element; title: string }[] = [];
 
 
 export default function RecentChats() {
+    if (recentChatData.length === 0) {
+        return null;
+    }
+
     return (
         <div className="w-full mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
             <h2 className="text-lg font-semibold text-foreground mb-4">Recent</h2>
