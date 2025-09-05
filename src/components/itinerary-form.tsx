@@ -59,8 +59,8 @@ export default function ItineraryForm({
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground">Good evening, Iqbal</h1>
-            <p className="text-lg text-muted-foreground mt-2">How can I help you?</p>
+            <h1 className="text-4xl font-bold tracking-tight text-foreground">Nomad Navigator</h1>
+            <p className="text-lg text-muted-foreground mt-2">Your AI-powered travel planner for digital nomads.</p>
        </div>
        
         <Form {...form}>
