@@ -68,23 +68,23 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <>
-            <div className="flex-1 flex flex-col items-center justify-center px-6">
-              <div className="flex flex-col items-center text-center max-w-md">
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8">
-                  <div className="w-8 h-8 bg-slate-800 rounded-md transform rotate-12 animate-logo-pulse"></div>
-                </div>
-                <h1 className="text-white text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
-                <h2 className="text-white text-xl mb-6">Can I help you with anything?</h2>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  Ready to assist you with anything you need?<br />
-                  From answering questions, to generating itineraries and providing<br />
-                  recommendations. Let's get started!
-                </p>
+          <div className="flex-1 flex flex-col items-center justify-center p-6">
+            {/* Welcome Section */}
+            <div className="flex flex-col items-center text-center max-w-md">
+              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8">
+                <div className="w-8 h-8 bg-slate-800 rounded-md transform rotate-12 animate-logo-pulse"></div>
               </div>
+              <h1 className="text-white text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
+              <h2 className="text-white text-xl mb-6">Can I help you with anything?</h2>
+              <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                Ready to assist you with anything you need?<br />
+                From answering questions, to generating itineraries and providing<br />
+                recommendations. Let's get started!
+              </p>
             </div>
+            
             {/* Input Area */}
-            <div className="px-6 pb-8">
+            <div className="w-full">
               <ItineraryForm
                 isSubmitting={isLoading}
                 onSubmit={handleItineraryRequest}
@@ -93,7 +93,7 @@ export default function Home() {
                 Nomad Navigator may contain errors. We recommend checking important information.
               </p>
             </div>
-          </>
+          </div>
         )}
       </main>
     </div>
