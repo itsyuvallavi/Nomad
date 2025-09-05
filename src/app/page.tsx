@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -84,7 +85,6 @@ export default function Home() {
   
   const handleRecentSearchClick = (search: string) => {
     setPromptValue(search);
-    handleItineraryRequest({ prompt: search });
   }
 
   const handleReturn = () => {
