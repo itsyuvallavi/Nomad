@@ -5,19 +5,45 @@ import type { z } from 'zod';
 import { generatePersonalizedItinerary, type GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 import ItineraryForm from '@/components/itinerary-form';
 import ItineraryDisplay from '@/components/itinerary-display';
-import type { formSchema } from '@/components/itinerary-form';
+import type { FormValues } from '@/components/itinerary-form';
 import { Settings } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+
+function fileToDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function Home() {
   const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput['itinerary'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleItineraryRequest = async (values: z.infer<typeof formSchema>) => {
+  const handleItineraryRequest = async (values: FormValues) => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await generatePersonalizedItinerary(values);
+      let fileDataUrl: string | undefined = undefined;
+      if (values.file) {
+        fileDataUrl = await fileToDataURL(values.file);
+      }
+
+      const result = await generatePersonalizedItinerary({
+        prompt: values.prompt,
+        attachedFile: fileDataUrl,
+      });
+
       if (result.itinerary && result.itinerary.length > 0) {
         setItinerary(result.itinerary);
       } else {
@@ -48,9 +74,24 @@ export default function Home() {
           </div>
           <span className="text-white font-medium">Nomad Navigator</span>
         </div>
-        <button className="w-8 h-8 text-slate-400 hover:text-white transition-colors">
-          <Settings size={20} />
-        </button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <button className="w-8 h-8 text-slate-400 hover:text-white transition-colors">
+              <Settings size={20} />
+            </button>
+          </SheetTrigger>
+          <SheetContent className="bg-slate-800 border-slate-700 text-white">
+            <SheetHeader>
+              <SheetTitle className="text-white">Settings</SheetTitle>
+              <SheetDescription className="text-slate-400">
+                Manage your application settings here.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="py-4">
+              <p className="text-slate-300">More settings coming soon!</p>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       {/* Main Content */}

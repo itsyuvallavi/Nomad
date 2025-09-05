@@ -17,6 +17,12 @@ const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
     .string()
     .describe('A natural language prompt describing the desired trip.'),
+  attachedFile: z
+    .string()
+    .optional()
+    .describe(
+      "A file attached by the user as a data URI. Can be a document or an image. Format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 
 export type GeneratePersonalizedItineraryInput = z.infer<
@@ -99,6 +105,11 @@ const prompt = ai.definePrompt({
   Analyze the user's prompt to determine the destination, travel dates, work requirements, visa status, budget, and lifestyle preferences.
 
   User's request: {{{prompt}}}
+
+  {{#if attachedFile}}
+  The user has also attached a file for reference. Use the information in this file to inform the itinerary.
+  Attached file: {{media url=attachedFile}}
+  {{/if}}
 
   Today's date is ${new Date().toLocaleDateString()}. Make sure the dates in the itinerary are correct based on the user's travel dates.
 

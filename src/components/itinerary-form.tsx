@@ -3,17 +3,18 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Mic, MoreHorizontal } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Mic, MoreHorizontal, Plus, Paperclip, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const placeholderTexts = [
   'Plan a 7-day work-cation in Bali...',
@@ -23,12 +24,15 @@ const placeholderTexts = [
   'Suggest a budget-friendly 5-day trip to Seoul...',
 ];
 
-export const formSchema = z.object({
+const formSchema = z.object({
   prompt: z.string().min(10, 'Please describe your trip in a bit more detail.'),
+  file: z.instanceof(File).optional(),
 });
 
+export type FormValues = z.infer<typeof formSchema>;
+
 type ItineraryFormProps = {
-  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  onSubmit: (values: FormValues) => void;
   isSubmitting: boolean;
 };
 
@@ -40,6 +44,7 @@ export default function ItineraryForm({
   const [textIndex, setTextIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const type = () => {
@@ -64,42 +69,109 @@ export default function ItineraryForm({
     const timeout = setTimeout(type, typingSpeed);
     return () => clearTimeout(timeout);
   }, [charIndex, isDeleting, textIndex]);
-  
-  const form = useForm<z.infer<typeof formSchema>>({
+
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       prompt: '',
     },
   });
 
+  const attachedFile = form.watch('file');
+
   return (
     <div className="relative max-w-2xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="bg-slate-700/80 backdrop-blur-sm rounded-2xl px-4 py-3 flex items-center gap-3">
-            <div className="w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center text-xs text-white">
-              Q
-            </div>
-              <FormField
-                control={form.control}
-                name="prompt"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                       <Input
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="w-6 h-6 text-slate-400 hover:text-white transition-colors flex-shrink-0"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Plus size={16} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-slate-800 border-slate-700 text-white">
+                  <p>Attach documents or photos</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <FormField
+              control={form.control}
+              name="prompt"
+              render={({ field }) => (
+                <FormItem className="flex-1">
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      {attachedFile && (
+                        <div className="flex items-center gap-2 bg-slate-600/50 rounded-full pl-3 pr-2 py-1 text-xs text-white">
+                          <Paperclip size={12} />
+                          <span className="truncate max-w-[120px]">
+                            {attachedFile.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              form.setValue('file', undefined);
+                              if(fileInputRef.current) {
+                                fileInputRef.current.value = '';
+                              }
+                            }}
+                            className="text-slate-400 hover:text-white"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )}
+                      <Input
                         placeholder={placeholder}
                         className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         {...field}
                       />
-                    </FormControl>
-                  </FormItem>
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+             <FormField
+                control={form.control}
+                name="file"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormControl>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                            />
+                        </FormControl>
+                    </FormItem>
                 )}
-              />
+            />
             <div className="flex items-center gap-2">
-              <Button type="button" variant="ghost" size="icon" className="w-6 h-6 text-slate-400 hover:text-white transition-colors">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
+              >
                 <Mic size={16} />
               </Button>
-              <Button type="submit" variant="ghost" size="icon" className="w-6 h-6 text-slate-400 hover:text-white transition-colors" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon"
+                className="w-6 h-6 text-slate-400 hover:text-white transition-colors"
+                disabled={isSubmitting}
+              >
                 <MoreHorizontal size={16} />
               </Button>
             </div>
