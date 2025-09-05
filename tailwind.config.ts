@@ -77,22 +77,31 @@ export default {
             height: '0',
           },
         },
-        'logo-pulse': {
-          '0%': {
-            transform: 'rotate(12deg) scale(1)',
+        float: {
+          '0%, 100%': {
+            transform: 'translateY(0) scale(1)',
           },
           '50%': {
-            transform: 'rotate(57deg) scale(0.9)',
+            transform: 'translateY(-8px) scale(1.02)',
+          },
+        },
+        'rotate-and-breathe': {
+          '0%, 100%': {
+            transform: 'rotate(0deg) scale(1)',
+          },
+          '50%': {
+            transform: 'rotate(180deg) scale(1.25)',
           },
           '100%': {
-            transform: 'rotate(102deg) scale(1)',
-          }
+            transform: 'rotate(360deg) scale(1)',
+          },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'logo-pulse': 'logo-pulse 3s ease-in-out infinite alternate',
+        'float': 'float 6s ease-in-out infinite',
+        'rotate-and-breathe': 'rotate-and-breathe 12s linear infinite',
       },
     },
   },
