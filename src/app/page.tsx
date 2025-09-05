@@ -156,7 +156,7 @@ export default function Home() {
             )}
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 -mt-20">
+          <div className="flex-1 flex flex-col items-center justify-center p-6">
             {/* Welcome Section */}
             <div className="flex flex-col items-center text-center max-w-md">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 animate-float">
