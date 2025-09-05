@@ -84,7 +84,7 @@ export default function ItineraryForm({
     <div className="relative max-w-2xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="flex items-center gap-3">
+          <div className="bg-slate-700/80 backdrop-blur-sm rounded-2xl px-4 py-3 flex items-center gap-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

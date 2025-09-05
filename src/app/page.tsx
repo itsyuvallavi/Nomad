@@ -15,6 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import ItineraryLoader from '@/components/itinerary-loader';
 
 function fileToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -97,16 +98,19 @@ export default function Home() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         {itinerary || isLoading || error ? (
-          <div className="container mx-auto p-4 sm:p-6 md:p-8 flex-1 flex justify-center items-center">
-            <div className="w-full max-w-4xl">
-              <ItineraryDisplay
-                itinerary={itinerary}
-                isLoading={isLoading}
-                error={error}
-                setItinerary={setItinerary}
-                onReturn={handleReturn}
-              />
-            </div>
+           <div className="container mx-auto p-4 sm:p-6 md:p-8 flex-1 flex justify-center items-center">
+            {isLoading ? (
+              <ItineraryLoader />
+            ) : (
+              <div className="w-full max-w-4xl">
+                <ItineraryDisplay
+                  itinerary={itinerary}
+                  error={error}
+                  setItinerary={setItinerary}
+                  onReturn={handleReturn}
+                />
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-6">

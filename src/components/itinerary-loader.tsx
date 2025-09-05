@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { Plane } from 'lucide-react';
 
 const loadingMessages = [
@@ -28,7 +27,7 @@ export default function ItineraryLoader() {
   }, []);
 
   return (
-    <Card className="shadow-lg flex flex-col items-center justify-center text-center p-8 min-h-[400px] bg-slate-800/50 border-slate-700">
+    <div className="flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
       <div className="relative">
         <Plane className="h-16 w-16 text-slate-400 animate-fly" />
       </div>
@@ -61,6 +60,6 @@ export default function ItineraryLoader() {
           animation: fly 2s ease-in-out infinite;
         }
       `}</style>
-    </Card>
+    </div>
   );
 }

@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, Share2, Wand2, PartyPopper, Home } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import ItineraryLoader from './itinerary-loader';
 import ItineraryCalendar from './itinerary-calendar';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,7 +23,6 @@ import { Loader2 } from 'lucide-react';
 
 type ItineraryDisplayProps = {
   itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null;
-  isLoading: boolean;
   error: string | null;
   setItinerary: (itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null) => void;
   onReturn: () => void;
@@ -32,7 +30,6 @@ type ItineraryDisplayProps = {
 
 export default function ItineraryDisplay({
   itinerary,
-  isLoading,
   error,
   setItinerary,
   onReturn,
@@ -74,10 +71,6 @@ export default function ItineraryDisplay({
     }
   };
 
-
-  if (isLoading) {
-    return <ItineraryLoader />;
-  }
 
   if (error) {
     return (
