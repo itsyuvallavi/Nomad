@@ -25,22 +25,22 @@ const ItineraryDailyView = ({ dailyPlans }: ItineraryDailyViewProps) => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {dailyPlans.map((plan, dayIndex) => {
         const { weekday, date } = formatDate(plan.date);
         return (
-          <div key={plan.day} className="mb-8">
-            <div className="flex items-center gap-4 mb-4">
-               <div className="w-12 h-12 bg-slate-700/80 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-lg">{plan.day}</span>
+          <div key={plan.day} className="mb-6">
+            <div className="flex items-center gap-3 mb-3">
+               <div className="w-8 h-8 bg-slate-700/80 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-base">{plan.day}</span>
                 </div>
               <div>
-                <h3 className="text-xl font-semibold text-white">{weekday}</h3>
-                <p className="text-slate-400">{date}</p>
+                <h3 className="text-lg font-semibold text-white">{weekday}</h3>
+                <p className="text-slate-400 text-sm">{date}</p>
               </div>
             </div>
 
-            <div className="space-y-3 ml-6 pl-10 border-l-2 border-slate-700">
+            <div className="space-y-3 ml-4 pl-7 border-l-2 border-slate-700">
               {plan.activities.map((activity, eventIndex) => (
                 <ItineraryEventCard key={eventIndex} activity={activity} />
               ))}

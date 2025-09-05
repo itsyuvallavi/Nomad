@@ -64,7 +64,7 @@ export default function ItineraryDisplay({
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-2xl mx-auto p-4">
         <Alert variant="destructive" className="bg-red-900/50 border-red-500/50 text-red-300">
           <AlertCircle className="h-4 w-4 text-red-300" />
           <AlertTitle>Error Generating Itinerary</AlertTitle>
@@ -79,7 +79,7 @@ export default function ItineraryDisplay({
 
   if (!itinerary || !itinerary.itinerary) {
     return (
-        <div className="max-w-4xl mx-auto p-6 text-center">
+        <div className="max-w-2xl mx-auto p-4 text-center">
         <p className="text-slate-400">Something went wrong. Please try starting over.</p>
          <Button variant="outline" size="sm" onClick={onReturn} className="mt-4 bg-slate-700 border-slate-600 hover:bg-slate-600">
             <ArrowLeft className="mr-2 h-4 w-4" /> Start Over
@@ -94,33 +94,37 @@ export default function ItineraryDisplay({
   const formatDateRange = (start: string, end: string) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
-    const startMonth = startDate.toLocaleDateString('en-US', { month: 'short' });
-    const endMonth = endDate.toLocaleDateString('en-US', { month: 'short' });
+    const userTimezoneOffset = startDate.getTimezoneOffset() * 60000;
+    const adjustedStartDate = new Date(startDate.getTime() + userTimezoneOffset);
+    const adjustedEndDate = new Date(endDate.getTime() + userTimezoneOffset);
+
+    const startMonth = adjustedStartDate.toLocaleDateString('en-US', { month: 'short' });
+    const endMonth = adjustedEndDate.toLocaleDateString('en-US', { month: 'short' });
     
     if (startMonth === endMonth) {
-      return `${startMonth} ${startDate.getDate()} - ${endDate.getDate()}, ${endDate.getFullYear()}`;
+      return `${startMonth} ${adjustedStartDate.getDate()} - ${adjustedEndDate.getDate()}, ${adjustedEndDate.getFullYear()}`;
     }
-    return `${startMonth} ${startDate.getDate()} - ${endMonth} ${endDate.getDate()}, ${endDate.getFullYear()}`;
+    return `${startMonth} ${adjustedStartDate.getDate()} - ${endMonth} ${adjustedEndDate.getDate()}, ${adjustedEndDate.getFullYear()}`;
   }
 
 
   return (
-    <div className="px-6 pb-8 text-white">
-      <div className="max-w-4xl mx-auto">
+    <div className="px-4 pb-8 text-white">
+      <div className="max-w-2xl mx-auto">
         <Button variant="ghost" onClick={onReturn} className="mb-4 text-slate-300 hover:text-white hover:bg-slate-700">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Search
         </Button>
 
         {/* Trip Header */}
-        <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white">{itinerary.title}</h1>
-            <p className="text-slate-400">{itinerary.destination} • {formatDateRange(tripStartDate, tripEndDate)}</p>
+        <div className="mb-6">
+            <h1 className="text-2xl font-bold text-white">{itinerary.title}</h1>
+            <p className="text-slate-400 text-sm">{itinerary.destination} • {formatDateRange(tripStartDate, tripEndDate)}</p>
         </div>
 
         {/* Actions & Tips */}
-         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 mb-8">
-            <div className="flex gap-2 mb-6">
-                <Button onClick={handleRefine} disabled={isRefining || !feedback.trim()} className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none">
+         <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 mb-6">
+            <div className="flex gap-2 mb-4">
+                <Button onClick={handleRefine} size="sm" disabled={isRefining || !feedback.trim()} className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none">
                   {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                   Refine
                 </Button>
@@ -136,9 +140,9 @@ export default function ItineraryDisplay({
               className="bg-slate-700/80 border-slate-600 text-white placeholder:text-slate-400"
             />
             {itinerary.quickTips && itinerary.quickTips.length > 0 && (
-                <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
-                    <h3 className="text-white font-medium mb-2">Quick Tips for {itinerary.destination}</h3>
-                    <ul className="space-y-1 text-sm text-slate-300 list-disc list-inside">
+                <div className="mt-4 p-3 bg-slate-700/30 rounded-lg">
+                    <h3 className="text-white font-medium mb-2 text-sm">Quick Tips for {itinerary.destination}</h3>
+                    <ul className="space-y-1 text-xs text-slate-300 list-disc list-inside">
                         {itinerary.quickTips.map((tip, index) => <li key={index}>{tip}</li>)}
                     </ul>
                 </div>
@@ -146,8 +150,8 @@ export default function ItineraryDisplay({
         </div>
 
         {/* Itinerary Body */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6">
-            <h2 className="text-white font-medium mb-6 text-xl">Your Personalized Itinerary</h2>
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4">
+            <h2 className="text-white font-medium mb-4 text-lg">Your Personalized Itinerary</h2>
              <ItineraryDailyView dailyPlans={itinerary.itinerary} />
         </div>
       </div>

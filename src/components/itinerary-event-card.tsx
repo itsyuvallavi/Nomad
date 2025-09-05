@@ -8,12 +8,12 @@ import type { GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-pe
 type Activity = GeneratePersonalizedItineraryOutput['itinerary'][0]['activities'][0];
 
 const categoryInfo = {
-  Work: { icon: <Briefcase className="h-5 w-5" />, color: 'from-blue-500 to-blue-600' },
-  Leisure: { icon: <Camera className="h-5 w-5" />, color: 'from-green-500 to-green-600' },
-  Food: { icon: <Utensils className="h-5 w-5" />, color: 'from-orange-500 to-orange-600' },
-  Travel: { icon: <Plane className="h-5 w-5" />, color: 'from-purple-500 to-purple-600' },
-  Accommodation: { icon: <Bed className="h-5 w-5" />, color: 'from-indigo-500 to-indigo-600' },
-  Default: { icon: <Coffee className="h-5 w-5" />, color: 'from-slate-500 to-slate-600' },
+  Work: { icon: <Briefcase className="h-4 w-4" />, color: 'from-blue-500 to-blue-600' },
+  Leisure: { icon: <Camera className="h-4 w-4" />, color: 'from-green-500 to-green-600' },
+  Food: { icon: <Utensils className="h-4 w-4" />, color: 'from-orange-500 to-orange-600' },
+  Travel: { icon: <Plane className="h-4 w-4" />, color: 'from-purple-500 to-purple-600' },
+  Accommodation: { icon: <Bed className="h-4 w-4" />, color: 'from-indigo-500 to-indigo-600' },
+  Default: { icon: <Coffee className="h-4 w-4" />, color: 'from-slate-500 to-slate-600' },
 };
 
 const getCategoryInfo = (category: Activity['category']) => {
@@ -30,29 +30,29 @@ export default function ItineraryEventCard({ activity }: ItineraryEventCardProps
 
   return (
     <div
-      className="bg-slate-700/50 backdrop-blur-sm rounded-xl p-4 cursor-pointer hover:bg-slate-700/70 transition-colors"
+      className="bg-slate-700/50 backdrop-blur-sm rounded-lg p-3 cursor-pointer hover:bg-slate-700/70 transition-colors"
       onClick={() => setIsExpanded(!isExpanded)}
     >
-      <div className="flex items-start gap-4">
-        <div className={`w-10 h-10 bg-gradient-to-br ${color} rounded-lg flex items-center justify-center text-white flex-shrink-0`}>
+      <div className="flex items-start gap-3">
+        <div className={`w-8 h-8 bg-gradient-to-br ${color} rounded-md flex items-center justify-center text-white flex-shrink-0`}>
           {icon}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <h4 className="font-bold text-white truncate">{activity.description}</h4>
-            <div className="flex items-center gap-1.5 text-slate-400 text-sm flex-shrink-0 ml-2">
+            <h4 className="font-semibold text-white truncate text-sm">{activity.description}</h4>
+            <div className="flex items-center gap-1.5 text-slate-400 text-xs flex-shrink-0 ml-2">
               <Clock className="w-3 h-3" />
               <span>{activity.time}</span>
             </div>
           </div>
           
-          <p className="text-slate-300 text-sm mb-2">{activity.category}</p>
+          <p className="text-slate-300 text-xs mb-2">{activity.category}</p>
 
           {isExpanded && (
-             <div className="pt-3 mt-2 border-t border-slate-600">
-              <div className="flex items-start gap-2 text-slate-400 text-sm">
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+             <div className="pt-2 mt-2 border-t border-slate-600">
+              <div className="flex items-start gap-2 text-slate-400 text-xs">
+                <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
                 <span className="flex-1">{activity.address}</span>
                  <a 
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.address)}`}
@@ -71,7 +71,7 @@ export default function ItineraryEventCard({ activity }: ItineraryEventCardProps
           )}
         </div>
         <ChevronDown
-          className={`h-5 w-5 text-slate-400 transition-transform transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 text-slate-400 transition-transform transform ${isExpanded ? 'rotate-180' : ''}`}
         />
       </div>
     </div>
