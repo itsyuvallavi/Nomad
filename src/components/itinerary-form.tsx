@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -25,6 +26,8 @@ type ItineraryFormProps = {
   isSubmitting: boolean;
 };
 
+const fullPlaceholder = "e.g., Plan a 5-day work-cation in Tokyo, focusing on tech hubs and good food.";
+
 export default function ItineraryForm({
   onSubmit,
   isSubmitting,
@@ -35,6 +38,23 @@ export default function ItineraryForm({
       prompt: '',
     },
   });
+
+  const [placeholder, setPlaceholder] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    let typingTimeout: NodeJS.Timeout;
+
+    if (isTyping && placeholder.length < fullPlaceholder.length) {
+      typingTimeout = setTimeout(() => {
+        setPlaceholder(fullPlaceholder.slice(0, placeholder.length + 1));
+      }, 50);
+    } else {
+      setIsTyping(false);
+    }
+
+    return () => clearTimeout(typingTimeout);
+  }, [placeholder, isTyping]);
   
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
@@ -53,9 +73,13 @@ export default function ItineraryForm({
                     <FormItem>
                       <FormControl>
                         <Textarea
-                          placeholder="Hey, can you help me with something?"
-                          className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base min-h-[60px]"
+                          placeholder={placeholder}
+                          className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base min-h-[60px] placeholder:text-gray-400"
                           {...field}
+                           onFocus={() => {
+                            setIsTyping(false);
+                            setPlaceholder(fullPlaceholder);
+                          }}
                         />
                       </FormControl>
                     </FormItem>
