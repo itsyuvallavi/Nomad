@@ -18,8 +18,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
-        code: ['monospace'],
+        headline: ['Satoshi', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

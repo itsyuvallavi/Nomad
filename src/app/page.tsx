@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import type { z } from 'zod';
 import { generatePersonalizedItinerary, type GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
-
 import ItineraryForm from '@/components/itinerary-form';
 import ItineraryDisplay from '@/components/itinerary-display';
 import type { formSchema } from '@/components/itinerary-form';
+import { Settings } from 'lucide-react';
 
 export default function Home() {
   const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput['itinerary'] | null>(null);
@@ -38,12 +38,26 @@ export default function Home() {
     setError(null);
   };
 
-
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-1 container mx-auto p-4 sm:p-6 md:p-8 flex justify-center items-center">
-        <div className="w-full max-w-4xl">
-            {itinerary || isLoading || error ? (
+    <div className="h-screen w-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            <div className="w-4 h-4 bg-slate-800 rounded-sm transform rotate-12"></div>
+          </div>
+          <span className="text-white font-medium">Nomad Navigator</span>
+        </div>
+        <button className="w-8 h-8 text-slate-400 hover:text-white transition-colors">
+          <Settings size={20} />
+        </button>
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col">
+        {itinerary || isLoading || error ? (
+          <div className="container mx-auto p-4 sm:p-6 md:p-8 flex-1 flex justify-center items-center">
+            <div className="w-full max-w-4xl">
               <ItineraryDisplay
                 itinerary={itinerary}
                 isLoading={isLoading}
@@ -51,13 +65,36 @@ export default function Home() {
                 setItinerary={setItinerary}
                 onReturn={handleReturn}
               />
-            ) : (
-                <ItineraryForm
-                  isSubmitting={isLoading}
-                  onSubmit={handleItineraryRequest}
-                />
-            )}
-        </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 flex flex-col items-center justify-center px-6">
+              <div className="flex flex-col items-center text-center max-w-md">
+                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8">
+                  <div className="w-8 h-8 bg-slate-800 rounded-md transform rotate-12"></div>
+                </div>
+                <h1 className="text-white text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
+                <h2 className="text-white text-xl mb-6">Can I help you with anything?</h2>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Ready to assist you with anything you need?<br />
+                  From answering questions, to generating itineraries and providing<br />
+                  recommendations. Let's get started!
+                </p>
+              </div>
+            </div>
+            {/* Input Area */}
+            <div className="px-6 pb-8">
+              <ItineraryForm
+                isSubmitting={isLoading}
+                onSubmit={handleItineraryRequest}
+              />
+              <p className="text-slate-500 text-xs text-center mt-4">
+                Nomad Navigator may contain errors. We recommend checking important information.
+              </p>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
