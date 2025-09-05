@@ -72,7 +72,7 @@ const ItineraryWeeklyView = ({ dailyPlans }: { dailyPlans: GeneratePersonalizedI
             <div
               className={cn(
                 'p-2 text-center border-b',
-                isToday && 'bg-accent/20'
+                isToday && 'bg-primary/10'
               )}
             >
               <p className="text-xs font-semibold text-muted-foreground">
@@ -80,7 +80,7 @@ const ItineraryWeeklyView = ({ dailyPlans }: { dailyPlans: GeneratePersonalizedI
               </p>
               <p className={cn(
                 'text-lg font-bold',
-                 isToday && 'text-accent'
+                 isToday && 'text-primary'
                  )}>
                 {day.getDate()}
                 </p>
@@ -89,7 +89,7 @@ const ItineraryWeeklyView = ({ dailyPlans }: { dailyPlans: GeneratePersonalizedI
               {plan ? (
                 plan.activities.map((activity, index) => (
                   <div key={index} className="p-1.5 rounded-md bg-background/60 flex items-start gap-2 text-xs">
-                     <div className="text-accent pt-0.5">{getCategoryIcon(activity.category)}</div>
+                     <div className="text-primary pt-0.5">{getCategoryIcon(activity.category)}</div>
                      <div>
                        <p className="font-semibold">{activity.time}</p>
                        <p className="text-muted-foreground leading-tight">{activity.description}</p>

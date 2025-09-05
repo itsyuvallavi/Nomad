@@ -81,23 +81,27 @@ export default function ItineraryDisplay({
 
   if (error) {
     return (
-      <Alert variant="destructive" className="shadow-lg">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error Generating Itinerary</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-        <Button variant="outline" size="sm" onClick={onReturn} className="mt-4">
-            <Home className="mr-2 h-4 w-4" /> Try Again
-        </Button>
-      </Alert>
+      <Card className="w-full max-w-4xl mx-auto">
+        <CardHeader>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error Generating Itinerary</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" size="sm" onClick={onReturn}>
+              <Home className="mr-2 h-4 w-4" /> Try Again
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!itinerary) {
-    // This case should ideally not be reached if loading and error are handled,
-    // but as a fallback, we can offer to return.
     return (
-        <Card className="shadow-lg flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
-        <PartyPopper className="h-16 w-16 text-accent" strokeWidth={1.5} />
+        <Card className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
+        <PartyPopper className="h-16 w-16 text-muted-foreground" strokeWidth={1.5} />
         <CardHeader className="p-2">
           <CardTitle className="font-headline text-2xl mt-4">
             Let's Plan an Adventure!
@@ -114,7 +118,7 @@ export default function ItineraryDisplay({
   }
 
   return (
-    <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
+    <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
           <div>

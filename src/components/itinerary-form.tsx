@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 export const formSchema = z.object({
   prompt: z.string().min(10, 'Please describe your trip in a bit more detail.'),
@@ -57,7 +58,7 @@ export default function ItineraryForm({
        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
-            <div className="rounded-2xl border bg-secondary/30 border-input focus-within:ring-1 focus-within:ring-ring p-4 space-y-2">
+            <div className="rounded-2xl border bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring p-4 space-y-2">
                 <FormField
                   control={form.control}
                   name="prompt"
@@ -75,10 +76,19 @@ export default function ItineraryForm({
                 />
 
                 <div className="flex justify-between items-center">
-                    <Badge variant="outline" className="rounded-lg border-muted-foreground/50">
-                        Synapse 0.11
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-2 h-4 w-4"><path d="M11.3333 6L8 9.33333L4.66667 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-                    </Badge>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Badge variant="outline" className="rounded-lg cursor-pointer">
+                                Synapse 0.11
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-2 h-4 w-4"><path d="M11.3333 6L8 9.33333L4.66667 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+                            </Badge>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem>Synapse 0.11</DropdownMenuItem>
+                             <DropdownMenuItem>Gemini 2.5 Pro</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                     <div className="flex items-center gap-1">
                         <Button type="button" variant="ghost" size="icon">
                             <Link className="h-5 w-5 text-muted-foreground" />
@@ -100,7 +110,7 @@ export default function ItineraryForm({
 
              <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
                 {suggestionChips.map((chip, index) => (
-                    <Button key={index} type="button" variant="outline" size="sm" className="rounded-lg gap-2 bg-secondary/30 border-input hover:bg-secondary/50" onClick={() => handleChipClick(chip.text)}>
+                    <Button key={index} type="button" variant="outline" size="sm" className="rounded-lg gap-2 bg-secondary/50 border-input hover:bg-secondary" onClick={() => handleChipClick(chip.text)}>
                         {chip.icon}
                         {chip.text}
                     </Button>

@@ -116,19 +116,19 @@ const ItineraryCalendar = ({ dailyPlans }: ItineraryCalendarProps) => {
               key={date.toISOString()}
               className={cn(
                 'p-2 border-b border-r h-48 flex flex-col',
-                !isCurrentMonth && 'bg-muted/30 text-muted-foreground'
+                !isCurrentMonth && 'bg-muted/30'
               )}
             >
               <div className={cn(
                   'font-semibold text-right mb-1',
-                   isToday && 'text-accent'
+                   isToday && 'text-primary'
                    )}>
                 {date.getDate()}
                 </div>
               <div className="flex-1 overflow-y-auto space-y-1 pr-1 -mr-2 text-xs">
                 {activities.map((activity, index) => (
-                  <div key={index} className="p-1.5 rounded-md bg-secondary/80 flex items-start gap-2">
-                    <div className="text-accent pt-0.5">{getCategoryIcon(activity.category)}</div>
+                  <div key={index} className="p-1.5 rounded-md bg-secondary flex items-start gap-2">
+                    <div className="text-primary pt-0.5">{getCategoryIcon(activity.category)}</div>
                     <div>
                       <p className="font-semibold">{activity.time}</p>
                       <p className="text-muted-foreground leading-tight">{activity.description}</p>

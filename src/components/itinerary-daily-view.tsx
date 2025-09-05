@@ -66,11 +66,11 @@ const ItineraryDailyView = ({ dailyPlans }: ItineraryDailyViewProps) => {
                 <p className="font-semibold text-sm text-muted-foreground">
                   Day {plan.day} &bull; {formatDate(plan.date)}
                 </p>
-                <h3 className="text-lg font-headline text-primary">{plan.title}</h3>
+                <h3 className="text-lg font-headline text-primary-foreground">{plan.title}</h3>
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-6 ml-2 border-l-2 border-accent/50 pl-6 py-2">
+              <div className="space-y-6 ml-2 border-l-2 border-primary/50 pl-6 py-2">
                 {plan.activities.map((activity, index) => (
                   <div key={index} className="relative">
                      {activity.travelTime && (
@@ -79,12 +79,12 @@ const ItineraryDailyView = ({ dailyPlans }: ItineraryDailyViewProps) => {
                          <span>{activity.travelTime}</span>
                        </div>
                      )}
-                    <div className="absolute -left-8 top-1.5 h-4 w-4 rounded-full bg-accent" />
+                    <div className="absolute -left-8 top-1.5 h-4 w-4 rounded-full bg-primary" />
                     <p className="font-bold text-muted-foreground">
                       {activity.time}
                     </p>
                     <div className="flex items-start gap-3 mt-1">
-                      <div className="text-accent mt-1">
+                      <div className="text-primary mt-1">
                         {getCategoryIcon(activity.category)}
                       </div>
                       <div>
