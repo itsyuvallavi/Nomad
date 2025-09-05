@@ -134,6 +134,7 @@ export default function ItineraryForm({
                       <Input
                         placeholder={placeholder}
                         className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        autoComplete="off"
                         {...field}
                       />
                     </div>
