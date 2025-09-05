@@ -107,7 +107,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between p-6">
         <div className="flex items-center gap-3">
