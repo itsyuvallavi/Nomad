@@ -4,10 +4,8 @@ import { useState } from 'react';
 import type { z } from 'zod';
 import { generatePersonalizedItinerary, type GeneratePersonalizedItineraryOutput } from '@/ai/flows/generate-personalized-itinerary';
 
-import Header from '@/components/header';
 import ItineraryForm from '@/components/itinerary-form';
 import ItineraryDisplay from '@/components/itinerary-display';
-import { Card, CardContent } from '@/components/ui/card';
 import type { formSchema } from '@/components/itinerary-form';
 
 export default function Home() {
@@ -18,7 +16,6 @@ export default function Home() {
   const handleItineraryRequest = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setError(null);
-    setItinerary(null);
     try {
       const result = await generatePersonalizedItinerary(values);
       if (result.itinerary && result.itinerary.length > 0) {
@@ -36,9 +33,14 @@ export default function Home() {
     }
   };
 
+  const handleReturn = () => {
+    setItinerary(null);
+    setError(null);
+  };
+
+
   return (
-    <div className="flex flex-col min-h-screen bg-transparent">
-      <Header />
+    <div className="flex flex-col min-h-screen bg-background">
       <main className="flex-1 container mx-auto p-4 sm:p-6 md:p-8 flex justify-center items-start">
         <div className="w-full max-w-4xl">
             {itinerary || isLoading || error ? (
@@ -47,16 +49,13 @@ export default function Home() {
                 isLoading={isLoading}
                 error={error}
                 setItinerary={setItinerary}
+                onReturn={handleReturn}
               />
             ) : (
-               <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-0">
-                    <ItineraryForm
-                      isSubmitting={isLoading}
-                      onSubmit={handleItineraryRequest}
-                    />
-                 </CardContent>
-              </Card>
+                <ItineraryForm
+                  isSubmitting={isLoading}
+                  onSubmit={handleItineraryRequest}
+                />
             )}
         </div>
       </main>

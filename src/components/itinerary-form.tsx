@@ -3,26 +3,16 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowUp, Link, Globe, Pencil, BrainCircuit, FileText, Image as ImageIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
-  FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Wand2 } from 'lucide-react';
 
 export const formSchema = z.object({
   prompt: z.string().min(10, 'Please describe your trip in a bit more detail.'),
@@ -33,6 +23,14 @@ type ItineraryFormProps = {
   isSubmitting: boolean;
 };
 
+const suggestionChips = [
+    { icon: <ImageIcon />, text: "Create image" },
+    { icon: <FileText />, text: "Make a plan" },
+    { icon: <Pencil />, text: "Summarize text" },
+    { icon: <Pencil />, text: "Help me write" },
+    { icon: <BrainCircuit />, text: "Brainstorm" },
+];
+
 export default function ItineraryForm({
   onSubmit,
   isSubmitting,
@@ -40,58 +38,76 @@ export default function ItineraryForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      prompt:
-        'I\'m planning a 2-week trip to Tokyo, Japan next month. I need to work most weekdays and prefer co-working spaces. I\'m on a mid-range budget and love specialty coffee, modern art, and vegetarian food.',
+      prompt: '',
     },
   });
+  
+  const handleChipClick = (text: string) => {
+    const currentPrompt = form.getValues('prompt');
+    form.setValue('prompt', currentPrompt ? `${currentPrompt} ${text}`: text);
+  }
 
   return (
-    <>
-      <CardHeader className="text-center">
-        <CardTitle className="font-headline text-3xl">
-          Where to next?
-        </CardTitle>
-        <CardDescription className="text-base">
-         Describe your ideal trip, and let AI handle the planning.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
+       <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground">Good evening, Iqbal</h1>
+            <p className="text-lg text-muted-foreground mt-2">How can I help you?</p>
+       </div>
+       
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="prompt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      placeholder="e.g., A 10-day trip to Bali for a surfer who loves yoga and spicy food..."
-                      className="resize-none bg-background/70 text-base"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
+            <div className="rounded-2xl border border-input focus-within:ring-2 focus-within:ring-ring p-4 space-y-2">
+                <FormField
+                  control={form.control}
+                  name="prompt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Hey, can you help me with something?"
+                          className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base"
+                          rows={1}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
-            <Button type="submit" size="lg" className="w-full !mt-6" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                <Wand2 className="mr-2 h-4 w-4" />
-                Generate Itinerary
-                </>
-              )}
-            </Button>
+                <div className="flex justify-between items-center">
+                    <Button type="button" variant="outline" size="sm" className="rounded-lg">
+                        Synapse 0.11
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-2"><path d="M11.3333 6L8 9.33333L4.66667 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button type="button" variant="ghost" size="icon">
+                            <Link className="h-5 w-5" />
+                        </Button>
+                         <Button type="button" variant="ghost" size="icon">
+                            <Globe className="h-5 w-5" />
+                        </Button>
+                        <Button type="submit" size="icon" className="rounded-lg bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                          {isSubmitting ? (
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : (
+                              <ArrowUp className="h-5 w-5" />
+                          )}
+                        </Button>
+                    </div>
+                </div>
+
+            </div>
+
+             <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
+                {suggestionChips.map((chip, index) => (
+                    <Button key={index} type="button" variant="outline" size="sm" className="rounded-lg gap-2" onClick={() => handleChipClick(chip.text)}>
+                        {chip.icon}
+                        {chip.text}
+                    </Button>
+                ))}
+            </div>
           </form>
         </Form>
-      </CardContent>
-    </>
+    </div>
   );
 }

@@ -2,13 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
-    --background: 220 17% 95%;
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -16,39 +12,39 @@ body {
     --popover-foreground: 222 47% 11%;
     --primary: 215 48% 11%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 220 17% 95%;
-    --secondary-foreground: 215 48% 11%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 180 65% 59%;
+    --accent: 210 40% 96.1%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 180 65% 59%;
-    --radius: 0.5rem;
+    --ring: 222 47% 11%;
+    --radius: 0.8rem;
   }
   .dark {
-    --background: 215 48% 11%;
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
     --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
     --primary: 210 40% 98%;
-    --primary-foreground: 215 48% 11%;
+    --primary-foreground: 222 47% 11%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 180 65% 59%;
-    --accent-foreground: 215 48% 11%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 180 65% 59%;
+    --ring: 210 40% 98%;
   }
 }
 
@@ -58,10 +54,5 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
-  }
-
-  .dark body {
-     background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
   }
 }

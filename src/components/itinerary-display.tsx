@@ -27,6 +27,7 @@ type ItineraryDisplayProps = {
   isLoading: boolean;
   error: string | null;
   setItinerary: (itinerary: GeneratePersonalizedItineraryOutput['itinerary'] | null) => void;
+  onReturn: () => void;
 };
 
 export default function ItineraryDisplay({
@@ -34,6 +35,7 @@ export default function ItineraryDisplay({
   isLoading,
   error,
   setItinerary,
+  onReturn,
 }: ItineraryDisplayProps) {
   const { toast } = useToast();
   const [isRefining, setIsRefining] = useState(false);
@@ -45,10 +47,6 @@ export default function ItineraryDisplay({
       title: 'Link Copied!',
       description: 'Itinerary link copied to your clipboard.',
     });
-  };
-
-  const handleReturn = () => {
-    setItinerary(null);
   };
 
   const handleRefine = async () => {
@@ -87,29 +85,36 @@ export default function ItineraryDisplay({
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error Generating Itinerary</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
+        <Button variant="outline" size="sm" onClick={onReturn} className="mt-4">
+            <Home className="mr-2 h-4 w-4" /> Try Again
+        </Button>
       </Alert>
     );
   }
 
   if (!itinerary) {
+    // This case should ideally not be reached if loading and error are handled,
+    // but as a fallback, we can offer to return.
     return (
-      <Card className="shadow-lg flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
+        <Card className="shadow-lg flex flex-col items-center justify-center text-center p-8 min-h-[400px]">
         <PartyPopper className="h-16 w-16 text-accent" strokeWidth={1.5} />
         <CardHeader className="p-2">
           <CardTitle className="font-headline text-2xl mt-4">
-            Your Personalized Itinerary Awaits
+            Let's Plan an Adventure!
           </CardTitle>
           <CardDescription className="mt-2">
-            Fill out the form to generate your travel plan. Your next adventure
-            is just a click away!
+            Something went wrong, but don't worry. Let's try again.
           </CardDescription>
         </CardHeader>
+        <Button variant="outline" size="sm" onClick={onReturn} className="mt-4">
+            <Home className="mr-2 h-4 w-4" /> Start Over
+        </Button>
       </Card>
     );
   }
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg bg-card/80 backdrop-blur-sm">
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
           <div>
@@ -121,7 +126,7 @@ export default function ItineraryDisplay({
             </CardDescription>
           </div>
           <div className="flex gap-2 shrink-0">
-             <Button variant="outline" size="sm" onClick={handleReturn}>
+             <Button variant="outline" size="sm" onClick={onReturn}>
               <Home className="mr-2 h-4 w-4" /> New Search
             </Button>
             <Button variant="outline" size="sm" onClick={handleShare}>
@@ -156,6 +161,7 @@ export default function ItineraryDisplay({
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               disabled={isRefining}
+              className="bg-background/70"
             />
             <Button onClick={handleRefine} disabled={isRefining || !feedback.trim()}>
               {isRefining ? (
