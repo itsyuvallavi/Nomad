@@ -76,11 +76,6 @@ export default function Home() {
               </div>
               <h1 className="text-white text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
               <h2 className="text-white text-xl mb-6">Can I help you with anything?</h2>
-              <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                Ready to assist you with anything you need?<br />
-                From answering questions, to generating itineraries and providing<br />
-                recommendations. Let's get started!
-              </p>
             </div>
             
             {/* Input Area */}
