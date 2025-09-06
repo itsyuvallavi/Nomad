@@ -18,11 +18,10 @@ import type { FormValues } from '@/components/itinerary-form';
 import ChatDisplay from '@/components/chat-display';
 
 
-export interface RecentItinerary {
+export interface RecentSearch {
   id: string;
-  title: string;
-  destination: string;
-  itinerary: GeneratePersonalizedItineraryOutput;
+  prompt: string;
+  fileDataUrl?: string;
 }
 
 export default function Home() {
@@ -31,13 +30,27 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   
-  const handleItineraryRequest = (values: FormValues, recentItinerary?: RecentItinerary) => {
-    if (recentItinerary) {
-      setItinerary(recentItinerary.itinerary);
-      setIsChatting(false);
-    } else {
-      setIsChatting(true);
-      setInitialPrompt(values);
+  const handleItineraryRequest = (values: FormValues) => {
+    setIsChatting(true);
+    setInitialPrompt(values);
+
+    if (values.prompt.trim()) {
+       try {
+        const storedSearches = localStorage.getItem('recentSearches');
+        const recentSearches: RecentSearch[] = storedSearches ? JSON.parse(storedSearches) : [];
+
+        const newSearch: RecentSearch = {
+          id: new Date().toISOString(),
+          prompt: values.prompt,
+          fileDataUrl: values.fileDataUrl,
+        };
+
+        const updatedSearches = [newSearch, ...recentSearches.filter(item => item.prompt !== newSearch.prompt)].slice(0, 3);
+        
+        localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      } catch (e) {
+        console.error("Could not save recent search to localStorage", e);
+      }
     }
   };
   

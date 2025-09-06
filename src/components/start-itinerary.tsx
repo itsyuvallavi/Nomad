@@ -18,41 +18,42 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import ItineraryForm from '@/components/itinerary-form';
 import type { FormValues } from '@/components/itinerary-form';
-import type { RecentItinerary } from '@/app/page';
+import type { RecentSearch } from '@/app/page';
 
 type StartItineraryProps = {
-    onItineraryRequest: (values: FormValues, recentItinerary?: RecentItinerary) => void;
+    onItineraryRequest: (values: FormValues) => void;
 };
 
 
 export default function StartItinerary({ onItineraryRequest }: StartItineraryProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [recentItineraries, setRecentItineraries] = useState<RecentItinerary[]>([]);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
 
   useEffect(() => {
     try {
-      const storedItineraries = localStorage.getItem('recentItineraries');
-      if (storedItineraries) {
-        setRecentItineraries(JSON.parse(storedItineraries));
+      const storedSearches = localStorage.getItem('recentSearches');
+      if (storedSearches) {
+        setRecentSearches(JSON.parse(storedSearches));
       }
     } catch (e) {
-      console.error("Could not parse recent itineraries from localStorage", e);
+      console.error("Could not parse recent searches from localStorage", e);
     }
   }, []);
 
   const handleInitialPrompt = async (values: FormValues) => {
     setIsLoading(true);
     onItineraryRequest(values);
-    setIsLoading(false);
+    // Note: We don't set isLoading(false) here because the parent component
+    // will switch to the chat view, unmounting this component.
   };
 
-  const handleRecentItineraryClick = (recentItinerary: RecentItinerary) => {
-    onItineraryRequest({ prompt: '' }, recentItinerary);
+  const handleRecentSearchClick = (search: RecentSearch) => {
+    onItineraryRequest({ prompt: search.prompt, fileDataUrl: search.fileDataUrl });
   }
 
   const handleClearHistory = () => {
-    setRecentItineraries([]);
-    localStorage.removeItem('recentItineraries');
+    setRecentSearches([]);
+    localStorage.removeItem('recentSearches');
   };
 
   return (
@@ -72,11 +73,11 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
           isSubmitting={isLoading}
           onSubmit={handleInitialPrompt}
         />
-        {recentItineraries.length > 0 && (
+        {recentSearches.length > 0 && (
           <div className="max-w-2xl mx-auto mt-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-3">
                <History size={14} className="text-slate-400" />
-               <h3 className="text-slate-400 text-sm font-medium">Recent Trips</h3>
+               <h3 className="text-slate-400 text-sm font-medium">Recent Searches</h3>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-500 hover:text-white">
@@ -87,7 +88,7 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                       <AlertDialogDescription className="text-slate-400">
-                        This will permanently delete your recent trip history. This action cannot be undone.
+                        This will permanently delete your recent search history. This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -100,15 +101,14 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                 </AlertDialog>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {recentItineraries.map((trip) => (
+              {recentSearches.map((search) => (
                 <Card
-                  key={trip.id}
-                  onClick={() => handleRecentItineraryClick(trip)}
+                  key={search.id}
+                  onClick={() => handleRecentSearchClick(search)}
                   className="bg-slate-700/50 hover:bg-slate-700 border-slate-700 cursor-pointer text-left"
                 >
                   <CardContent className="p-3">
-                    <p className="font-semibold text-white truncate text-sm">{trip.title}</p>
-                    <p className="text-xs text-slate-300 truncate">{trip.destination}</p>
+                    <p className="font-semibold text-white truncate text-sm">{search.prompt}</p>
                   </CardContent>
                 </Card>
               ))}

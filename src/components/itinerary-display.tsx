@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/popover';
 import ItineraryRefinementForm from './itinerary-refinement-form';
 import { refineItineraryBasedOnFeedback } from '@/ai/flows/refine-itinerary-based-on-feedback';
-import type { RecentItinerary } from '@/app/page';
 
 type ItineraryDisplayProps = {
   itinerary: GeneratePersonalizedItineraryOutput | null;
@@ -30,30 +29,6 @@ export default function ItineraryDisplay({
 }: ItineraryDisplayProps) {
   const [isRefining, setIsRefining] = useState(false);
   const [refinementError, setRefinementError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (itinerary && !error) {
-      try {
-        const storedItineraries = localStorage.getItem('recentItineraries');
-        const recentItineraries: RecentItinerary[] = storedItineraries ? JSON.parse(storedItineraries) : [];
-
-        const newItinerary: RecentItinerary = {
-          id: new Date().toISOString(),
-          title: itinerary.title,
-          destination: itinerary.destination,
-          itinerary: itinerary,
-        };
-
-        // Add new itinerary and keep the list at a max of 3
-        const updatedItineraries = [newItinerary, ...recentItineraries.filter(item => item.id !== newItinerary.id)].slice(0, 3);
-        
-        localStorage.setItem('recentItineraries', JSON.stringify(updatedItineraries));
-      } catch (e) {
-        console.error("Could not save recent itinerary to localStorage", e);
-      }
-    }
-  }, [itinerary, error]);
-
 
   const handleRefinement = async (feedback: string) => {
     if (!itinerary) return;
