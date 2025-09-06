@@ -10,6 +10,7 @@ import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { ArrowUp, Bot, User, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import type { RecentSearch } from '@/app/page';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -44,13 +45,7 @@ export default function ChatDisplay({
     }, [messages]);
 
     useEffect(() => {
-        let mounted = true;
-        let initialized = false;
-        
         const getQuestions = async () => {
-            if (!mounted || initialized) return;
-            initialized = true;
-            
             setIsLoading(true);
             try {
                 console.log('[ChatDisplay] Analyzing initial prompt:', initialPrompt.prompt);
@@ -59,11 +54,8 @@ export default function ChatDisplay({
                     attachedFile: initialPrompt.fileDataUrl,
                 });
                 
-                if (!mounted) return;
-                
                 console.log('[ChatDisplay] Received questions:', result.questions);
                 
-                // Filter out empty or whitespace-only questions
                 const validQuestions = result.questions.filter(q => q && q.trim().length > 0);
                 
                 if (validQuestions.length > 0) {
@@ -71,7 +63,6 @@ export default function ChatDisplay({
                     setMessages(prev => [...prev, { role: 'assistant', content: allQuestions }]);
                     setHasAskedQuestions(true);
                 } else {
-                    // No questions needed, generate itinerary directly
                     console.log('[ChatDisplay] No questions needed, generating itinerary directly');
                     setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
                     await generateItinerary(initialPrompt.prompt);
@@ -79,13 +70,9 @@ export default function ChatDisplay({
 
             } catch (e) {
                 console.error('[ChatDisplay] Error in getQuestions:', e);
-                if (mounted) {
-                    onError("Sorry, I had trouble understanding your request. Please try again.");
-                }
+                onError("Sorry, I had trouble understanding your request. Please try again.");
             } finally {
-                if (mounted) {
-                    setIsLoading(false);
-                }
+                setIsLoading(false);
             }
         };
 
@@ -94,9 +81,6 @@ export default function ChatDisplay({
             getQuestions();
         }
         
-        return () => {
-            mounted = false;
-        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -109,6 +93,25 @@ export default function ChatDisplay({
                 attachedFile: initialPrompt.fileDataUrl,
             });
             console.log('[ChatDisplay] Itinerary generated successfully');
+            
+            // Save search to local storage after itinerary is generated
+            try {
+                const storedSearches = localStorage.getItem('recentSearches');
+                const recentSearches: RecentSearch[] = storedSearches ? JSON.parse(storedSearches) : [];
+
+                const newSearch: RecentSearch = {
+                  id: new Date().toISOString(),
+                  prompt: itinerary.title, // Use itinerary title as the summary
+                  fileDataUrl: initialPrompt.fileDataUrl,
+                };
+
+                const updatedSearches = [newSearch, ...recentSearches.filter(item => item.prompt !== newSearch.prompt)].slice(0, 3);
+                
+                localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+            } catch (e) {
+                console.error("Could not save recent search to localStorage", e);
+            }
+
             onItineraryGenerated(itinerary);
         } catch (e) {
             console.error('[ChatDisplay] Error generating itinerary:', e);
