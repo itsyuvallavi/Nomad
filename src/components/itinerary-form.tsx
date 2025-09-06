@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm, useWatch } from 'react-hook-form';
@@ -29,7 +30,11 @@ const formSchema = z.object({
   file: z.instanceof(File).optional(),
 });
 
-export type FormValues = z.infer<typeof formSchema>;
+export type FormValues = {
+  prompt: string;
+  file?: File;
+  fileDataUrl?: string;
+};
 
 type ItineraryFormProps = {
   onSubmit: (values: FormValues) => void;
@@ -74,7 +79,7 @@ export default function ItineraryForm({
     return () => clearTimeout(timeout);
   }, [charIndex, isDeleting, textIndex]);
 
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       prompt: '',
@@ -92,11 +97,28 @@ export default function ItineraryForm({
       name: 'prompt'
   });
 
+  function fileToDataURL(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    let fileDataUrl: string | undefined = undefined;
+    if (values.file) {
+      fileDataUrl = await fileToDataURL(values.file);
+    }
+    onSubmit({ ...values, fileDataUrl });
+  };
+
 
   return (
     <div className="relative max-w-2xl mx-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(handleFormSubmit)}>
           <div className="bg-slate-700/80 backdrop-blur-sm rounded-2xl px-4 py-3 flex items-center gap-3">
             <TooltipProvider>
               <Tooltip>
