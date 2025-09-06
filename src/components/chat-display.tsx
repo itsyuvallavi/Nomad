@@ -48,8 +48,8 @@ export default function ChatDisplay({
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
         
-        // Save chat state whenever messages change
-        if (messages.length > 0) {
+        // Save chat state whenever messages change, but only if not completed
+        if (messages.length > 0 && !(savedChatState?.isCompleted)) {
             saveChatStateToStorage();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -61,10 +61,11 @@ export default function ChatDisplay({
             const recentSearches: RecentSearch[] = storedSearches ? JSON.parse(storedSearches) : [];
             
             const existingIndex = recentSearches.findIndex(s => s.id === currentSearchId.current);
+            
             const chatState: ChatState = {
                 messages,
                 hasAskedQuestions,
-                isCompleted: false,
+                isCompleted: false, // This will be set to true only when itinerary is generated
                 itinerary: undefined
             };
             
@@ -73,7 +74,7 @@ export default function ChatDisplay({
                 prompt: initialPrompt.prompt,
                 fileDataUrl: initialPrompt.fileDataUrl,
                 chatState,
-                title: messages.length > 1 ? initialPrompt.prompt.substring(0, 100) : initialPrompt.prompt,
+                title: initialPrompt.prompt, // Use the prompt as title until itinerary is generated
                 lastUpdated: new Date().toISOString()
             };
             
@@ -90,6 +91,16 @@ export default function ChatDisplay({
     };
 
     useEffect(() => {
+        // If we have a saved state, we're resuming. Check if it's already completed.
+        if (savedChatState) {
+            if (savedChatState.isCompleted && savedChatState.itinerary) {
+                onItineraryGenerated(savedChatState.itinerary);
+            }
+            setIsLoading(false);
+            return; // IMPORTANT: Stop here if we're resuming a chat.
+        }
+        
+        // This logic runs only for a NEW chat session
         const getQuestions = async () => {
             setIsLoading(true);
             try {
@@ -123,14 +134,6 @@ export default function ChatDisplay({
             }
         };
 
-        if (savedChatState && savedChatState.messages.length > 0) {
-            if (savedChatState.isCompleted && savedChatState.itinerary) {
-                onItineraryGenerated(savedChatState.itinerary);
-            }
-            setIsLoading(false);
-            return;
-        }
-        
         if (messages.length === 0) {
             getQuestions();
         }
@@ -152,17 +155,20 @@ export default function ChatDisplay({
                 
                 const existingIndex = recentSearches.findIndex(s => s.id === currentSearchId.current);
                 
+                // Final "assistant" message before showing itinerary
+                const finalAssistantMessage = {role: 'assistant', content: "Here is your generated itinerary."};
+
                 const searchEntry: RecentSearch = {
                     id: currentSearchId.current,
                     prompt: initialPrompt.prompt,
                     fileDataUrl: initialPrompt.fileDataUrl,
                     chatState: {
-                      messages: [...messages, {role: 'assistant', content: "Here is your generated itinerary."}],
+                      messages: [...messages, finalAssistantMessage],
                       hasAskedQuestions: true,
                       isCompleted: true,
                       itinerary,
                     },
-                    title: itinerary.title || initialPrompt.prompt.substring(0, 100),
+                    title: itinerary.title || initialPrompt.prompt,
                     lastUpdated: new Date().toISOString()
                 };
                 
@@ -190,7 +196,8 @@ export default function ChatDisplay({
         e.preventDefault();
         if (!userInput.trim()) return;
 
-        const fullPrompt = `${initialPrompt.prompt}\n\nHere is the additional information you requested:\n${userInput}`;
+        // Combine all previous messages and the new user input to create a full context
+        const fullPrompt = messages.map(m => `${m.role}: ${m.content}`).join('\n') + `\nuser: ${userInput}`;
         
         setMessages(prev => [
             ...prev, 
