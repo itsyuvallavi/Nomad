@@ -52,15 +52,13 @@ export default function ChatDisplay({
                     attachedFile: initialPrompt.fileDataUrl,
                 });
                 
-                const userMessage: Message = { role: 'user', content: initialPrompt.prompt };
-
                 if (result.questions.length > 0) {
                     const allQuestions = result.questions.join('\n');
-                    setMessages([userMessage, { role: 'assistant', content: allQuestions }]);
+                    setMessages(prev => [...prev, { role: 'assistant', content: allQuestions }]);
                     setHasAskedQuestions(true);
                 } else {
                     // No questions needed, generate itinerary directly
-                    setMessages([userMessage, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
+                    setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
                     await generateItinerary(initialPrompt.prompt);
                 }
 
@@ -71,9 +69,10 @@ export default function ChatDisplay({
                 setIsLoading(false);
             }
         };
-        // The check on messages.length ensures this only runs once on initial load
+
         if (messages.length === 0) {
-          getQuestions();
+            setMessages([{ role: 'user', content: initialPrompt.prompt }]);
+            getQuestions();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
