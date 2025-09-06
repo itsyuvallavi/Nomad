@@ -45,7 +45,6 @@ export default function ChatDisplay({
 
     useEffect(() => {
         const getQuestions = async () => {
-            setMessages([{ role: 'user', content: initialPrompt.prompt }]);
             setIsLoading(true);
             try {
                 const result = await analyzeInitialPrompt({
@@ -53,13 +52,15 @@ export default function ChatDisplay({
                     attachedFile: initialPrompt.fileDataUrl,
                 });
                 
+                const userMessage: Message = { role: 'user', content: initialPrompt.prompt };
+
                 if (result.questions.length > 0) {
                     const allQuestions = result.questions.join('\n');
-                    setMessages(prev => [...prev, { role: 'assistant', content: allQuestions }]);
+                    setMessages([userMessage, { role: 'assistant', content: allQuestions }]);
                     setHasAskedQuestions(true);
                 } else {
                     // No questions needed, generate itinerary directly
-                    setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
+                    setMessages([userMessage, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
                     await generateItinerary(initialPrompt.prompt);
                 }
 
@@ -75,7 +76,7 @@ export default function ChatDisplay({
           getQuestions();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialPrompt, onError]);
+    }, [initialPrompt]);
 
     const generateItinerary = async (fullPrompt: string) => {
         setIsGenerating(true);
