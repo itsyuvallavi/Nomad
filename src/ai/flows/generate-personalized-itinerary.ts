@@ -102,7 +102,7 @@ const prompt = ai.definePrompt({
   Attached file: {{media url=attachedFile}}
   {{/if}}
 
-  Today's date is ${new Date().toLocaleDateString()}. Make sure the dates in the itinerary are correct based on the user's travel dates.
+  Make sure the dates in the itinerary are correct based on the user's travel dates.
 
   Incorporate coworking spaces, cafes with reliable WiFi, and local nomad community events into the itinerary.
 
