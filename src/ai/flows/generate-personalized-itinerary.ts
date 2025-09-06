@@ -92,7 +92,7 @@ const prompt = ai.definePrompt({
   **CRITICAL RULES:**
   1.  **Handle Multiple Destinations:** If the user requests a trip to multiple destinations (e.g., "one week in Lisbon and one week in Porto"), you MUST create a single, continuous itinerary that covers all requested locations. The 'destination' field in the output should reflect this (e.g., "Lisbon & Porto, Portugal").
   2.  **Select Specific Places:** You MUST choose real, specific locations for ALL activities. This includes a hotel for the stay, coworking spaces, restaurants, and points of interest. Provide a full, real address for each location. Do not use generic placeholders.
-  3.  **Default Budget:** If the user does NOT specify a budget, you MUST assume a total daily budget of $500. This budget must cover everything for the day: the hotel, three meals, transportation, and all activities. You are responsible for selecting places that fit within this budget.
+  3.  **Default Budget:** If the user does NOT specify a budget, you MUST assume a total daily budget of $500 (USD). This budget must cover everything for the day: the hotel, three meals, transportation, and all activities. You are responsible for selecting places that fit within this budget.
   4.  **Use Tools:** You MUST use the getWeatherForecast tool to check the weather for each day of the trip and plan activities accordingly (e.g., indoor activities for rainy days). Use the decideOnEventOrLocation tool to determine if a potential activity aligns with the user's preferences.
   5.  **Minimal Text:** Keep all descriptions for activities and quick tips extremely short and to the point.
   6.  **Hotel First:** The first activity for Day 1 should always be "Accommodation" and should be the check-in at the selected hotel.

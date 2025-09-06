@@ -28,12 +28,10 @@ export default function ChatDisplay({
     onError,
 }: ChatDisplayProps) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [clarifyingQuestions, setClarifyingQuestions] = useState<string[]>([]);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [answers, setAnswers] = useState<string[]>([]);
     const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [hasAskedQuestions, setHasAskedQuestions] = useState(false);
 
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -54,11 +52,13 @@ export default function ChatDisplay({
                 });
                 
                 if (result.questions.length > 0) {
-                    setClarifyingQuestions(result.questions);
-                    setMessages(prev => [...prev, { role: 'assistant', content: result.questions[0] }]);
+                    const allQuestions = result.questions.join('\n');
+                    setMessages(prev => [...prev, { role: 'assistant', content: allQuestions }]);
+                    setHasAskedQuestions(true);
                 } else {
                     // No questions needed, generate itinerary directly
-                    await generateItinerary();
+                    setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
+                    await generateItinerary(initialPrompt.prompt);
                 }
 
             } catch (e) {
@@ -71,10 +71,8 @@ export default function ChatDisplay({
         getQuestions();
     }, [initialPrompt, onError]);
 
-    const generateItinerary = async () => {
+    const generateItinerary = async (fullPrompt: string) => {
         setIsGenerating(true);
-        const fullPrompt = [initialPrompt.prompt, ...answers].join('\n\n');
-        
         try {
             const itinerary = await generatePersonalizedItinerary({
                 prompt: fullPrompt,
@@ -93,20 +91,13 @@ export default function ChatDisplay({
         e.preventDefault();
         if (!userInput.trim()) return;
 
-        const newAnswers = [...answers, userInput];
-        setAnswers(newAnswers);
         setMessages(prev => [...prev, { role: 'user', content: userInput }]);
+        
+        const fullPrompt = `${initialPrompt.prompt}\n\nHere is the additional information you requested:\n${userInput}`;
+        
+        setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
         setUserInput('');
-
-        if (currentQuestionIndex < clarifyingQuestions.length - 1) {
-            const nextQuestionIndex = currentQuestionIndex + 1;
-            setCurrentQuestionIndex(nextQuestionIndex);
-            setMessages(prev => [...prev, { role: 'assistant', content: clarifyingQuestions[nextQuestionIndex] }]);
-        } else {
-            // Last question answered, generate itinerary
-            setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
-            await generateItinerary();
-        }
+        await generateItinerary(fullPrompt);
     };
     
     if (isGenerating) {
@@ -129,7 +120,7 @@ export default function ChatDisplay({
                                     <Bot size={20} className="text-white" />
                                 </div>
                             )}
-                            <div className={`rounded-lg px-4 py-2 text-white max-w-[80%] ${msg.role === 'user' ? 'bg-blue-600' : 'bg-slate-700'}`}>
+                            <div className={`rounded-lg px-4 py-2 text-white max-w-[80%] whitespace-pre-line ${msg.role === 'user' ? 'bg-blue-600' : 'bg-slate-700'}`}>
                                 <p className="text-sm">{msg.content}</p>
                             </div>
                             {msg.role === 'user' && (
@@ -160,7 +151,7 @@ export default function ChatDisplay({
                         onChange={(e) => setUserInput(e.target.value)}
                         placeholder="Type your answer..."
                         className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-                        disabled={isLoading || currentQuestionIndex >= clarifyingQuestions.length}
+                        disabled={isLoading || !hasAskedQuestions}
                     />
                     <Button type="submit" size="icon" className="bg-slate-700 hover:bg-slate-600 text-white" disabled={isLoading || !userInput.trim()}>
                         <ArrowUp size={20} />
