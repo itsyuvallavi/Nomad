@@ -51,10 +51,26 @@ The application uses Firebase Genkit with Google Gemini for AI processing. All A
 - **Schemas** (`src/ai/schemas.ts`): Zod schemas defining structured outputs for AI responses
 - **Configuration** (`src/ai/genkit.ts`): Genkit and Gemini model setup
 
+#### Information Gathering Strategy
+The AI uses a streamlined approach to gather information:
+
+**Essential Information (AI will ask if missing):**
+- Trip duration/length (e.g., "5 days", "2 weeks")
+- Travel dates (specific or flexible like "mid-January")
+- Destination(s)
+- Origin/departure location
+
+**Smart Defaults (AI won't ask - applies automatically):**
+- Budget: Moderate ($150-200/day per person)
+- Activities: Mix of highlights, culture, food, sights
+- Travel style: Balanced comfort/adventure
+- Accommodation: Mid-range hotels/Airbnbs
+
 When modifying AI functionality:
 1. Update relevant flow in `src/ai/flows/`
 2. Ensure schema compliance in `src/ai/schemas.ts`
 3. Test using `npm run genkit:dev` to access the Genkit UI
+4. Keep questions minimal - only ask for essential missing info
 
 ### Application State Flow
 The main application (`src/app/page.tsx`) manages three primary views:

@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { History, Trash2 } from 'lucide-react';
+import { History, Trash2, MessageSquare } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -74,14 +75,13 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
           onSubmit={handleInitialPrompt}
         />
         {recentSearches.length > 0 && (
-          <div className="max-w-2xl mx-auto mt-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-3">
-               <History size={14} className="text-slate-400" />
-               <h3 className="text-slate-400 text-sm font-medium">Recent Searches</h3>
+          <div className="max-w-2xl mx-auto mt-6">
+            <div className="flex items-center justify-between mb-3 px-1">
+               <h3 className="text-slate-300 text-base font-medium">Recent Chat</h3>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-500 hover:text-white">
-                      <Trash2 size={14} />
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500 hover:text-white">
+                      <Trash2 size={16} />
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent className="bg-slate-800 border-slate-700 text-white">
@@ -100,15 +100,17 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                   </AlertDialogContent>
                 </AlertDialog>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {recentSearches.map((search) => (
                 <Card
                   key={search.id}
                   onClick={() => handleRecentSearchClick(search)}
-                  className="bg-slate-700/50 hover:bg-slate-700 border-slate-700 cursor-pointer text-left"
+                  className="bg-slate-800/60 hover:bg-slate-700/80 border-slate-700 cursor-pointer text-left transition-colors"
                 >
-                  <CardContent className="p-3">
-                    <p className="font-semibold text-white truncate text-sm">{search.prompt}</p>
+                  <CardContent className="p-4 flex flex-col h-full">
+                     <MessageSquare size={20} className="text-slate-400 mb-3" />
+                     <p className="font-medium text-white text-sm flex-1 leading-snug line-clamp-3">{search.prompt || 'New chat'}</p>
+                     <p className="text-slate-500 text-xs mt-3">{formatDistanceToNow(new Date(search.id), { addSuffix: true })}</p>
                   </CardContent>
                 </Card>
               ))}

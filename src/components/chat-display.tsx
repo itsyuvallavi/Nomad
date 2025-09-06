@@ -44,29 +44,48 @@ export default function ChatDisplay({
     }, [messages]);
 
     useEffect(() => {
+        let mounted = true;
+        let initialized = false;
+        
         const getQuestions = async () => {
+            if (!mounted || initialized) return;
+            initialized = true;
+            
             setIsLoading(true);
             try {
+                console.log('[ChatDisplay] Analyzing initial prompt:', initialPrompt.prompt);
                 const result = await analyzeInitialPrompt({
                     prompt: initialPrompt.prompt,
                     attachedFile: initialPrompt.fileDataUrl,
                 });
                 
-                if (result.questions.length > 0) {
-                    const allQuestions = result.questions.join('\n');
+                if (!mounted) return;
+                
+                console.log('[ChatDisplay] Received questions:', result.questions);
+                
+                // Filter out empty or whitespace-only questions
+                const validQuestions = result.questions.filter(q => q && q.trim().length > 0);
+                
+                if (validQuestions.length > 0) {
+                    const allQuestions = validQuestions.join('\n');
                     setMessages(prev => [...prev, { role: 'assistant', content: allQuestions }]);
                     setHasAskedQuestions(true);
                 } else {
                     // No questions needed, generate itinerary directly
+                    console.log('[ChatDisplay] No questions needed, generating itinerary directly');
                     setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
                     await generateItinerary(initialPrompt.prompt);
                 }
 
             } catch (e) {
-                console.error(e);
-                onError("Sorry, I had trouble understanding your request. Please try again.");
+                console.error('[ChatDisplay] Error in getQuestions:', e);
+                if (mounted) {
+                    onError("Sorry, I had trouble understanding your request. Please try again.");
+                }
             } finally {
-                setIsLoading(false);
+                if (mounted) {
+                    setIsLoading(false);
+                }
             }
         };
 
@@ -74,19 +93,25 @@ export default function ChatDisplay({
             setMessages([{ role: 'user', content: initialPrompt.prompt }]);
             getQuestions();
         }
+        
+        return () => {
+            mounted = false;
+        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const generateItinerary = async (fullPrompt: string) => {
+        console.log('[ChatDisplay] Starting itinerary generation');
         setIsGenerating(true);
         try {
             const itinerary = await generatePersonalizedItinerary({
                 prompt: fullPrompt,
                 attachedFile: initialPrompt.fileDataUrl,
             });
+            console.log('[ChatDisplay] Itinerary generated successfully');
             onItineraryGenerated(itinerary);
         } catch (e) {
-            console.error(e);
+            console.error('[ChatDisplay] Error generating itinerary:', e);
             onError("I'm sorry, there was an error creating your itinerary. Please try again.");
         } finally {
             setIsGenerating(false);

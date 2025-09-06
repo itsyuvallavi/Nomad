@@ -46,16 +46,23 @@ const prompt = ai.definePrompt({
   name: 'analyzeInitialPrompt',
   input: {schema: AnalyzeInitialPromptInputSchema},
   output: {schema: AnalyzeInitialPromptOutputSchema},
-  prompt: `You are a helpful travel assistant. Your first job is to analyze a user's initial request and determine what information is missing.
+  prompt: `You are a helpful travel assistant. Your first job is to analyze a user's initial request and determine what ESSENTIAL information is missing.
 
-  You need to gather the following details to plan a trip:
-  - Destination(s)
-  - Budget
-  - Travel Dates (start and end)
-  - Travel style (e.g., business, pleasure, backpacking, luxury)
-  - Key activities or interests (e.g., hiking, museums, nightlife)
+  ESSENTIAL information needed (MUST ASK if missing):
+  - Trip duration/length (e.g., "5 days", "2 weeks")
+  - Travel dates (can be specific dates or flexible like "mid-January", "next month")
+  - Destination (where they're going)
+  - Origin/departure location (where they're traveling from)
+  - How many of you will be traveling with? (How many people the trip is for)
 
-  Analyze the user's request below and generate a list of questions to ask them to get the missing information. Frame the questions in a friendly, conversational way.
+  OPTIONAL information (DO NOT ASK - use defaults if not provided):
+  - Budget: Default to moderate ($150-200/day per person)
+  - Activities/interests: Default to mix of popular highlights, culture, food, and sights
+  - Travel style: Default to balanced comfort/adventure
+  - Accommodation: Default to mid-range hotels/Airbnbs
+  - Currency Will be USD by default, unless specified otherwise.
+
+  Analyze the user's request below and ONLY ask for the ESSENTIAL missing information. Keep questions minimal and conversational.
 
   User's request: {{{prompt}}}
 
@@ -65,8 +72,12 @@ const prompt = ai.definePrompt({
   {{/if}}
 
   CRITICAL RULES:
-  1. Only ask for the information that is actually missing. If the user has already provided a detail, do not ask for it again.
-  2. DO NOT ask for the currency. The default is USD unless the user specifies otherwise in their prompt.
+  1. ONLY ask for ESSENTIAL information that is missing (duration, dates, destination, origin)
+  2. DO NOT ask about budget, activities, travel style, or accommodation unless the user specifically mentions wanting help with these
+  3. If ALL essential information is provided, return an empty questions array
+  4. Each question must be a non-empty string
+  5. Keep questions brief and friendly - aim for 1-2 questions maximum
+  6. If the user provides a vague duration like "a week" or "few days", that's sufficient - don't ask for exact numbers
   `,
 });
 
@@ -77,14 +88,20 @@ const analyzeInitialPromptFlow = ai.defineFlow(
     outputSchema: AnalyzeInitialPromptOutputSchema,
   },
   async (input) => {
-    console.log('Analyzing initial prompt:', input.prompt);
+    console.log('[AI Flow] Analyzing initial prompt:', input.prompt);
     const {output} = await prompt(input);
     
     if (!output) {
+        console.log('[AI Flow] No output from AI, returning error question');
         return { questions: ["I'm sorry, I had trouble understanding your request. Could you please provide more details about your trip?"] };
     }
     
-    console.log('Generated questions:', output.questions);
-    return output;
+    // Filter out empty or whitespace-only questions
+    const validQuestions = (output.questions || []).filter(
+      q => q && typeof q === 'string' && q.trim().length > 0
+    );
+    
+    console.log('[AI Flow] Generated questions:', validQuestions);
+    return { questions: validQuestions };
   }
 );
