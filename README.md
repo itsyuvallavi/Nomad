@@ -25,3 +25,20 @@ Building a travel assistant like this involves several key technological compone
 4.  **Personalization Engine:** To tailor recommendations based on user preferences and previous interactions.
 5.  **User Interface (UI):** A combination of a chat interface for conversation and interactive "trip cards" or displays for visual information.
 6.  **Backend Services:** To manage user sessions, orchestrate calls to external APIs, and handle the core application logic.
+
+### Application Flow
+
+The user experience will follow a specific flow inspired by the Layla app:
+
+1.  **Initial Interaction:** The user is first presented with a simple chat interface.
+2.  **Conversational Information Gathering:** The AI will proactively ask clarifying questions to gather all the necessary details to plan a trip. This includes, but is not limited to:
+    *   Budget
+    *   Travel Dates & Flexibility
+    *   Departure & Arrival Cities
+    *   One-way or Round-trip
+    *   Travel style (e.g., business, pleasure, backpacking)
+    *   Preferred activities and interests
+3.  **Split-View Results:** Once the AI has sufficient information, the interface will transform into a three-column layout:
+    *   **Chat Column:** The chat interface remains visible, allowing the user to make continuous adjustments and edits to their itinerary.
+    *   **Itinerary Column:** A detailed, day-by-day itinerary is displayed.
+    *   **Map Column:** An interactive map visualizes the travel route, including pins for hotels, restaurants, and points of interest.
