@@ -21,7 +21,7 @@ import type { FormValues } from '@/components/itinerary-form';
 import type { RecentItinerary } from '@/app/page';
 
 type StartItineraryProps = {
-    onItineraryRequest: (values: FormValues) => void;
+    onItineraryRequest: (values: FormValues, recentItinerary?: RecentItinerary) => void;
 };
 
 
@@ -47,8 +47,7 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
   };
 
   const handleRecentItineraryClick = (recentItinerary: RecentItinerary) => {
-    // This needs to be handled in the parent component now
-    console.log("Recent itinerary clicked, but handler needs to be in parent", recentItinerary);
+    onItineraryRequest({ prompt: '' }, recentItinerary);
   }
 
   const handleClearHistory = () => {

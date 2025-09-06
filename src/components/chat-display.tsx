@@ -7,7 +7,7 @@ import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-
 import ItineraryLoader from './itinerary-loader';
 import type { FormValues } from './itinerary-form';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import { ArrowUp, Bot, User } from 'lucide-react';
+import { ArrowUp, Bot, User, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
@@ -20,12 +20,14 @@ type ChatDisplayProps = {
     initialPrompt: FormValues;
     onItineraryGenerated: (itinerary: GeneratePersonalizedItineraryOutput) => void;
     onError: (error: string) => void;
+    onReturn: () => void;
 };
 
 export default function ChatDisplay({
     initialPrompt,
     onItineraryGenerated,
     onError,
+    onReturn
 }: ChatDisplayProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [userInput, setUserInput] = useState('');
@@ -111,7 +113,12 @@ export default function ChatDisplay({
     return (
         <main className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col">
-                <h2 className="text-white font-medium text-lg mb-4">Chat</h2>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-white font-medium text-lg">Chat</h2>
+                    <Button variant="ghost" onClick={onReturn} className="text-slate-300 hover:text-white hover:bg-slate-700">
+                        <ArrowLeft className="mr-2 h-4 w-4" /> New Search
+                    </Button>
+                </div>
                  <div ref={chatContainerRef} className="flex-1 space-y-4 overflow-y-auto pr-2">
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex items-start gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}>

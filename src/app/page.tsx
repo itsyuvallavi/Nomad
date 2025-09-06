@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import ItineraryDisplay from '@/components/itinerary-display';
 import { Settings } from 'lucide-react';
@@ -28,14 +27,18 @@ export interface RecentItinerary {
 
 export default function Home() {
   const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isChatting, setIsChatting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   
-  const handleItineraryRequest = async (values: FormValues) => {
-    setIsChatting(true);
-    setInitialPrompt(values);
+  const handleItineraryRequest = (values: FormValues, recentItinerary?: RecentItinerary) => {
+    if (recentItinerary) {
+      setItinerary(recentItinerary.itinerary);
+      setIsChatting(false);
+    } else {
+      setIsChatting(true);
+      setInitialPrompt(values);
+    }
   };
   
   const handleReturn = () => {
@@ -58,6 +61,7 @@ export default function Home() {
                 setError(error);
                 setIsChatting(false);
               }}
+              onReturn={handleReturn}
             />
         )
     }
