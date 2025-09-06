@@ -76,7 +76,7 @@ export default function ChatDisplay({
           getQuestions();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialPrompt]);
+    }, []);
 
     const generateItinerary = async (fullPrompt: string) => {
         setIsGenerating(true);
