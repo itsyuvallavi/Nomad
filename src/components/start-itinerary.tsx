@@ -19,10 +19,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import ItineraryForm from '@/components/itinerary-form';
 import type { FormValues } from '@/components/itinerary-form';
-import type { RecentSearch } from '@/app/page';
+import type { RecentSearch, ChatState } from '@/app/page';
 
 type StartItineraryProps = {
-    onItineraryRequest: (values: FormValues) => void;
+    onItineraryRequest: (values: FormValues, chatState?: ChatState, searchId?: string) => void;
 };
 
 
@@ -49,7 +49,11 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
   };
 
   const handleRecentSearchClick = (search: RecentSearch) => {
-    onItineraryRequest({ prompt: search.prompt, fileDataUrl: search.fileDataUrl });
+    onItineraryRequest(
+      { prompt: search.prompt, fileDataUrl: search.fileDataUrl },
+      search.chatState,
+      search.id
+    );
   }
 
   const handleClearHistory = () => {
@@ -109,8 +113,8 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                 >
                   <CardContent className="p-4 flex flex-col h-full">
                      <MessageSquare size={20} className="text-slate-400 mb-3" />
-                     <p className="font-medium text-white text-sm flex-1 leading-snug line-clamp-3">{search.prompt || 'New chat'}</p>
-                     <p className="text-slate-500 text-xs mt-3">{formatDistanceToNow(new Date(search.id), { addSuffix: true })}</p>
+                     <p className="font-medium text-white text-sm flex-1 leading-snug line-clamp-3">{search.title || search.prompt || 'New chat'}</p>
+                     <p className="text-slate-500 text-xs mt-3">{formatDistanceToNow(new Date(search.lastUpdated || search.id), { addSuffix: true })}</p>
                   </CardContent>
                 </Card>
               ))}

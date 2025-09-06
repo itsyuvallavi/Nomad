@@ -10,7 +10,7 @@ import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { ArrowUp, Bot, User, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import type { RecentSearch } from '@/app/page';
+import type { RecentSearch, ChatState } from '@/app/page';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -19,6 +19,8 @@ type Message = {
 
 type ChatDisplayProps = {
     initialPrompt: FormValues;
+    savedChatState?: ChatState;
+    searchId?: string;
     onItineraryGenerated: (itinerary: GeneratePersonalizedItineraryOutput) => void;
     onError: (error: string) => void;
     onReturn: () => void;
@@ -26,15 +28,18 @@ type ChatDisplayProps = {
 
 export default function ChatDisplay({
     initialPrompt,
+    savedChatState,
+    searchId,
     onItineraryGenerated,
     onError,
-    onReturn
+    onReturn,
 }: ChatDisplayProps) {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>(savedChatState?.messages || []);
     const [userInput, setUserInput] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(!savedChatState);
     const [isGenerating, setIsGenerating] = useState(false);
-    const [hasAskedQuestions, setHasAskedQuestions] = useState(false);
+    const [hasAskedQuestions, setHasAskedQuestions] = useState(savedChatState?.hasAskedQuestions || false);
+    const currentSearchId = useRef(searchId || new Date().toISOString());
 
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,29 +47,71 @@ export default function ChatDisplay({
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    }, [messages]);
+        
+        // Save chat state whenever messages change
+        if (messages.length > 0) {
+            saveChatStateToStorage();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [messages, hasAskedQuestions]);
+    
+    const saveChatStateToStorage = () => {
+        try {
+            const storedSearches = localStorage.getItem('recentSearches');
+            const recentSearches: RecentSearch[] = storedSearches ? JSON.parse(storedSearches) : [];
+            
+            const existingIndex = recentSearches.findIndex(s => s.id === currentSearchId.current);
+            const chatState: ChatState = {
+                messages,
+                hasAskedQuestions,
+                isCompleted: false,
+                itinerary: undefined
+            };
+            
+            const searchEntry: RecentSearch = {
+                id: currentSearchId.current,
+                prompt: initialPrompt.prompt,
+                fileDataUrl: initialPrompt.fileDataUrl,
+                chatState,
+                title: messages.length > 1 ? initialPrompt.prompt.substring(0, 100) : initialPrompt.prompt,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            if (existingIndex >= 0) {
+                recentSearches[existingIndex] = searchEntry;
+            } else {
+                recentSearches.unshift(searchEntry);
+            }
+            
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches.slice(0, 5)));
+        } catch (e) {
+            console.error('Could not save chat state:', e);
+        }
+    };
 
     useEffect(() => {
         const getQuestions = async () => {
             setIsLoading(true);
             try {
-                console.log('[ChatDisplay] Analyzing initial prompt:', initialPrompt.prompt);
                 const result = await analyzeInitialPrompt({
                     prompt: initialPrompt.prompt,
                     attachedFile: initialPrompt.fileDataUrl,
                 });
                 
-                console.log('[ChatDisplay] Received questions:', result.questions);
-                
-                const validQuestions = result.questions.filter(q => q && q.trim().length > 0);
+                const validQuestions = (result.questions || []).filter(q => q && q.trim().length > 0);
                 
                 if (validQuestions.length > 0) {
-                    const allQuestions = validQuestions.join('\n');
-                    setMessages(prev => [...prev, { role: 'assistant', content: allQuestions }]);
+                    const questionMessage = validQuestions[0]; // Should be a single combined message
+                    setMessages([
+                        { role: 'user', content: initialPrompt.prompt },
+                        { role: 'assistant', content: questionMessage }
+                    ]);
                     setHasAskedQuestions(true);
                 } else {
-                    console.log('[ChatDisplay] No questions needed, generating itinerary directly');
-                    setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
+                    setMessages([
+                        { role: 'user', content: initialPrompt.prompt },
+                        { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }
+                    ]);
                     await generateItinerary(initialPrompt.prompt);
                 }
 
@@ -76,8 +123,15 @@ export default function ChatDisplay({
             }
         };
 
+        if (savedChatState && savedChatState.messages.length > 0) {
+            if (savedChatState.isCompleted && savedChatState.itinerary) {
+                onItineraryGenerated(savedChatState.itinerary);
+            }
+            setIsLoading(false);
+            return;
+        }
+        
         if (messages.length === 0) {
-            setMessages([{ role: 'user', content: initialPrompt.prompt }]);
             getQuestions();
         }
         
@@ -85,31 +139,42 @@ export default function ChatDisplay({
     }, []);
 
     const generateItinerary = async (fullPrompt: string) => {
-        console.log('[ChatDisplay] Starting itinerary generation');
         setIsGenerating(true);
         try {
             const itinerary = await generatePersonalizedItinerary({
                 prompt: fullPrompt,
                 attachedFile: initialPrompt.fileDataUrl,
             });
-            console.log('[ChatDisplay] Itinerary generated successfully');
             
-            // Save search to local storage after itinerary is generated
             try {
                 const storedSearches = localStorage.getItem('recentSearches');
-                const recentSearches: RecentSearch[] = storedSearches ? JSON.parse(storedSearches) : [];
-
-                const newSearch: RecentSearch = {
-                  id: new Date().toISOString(),
-                  prompt: itinerary.title, // Use itinerary title as the summary
-                  fileDataUrl: initialPrompt.fileDataUrl,
-                };
-
-                const updatedSearches = [newSearch, ...recentSearches.filter(item => item.prompt !== newSearch.prompt)].slice(0, 3);
+                let recentSearches: RecentSearch[] = storedSearches ? JSON.parse(storedSearches) : [];
                 
-                localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+                const existingIndex = recentSearches.findIndex(s => s.id === currentSearchId.current);
+                
+                const searchEntry: RecentSearch = {
+                    id: currentSearchId.current,
+                    prompt: initialPrompt.prompt,
+                    fileDataUrl: initialPrompt.fileDataUrl,
+                    chatState: {
+                      messages: [...messages, {role: 'assistant', content: "Here is your generated itinerary."}],
+                      hasAskedQuestions: true,
+                      isCompleted: true,
+                      itinerary,
+                    },
+                    title: itinerary.title || initialPrompt.prompt.substring(0, 100),
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                if (existingIndex >= 0) {
+                    recentSearches[existingIndex] = searchEntry;
+                } else {
+                    recentSearches.unshift(searchEntry);
+                }
+
+                localStorage.setItem('recentSearches', JSON.stringify(recentSearches.slice(0, 5)));
             } catch (e) {
-                console.error("Could not save recent search to localStorage", e);
+                console.error("Could not save completed search to localStorage", e);
             }
 
             onItineraryGenerated(itinerary);
@@ -125,11 +190,14 @@ export default function ChatDisplay({
         e.preventDefault();
         if (!userInput.trim()) return;
 
-        setMessages(prev => [...prev, { role: 'user', content: userInput }]);
-        
         const fullPrompt = `${initialPrompt.prompt}\n\nHere is the additional information you requested:\n${userInput}`;
         
-        setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
+        setMessages(prev => [
+            ...prev, 
+            { role: 'user', content: userInput },
+            { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }
+        ]);
+        
         setUserInput('');
         await generateItinerary(fullPrompt);
     };

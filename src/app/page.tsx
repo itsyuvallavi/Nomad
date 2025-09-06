@@ -18,10 +18,20 @@ import type { FormValues } from '@/components/itinerary-form';
 import ChatDisplay from '@/components/chat-display';
 
 
+export interface ChatState {
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  hasAskedQuestions: boolean;
+  isCompleted: boolean;
+  itinerary?: GeneratePersonalizedItineraryOutput;
+}
+
 export interface RecentSearch {
   id: string;
   prompt: string;
   fileDataUrl?: string;
+  chatState?: ChatState;
+  title?: string;
+  lastUpdated: string;
 }
 
 export default function Home() {
@@ -29,10 +39,14 @@ export default function Home() {
   const [isChatting, setIsChatting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
+  const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
+  const [currentSearchId, setCurrentSearchId] = useState<string | undefined>(undefined);
   
-  const handleItineraryRequest = (values: FormValues) => {
+  const handleItineraryRequest = (values: FormValues, chatState?: ChatState, searchId?: string) => {
     setIsChatting(true);
     setInitialPrompt(values);
+    setSavedChatState(chatState);
+    setCurrentSearchId(searchId);
   };
   
   const handleReturn = () => {
@@ -40,6 +54,8 @@ export default function Home() {
     setError(null);
     setIsChatting(false);
     setInitialPrompt(null);
+    setSavedChatState(undefined);
+    setCurrentSearchId(undefined);
   };
 
   const renderMainContent = () => {
@@ -47,6 +63,8 @@ export default function Home() {
         return (
             <ChatDisplay
               initialPrompt={initialPrompt!}
+              savedChatState={savedChatState}
+              searchId={currentSearchId}
               onItineraryGenerated={(itinerary) => {
                 setItinerary(itinerary);
                 setIsChatting(false);

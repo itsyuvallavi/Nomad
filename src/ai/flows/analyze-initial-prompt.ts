@@ -30,7 +30,7 @@ export type AnalyzeInitialPromptInput = z.infer<
 >;
 
 const AnalyzeInitialPromptOutputSchema = z.object({
-    questions: z.array(z.string()).describe("A list of questions to ask the user to gather the necessary information for planning their trip.")
+    questions: z.array(z.string()).describe("A single cohesive message containing all questions needed. This should be ONE string in the array, not multiple.")
 });
 
 export type AnalyzeInitialPromptOutput = z.infer<typeof AnalyzeInitialPromptOutputSchema>;
@@ -53,16 +53,16 @@ const prompt = ai.definePrompt({
   - Travel dates (can be specific dates or flexible like "mid-January", "next month")
   - Destination (where they're going)
   - Origin/departure location (where they're traveling from)
-  - How many of you will be traveling with? (How many people the trip is for)
+  - Number of travelers (how many people the trip is for)
 
   OPTIONAL information (DO NOT ASK - use defaults if not provided):
   - Budget: Default to moderate ($150-200/day per person)
   - Activities/interests: Default to mix of popular highlights, culture, food, and sights
   - Travel style: Default to balanced comfort/adventure
   - Accommodation: Default to mid-range hotels/Airbnbs
-  - Currency Will be USD by default, unless specified otherwise.
+  - Currency: Will be USD by default, unless specified otherwise
 
-  Analyze the user's request below and ONLY ask for the ESSENTIAL missing information. Keep questions minimal and conversational.
+  Analyze the user's request below and ONLY ask for the ESSENTIAL missing information.
 
   User's request: {{{prompt}}}
 
@@ -72,12 +72,18 @@ const prompt = ai.definePrompt({
   {{/if}}
 
   CRITICAL RULES:
-  1. ONLY ask for ESSENTIAL information that is missing (duration, dates, destination, origin)
-  2. DO NOT ask about budget, activities, travel style, or accommodation unless the user specifically mentions wanting help with these
-  3. If ALL essential information is provided, return an empty questions array
-  4. Each question must be a non-empty string
-  5. Keep questions brief and friendly - aim for 1-2 questions maximum
-  6. If the user provides a vague duration like "a week" or "few days", that's sufficient - don't ask for exact numbers
+  1. Return ONLY ONE string in the questions array that contains ALL the questions you need to ask.
+  2. Combine all questions into a single, friendly, conversational message.
+  3. If ALL essential information is provided, return an empty array [].
+  4. DO NOT return multiple separate question strings - always combine into ONE message.
+  5. Keep the message brief and natural.
+  6. If the user provides a vague duration like "a week" or "few days", that's sufficient.
+  
+  Example of CORRECT output:
+  questions: ["To help plan your trip to Paris, I'll need to know: How long would you like to stay? When are you planning to travel? Where will you be departing from? And how many people will be traveling?"]
+  
+  Example of INCORRECT output (DO NOT DO THIS):
+  questions: ["How long will you be staying?", "What are your travel dates?", "Where are you departing from?"]
   `,
 });
 
@@ -88,11 +94,9 @@ const analyzeInitialPromptFlow = ai.defineFlow(
     outputSchema: AnalyzeInitialPromptOutputSchema,
   },
   async (input) => {
-    console.log('[AI Flow] Analyzing initial prompt:', input.prompt);
     const {output} = await prompt(input);
     
     if (!output) {
-        console.log('[AI Flow] No output from AI, returning error question');
         return { questions: ["I'm sorry, I had trouble understanding your request. Could you please provide more details about your trip?"] };
     }
     
@@ -101,7 +105,6 @@ const analyzeInitialPromptFlow = ai.defineFlow(
       q => q && typeof q === 'string' && q.trim().length > 0
     );
     
-    console.log('[AI Flow] Generated questions:', validQuestions);
     return { questions: validQuestions };
   }
 );
