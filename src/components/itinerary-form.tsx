@@ -39,15 +39,11 @@ export type FormValues = {
 type ItineraryFormProps = {
   onSubmit: (values: FormValues) => void;
   isSubmitting: boolean;
-  promptValue: string;
-  setPromptValue: (value: string) => void;
 };
 
 export default function ItineraryForm({
   onSubmit,
   isSubmitting,
-  promptValue,
-  setPromptValue,
 }: ItineraryFormProps) {
   const [placeholder, setPlaceholder] = useState(placeholderTexts[0]);
   const [textIndex, setTextIndex] = useState(0);
@@ -87,10 +83,6 @@ export default function ItineraryForm({
   });
 
   const attachedFile = form.watch('file');
-
-  useEffect(() => {
-    form.setValue('prompt', promptValue);
-  }, [promptValue, form]);
   
   const currentPromptValue = useWatch({
       control: form.control,
@@ -112,6 +104,7 @@ export default function ItineraryForm({
       fileDataUrl = await fileToDataURL(values.file);
     }
     onSubmit({ ...values, fileDataUrl });
+    form.reset();
   };
 
 
@@ -171,10 +164,6 @@ export default function ItineraryForm({
                         className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         autoComplete="off"
                         {...field}
-                        onChange={(e) => {
-                            field.onChange(e);
-                            setPromptValue(e.target.value);
-                        }}
                       />
                     </div>
                   </FormControl>

@@ -28,7 +28,6 @@ type StartItineraryProps = {
 export default function StartItinerary({ onItineraryRequest }: StartItineraryProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [recentItineraries, setRecentItineraries] = useState<RecentItinerary[]>([]);
-  const [promptValue, setPromptValue] = useState('');
 
   useEffect(() => {
     try {
@@ -43,11 +42,7 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
 
   const handleInitialPrompt = async (values: FormValues) => {
     setIsLoading(true);
-    setPromptValue(''); // Clear input after submission
-    
-    // This will switch the view to the chat display
     onItineraryRequest(values);
-
     setIsLoading(false);
   };
 
@@ -77,8 +72,6 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
         <ItineraryForm
           isSubmitting={isLoading}
           onSubmit={handleInitialPrompt}
-          promptValue={promptValue}
-          setPromptValue={setPromptValue}
         />
         {recentItineraries.length > 0 && (
           <div className="max-w-2xl mx-auto mt-6 text-center">

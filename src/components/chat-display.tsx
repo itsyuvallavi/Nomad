@@ -1,14 +1,23 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { analyzeInitialPrompt } from '@/ai/flows/analyze-initial-prompt';
+import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
 import ItineraryLoader from './itinerary-loader';
 import type { FormValues } from './itinerary-form';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import { ArrowUp, Bot, User } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+
+type Message = {
+  role: 'user' | 'assistant';
+  content: string;
+};
 
 type ChatDisplayProps = {
-    initialPrompt: FormValues | null;
+    initialPrompt: FormValues;
     onItineraryGenerated: (itinerary: GeneratePersonalizedItineraryOutput) => void;
     onError: (error: string) => void;
 };
@@ -18,38 +27,145 @@ export default function ChatDisplay({
     onItineraryGenerated,
     onError,
 }: ChatDisplayProps) {
-    const [questions, setQuestions] = useState<string[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [clarifyingQuestions, setClarifyingQuestions] = useState<string[]>([]);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [answers, setAnswers] = useState<string[]>([]);
+    const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+
+     useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     useEffect(() => {
-        if (initialPrompt) {
-            const getQuestions = async () => {
-                setIsLoading(true);
-                try {
-                    const result = await analyzeInitialPrompt({
-                        prompt: initialPrompt.prompt,
-                        attachedFile: initialPrompt.fileDataUrl,
-                    });
-                    setQuestions(result.questions);
-                } catch (e) {
-                    console.error(e);
-                    onError("Sorry, I had trouble understanding your request. Please try again.");
-                } finally {
-                    setIsLoading(false);
+        const getQuestions = async () => {
+            setMessages([{ role: 'user', content: initialPrompt.prompt }]);
+            setIsLoading(true);
+            try {
+                const result = await analyzeInitialPrompt({
+                    prompt: initialPrompt.prompt,
+                    attachedFile: initialPrompt.fileDataUrl,
+                });
+                
+                if (result.questions.length > 0) {
+                    setClarifyingQuestions(result.questions);
+                    setMessages(prev => [...prev, { role: 'assistant', content: result.questions[0] }]);
+                } else {
+                    // No questions needed, generate itinerary directly
+                    await generateItinerary();
                 }
-            };
-            getQuestions();
-        }
+
+            } catch (e) {
+                console.error(e);
+                onError("Sorry, I had trouble understanding your request. Please try again.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        getQuestions();
     }, [initialPrompt, onError]);
+
+    const generateItinerary = async () => {
+        setIsGenerating(true);
+        const fullPrompt = [initialPrompt.prompt, ...answers].join('\n\n');
+        
+        try {
+            const itinerary = await generatePersonalizedItinerary({
+                prompt: fullPrompt,
+                attachedFile: initialPrompt.fileDataUrl,
+            });
+            onItineraryGenerated(itinerary);
+        } catch (e) {
+            console.error(e);
+            onError("I'm sorry, there was an error creating your itinerary. Please try again.");
+        } finally {
+            setIsGenerating(false);
+        }
+    }
+
+    const handleUserInputSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!userInput.trim()) return;
+
+        const newAnswers = [...answers, userInput];
+        setAnswers(newAnswers);
+        setMessages(prev => [...prev, { role: 'user', content: userInput }]);
+        setUserInput('');
+
+        if (currentQuestionIndex < clarifyingQuestions.length - 1) {
+            const nextQuestionIndex = currentQuestionIndex + 1;
+            setCurrentQuestionIndex(nextQuestionIndex);
+            setMessages(prev => [...prev, { role: 'assistant', content: clarifyingQuestions[nextQuestionIndex] }]);
+        } else {
+            // Last question answered, generate itinerary
+            setMessages(prev => [...prev, { role: 'assistant', content: "Great, I have all the information I need. I'm now generating your personalized itinerary..." }]);
+            await generateItinerary();
+        }
+    };
+    
+    if (isGenerating) {
+      return (
+         <main className="flex-1 flex items-center justify-center p-6">
+            <ItineraryLoader />
+        </main>
+      )
+    }
 
     return (
         <main className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6">
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col">
                 <h2 className="text-white font-medium text-lg mb-4">Chat</h2>
-                {/* Chat interface will go here */}
-                <div className="text-slate-400">
-                    <p>Chat placeholder</p>
+                 <div ref={chatContainerRef} className="flex-1 space-y-4 overflow-y-auto pr-2">
+                    {messages.map((msg, index) => (
+                        <div key={index} className={`flex items-start gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+                             {msg.role === 'assistant' && (
+                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                    <Bot size={20} className="text-white" />
+                                </div>
+                            )}
+                            <div className={`rounded-lg px-4 py-2 text-white max-w-[80%] ${msg.role === 'user' ? 'bg-blue-600' : 'bg-slate-700'}`}>
+                                <p className="text-sm">{msg.content}</p>
+                            </div>
+                            {msg.role === 'user' && (
+                                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                    <User size={20} className="text-white" />
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                    {isLoading && (
+                         <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                <Bot size={20} className="text-white" />
+                            </div>
+                            <div className="rounded-lg px-4 py-2 text-white bg-slate-700">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse"></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
+                 <form onSubmit={handleUserInputSubmit} className="mt-4 flex items-center gap-2">
+                    <Input
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        placeholder="Type your answer..."
+                        className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                        disabled={isLoading || currentQuestionIndex >= clarifyingQuestions.length}
+                    />
+                    <Button type="submit" size="icon" className="bg-slate-700 hover:bg-slate-600 text-white" disabled={isLoading || !userInput.trim()}>
+                        <ArrowUp size={20} />
+                    </Button>
+                </form>
             </div>
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl flex items-center justify-center">
                 <ItineraryLoader />

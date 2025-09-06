@@ -36,10 +36,6 @@ export default function Home() {
   const handleItineraryRequest = async (values: FormValues) => {
     setIsChatting(true);
     setInitialPrompt(values);
-
-    // This is where we will handle the conversation flow.
-    // For now, it just shows the chat display.
-    // We will soon replace this with a call to the AI.
   };
   
   const handleReturn = () => {
@@ -53,7 +49,7 @@ export default function Home() {
     if (isChatting) {
         return (
             <ChatDisplay
-              initialPrompt={initialPrompt}
+              initialPrompt={initialPrompt!}
               onItineraryGenerated={(itinerary) => {
                 setItinerary(itinerary);
                 setIsChatting(false);
