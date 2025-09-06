@@ -70,7 +70,11 @@ export default function ChatDisplay({
                 setIsLoading(false);
             }
         };
-        getQuestions();
+        // The check on messages.length ensures this only runs once on initial load
+        if (messages.length === 0) {
+          getQuestions();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialPrompt, onError]);
 
     const generateItinerary = async (fullPrompt: string) => {

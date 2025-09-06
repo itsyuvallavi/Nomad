@@ -50,7 +50,7 @@ const prompt = ai.definePrompt({
 
   You need to gather the following details to plan a trip:
   - Destination(s)
-  - Budget (in a specific currency)
+  - Budget
   - Travel Dates (start and end)
   - Travel style (e.g., business, pleasure, backpacking, luxury)
   - Key activities or interests (e.g., hiking, museums, nightlife)
@@ -64,7 +64,9 @@ const prompt = ai.definePrompt({
   Attached file: {{media url=attachedFile}}
   {{/if}}
 
-  CRITICAL: Only ask for the information that is actually missing. If the user has already provided a detail, do not ask for it again.
+  CRITICAL RULES:
+  1. Only ask for the information that is actually missing. If the user has already provided a detail, do not ask for it again.
+  2. DO NOT ask for the currency. The default is USD unless the user specifies otherwise in their prompt.
   `,
 });
 
