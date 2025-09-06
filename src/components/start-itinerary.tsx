@@ -18,15 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import ItineraryForm from '@/components/itinerary-form';
 import type { FormValues } from '@/components/itinerary-form';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import { analyzeInitialPrompt } from '@/ai/flows/analyze-initial-prompt';
-
-interface RecentItinerary {
-  id: string;
-  title: string;
-  destination: string;
-  itinerary: GeneratePersonalizedItineraryOutput;
-}
+import type { RecentItinerary } from '@/app/page';
 
 type StartItineraryProps = {
     onItineraryRequest: (values: FormValues) => void;
@@ -52,27 +44,11 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
   const handleInitialPrompt = async (values: FormValues) => {
     setIsLoading(true);
     setPromptValue(''); // Clear input after submission
+    
+    // This will switch the view to the chat display
+    onItineraryRequest(values);
 
-    try {
-      const result = await analyzeInitialPrompt({
-        prompt: values.prompt,
-        attachedFile: values.fileDataUrl,
-      });
-
-      console.log('AI needs more info, questions:', result.questions);
-      // For now, we'll just log the questions.
-      // In the next step, we will build the UI to ask these questions.
-      
-      // As a temporary measure, let's just call the old flow
-      // to keep the app working.
-      await onItineraryRequest(values);
-
-
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(false);
   };
 
   const handleRecentItineraryClick = (recentItinerary: RecentItinerary) => {

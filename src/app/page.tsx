@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import ItineraryDisplay from '@/components/itinerary-display';
@@ -14,12 +14,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import ItineraryLoader from '@/components/itinerary-loader';
 import StartItinerary from '@/components/start-itinerary';
 import type { FormValues } from '@/components/itinerary-form';
+import ChatDisplay from '@/components/chat-display';
 
 
-interface RecentItinerary {
+export interface RecentItinerary {
   id: string;
   title: string;
   destination: string;
@@ -29,46 +29,41 @@ interface RecentItinerary {
 export default function Home() {
   const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isChatting, setIsChatting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   
   const handleItineraryRequest = async (values: FormValues) => {
-    setIsLoading(true);
-    setError(null);
+    setIsChatting(true);
+    setInitialPrompt(values);
 
-    try {
-      const result = await generatePersonalizedItinerary({
-        prompt: values.prompt,
-        attachedFile: values.fileDataUrl,
-      });
-
-      if (result.itinerary && result.itinerary.length > 0) {
-        setItinerary(result);
-        
-      } else {
-        setError(
-          'Failed to generate itinerary. The AI may be busy or the request could not be processed. Please try again.'
-        );
-      }
-    } catch (e) {
-      console.error(e);
-      setError('An unexpected error occurred. Please check the console and try again later.');
-    } finally {
-      setIsLoading(false);
-    }
+    // This is where we will handle the conversation flow.
+    // For now, it just shows the chat display.
+    // We will soon replace this with a call to the AI.
   };
   
   const handleReturn = () => {
     setItinerary(null);
     setError(null);
+    setIsChatting(false);
+    setInitialPrompt(null);
   };
 
   const renderMainContent = () => {
-    if (isLoading) {
-      return (
-        <main className="flex-1 flex flex-col items-center justify-center">
-          <ItineraryLoader />
-        </main>
-      );
+    if (isChatting) {
+        return (
+            <ChatDisplay
+              initialPrompt={initialPrompt}
+              onItineraryGenerated={(itinerary) => {
+                setItinerary(itinerary);
+                setIsChatting(false);
+              }}
+              onError={(error) => {
+                setError(error);
+                setIsChatting(false);
+              }}
+            />
+        )
     }
 
     if (error) {
