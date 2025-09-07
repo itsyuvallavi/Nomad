@@ -36,6 +36,9 @@ export interface RecentSearch {
 export type View = 'start' | 'chat';
 
 export default function Home() {
+  console.log('Nomad Navigator loaded');
+  console.log('Browser console working - logs will appear here during itinerary generation');
+  
   const [currentView, setCurrentView] = useState<View>('start');
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);

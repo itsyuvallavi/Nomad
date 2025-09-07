@@ -58,43 +58,19 @@ export function validateAPIKeys(): APIKeysConfig {
  * Logs API key validation status
  */
 export function logAPIKeyStatus(config: APIKeysConfig): void {
-  console.log('='.repeat(60));
-  console.log('🔑 API Key Validation Status:');
-  console.log('='.repeat(60));
+  // Only log critical errors
+  if (!config.gemini.isValid) {
+    console.error('❌ CRITICAL: Gemini API key is missing. Add GEMINI_API_KEY to your .env file.');
+  }
   
-  const keys = [
-    { name: 'Gemini (AI)', status: config.gemini, required: true },
-    { name: 'Foursquare (Places)', status: config.foursquare, required: false },
-    { name: 'OpenWeather (Weather)', status: config.openweather, required: false },
-  ];
-
-  keys.forEach(key => {
-    const icon = key.status.isValid ? '✅' : (key.required ? '❌' : '⚠️');
-    const status = key.status.isValid ? 'Configured' : key.status.error;
-    console.log(`${icon} ${key.name}: ${status}`);
-  });
-
-  // Check if any required keys are missing
-  const hasRequiredKeys = config.gemini.isValid;
-  if (!hasRequiredKeys) {
-    console.log('\n❌ CRITICAL: Required API keys are missing!');
-    console.log('   The application cannot function without the Gemini API key.');
-    console.log('   Please add GEMINI_API_KEY to your .env file.');
+  // Single line warning for optional keys
+  const missing = [];
+  if (!config.foursquare.isValid) missing.push('Foursquare');
+  if (!config.openweather.isValid) missing.push('OpenWeather');
+  
+  if (missing.length > 0) {
+    console.warn(`⚠️ Optional API keys missing: ${missing.join(', ')}. Some features will use fallbacks.`);
   }
-
-  // Warnings for optional keys
-  if (!config.foursquare.isValid || !config.openweather.isValid) {
-    console.log('\n⚠️  WARNING: Some optional API keys are missing.');
-    console.log('   The app will work but with limited functionality:');
-    if (!config.foursquare.isValid) {
-      console.log('   - Real place recommendations will not be available');
-    }
-    if (!config.openweather.isValid) {
-      console.log('   - Real weather forecasts will not be available');
-    }
-  }
-
-  console.log('='.repeat(60));
 }
 
 /**

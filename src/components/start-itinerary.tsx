@@ -78,6 +78,20 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
           isSubmitting={isLoading}
           onSubmit={handleInitialPrompt}
         />
+        
+        {/* Quick Test Button */}
+        <div className="max-w-2xl mx-auto mt-4 text-center">
+          <Button
+            onClick={() => handleInitialPrompt({ 
+              prompt: "Plan one week in London from LA for one person in mid next month" 
+            })}
+            className="bg-slate-700 hover:bg-slate-600 text-white"
+            disabled={isLoading}
+          >
+            Quick Test: London Trip
+          </Button>
+        </div>
+        
         {recentSearches.length > 0 && (
           <div className="max-w-2xl mx-auto mt-6">
             <div className="flex items-center justify-between mb-3 px-1">

@@ -90,6 +90,9 @@ export default function ChatDisplay({
     }
 
     const generateItinerary = async (currentMessages: Message[]) => {
+        console.log('[Itinerary] Starting generation for:', initialPrompt.prompt);
+        console.time('Generation time');
+        
         setIsGenerating(true);
         const conversationHistory = getConversationHistory(currentMessages);
 
@@ -99,11 +102,33 @@ export default function ChatDisplay({
         }]);
 
         try {
+            console.log('[API CALL START] Calling generatePersonalizedItinerary');
+            console.log('[API Details]', {
+                promptLength: initialPrompt.prompt.length,
+                hasFile: !!initialPrompt.fileDataUrl,
+                hasHistory: !!conversationHistory
+            });
+            
             const itinerary = await generatePersonalizedItinerary({
                 prompt: initialPrompt.prompt,
                 attachedFile: initialPrompt.fileDataUrl,
                 conversationHistory: conversationHistory
             });
+            
+            console.log('[API CALL END] Response received from server');
+            
+            // Check if this is an error response
+            if (itinerary.title && itinerary.title.includes('Error:')) {
+                console.error('[API ERROR] Generation failed:', itinerary.title);
+            }
+            
+            console.log('[Generated Itinerary]', {
+                destination: itinerary.destination,
+                title: itinerary.title,
+                days: itinerary.itinerary.length,
+                activities: itinerary.itinerary.reduce((acc, day) => acc + day.activities.length, 0)
+            });
+            console.timeEnd('Generation time');
             
             setMessages(prev => [...prev, { 
                 role: 'assistant', 
@@ -114,7 +139,8 @@ export default function ChatDisplay({
             saveChatStateToStorage(true, itinerary);
 
         } catch (e) {
-            console.error('[ChatDisplay] Error generating itinerary:', e);
+            console.error('[Itinerary] Generation failed:', e);
+            console.timeEnd('Generation time');
             const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
             onError(`I'm sorry, there was an error creating your itinerary. ${errorMessage}`);
             setMessages(prev => [...prev, { 
@@ -155,6 +181,8 @@ export default function ChatDisplay({
         e.preventDefault();
         if (!userInput.trim() || isGenerating) return;
 
+        console.log('[User] New message:', userInput);
+        
         const newUserMessage: Message = { role: 'user', content: userInput };
         const newMessages = [...messages, newUserMessage];
         setMessages(newMessages);
@@ -170,6 +198,10 @@ export default function ChatDisplay({
     const handleRefine = async (feedback: string, currentMessages: Message[]) => {
         if (!currentItinerary) return;
         
+        console.log('[Refine] User feedback:', feedback);
+        console.log('[API CALL START] Calling refineItineraryBasedOnFeedback API');
+        console.time('API Call Duration');
+        
         setMessages(prev => [...prev, { role: 'assistant', content: "I understand. Refining the itinerary..." }]);
         setIsGenerating(true);
 
@@ -178,11 +210,16 @@ export default function ChatDisplay({
                 originalItinerary: currentItinerary,
                 userFeedback: feedback,
             });
+            
+            console.log('[API CALL END] Response received from server');
+            console.timeEnd('API Call Duration');
+            console.log('[Refine Result] Success - itinerary updated');
             setCurrentItinerary(refinedItinerary);
             saveChatStateToStorage(true, refinedItinerary);
             setMessages(prev => [...prev, { role: 'assistant', content: "✅ Itinerary updated!" }]);
         } catch (error) {
-            console.error('[ChatDisplay] Error refining itinerary:', error);
+            console.error('[Refine] Failed:', error);
+            console.timeEnd('Refinement time');
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             onError(`I'm sorry, there was an error refining your itinerary. ${errorMessage}`);
             setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't refine the itinerary. Please try again." }]);
@@ -235,6 +272,14 @@ export default function ChatDisplay({
                     )}
                 </div>
                  <form onSubmit={handleUserInputSubmit} className="mt-4 flex items-center gap-2 flex-shrink-0">
+                    <Button 
+                        type="button"
+                        onClick={() => setUserInput("Plan one week in London from LA for one person in mid next month")}
+                        className="bg-slate-700 hover:bg-slate-600 text-white text-xs px-2 py-1"
+                        disabled={isGenerating}
+                    >
+                        Quick Test
+                    </Button>
                     <Input
                         value={userInput}
                         onChange={(e) => setUserInput(e.target.value)}

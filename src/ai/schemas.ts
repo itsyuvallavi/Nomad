@@ -6,7 +6,7 @@ export const ActivitySchema = z.object({
     .describe('The time of the activity (e.g., "9:00 AM", "Afternoon").'),
   description: z.string().describe('A short, minimal description of the activity.'),
   category: z
-    .enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation'])
+    .enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation', 'Attraction'])
     .describe('The category of the activity.'),
   address: z.string().describe('The specific address of the activity location (e.g., "123 Main St, City, Country").'),
 });

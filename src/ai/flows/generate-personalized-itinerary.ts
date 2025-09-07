@@ -229,15 +229,10 @@ const findRealPlacesTool = ai.defineTool(
                     break;
             }
             
-            console.log(`✅ [Places Tool] FOURSQUARE API SUCCESS - Found ${places.length} real places`);
-            console.log('🏢 [Places Tool] Places from Foursquare:');
-            places.slice(0, 3).forEach((p, i) => {
-                console.log(`   ${i + 1}. ${p.name}`);
-                console.log(`      📍 Address: ${p.location?.formatted_address || 'No address'}`);
-            });
+            // Found real places from Foursquare
             
             if (places.length === 0) {
-                console.warn('⚠️ [Places Tool] No places found, returning defaults');
+                // No places found, using defaults
                 // Return some default places as fallback
                 return {
                     places: [{
@@ -260,10 +255,7 @@ const findRealPlacesTool = ai.defineTool(
                 success: true
             };
             
-            console.log('📦 [Places Tool] Returning', result.places.length, 'places');
-            result.places.forEach((p, i) => {
-                console.log(`   ${i + 1}. ${p.name} - ${p.address}`);
-            });
+            // Returning places
             
             return result;
         } catch (error) {
@@ -372,41 +364,24 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     outputSchema: GeneratePersonalizedItineraryOutputSchema,
   },
   async (input) => {
-    console.log('='.repeat(80));
-    console.log('🚀 [ITINERARY GENERATION] Starting generation process...');
-    console.log('📅 [ITINERARY GENERATION] Today\'s date:', new Date().toISOString().split('T')[0]);
-    
     // Validate API keys at the start
     const apiKeys = validateAPIKeys();
     logAPIKeyStatus(apiKeys);
     
     if (!apiKeys.gemini.isValid) {
-      console.error('❌ [ITINERARY GENERATION] Cannot proceed without Gemini API key');
       throw new Error('AI service is not configured. Please ensure GEMINI_API_KEY is set in your .env file.');
     }
-    
-    console.log('='.repeat(80));
-    console.log('📤 [ITINERARY GENERATION] Sending initial prompt to AI...');
-    console.log('   [ITINERARY GENERATION] Prompt:', input.prompt);
     
     try {
       const {output, usage} = await prompt(input);
 
-      console.log('📊 [ITINERARY GENERATION] LLM Usage:', usage);
-      console.log('🎯 [ITINERARY GENERATION] AI Model Response Received');
-      
-      const outputStr = JSON.stringify(output, null, 2);
-      console.log('📝 [ITINERARY GENERATION] Output preview:', outputStr.substring(0, 500) + '...');
-      
       if (!output || output === null) {
-        console.error('❌ [ITINERARY GENERATION] AI returned null or undefined');
+        console.error('❌ AI returned null or undefined');
         throw new Error('AI model returned null - retrying with fallback');
       }
       
       if (output.itinerary && Array.isArray(output.itinerary)) {
-        console.log('✅ [ITINERARY GENERATION] Successfully generated itinerary:');
-        console.log(`   📍 Destination: ${output.destination}`);
-        console.log(`   📅 Days: ${output.itinerary.length}`);
+        console.log(`✅ Generated itinerary for ${output.destination}: ${output.itinerary.length} days`);
       }
       
       if (!output.destination || !output.title) {
@@ -423,10 +398,14 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
         }
       }
       
-      console.log('='.repeat(80));
+      // Generation complete
       return output;
     } catch (error) {
-      console.error('❌ [ITINERARY GENERATION] Error:', error);
+      console.error('[ITINERARY GENERATION] Error:', error);
+      
+      // Include error details in the response for client-side debugging
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[ITINERARY GENERATION] Error details:', errorMessage);
       
       const today = new Date();
       const dates = Array.from({ length: 3 }, (_, i) => {
@@ -437,7 +416,7 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
       
       return {
         destination: 'Your Destination',
-        title: 'Trip Itinerary',
+        title: 'Trip Itinerary - Error: ' + errorMessage,
         itinerary: [{
           day: 1,
           date: dates[0],
