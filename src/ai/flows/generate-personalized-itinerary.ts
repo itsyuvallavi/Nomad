@@ -10,9 +10,6 @@
  * - GeneratePersonalizedItineraryInput - The input type for the generatePersonalizedItinerary function.
  * - GeneratePersonalizedItineraryOutput - The return type for the generatePersonalizedItinerary function.
  */
-import { config } from 'dotenv';
-config();
-
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { GeneratePersonalizedItineraryOutputSchema } from '@/ai/schemas';
@@ -411,7 +408,6 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     console.log('🚀 [ITINERARY GENERATION] Starting generation process...');
     console.log('📅 [ITINERARY GENERATION] Today\'s date:', new Date().toISOString().split('T')[0]);
     console.log('📅 [ITINERARY GENERATION] Current year:', new Date().getFullYear());
-    console.log('🔧 [ITINERARY GENERATION] Tools available: getWeatherForecast, findRealPlaces');
     
     // Validate API keys at the start
     const apiKeys = validateAPIKeys();
