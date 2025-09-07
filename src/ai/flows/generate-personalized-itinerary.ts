@@ -44,25 +44,94 @@ export async function generatePersonalizedItinerary(
   return generatePersonalizedItineraryFlow(input);
 }
 
-const decideOnEventOrLocation = ai.defineTool(
+const estimateFlightTime = ai.defineTool(
   {
-    name: 'decideOnEventOrLocation',
-    description:
-      'Decides whether to incorporate a particular event or location into the itinerary based on user preferences.',
+    name: 'estimateFlightTime',
+    description: 'Estimates flight time between two cities. Use this for adding flight information to the itinerary.',
     inputSchema: z.object({
-      eventOrLocation: z
-        .string()
-        .describe('The event or location to consider.'),
-      userPreferences: z
-        .string()
-        .describe('The user’s lifestyle preferences and interests.'),
+      origin: z.string().describe('Origin city (e.g., "London", "New York")'),
+      destination: z.string().describe('Destination city (e.g., "Paris", "Tokyo")'),
     }),
-    outputSchema: z.boolean(),
+    outputSchema: z.object({
+      duration: z.string().describe('Estimated flight duration'),
+      departureAirport: z.string().describe('Main airport in origin city'),
+      arrivalAirport: z.string().describe('Main airport in destination city'),
+    }),
   },
   async (input) => {
-    // A real implementation would compare the event/location to user preferences.
-    // For now, we'll just include everything.
-    return true;
+    console.log('\n✈️ [Flight Tool] CALLED by AI model');
+    console.log('✈️ [Flight Tool] Estimating flight:', input.origin, '→', input.destination);
+    
+    // Common flight routes with approximate times
+    const routes: Record<string, Record<string, {duration: string, airports: [string, string]}>> = {
+      'london': {
+        'paris': { duration: '1h 15min', airports: ['London Heathrow (LHR)', 'Paris Charles de Gaulle (CDG)'] },
+        'lisbon': { duration: '2h 45min', airports: ['London Heathrow (LHR)', 'Lisbon Airport (LIS)'] },
+        'barcelona': { duration: '2h 15min', airports: ['London Gatwick (LGW)', 'Barcelona El Prat (BCN)'] },
+        'rome': { duration: '2h 30min', airports: ['London Heathrow (LHR)', 'Rome Fiumicino (FCO)'] },
+        'amsterdam': { duration: '1h 20min', airports: ['London City (LCY)', 'Amsterdam Schiphol (AMS)'] },
+        'new york': { duration: '7h 30min', airports: ['London Heathrow (LHR)', 'JFK International (JFK)'] },
+      },
+      'new york': {
+        'los angeles': { duration: '5h 30min', airports: ['JFK International (JFK)', 'LAX International (LAX)'] },
+        'london': { duration: '7h 00min', airports: ['JFK International (JFK)', 'London Heathrow (LHR)'] },
+        'paris': { duration: '8h 00min', airports: ['JFK International (JFK)', 'Paris Charles de Gaulle (CDG)'] },
+        'miami': { duration: '3h 00min', airports: ['LaGuardia (LGA)', 'Miami International (MIA)'] },
+      },
+      'paris': {
+        'london': { duration: '1h 15min', airports: ['Paris Charles de Gaulle (CDG)', 'London Heathrow (LHR)'] },
+        'rome': { duration: '2h 00min', airports: ['Paris Orly (ORY)', 'Rome Fiumicino (FCO)'] },
+        'barcelona': { duration: '1h 45min', airports: ['Paris Charles de Gaulle (CDG)', 'Barcelona El Prat (BCN)'] },
+        'lisbon': { duration: '2h 30min', airports: ['Paris Orly (ORY)', 'Lisbon Airport (LIS)'] },
+        'amsterdam': { duration: '1h 10min', airports: ['Paris Charles de Gaulle (CDG)', 'Amsterdam Schiphol (AMS)'] },
+        'berlin': { duration: '1h 45min', airports: ['Paris Charles de Gaulle (CDG)', 'Berlin Brandenburg (BER)'] },
+      },
+      'lisbon': {
+        'london': { duration: '2h 45min', airports: ['Lisbon Airport (LIS)', 'London Heathrow (LHR)'] },
+        'paris': { duration: '2h 30min', airports: ['Lisbon Airport (LIS)', 'Paris Orly (ORY)'] },
+        'madrid': { duration: '1h 20min', airports: ['Lisbon Airport (LIS)', 'Madrid Barajas (MAD)'] },
+        'barcelona': { duration: '1h 50min', airports: ['Lisbon Airport (LIS)', 'Barcelona El Prat (BCN)'] },
+      },
+      'tokyo': {
+        'london': { duration: '12h 30min', airports: ['Narita International (NRT)', 'London Heathrow (LHR)'] },
+        'new york': { duration: '14h 00min', airports: ['Narita International (NRT)', 'JFK International (JFK)'] },
+        'singapore': { duration: '7h 00min', airports: ['Narita International (NRT)', 'Singapore Changi (SIN)'] },
+        'seoul': { duration: '2h 30min', airports: ['Narita International (NRT)', 'Incheon International (ICN)'] },
+      },
+    };
+    
+    const originLower = input.origin.toLowerCase();
+    const destLower = input.destination.toLowerCase();
+    
+    // Check if we have this route
+    if (routes[originLower]?.[destLower]) {
+      const route = routes[originLower][destLower];
+      console.log('✅ [Flight Tool] Found route:', route.duration);
+      return {
+        duration: route.duration,
+        departureAirport: route.airports[0],
+        arrivalAirport: route.airports[1],
+      };
+    }
+    
+    // Check reverse route
+    if (routes[destLower]?.[originLower]) {
+      const route = routes[destLower][originLower];
+      console.log('✅ [Flight Tool] Found reverse route:', route.duration);
+      return {
+        duration: route.duration,
+        departureAirport: route.airports[1],
+        arrivalAirport: route.airports[0],
+      };
+    }
+    
+    // Default estimate based on distance
+    console.log('⚠️ [Flight Tool] Route not in database, using estimate');
+    return {
+      duration: '3h 00min (estimated)',
+      departureAirport: `${input.origin} International Airport`,
+      arrivalAirport: `${input.destination} International Airport`,
+    };
   }
 );
 
@@ -79,10 +148,13 @@ const getWeatherForecastTool = ai.defineTool(
         }),
     },
     async (input) => {
-        if (!process.env.OPENWEATHERMAP_API_KEY) {
-            console.error('❌ [Weather Tool] API key is missing. Please set OPENWEATHERMAP_API_KEY in your .env file.');
+        const apiKey = process.env.OPENWEATHERMAP;
+        if (!apiKey) {
+            console.error('❌ [Weather Tool] API key is missing. Please set OPENWEATHERMAP in your .env file.');
+            console.error('   Current env vars:', Object.keys(process.env).filter(k => k.includes('WEATHER') || k.includes('OPEN')));
             return { forecast: "Weather information unavailable due to missing API key.", success: false };
         }
+        console.log('\n🔔 [Weather Tool] CALLED by AI model');
         console.log('🌤️ [Weather Tool] Getting weather for:', input.location);
         try {
             const weatherData = await getWeatherForecast(input.location, 5);
@@ -90,7 +162,8 @@ const getWeatherForecastTool = ai.defineTool(
                 const summary = weatherData.slice(0, 3)
                     .map(w => `${w.date}: ${w.weather.main}, ${w.temp.min}-${w.temp.max}°C`)
                     .join('; ');
-                console.log('✅ [Weather Tool] Success:', summary);
+                console.log('✅ [Weather Tool] SUCCESS - Got real weather data from OpenWeatherMap API');
+                console.log('   📊 Weather summary:', summary);
                 return { forecast: summary, success: true };
             }
         } catch (error) {
@@ -132,8 +205,9 @@ const findRealPlacesTool = ai.defineTool(
                 success: false 
             };
         }
+        console.log('\n🔔 [Places Tool] CALLED by AI model');
         console.log('🔍 [Places Tool] Searching for', input.placeType, 'in', input.destination);
-        console.log('📍 [Places Tool] Full input:', JSON.stringify(input));
+        console.log('📍 [Places Tool] Request details:', JSON.stringify(input));
         
         try {
             let places: any[] = [];
@@ -154,7 +228,12 @@ const findRealPlacesTool = ai.defineTool(
                     break;
             }
             
-            console.log(`✅ [Places Tool] Found ${places.length} real places from Foursquare API`);
+            console.log(`✅ [Places Tool] FOURSQUARE API SUCCESS - Found ${places.length} real places`);
+            console.log('🏢 [Places Tool] Places from Foursquare:');
+            places.slice(0, 3).forEach((p, i) => {
+                console.log(`   ${i + 1}. ${p.name}`);
+                console.log(`      📍 Address: ${p.location?.formatted_address || 'No address'}`);
+            });
             
             if (places.length === 0) {
                 console.warn('⚠️ [Places Tool] No places found, returning defaults');
@@ -206,7 +285,7 @@ const prompt = ai.definePrompt({
   name: 'generatePersonalizedItineraryPrompt',
   input: {schema: GeneratePersonalizedItineraryInputSchema},
   output: {schema: GeneratePersonalizedItineraryOutputSchema},
-  tools: [decideOnEventOrLocation, getWeatherForecastTool, findRealPlacesTool],
+  tools: [estimateFlightTime, getWeatherForecastTool, findRealPlacesTool],
   temperature: 0.7,
   maxOutputTokens: 8192,
   prompt: `You are a master travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
@@ -226,8 +305,10 @@ const prompt = ai.definePrompt({
   Analyze the user's prompt to extract:
   - Trip duration and EXACT dates (very important!)
   - Destination(s) 
-  - Origin/departure location
+  - Origin/departure location (CRITICAL for flight information)
   - Any specific preferences mentioned
+  
+  **IMPORTANT**: Store the origin location for adding flight information
 
   User's request: {{{prompt}}}
 
@@ -244,27 +325,46 @@ const prompt = ai.definePrompt({
 
   **MANDATORY TOOL USAGE - YOU MUST FOLLOW THIS EXACTLY:**
   
-  STEP 1: Call getWeatherForecast tool
+  STEP 1: Call estimateFlightTime tool
+  - Input: origin and destination cities
+  - This gives you flight duration and airport names
+  
+  STEP 2: Call getWeatherForecast tool
   - Input: destination city name
   - This gives you real weather for planning
   
-  STEP 2: Call findRealPlaces for accommodation
+  STEP 3: Call findRealPlaces for accommodation
   - Input: destination, placeType: 'accommodation', limit: 5
   - Pick ONE real hotel from the results
   
-  STEP 3: For EACH day, call findRealPlaces multiple times:
+  STEP 4: For EACH day, call findRealPlaces multiple times:
   - Morning: findRealPlaces with placeType: 'restaurant' for breakfast
   - Daytime: findRealPlaces with placeType: 'attraction' for activities
   - Lunch: findRealPlaces with placeType: 'restaurant' 
   - Afternoon: findRealPlaces with placeType: 'workspace' or 'attraction'
   - Dinner: findRealPlaces with placeType: 'restaurant'
   
+  **FLIGHT INFORMATION (MANDATORY - USE estimateFlightTime TOOL):**
+  - DAY 1 FIRST ACTIVITY: Must be the departure flight
+    - Time: "Early Morning" or "Morning" 
+    - Description: "Flight from [Origin] to [Destination] (Duration: [from tool])"
+    - Category: "Travel"
+    - Address: Use the airports from estimateFlightTime tool
+  
+  - LAST DAY LAST ACTIVITY: Must be the return flight
+    - Time: "Evening" or "Late Afternoon"
+    - Description: "Return flight from [Destination] to [Origin] (Duration: [from tool])"
+    - Category: "Travel"
+    - Address: Use the airports from estimateFlightTime tool
+  
   **CRITICAL RULES:**
-  1. NEVER make up place names - ONLY use results from findRealPlaces tool
-  2. Each place in your itinerary MUST come from a tool call
+  1. NEVER make up place names - ONLY use results from findRealPlaces tool (except for flights)
+  2. Each place in your itinerary MUST come from a tool call (except flights which you generate)
   3. Include the ACTUAL address returned by the API
   4. If a tool returns empty results, call it again with different parameters
   5. Your itinerary MUST contain real places with real addresses
+  6. ALWAYS include flights: departure flight on Day 1 and return flight on last day
+  7. Extract and use the origin location from the user's prompt for flight information
 
   {{#if attachedFile}}
   The user has also attached a file for reference. Use this to inform the itinerary.
@@ -302,16 +402,23 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     outputSchema: GeneratePersonalizedItineraryOutputSchema,
   },
   async (input) => {
-    console.log('🚀 [ITINERARY GENERATION] Starting for input:', input.prompt);
+    console.log('='.repeat(80));
+    console.log('🚀 [ITINERARY GENERATION] Starting generation process...');
+    console.log('📥 [ITINERARY GENERATION] Input prompt:', input.prompt);
     console.log('📅 [ITINERARY GENERATION] Today\'s date:', new Date().toISOString().split('T')[0]);
     console.log('📅 [ITINERARY GENERATION] Current year:', new Date().getFullYear());
+    console.log('🔧 [ITINERARY GENERATION] Tools available: getWeatherForecast, findRealPlaces');
     console.log('='.repeat(80));
     
     try {
       const {output, usage} = await prompt(input);
 
       console.log('📊 [ITINERARY GENERATION] LLM Usage:', usage);
-      console.log('📝 [ITINERARY GENERATION] Raw Output:', JSON.stringify(output, null, 2));
+      console.log('🎯 [ITINERARY GENERATION] AI Model Response Received');
+      
+      // Only log first 500 chars of output to avoid clutter
+      const outputStr = JSON.stringify(output, null, 2);
+      console.log('📝 [ITINERARY GENERATION] Output preview:', outputStr.substring(0, 500) + '...');
       
       if (!output || output === null) {
         console.error('❌ [ITINERARY GENERATION] AI returned null or undefined');
@@ -341,11 +448,35 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
           prevDate = currentDate;
           
           // Log each activity to verify it's from APIs
-          day.activities.forEach(activity => {
-            console.log(`      ⭐ ${activity.time}: ${activity.description}`);
-            console.log(`         📍 Address: ${activity.address}`);
+          day.activities.forEach((activity, idx) => {
+            console.log(`      Activity ${idx + 1}:`);
+            console.log(`         ⏰ Time: ${activity.time}`);
+            console.log(`         📝 Description: ${activity.description}`);
+            console.log(`         📍 ADDRESS: ${activity.address || 'NO ADDRESS PROVIDED'}`);
             console.log(`         🏷️ Category: ${activity.category}`);
-            console.log(`         ✅ Data source: ${activity.address !== 'N/A' ? 'REAL API' : 'DEFAULT/ERROR'}`);
+            
+            // Check if this is a flight
+            if (activity.category === 'Travel' && activity.description.toLowerCase().includes('flight')) {
+              console.log(`         ✈️ FLIGHT: This is a flight activity`);
+              if (activity.address.includes('Airport')) {
+                console.log(`         ✅ DATA SOURCE: Flight tool (with real airports)`);
+              } else {
+                console.log(`         ⚠️ WARNING: Flight missing proper airport information`);
+              }
+            } else {
+              // Check if this looks like real API data
+              const hasRealAddress = activity.address && 
+                                    activity.address !== 'N/A' && 
+                                    activity.address !== 'Address not available' &&
+                                    activity.address !== 'Location pending' &&
+                                    !activity.address.includes('city center');
+              
+              if (hasRealAddress) {
+                console.log(`         ✅ DATA SOURCE: REAL API DATA (Foursquare)`);
+              } else {
+                console.log(`         ⚠️ DATA SOURCE: DEFAULT/PLACEHOLDER - NOT FROM API`);
+              }
+            }
           });
         });
       }

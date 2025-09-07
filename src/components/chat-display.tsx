@@ -7,6 +7,7 @@ import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-
 import { refineItineraryBasedOnFeedback } from '@/ai/flows/refine-itinerary-based-on-feedback';
 import type { FormValues } from './itinerary-form';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import ItineraryDisplay from './itinerary-display';
 import { ArrowUp, Bot, User, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -91,8 +92,11 @@ export default function ChatDisplay({
     };
 
     useEffect(() => {
-        // If resuming a chat, do nothing here. The state is already set.
+        // If resuming a chat with a completed itinerary, restore it
         if (savedChatState) {
+            if (savedChatState.isCompleted && savedChatState.itinerary) {
+                setCurrentItinerary(savedChatState.itinerary);
+            }
             setIsLoading(false);
             return;
         }
@@ -146,8 +150,15 @@ export default function ChatDisplay({
                 attachedFile: initialPrompt.fileDataUrl,
             });
             
+            // Add a success message in chat
+            setMessages(prev => [...prev, { 
+                role: 'assistant', 
+                content: "✨ Your personalized itinerary is ready! You can see it on the right." 
+            }]);
+            
+            setCurrentItinerary(itinerary);
             saveChatStateToStorage(true, itinerary);
-            onItineraryGenerated(itinerary);
+            // Don't call onItineraryGenerated to keep chat visible
 
         } catch (e) {
             console.error('[ChatDisplay] Error generating itinerary:', e);
@@ -211,8 +222,9 @@ export default function ChatDisplay({
     };
     
     return (
-        <main className="flex-1 p-6 flex flex-col min-h-0">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col overflow-hidden h-full">
+        <main className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 p-6 min-h-0">
+            {/* LEFT SIDE - CHAT (ALWAYS VISIBLE) */}
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between mb-4 flex-shrink-0">
                     <h2 className="text-white font-medium text-lg">Chat</h2>
                     <Button variant="ghost" onClick={onReturn} className="text-slate-300 hover:text-white hover:bg-slate-700">
@@ -264,6 +276,38 @@ export default function ChatDisplay({
                          {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp size={20} />}
                     </Button>
                 </form>
+            </div>
+            
+            {/* RIGHT SIDE - ITINERARY OR LOADING */}
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl flex flex-col overflow-hidden">
+                {currentItinerary ? (
+                    <div className="flex-1 overflow-y-auto min-h-0 max-h-full">
+                        <ItineraryDisplay 
+                            itinerary={currentItinerary}
+                            setItinerary={setCurrentItinerary}
+                            onReturn={() => {
+                                // Don't actually return, just clear the itinerary if needed
+                                setCurrentItinerary(null);
+                            }}
+                        />
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-full">
+                        <div className="text-center p-8">
+                            <div className="text-slate-400 mb-2">
+                                <svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <p className="text-slate-400 text-sm">
+                                {isGenerating ? "Generating your itinerary..." : "Your itinerary will appear here"}
+                            </p>
+                            <p className="text-slate-500 text-xs mt-2">
+                                {isGenerating ? "This may take a moment" : "Answer the questions to get started"}
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
         </main>
     );
