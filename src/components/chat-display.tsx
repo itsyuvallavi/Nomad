@@ -22,7 +22,6 @@ type ChatDisplayProps = {
     initialPrompt: FormValues;
     savedChatState?: ChatState;
     searchId?: string;
-    onItineraryGenerated: (itinerary: GeneratePersonalizedItineraryOutput) => void;
     onError: (error: string) => void;
     onReturn: () => void;
 };
@@ -31,7 +30,6 @@ export default function ChatDisplay({
     initialPrompt,
     savedChatState,
     searchId,
-    onItineraryGenerated,
     onError,
     onReturn,
 }: ChatDisplayProps) {
@@ -92,7 +90,10 @@ export default function ChatDisplay({
     };
 
     useEffect(() => {
-        // If resuming a chat with a completed itinerary, restore it
+        // Track if this effect has already run to prevent duplicates
+        let isMounted = true;
+        
+        // If resuming a chat, restore state and do nothing else.
         if (savedChatState) {
             if (savedChatState.isCompleted && savedChatState.itinerary) {
                 setCurrentItinerary(savedChatState.itinerary);
@@ -112,15 +113,17 @@ export default function ChatDisplay({
                     attachedFile: initialPrompt.fileDataUrl,
                 });
                 
+                if (!isMounted) return;
+                
                 const validQuestions = (result.questions || []).filter(q => q && q.trim().length > 0);
                 
                 if (validQuestions.length > 0) {
                     const aiMessage: Message = { role: 'assistant', content: validQuestions.join('\n\n') };
-                    setMessages([userMessage, aiMessage]);
+                    setMessages(prev => [...prev, aiMessage]);
                     setHasAskedQuestions(true);
                 } else {
-                    setMessages([
-                        userMessage,
+                    setMessages(prev => [
+                        ...prev,
                         { role: 'assistant', content: "Great! I have all the information I need." },
                         { role: 'assistant', content: "Let me generate your personalized itinerary..." }
                     ]);
@@ -129,15 +132,21 @@ export default function ChatDisplay({
 
             } catch (e) {
                 console.error('[ChatDisplay] Error in getQuestions:', e);
-                onError("Sorry, I had trouble understanding your request. Please try again.");
+                if (isMounted) {
+                    onError("Sorry, I had trouble understanding your request. Please try again.");
+                }
             } finally {
-                setIsLoading(false);
+                if (isMounted) {
+                    setIsLoading(false);
+                }
             }
         };
 
-        if (messages.length === 0) {
-            getQuestions();
-        }
+        getQuestions();
+        
+        return () => {
+            isMounted = false;
+        };
         
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -158,7 +167,6 @@ export default function ChatDisplay({
             
             setCurrentItinerary(itinerary);
             saveChatStateToStorage(true, itinerary);
-            // Don't call onItineraryGenerated to keep chat visible
 
         } catch (e) {
             console.error('[ChatDisplay] Error generating itinerary:', e);
@@ -173,21 +181,14 @@ export default function ChatDisplay({
         if (!userInput.trim()) return;
 
         const newUserMessage: Message = { role: 'user', content: userInput };
-        const newMessages = [...messages, newUserMessage];
-        setMessages(newMessages);
+        setMessages(prev => [...prev, newUserMessage]);
         setUserInput('');
         setIsLoading(true);
 
         try {
             if (currentItinerary) {
-                // User is providing feedback on an itinerary (this flow is now handled in ItineraryDisplay)
-                // This logic can be simplified or removed if refinement happens on a different screen.
-                // For now, we assume refinement might still happen here.
-                const feedbackMessages: Message[] = [
-                    ...newMessages,
-                    { role: 'assistant', content: "I understand your feedback. Let me refine the itinerary for you..." }
-                ];
-                setMessages(feedbackMessages);
+                // User is providing feedback on an itinerary
+                setMessages(prev => [...prev, { role: 'assistant', content: "I understand. Let me refine the itinerary for you..." }]);
                 
                 setIsGenerating(true);
                 const refinedItinerary = await refineItineraryBasedOnFeedback({
@@ -196,17 +197,15 @@ export default function ChatDisplay({
                 });
                 setCurrentItinerary(refinedItinerary);
                 saveChatStateToStorage(true, refinedItinerary);
-                setMessages([
-                    ...feedbackMessages,
-                    { role: 'assistant', content: "✅ I've updated your itinerary based on your feedback!" }
-                ]);
+                setMessages(prev => [...prev, { role: 'assistant', content: "✅ I've updated your itinerary based on your feedback!" }]);
 
             } else {
                 // User is answering questions
-                const conversationContext = newMessages
+                const conversationContext = [...messages, newUserMessage]
                     .map(m => `${m.role}: ${m.content}`)
                     .join('\n');
                 
+                setMessages(prev => [...prev, { role: 'assistant', content: "Thanks for the details! Let me generate your itinerary..." }]);
                 await generateItinerary(conversationContext);
             }
         } catch (error) {
@@ -217,6 +216,29 @@ export default function ChatDisplay({
             }]);
         } finally {
             setIsLoading(false);
+            setIsGenerating(false);
+        }
+    };
+    
+    const handleRefine = async (feedback: string) => {
+        if (!currentItinerary) return;
+        
+        const newUserMessage: Message = { role: 'user', content: feedback };
+        setMessages(prev => [...prev, newUserMessage, { role: 'assistant', content: "I understand. Refining the itinerary..." }]);
+        setIsGenerating(true);
+
+        try {
+            const refinedItinerary = await refineItineraryBasedOnFeedback({
+                originalItinerary: currentItinerary,
+                userFeedback: feedback,
+            });
+            setCurrentItinerary(refinedItinerary);
+            saveChatStateToStorage(true, refinedItinerary);
+            setMessages(prev => [...prev, { role: 'assistant', content: "✅ Itinerary updated!" }]);
+        } catch (error) {
+            console.error('[ChatDisplay] Error refining itinerary:', error);
+            setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't refine the itinerary. Please try again." }]);
+        } finally {
             setIsGenerating(false);
         }
     };
@@ -249,7 +271,7 @@ export default function ChatDisplay({
                             )}
                         </div>
                     ))}
-                    {isLoading && (
+                    {(isLoading || isGenerating) && messages.length > 0 && (
                          <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
                                 <Bot size={20} className="text-white" />
@@ -268,7 +290,7 @@ export default function ChatDisplay({
                     <Input
                         value={userInput}
                         onChange={(e) => setUserInput(e.target.value)}
-                        placeholder={isGenerating ? "Generating your itinerary..." : "Type your answer..."}
+                        placeholder={isGenerating ? "Generating your itinerary..." : (currentItinerary ? "Refine your itinerary..." : "Type your answer...")}
                         className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
                         disabled={isLoading || isGenerating}
                     />
@@ -278,33 +300,35 @@ export default function ChatDisplay({
                 </form>
             </div>
             
-            {/* RIGHT SIDE - ITINERARY OR LOADING */}
+            {/* RIGHT SIDE - ITINERARY OR PLACEHOLDER */}
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl flex flex-col overflow-hidden">
                 {currentItinerary ? (
                     <div className="flex-1 overflow-y-auto min-h-0 max-h-full">
                         <ItineraryDisplay 
                             itinerary={currentItinerary}
                             setItinerary={setCurrentItinerary}
-                            onReturn={() => {
-                                // Don't actually return, just clear the itinerary if needed
-                                setCurrentItinerary(null);
-                            }}
+                            onRefine={handleRefine}
+                            isRefining={isGenerating}
                         />
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center p-8">
-                            <div className="text-slate-400 mb-2">
-                                <svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <p className="text-slate-400 text-sm">
-                                {isGenerating ? "Generating your itinerary..." : "Your itinerary will appear here"}
-                            </p>
-                            <p className="text-slate-500 text-xs mt-2">
-                                {isGenerating ? "This may take a moment" : "Answer the questions to get started"}
-                            </p>
+                             {isGenerating || isLoading ? (
+                                <>
+                                    <Loader2 className="w-16 h-16 mx-auto mb-4 text-slate-600 animate-spin" />
+                                    <p className="text-slate-400 text-sm">Generating your itinerary...</p>
+                                    <p className="text-slate-500 text-xs mt-2">This may take a moment</p>
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p className="text-slate-400 text-sm">Your itinerary will appear here</p>
+                                    <p className="text-slate-500 text-xs mt-2">Answer the questions on the left to get started</p>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}

@@ -64,9 +64,6 @@ export default function ItineraryEventCard({ activity }: ItineraryEventCardProps
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
-               {activity.travelTime && (
-                <p className="text-xs text-slate-400 mt-2">Travel from previous: {activity.travelTime}</p>
-              )}
             </div>
           )}
         </div>

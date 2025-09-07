@@ -19,6 +19,7 @@ import { GeneratePersonalizedItineraryOutputSchema } from '@/ai/schemas';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { findAccommodation, findRestaurants, findWorkspaces, findAttractions } from '@/lib/api/foursquare';
 import { getWeatherForecast, getWeatherSummary } from '@/lib/api/weather';
+import { validateAPIKeys, logAPIKeyStatus } from '@/lib/api-validation';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -149,10 +150,12 @@ const getWeatherForecastTool = ai.defineTool(
     },
     async (input) => {
         const apiKey = process.env.OPENWEATHERMAP;
-        if (!apiKey) {
-            console.error('❌ [Weather Tool] API key is missing. Please set OPENWEATHERMAP in your .env file.');
-            console.error('   Current env vars:', Object.keys(process.env).filter(k => k.includes('WEATHER') || k.includes('OPEN')));
-            return { forecast: "Weather information unavailable due to missing API key.", success: false };
+        if (!apiKey || apiKey.length < 20) {
+            console.warn('⚠️ [Weather Tool] API key is missing or invalid.');
+            return { 
+                forecast: "Weather: Typical seasonal conditions expected (API key not configured)", 
+                success: false 
+            };
         }
         console.log('\n🔔 [Weather Tool] CALLED by AI model');
         console.log('🌤️ [Weather Tool] Getting weather for:', input.location);
@@ -286,8 +289,10 @@ const prompt = ai.definePrompt({
   input: {schema: GeneratePersonalizedItineraryInputSchema},
   output: {schema: GeneratePersonalizedItineraryOutputSchema},
   tools: [estimateFlightTime, getWeatherForecastTool, findRealPlacesTool],
-  temperature: 0.7,
-  maxOutputTokens: 8192,
+  config: {
+    temperature: 0.7,
+    maxOutputTokens: 8192,
+  },
   prompt: `You are a master travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
 
   **CRITICAL DATE HANDLING:**
@@ -408,6 +413,17 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     console.log('📅 [ITINERARY GENERATION] Today\'s date:', new Date().toISOString().split('T')[0]);
     console.log('📅 [ITINERARY GENERATION] Current year:', new Date().getFullYear());
     console.log('🔧 [ITINERARY GENERATION] Tools available: getWeatherForecast, findRealPlaces');
+    
+    // Validate API keys at the start
+    const apiKeys = validateAPIKeys();
+    logAPIKeyStatus(apiKeys);
+    
+    // Check if critical keys are missing
+    if (!apiKeys.gemini.isValid) {
+      console.error('❌ [ITINERARY GENERATION] Cannot proceed without Gemini API key');
+      throw new Error('AI service is not configured. Please ensure GEMINI_API_KEY is set in your .env file.');
+    }
+    
     console.log('='.repeat(80));
     
     try {

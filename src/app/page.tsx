@@ -3,7 +3,6 @@
 
 import { useState } from 'react';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import ItineraryDisplay from '@/components/itinerary-display';
 import { Settings } from 'lucide-react';
 import {
   Sheet,
@@ -35,11 +34,10 @@ export interface RecentSearch {
   lastUpdated: string;
 }
 
-export type View = 'start' | 'chat' | 'itinerary';
+export type View = 'start' | 'chat';
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<View>('start');
-  const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
@@ -54,16 +52,10 @@ export default function Home() {
   
   const handleReturnToStart = () => {
     setCurrentView('start');
-    setItinerary(null);
     setError(null);
     setInitialPrompt(null);
     setSavedChatState(undefined);
     setCurrentSearchId(undefined);
-  };
-  
-  const handleItineraryGenerated = (newItinerary: GeneratePersonalizedItineraryOutput) => {
-    setItinerary(newItinerary);
-    setCurrentView('itinerary');
   };
   
   const handleChatError = (errorMessage: string) => {
@@ -80,16 +72,7 @@ export default function Home() {
             initialPrompt={initialPrompt!}
             savedChatState={savedChatState}
             searchId={currentSearchId}
-            onItineraryGenerated={handleItineraryGenerated}
             onError={handleChatError}
-            onReturn={handleReturnToStart}
-          />
-        );
-      case 'itinerary':
-        return (
-          <ItineraryDisplay
-            itinerary={itinerary!}
-            setItinerary={setItinerary}
             onReturn={handleReturnToStart}
           />
         );
