@@ -409,7 +409,6 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
   async (input) => {
     console.log('='.repeat(80));
     console.log('🚀 [ITINERARY GENERATION] Starting generation process...');
-    console.log('📥 [ITINERARY GENERATION] Input prompt:', input.prompt);
     console.log('📅 [ITINERARY GENERATION] Today\'s date:', new Date().toISOString().split('T')[0]);
     console.log('📅 [ITINERARY GENERATION] Current year:', new Date().getFullYear());
     console.log('🔧 [ITINERARY GENERATION] Tools available: getWeatherForecast, findRealPlaces');
@@ -425,6 +424,8 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     }
     
     console.log('='.repeat(80));
+    console.log('📤 [ITINERARY GENERATION] Sending initial prompt to AI...');
+    console.log('   [ITINERARY GENERATION] Prompt:', input.prompt);
     
     try {
       const {output, usage} = await prompt(input);
