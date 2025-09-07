@@ -12,7 +12,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-// We get the schemas from the generation flow to ensure consistency
+// We get the schemas from the central schemas file to ensure consistency
 import { GeneratePersonalizedItineraryOutputSchema } from '@/ai/schemas';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 
@@ -47,7 +47,7 @@ const refineItineraryBasedOnFeedbackPrompt = ai.definePrompt({
   User Feedback:
   "{{{userFeedback}}}"
 
-  Based on this feedback, please refine the itinerary. Your response must be only the refined itinerary in the exact same JSON structure as the original. Only change the content of the fields based on the feedback. Ensure all fields for each activity (time, description, category, address, travelTime) are present.
+  Based on this feedback, please refine the itinerary. Your response must be only the refined itinerary in the exact same JSON structure as the original. Only change the content of the fields based on the feedback. Ensure all fields for each activity (time, description, category, address) are present.
 `,
 });
 

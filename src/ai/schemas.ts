@@ -9,10 +9,6 @@ export const ActivitySchema = z.object({
     .enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation'])
     .describe('The category of the activity.'),
   address: z.string().describe('The specific address of the activity location (e.g., "123 Main St, City, Country").'),
-  travelTime: z
-    .string()
-    .optional()
-    .describe('Estimated travel time from the previous location.'),
 });
 
 export const DailyItinerarySchema = z.object({
