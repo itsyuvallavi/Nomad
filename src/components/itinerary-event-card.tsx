@@ -13,6 +13,7 @@ const categoryInfo = {
   Food: { icon: <Utensils className="h-4 w-4" />, color: 'from-orange-500 to-orange-600' },
   Travel: { icon: <Plane className="h-4 w-4" />, color: 'from-purple-500 to-purple-600' },
   Accommodation: { icon: <Bed className="h-4 w-4" />, color: 'from-indigo-500 to-indigo-600' },
+  Attraction: { icon: <MapPin className="h-4 w-4" />, color: 'from-pink-500 to-pink-600' },
   Default: { icon: <Coffee className="h-4 w-4" />, color: 'from-slate-500 to-slate-600' },
 };
 

@@ -101,8 +101,25 @@ AI flows include fallback responses when APIs fail. See `generate-personalized-i
 
 ### Information Gathering Strategy
 Defined in `analyze-initial-prompt.ts:49-86`:
-- Essential info: duration, dates, destination, origin, traveler count
-- Smart defaults: budget ($150-200/day), activities, travel style, accommodation
+
+**Essential Information (AI will ask if missing):**
+- Trip duration/length (e.g., "5 days", "2 weeks")
+- Travel dates (specific or flexible like "mid-January")
+- Destination(s)
+- Origin/departure location
+- Number of travelers
+
+**Smart Defaults (AI won't ask - applies automatically):**
+- Budget: Moderate ($150-200/day per person)
+- Activities: Mix of highlights, culture, food, sights
+- Travel style: Balanced comfort/adventure
+- Accommodation: Mid-range hotels/Airbnbs
+
+When modifying AI functionality:
+1. Update relevant flow in `src/ai/flows/`
+2. Ensure schema compliance in `src/ai/schemas.ts`
+3. Test using `npm run genkit:dev` to access the Genkit UI
+4. Keep questions minimal - only ask for essential missing info
 
 ### File Attachments
 Files converted to base64 data URIs before AI processing. See `itinerary-form.tsx` for implementation.

@@ -17,6 +17,7 @@ import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { findAccommodation, findRestaurants, findWorkspaces, findAttractions } from '@/lib/api/foursquare';
 import { getWeatherForecast, getWeatherSummary } from '@/lib/api/weather';
 import { validateAPIKeys, logAPIKeyStatus } from '@/lib/api-validation';
+import { mockItinerary } from '@/lib/mock-data';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -40,6 +41,49 @@ export { type GeneratePersonalizedItineraryOutput };
 export async function generatePersonalizedItinerary(
   input: GeneratePersonalizedItineraryInput
 ): Promise<GeneratePersonalizedItineraryOutput> {
+  // Check if we should use mock data for testing
+  if (process.env.USE_MOCK_DATA === 'true') {
+    console.log('[MOCK MODE] Using mock data instead of API calls');
+    // Simulate a small delay to mimic API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Customize the mock based on the prompt (optional)
+    const customMock = { ...mockItinerary };
+    if (input.prompt.toLowerCase().includes('paris')) {
+      customMock.destination = 'Paris, France';
+      customMock.title = 'Paris Work & Culture Week';
+    } else if (input.prompt.toLowerCase().includes('tokyo')) {
+      customMock.destination = 'Tokyo, Japan';
+      customMock.title = 'Tokyo Digital Nomad Experience';
+    } else if (input.prompt.toLowerCase().includes('brussels') || input.prompt.toLowerCase().includes('belgium')) {
+      // For Brussels, modify some days to show Brussels activities
+      customMock.destination = 'London & Brussels';
+      customMock.title = 'London & Brussels Multi-City Adventure';
+      // Change day 4-6 to Brussels
+      if (customMock.itinerary[3]) {
+        customMock.itinerary[3].title = 'Travel to Brussels';
+        customMock.itinerary[3].activities[0] = {
+          time: '9:00 AM',
+          description: 'Eurostar train from London to Brussels',
+          category: 'Travel',
+          address: 'St Pancras International, London'
+        };
+      }
+      if (customMock.itinerary[4]) {
+        customMock.itinerary[4].title = 'Brussels City Center';
+        customMock.itinerary[4].activities[0].description = 'Grand Place - UNESCO World Heritage Site';
+        customMock.itinerary[4].activities[0].address = 'Grand Place, Brussels, Belgium';
+      }
+      if (customMock.itinerary[5]) {
+        customMock.itinerary[5].title = 'Brussels Museums & Culture';
+        customMock.itinerary[5].activities[0].description = 'Royal Museums of Fine Arts';
+        customMock.itinerary[5].activities[0].address = 'Rue de la Régence 3, Brussels';
+      }
+    }
+    
+    return customMock;
+  }
+  
   return generatePersonalizedItineraryFlow(input);
 }
 
@@ -312,8 +356,18 @@ const prompt = ai.definePrompt({
   - **Budget:** Moderate budget of $150-200 per day per person.
   - **Accommodation:** Mid-range hotels or quality Airbnbs.
   - **Activities:** Mix of popular tourist highlights, local cultural experiences, and food.
-  - **Travel Style:** Balanced comfort and adventure (2-3 main activities per day).
+  - **Travel Style:** Balanced comfort and adventure (5-7 activities per day including meals and rest).
   - **Meals:** Mix of local restaurants.
+  
+  **DAILY SCHEDULE REQUIREMENTS:**
+  - Start each day between 8-9 AM (breakfast or morning activity)
+  - Include a morning activity (10-11 AM)
+  - Include lunch (12-1 PM)
+  - Include 2-3 afternoon activities (2-6 PM)
+  - Include dinner (7-8 PM)
+  - Include an evening activity when appropriate (8-10 PM) - could be nightlife, sunset viewing, evening market, etc.
+  - Include rest/relaxation periods between activities when needed
+  - For digital nomads: Include at least 1 coworking/work session option per day
 
   **MANDATORY TOOL USAGE - YOU MUST FOLLOW THIS EXACTLY:**
   
