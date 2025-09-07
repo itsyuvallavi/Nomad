@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button';
 
 export interface ChatState {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;
-  hasAskedQuestions: boolean;
   isCompleted: boolean;
   itinerary?: GeneratePersonalizedItineraryOutput;
 }
@@ -60,7 +59,6 @@ export default function Home() {
   
   const handleChatError = (errorMessage: string) => {
     setError(errorMessage);
-    setCurrentView('start');
   };
 
 
@@ -117,9 +115,9 @@ export default function Home() {
       
       {error && (
         <div className="p-6 pt-0">
-            <div className="bg-red-900/50 border border-red-500/50 text-red-300 p-4 rounded-lg">
+            <div className="bg-red-900/50 border border-red-500/50 text-red-300 p-4 rounded-lg flex justify-between items-center">
                 <p><strong>Error:</strong> {error}</p>
-                <Button onClick={() => setError(null)} className="mt-2 text-white">Dismiss</Button>
+                <Button onClick={() => setError(null)} variant="ghost" size="icon" className="text-white hover:bg-red-800/50">X</Button>
             </div>
         </div>
       )}

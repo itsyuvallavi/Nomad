@@ -14,14 +14,12 @@ import ItineraryRefinementForm from './itinerary-refinement-form';
 
 type ItineraryDisplayProps = {
   itinerary: GeneratePersonalizedItineraryOutput;
-  setItinerary: (itinerary: GeneratePersonalizedItineraryOutput | null) => void;
   onRefine: (feedback: string) => void;
   isRefining: boolean;
 };
 
 export default function ItineraryDisplay({
   itinerary,
-  setItinerary,
   onRefine,
   isRefining,
 }: ItineraryDisplayProps) {
@@ -37,19 +35,24 @@ export default function ItineraryDisplay({
 
   const formatDateRange = (start: string, end: string) => {
     if (!start || !end) return '';
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const userTimezoneOffset = startDate.getTimezoneOffset() * 60000;
-    const adjustedStartDate = new Date(startDate.getTime() + userTimezoneOffset);
-    const adjustedEndDate = new Date(endDate.getTime() + userTimezoneOffset);
+    try {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const userTimezoneOffset = startDate.getTimezoneOffset() * 60000;
+        const adjustedStartDate = new Date(startDate.getTime() + userTimezoneOffset);
+        const adjustedEndDate = new Date(endDate.getTime() + userTimezoneOffset);
 
-    const startMonth = adjustedStartDate.toLocaleDateString('en-US', { month: 'short' });
-    const endMonth = adjustedEndDate.toLocaleDateString('en-US', { month: 'short' });
-    
-    if (startMonth === endMonth) {
-      return `${startMonth} ${adjustedStartDate.getDate()} - ${adjustedEndDate.getDate()}, ${adjustedEndDate.getFullYear()}`;
+        const startMonth = adjustedStartDate.toLocaleDateString('en-US', { month: 'short' });
+        const endMonth = adjustedEndDate.toLocaleDateString('en-US', { month: 'short' });
+        
+        if (startMonth === endMonth) {
+          return `${startMonth} ${adjustedStartDate.getDate()} - ${adjustedEndDate.getDate()}, ${adjustedEndDate.getFullYear()}`;
+        }
+        return `${startMonth} ${adjustedStartDate.getDate()} - ${endMonth} ${adjustedEndDate.getDate()}, ${adjustedEndDate.getFullYear()}`;
+    } catch(e) {
+        console.error("Error formatting date range", e);
+        return "Date range unavailable";
     }
-    return `${startMonth} ${adjustedStartDate.getDate()} - ${endMonth} ${adjustedEndDate.getDate()}, ${adjustedEndDate.getFullYear()}`;
   }
 
 
@@ -60,10 +63,8 @@ export default function ItineraryDisplay({
                 <h1 className="text-2xl font-bold text-white">{itinerary.title}</h1>
                 <p className="text-slate-400">{itinerary.destination} • {formatDateRange(tripStartDate, tripEndDate)}</p>
             </div>
-             {/* Action Buttons are inside the chat now, so we remove the return button from here */}
         </div>
         
-         {/* Action Buttons */}
         <div className="flex items-center gap-2 mb-4">
             {itinerary.quickTips && itinerary.quickTips.length > 0 && (
                 <Popover>
@@ -83,7 +84,6 @@ export default function ItineraryDisplay({
             )}
         </div>
 
-        {/* Refinement */}
         <div className="mb-6 max-w-2xl sticky top-0 bg-slate-800/50 backdrop-blur-sm py-4 z-10">
             <ItineraryRefinementForm
               onSubmit={handleRefinement}
@@ -94,10 +94,9 @@ export default function ItineraryDisplay({
             )}
         </div>
 
-        {/* Itinerary Body */}
         <div className="mt-4">
              <h2 className="text-white font-medium text-lg mb-4">Your Personalized Itinerary</h2>
-             {isRefining ? (
+             {isRefining && itinerary.itinerary.length > 1 ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 text-slate-400 animate-spin" />
                   <p className="ml-4 text-slate-400">Refining your itinerary...</p>

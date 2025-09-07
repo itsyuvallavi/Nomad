@@ -28,6 +28,7 @@ const GeneratePersonalizedItineraryInputSchema = z.object({
     .describe(
       "A file attached by the user as a data URI. Can be a document or an image. Format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  conversationHistory: z.string().optional().describe("A summary of the conversation so far, for context."),
 });
 
 export type GeneratePersonalizedItineraryInput = z.infer<
@@ -293,94 +294,61 @@ const prompt = ai.definePrompt({
   prompt: `You are a master travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
 
   **CRITICAL DATE HANDLING:**
-  Today's date is: ` + new Date().toISOString().split('T')[0] + `
-  Current year: ` + new Date().getFullYear() + `
+  Today's date is: ${new Date().toISOString().split('T')[0]}
+  Current year: ${new Date().getFullYear()}
   
-  1. Extract the EXACT dates from the user's prompt
-  2. ALWAYS use the CURRENT YEAR (` + new Date().getFullYear() + `) unless user specifies otherwise
-  3. If user says "January 15-20", use ` + new Date().getFullYear() + `-01-15 to ` + new Date().getFullYear() + `-01-20
-  4. If user says "5 days starting March 1st", calculate dates starting ` + new Date().getFullYear() + `-03-01
-  5. If user says "next week", calculate from today's date: ` + new Date().toISOString().split('T')[0] + `
-  6. ALWAYS use YYYY-MM-DD format for dates
-  7. The number of days in the itinerary MUST match the trip duration
+  1. Extract the EXACT dates from the user's prompt.
+  2. ALWAYS use the CURRENT YEAR (${new Date().getFullYear()}) unless the user specifies a different year.
+  3. If user says "January 15-20", use ${new Date().getFullYear()}-01-15 to ${new Date().getFullYear()}-01-20.
+  4. If user says "5 days starting March 1st", calculate dates starting ${new Date().getFullYear()}-03-01.
+  5. If user says "next week", calculate from today's date: ${new Date().toISOString().split('T')[0]}.
+  6. ALWAYS use YYYY-MM-DD format for dates.
+  7. The number of days in the itinerary array MUST EXACTLY match the requested trip duration.
 
-  Analyze the user's prompt to extract:
+  Analyze the user's request to extract:
   - Trip duration and EXACT dates (very important!)
   - Destination(s) 
   - Origin/departure location (CRITICAL for flight information)
   - Any specific preferences mentioned
   
-  **IMPORTANT**: Store the origin location for adding flight information
-
   User's request: {{{prompt}}}
+  {{#if conversationHistory}}
+  Conversation History: {{{conversationHistory}}}
+  {{/if}}
 
   **SMART DEFAULTS TO USE (unless user specifies otherwise):**
-  - **Budget:** Moderate budget of $150-200 per day per person (covers accommodation, meals, activities, and local transport)
-  - **Accommodation:** Mid-range hotels or quality Airbnbs ($60-100/night)
-  - **Activities:** Mix of:
-    • Popular tourist highlights (must-see landmarks)
-    • Local cultural experiences (markets, neighborhoods)
-    • Food experiences (local restaurants, cafes, food tours)
-    • Some free/low-cost activities (parks, walking tours, viewpoints)
-  - **Travel Style:** Balanced comfort and adventure (not too rushed, 2-3 main activities per day)
-  - **Meals:** Mix of local restaurants (breakfast $10-15, lunch $15-25, dinner $25-40)
+  - **Budget:** Moderate budget of $150-200 per day per person.
+  - **Accommodation:** Mid-range hotels or quality Airbnbs.
+  - **Activities:** Mix of popular tourist highlights, local cultural experiences, and food.
+  - **Travel Style:** Balanced comfort and adventure (2-3 main activities per day).
+  - **Meals:** Mix of local restaurants.
 
   **MANDATORY TOOL USAGE - YOU MUST FOLLOW THIS EXACTLY:**
   
-  STEP 1: Call estimateFlightTime tool
-  - Input: origin and destination cities
-  - This gives you flight duration and airport names
+  STEP 1: Call estimateFlightTime tool.
   
-  STEP 2: Call getWeatherForecast tool
-  - Input: destination city name
-  - This gives you real weather for planning
+  STEP 2: Call getWeatherForecast tool.
   
-  STEP 3: Call findRealPlaces for accommodation
-  - Input: destination, placeType: 'accommodation', limit: 5
-  - Pick ONE real hotel from the results
+  STEP 3: Call findRealPlaces for accommodation. Pick ONE real hotel from the results.
   
-  STEP 4: For EACH day, call findRealPlaces multiple times:
-  - Morning: findRealPlaces with placeType: 'restaurant' for breakfast
-  - Daytime: findRealPlaces with placeType: 'attraction' for activities
-  - Lunch: findRealPlaces with placeType: 'restaurant' 
-  - Afternoon: findRealPlaces with placeType: 'workspace' or 'attraction'
-  - Dinner: findRealPlaces with placeType: 'restaurant'
+  STEP 4: For EACH day, call findRealPlaces multiple times for restaurants, attractions, etc.
   
-  **FLIGHT INFORMATION (MANDATORY - USE estimateFlightTime TOOL):**
-  - DAY 1 FIRST ACTIVITY: Must be the departure flight
-    - Time: "Early Morning" or "Morning" 
-    - Description: "Flight from [Origin] to [Destination] (Duration: [from tool])"
-    - Category: "Travel"
-    - Address: Use the airports from estimateFlightTime tool
-  
-  - LAST DAY LAST ACTIVITY: Must be the return flight
-    - Time: "Evening" or "Late Afternoon"
-    - Description: "Return flight from [Destination] to [Origin] (Duration: [from tool])"
-    - Category: "Travel"
-    - Address: Use the airports from estimateFlightTime tool
+  **FLIGHT INFORMATION (MANDATORY):**
+  - DAY 1 FIRST ACTIVITY: Must be the departure flight.
+  - LAST DAY LAST ACTIVITY: Must be the return flight.
   
   **CRITICAL RULES:**
-  1. NEVER make up place names - ONLY use results from findRealPlaces tool (except for flights)
-  2. Each place in your itinerary MUST come from a tool call (except flights which you generate)
-  3. Include the ACTUAL address returned by the API
-  4. If a tool returns empty results, call it again with different parameters
-  5. Your itinerary MUST contain real places with real addresses
-  6. ALWAYS include flights: departure flight on Day 1 and return flight on last day
-  7. Extract and use the origin location from the user's prompt for flight information
+  1. NEVER make up place names - ONLY use results from the findRealPlaces tool.
+  2. Each place in your itinerary MUST come from a tool call (except flights).
+  3. Include the ACTUAL address returned by the API.
+  4. Your itinerary MUST contain real places with real addresses.
+  5. ALWAYS include departure and return flights.
+  6. Extract and use the origin location from the user's prompt for flight information.
 
   {{#if attachedFile}}
   The user has also attached a file for reference. Use this to inform the itinerary.
   Attached file: {{media url=attachedFile}}
   {{/if}}
-
-  **OUTPUT REQUIREMENTS:**
-  - Keep activity descriptions concise (1-2 sentences max)
-  - Include practical details (opening hours, costs, booking needs)
-  - Add 3-5 relevant quick tips for the destination
-  - CRITICAL: Dates MUST align with user's specified travel dates (not arbitrary dates!)
-  - Each day's date field must be in YYYY-MM-DD format
-  - The itinerary array must have exactly the number of days matching the trip duration
-  - Balance the itinerary: don't overschedule, allow for flexibility
 
   **FINAL OUTPUT REQUIREMENTS:**
   You MUST return a valid JSON object with ALL of these fields:
@@ -388,12 +356,12 @@ const prompt = ai.definePrompt({
   - title: string (a catchy trip title)
   - itinerary: array of day objects, each with:
     - day: number
-    - date: string in YYYY-MM-DD format using year ` + new Date().getFullYear() + `
+    - date: string in YYYY-MM-DD format using year ${new Date().getFullYear()}
     - title: string
     - activities: array with time, description, category, address fields
   - quickTips: array of 3-5 string tips
   
-  NEVER return null or undefined. Always return a complete JSON structure.
+  NEVER return null or undefined. Always return a complete JSON structure. The itinerary array must have exactly the number of days matching the trip duration.
   `,
 });
 
@@ -407,13 +375,11 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     console.log('='.repeat(80));
     console.log('🚀 [ITINERARY GENERATION] Starting generation process...');
     console.log('📅 [ITINERARY GENERATION] Today\'s date:', new Date().toISOString().split('T')[0]);
-    console.log('📅 [ITINERARY GENERATION] Current year:', new Date().getFullYear());
     
     // Validate API keys at the start
     const apiKeys = validateAPIKeys();
     logAPIKeyStatus(apiKeys);
     
-    // Check if critical keys are missing
     if (!apiKeys.gemini.isValid) {
       console.error('❌ [ITINERARY GENERATION] Cannot proceed without Gemini API key');
       throw new Error('AI service is not configured. Please ensure GEMINI_API_KEY is set in your .env file.');
@@ -430,7 +396,6 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
       console.log('📊 [ITINERARY GENERATION] LLM Usage:', usage);
       console.log('🎯 [ITINERARY GENERATION] AI Model Response Received');
       
-      // Only log first 500 chars of output to avoid clutter
       const outputStr = JSON.stringify(output, null, 2);
       console.log('📝 [ITINERARY GENERATION] Output preview:', outputStr.substring(0, 500) + '...');
       
@@ -439,78 +404,22 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
         throw new Error('AI model returned null - retrying with fallback');
       }
       
-      // Log what we're generating
       if (output.itinerary && Array.isArray(output.itinerary)) {
         console.log('✅ [ITINERARY GENERATION] Successfully generated itinerary:');
         console.log(`   📍 Destination: ${output.destination}`);
         console.log(`   📅 Days: ${output.itinerary.length}`);
-        
-        // Verify dates are sequential and make sense
-        let prevDate: Date | null = null;
-        output.itinerary.forEach(day => {
-          console.log(`   📆 Day ${day.day} (${day.date}): ${day.title}`);
-          console.log(`      Activities: ${day.activities.length}`);
-          
-          // Check date sequence
-          const currentDate = new Date(day.date);
-          if (prevDate) {
-            const dayDiff = Math.round((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
-            if (dayDiff !== 1) {
-              console.warn(`      ⚠️ DATE ISSUE: Gap of ${dayDiff} days between Day ${day.day - 1} and Day ${day.day}`);
-            }
-          }
-          prevDate = currentDate;
-          
-          // Log each activity to verify it's from APIs
-          day.activities.forEach((activity, idx) => {
-            console.log(`      Activity ${idx + 1}:`);
-            console.log(`         ⏰ Time: ${activity.time}`);
-            console.log(`         📝 Description: ${activity.description}`);
-            console.log(`         📍 ADDRESS: ${activity.address || 'NO ADDRESS PROVIDED'}`);
-            console.log(`         🏷️ Category: ${activity.category}`);
-            
-            // Check if this is a flight
-            if (activity.category === 'Travel' && activity.description.toLowerCase().includes('flight')) {
-              console.log(`         ✈️ FLIGHT: This is a flight activity`);
-              if (activity.address.includes('Airport')) {
-                console.log(`         ✅ DATA SOURCE: Flight tool (with real airports)`);
-              } else {
-                console.log(`         ⚠️ WARNING: Flight missing proper airport information`);
-              }
-            } else {
-              // Check if this looks like real API data
-              const hasRealAddress = activity.address && 
-                                    activity.address !== 'N/A' && 
-                                    activity.address !== 'Address not available' &&
-                                    activity.address !== 'Location pending' &&
-                                    !activity.address.includes('city center');
-              
-              if (hasRealAddress) {
-                console.log(`         ✅ DATA SOURCE: REAL API DATA (Foursquare)`);
-              } else {
-                console.log(`         ⚠️ DATA SOURCE: DEFAULT/PLACEHOLDER - NOT FROM API`);
-              }
-            }
-          });
-        });
       }
       
-      // Validate critical fields
       if (!output.destination || !output.title) {
-        console.error('❌ [ITINERARY GENERATION] Missing destination or title');
         throw new Error('Invalid itinerary structure - missing required fields');
       }
       
-      // Ensure we have a valid itinerary array
       if (!output.itinerary || !Array.isArray(output.itinerary) || output.itinerary.length === 0) {
-        console.error('❌ [ITINERARY GENERATION] Invalid or empty itinerary array');
         throw new Error('Invalid itinerary structure - empty or invalid itinerary array');
       }
       
-      // Validate each day has required fields
       for (const day of output.itinerary) {
         if (!day.date || !day.activities || day.activities.length === 0) {
-          console.error('❌ [ITINERARY GENERATION] Invalid day structure:', day);
           throw new Error(`Invalid day ${day.day} - missing date or activities`);
         }
       }
@@ -519,33 +428,13 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
       return output;
     } catch (error) {
       console.error('❌ [ITINERARY GENERATION] Error:', error);
-      console.log('🔄 [ITINERARY GENERATION] Attempting retry with simplified prompt...');
       
-      // Try once more with a simpler approach
-      try {
-        const simpleInput = {
-          ...input,
-          prompt: input.prompt + '\n\nIMPORTANT: You MUST return a valid JSON itinerary structure. Use the year ' + new Date().getFullYear() + ' for all dates.'
-        };
-        
-        const {output: retryOutput} = await prompt(simpleInput);
-        
-        if (retryOutput && retryOutput.itinerary && retryOutput.itinerary.length > 0) {
-          console.log('✅ [ITINERARY GENERATION] Retry successful');
-          return retryOutput;
-        }
-      } catch (retryError) {
-        console.error('❌ [ITINERARY GENERATION] Retry also failed:', retryError);
-      }
-      
-      // Return a valid fallback structure
       const today = new Date();
-      const dates = [];
-      for (let i = 0; i < 3; i++) {
+      const dates = Array.from({ length: 3 }, (_, i) => {
         const date = new Date(today);
         date.setDate(date.getDate() + i);
-        dates.push(date.toISOString().split('T')[0]);
-      }
+        return date.toISOString().split('T')[0];
+      });
       
       return {
         destination: 'Your Destination',
@@ -553,22 +442,20 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
         itinerary: [{
           day: 1,
           date: dates[0],
-          title: 'Day 1 - Arrival',
+          title: 'Day 1 - API Error',
           activities: [{
             time: 'Morning',
-            description: 'We\'re having trouble connecting to our travel APIs. Please check your connection and try again.',
+            description: 'We\'re having trouble connecting to our travel APIs. Please check your API keys and try again.',
             category: 'Travel' as const,
             address: 'Location pending'
           }]
         }],
         quickTips: [
           'Ensure you have a stable internet connection',
-          'Try specifying a major city as your destination',
-          'Include specific dates in your request'
+          'Check that your Foursquare and OpenWeatherMap API keys are in your .env file',
+          'Try specifying a major city as your destination'
         ]
       };
     }
   }
 );
-
-    
