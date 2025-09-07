@@ -421,6 +421,7 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     
     console.log('='.repeat(80));
     console.log('📤 [ITINERARY GENERATION] Sending initial prompt to AI...');
+    console.log('   [ITINERARY GENERATION] Using model:', prompt.model.name);
     console.log('   [ITINERARY GENERATION] Prompt:', input.prompt);
     
     try {
