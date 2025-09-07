@@ -58,10 +58,14 @@ const refineItineraryBasedOnFeedbackFlow = ai.defineFlow(
     outputSchema: GeneratePersonalizedItineraryOutputSchema,
   },
   async input => {
+    console.log('🔄 [AI Flow] Refining itinerary based on feedback...');
+    console.log('   [AI Flow] Feedback:', input.userFeedback);
     const {output} = await refineItineraryBasedOnFeedbackPrompt(input);
     if (!output) {
+        console.error('❌ [AI Flow] Refinement failed, model returned no output.');
         throw new Error("The model failed to generate a refined itinerary.");
     }
+    console.log('✅ [AI Flow] Itinerary refined successfully.');
     return output;
   }
 );
