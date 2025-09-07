@@ -30,7 +30,7 @@ export type AnalyzeInitialPromptInput = z.infer<
 >;
 
 const AnalyzeInitialPromptOutputSchema = z.object({
-    questions: z.array(z.string()).describe("A single cohesive message containing all questions needed. This should be ONE string in the array, not multiple.")
+    questions: z.array(z.string()).describe("Array of question strings. Can be multiple messages for better readability.")
 });
 
 export type AnalyzeInitialPromptOutput = z.infer<typeof AnalyzeInitialPromptOutputSchema>;
@@ -72,18 +72,17 @@ const prompt = ai.definePrompt({
   {{/if}}
 
   CRITICAL RULES:
-  1. Return ONLY ONE string in the questions array that contains ALL the questions you need to ask.
-  2. Combine all questions into a single, friendly, conversational message.
+  1. You can return multiple strings in the questions array for better readability.
+  2. Each string should be a complete thought or question.
   3. If ALL essential information is provided, return an empty array [].
-  4. DO NOT return multiple separate question strings - always combine into ONE message.
-  5. Keep the message brief and natural.
-  6. If the user provides a vague duration like "a week" or "few days", that's sufficient.
+  4. Keep messages conversational and natural.
+  5. If the user provides a vague duration like "a week" or "few days", that's sufficient.
   
-  Example of CORRECT output:
+  Example outputs:
+  questions: ["Great! I'd love to help plan your Paris trip.", "Just need a few details: How long would you like to stay?", "When are you planning to travel?", "And where will you be departing from?"]
+  
+  OR for a single combined message:
   questions: ["To help plan your trip to Paris, I'll need to know: How long would you like to stay? When are you planning to travel? Where will you be departing from? And how many people will be traveling?"]
-  
-  Example of INCORRECT output (DO NOT DO THIS):
-  questions: ["How long will you be staying?", "What are your travel dates?", "Where are you departing from?"]
   `,
 });
 
@@ -94,17 +93,22 @@ const analyzeInitialPromptFlow = ai.defineFlow(
     outputSchema: AnalyzeInitialPromptOutputSchema,
   },
   async (input) => {
+    console.log('[AI Flow] Analyzing initial prompt:', input.prompt);
     const {output} = await prompt(input);
     
     if (!output) {
+        console.log('[AI Flow] No output from AI, returning error question');
         return { questions: ["I'm sorry, I had trouble understanding your request. Could you please provide more details about your trip?"] };
     }
+    
+    console.log('[AI Flow] Raw AI output:', JSON.stringify(output, null, 2));
     
     // Filter out empty or whitespace-only questions
     const validQuestions = (output.questions || []).filter(
       q => q && typeof q === 'string' && q.trim().length > 0
     );
     
+    console.log('[AI Flow] Final question array:', validQuestions);
     return { questions: validQuestions };
   }
 );

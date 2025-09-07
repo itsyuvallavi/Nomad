@@ -14,6 +14,8 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { GeneratePersonalizedItineraryOutputSchema } from '@/ai/schemas';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import { findAccommodation, findRestaurants, findWorkspaces, findAttractions } from '@/lib/api/foursquare';
+import { getWeatherForecast, getWeatherSummary } from '@/lib/api/weather';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -59,21 +61,122 @@ const decideOnEventOrLocation = ai.defineTool(
   }
 );
 
-const getWeatherForecast = ai.defineTool(
+const getWeatherForecastTool = ai.defineTool(
     {
         name: 'getWeatherForecast',
-        description: 'Gets the weather forecast for a specific location and date.',
+        description: 'MANDATORY: Gets the real weather forecast for a specific location. Call this FIRST before planning activities.',
         inputSchema: z.object({
-            location: z.string().describe('The location to get the weather for (e.g., "Lisbon, Portugal").'),
-            date: z.string().describe('The date for the forecast in YYYY-MM-DD format.'),
+            location: z.string().describe('The city name (e.g., "Lisbon", "Paris", "Tokyo").'),
         }),
         outputSchema: z.object({
-            forecast: z.string().describe('A description of the weather (e.g., "Sunny with a high of 25°C").')
+            forecast: z.string().describe('Weather summary for the location.'),
+            success: z.boolean().describe('Whether the API call succeeded.')
         }),
     },
     async (input) => {
-        // This is a mock implementation. In a real app, you would call a weather API.
-        return { forecast: "Sunny and pleasant, 22°C" };
+        console.log('🌤️ [Weather Tool] Getting weather for:', input.location);
+        try {
+            const weatherData = await getWeatherForecast(input.location, 5);
+            if (weatherData && weatherData.length > 0) {
+                const summary = weatherData.slice(0, 3)
+                    .map(w => `${w.date}: ${w.weather.main}, ${w.temp.min}-${w.temp.max}°C`)
+                    .join('; ');
+                console.log('✅ [Weather Tool] Success:', summary);
+                return { forecast: summary, success: true };
+            }
+        } catch (error) {
+            console.error('❌ [Weather Tool] API error:', error);
+        }
+        return { forecast: "Weather: Moderate temperatures expected", success: false };
+    }
+);
+
+const findRealPlacesTool = ai.defineTool(
+    {
+        name: 'findRealPlaces',
+        description: 'MANDATORY: Finds REAL places in a destination. You MUST use this for EVERY place in the itinerary.',
+        inputSchema: z.object({
+            destination: z.string().describe('The city to search (e.g., "Lisbon", "Paris", "Tokyo").'),
+            placeType: z.enum(['accommodation', 'restaurant', 'workspace', 'attraction']).describe('Type of place to find.'),
+            limit: z.number().optional().default(5).describe('Number of results (default: 5).'),
+        }),
+        outputSchema: z.object({
+            places: z.array(z.object({
+                name: z.string(),
+                address: z.string(),
+                category: z.string().optional(),
+                rating: z.number().optional(),
+            })),
+            success: z.boolean().describe('Whether the API call succeeded.')
+        }),
+    },
+    async (input) => {
+        console.log('🔍 [Places Tool] Searching for', input.placeType, 'in', input.destination);
+        console.log('📍 [Places Tool] Full input:', JSON.stringify(input));
+        
+        try {
+            let places: any[] = [];
+            const searchLimit = input.limit || 5;
+            
+            switch (input.placeType) {
+                case 'accommodation':
+                    places = await findAccommodation(input.destination);
+                    break;
+                case 'restaurant':
+                    places = await findRestaurants(input.destination, undefined, searchLimit);
+                    break;
+                case 'workspace':
+                    places = await findWorkspaces(input.destination, searchLimit);
+                    break;
+                case 'attraction':
+                    places = await findAttractions(input.destination, searchLimit);
+                    break;
+            }
+            
+            console.log(`✅ [Places Tool] Found ${places.length} real places from Foursquare API`);
+            
+            if (places.length === 0) {
+                console.warn('⚠️ [Places Tool] No places found, returning defaults');
+                // Return some default places as fallback
+                return {
+                    places: [{
+                        name: `${input.placeType} in ${input.destination}`,
+                        address: `${input.destination} city center`,
+                        category: input.placeType,
+                        rating: 4.0
+                    }],
+                    success: false
+                };
+            }
+            
+            const result = {
+                places: places.slice(0, searchLimit).map(p => ({
+                    name: p.name || `${input.placeType} venue`,
+                    address: p.location?.formatted_address || `${input.destination} area`,
+                    category: p.categories?.[0]?.name || input.placeType,
+                    rating: p.rating || undefined,
+                })),
+                success: true
+            };
+            
+            console.log('📦 [Places Tool] Returning', result.places.length, 'places');
+            result.places.forEach((p, i) => {
+                console.log(`   ${i + 1}. ${p.name} - ${p.address}`);
+            });
+            
+            return result;
+        } catch (error) {
+            console.error('❌ [Places Tool] API error:', error);
+            return { 
+                places: [{
+                    name: `${input.placeType} in ${input.destination}`,
+                    address: `${input.destination} city center`,
+                    category: input.placeType,
+                    rating: undefined
+                }],
+                success: false 
+            };
+        }
     }
 );
 
@@ -82,11 +185,25 @@ const prompt = ai.definePrompt({
   name: 'generatePersonalizedItineraryPrompt',
   input: {schema: GeneratePersonalizedItineraryInputSchema},
   output: {schema: GeneratePersonalizedItineraryOutputSchema},
-  tools: [decideOnEventOrLocation, getWeatherForecast],
+  tools: [decideOnEventOrLocation, getWeatherForecastTool, findRealPlacesTool],
+  temperature: 0.7,
+  maxOutputTokens: 8192,
   prompt: `You are a master travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
 
+  **CRITICAL DATE HANDLING:**
+  Today's date is: ` + new Date().toISOString().split('T')[0] + `
+  Current year: ` + new Date().getFullYear() + `
+  
+  1. Extract the EXACT dates from the user's prompt
+  2. ALWAYS use the CURRENT YEAR (` + new Date().getFullYear() + `) unless user specifies otherwise
+  3. If user says "January 15-20", use ` + new Date().getFullYear() + `-01-15 to ` + new Date().getFullYear() + `-01-20
+  4. If user says "5 days starting March 1st", calculate dates starting ` + new Date().getFullYear() + `-03-01
+  5. If user says "next week", calculate from today's date: ` + new Date().toISOString().split('T')[0] + `
+  6. ALWAYS use YYYY-MM-DD format for dates
+  7. The number of days in the itinerary MUST match the trip duration
+
   Analyze the user's prompt to extract:
-  - Trip duration and dates
+  - Trip duration and EXACT dates (very important!)
   - Destination(s) 
   - Origin/departure location
   - Any specific preferences mentioned
@@ -104,14 +221,29 @@ const prompt = ai.definePrompt({
   - **Travel Style:** Balanced comfort and adventure (not too rushed, 2-3 main activities per day)
   - **Meals:** Mix of local restaurants (breakfast $10-15, lunch $15-25, dinner $25-40)
 
+  **MANDATORY TOOL USAGE - YOU MUST FOLLOW THIS EXACTLY:**
+  
+  STEP 1: Call getWeatherForecast tool
+  - Input: destination city name
+  - This gives you real weather for planning
+  
+  STEP 2: Call findRealPlaces for accommodation
+  - Input: destination, placeType: 'accommodation', limit: 5
+  - Pick ONE real hotel from the results
+  
+  STEP 3: For EACH day, call findRealPlaces multiple times:
+  - Morning: findRealPlaces with placeType: 'restaurant' for breakfast
+  - Daytime: findRealPlaces with placeType: 'attraction' for activities
+  - Lunch: findRealPlaces with placeType: 'restaurant' 
+  - Afternoon: findRealPlaces with placeType: 'workspace' or 'attraction'
+  - Dinner: findRealPlaces with placeType: 'restaurant'
+  
   **CRITICAL RULES:**
-  1.  **Handle Multiple Destinations:** If the user requests multiple destinations, create a continuous itinerary covering all locations.
-  2.  **Select Specific Places:** Choose real, specific locations for ALL activities with actual addresses. No generic placeholders.
-  3.  **Smart Budget Application:** Apply the moderate budget default intelligently - adjust based on destination cost of living.
-  4.  **Digital Nomad Friendly:** Include cafes with good WiFi, coworking spaces (1-2 per trip), and productive work spots.
-  5.  **Use Tools:** Use getWeatherForecast for weather-appropriate activities. Use decideOnEventOrLocation for preference alignment.
-  6.  **First Day Setup:** Day 1 should start with accommodation check-in, followed by area orientation and a light schedule.
-  7.  **Origin Consideration:** Consider the origin location for jet lag and travel fatigue on Day 1.
+  1. NEVER make up place names - ONLY use results from findRealPlaces tool
+  2. Each place in your itinerary MUST come from a tool call
+  3. Include the ACTUAL address returned by the API
+  4. If a tool returns empty results, call it again with different parameters
+  5. Your itinerary MUST contain real places with real addresses
 
   {{#if attachedFile}}
   The user has also attached a file for reference. Use this to inform the itinerary.
@@ -122,10 +254,23 @@ const prompt = ai.definePrompt({
   - Keep activity descriptions concise (1-2 sentences max)
   - Include practical details (opening hours, costs, booking needs)
   - Add 3-5 relevant quick tips for the destination
-  - Ensure dates align with user's travel dates
+  - CRITICAL: Dates MUST align with user's specified travel dates (not arbitrary dates!)
+  - Each day's date field must be in YYYY-MM-DD format
+  - The itinerary array must have exactly the number of days matching the trip duration
   - Balance the itinerary: don't overschedule, allow for flexibility
 
-  The final output must include 'destination', 'title', 'itinerary', and 'quickTips'.
+  **FINAL OUTPUT REQUIREMENTS:**
+  You MUST return a valid JSON object with ALL of these fields:
+  - destination: string (the city/location)
+  - title: string (a catchy trip title)
+  - itinerary: array of day objects, each with:
+    - day: number
+    - date: string in YYYY-MM-DD format using year ` + new Date().getFullYear() + `
+    - title: string
+    - activities: array with time, description, category, address fields
+  - quickTips: array of 3-5 string tips
+  
+  NEVER return null or undefined. Always return a complete JSON structure.
   `,
 });
 
@@ -136,20 +281,126 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
     outputSchema: GeneratePersonalizedItineraryOutputSchema,
   },
   async (input) => {
-    console.log('Generating itinerary for input:', input.prompt);
-    const {output, usage} = await prompt(input);
+    console.log('🚀 [ITINERARY GENERATION] Starting for input:', input.prompt);
+    console.log('📅 [ITINERARY GENERATION] Today\'s date:', new Date().toISOString().split('T')[0]);
+    console.log('📅 [ITINERARY GENERATION] Current year:', new Date().getFullYear());
+    console.log('='.repeat(80));
+    
+    try {
+      const {output, usage} = await prompt(input);
 
-    console.log('LLM Usage:', usage);
-    console.log('Raw LLM Output:', JSON.stringify(output, null, 2));
-    
-    if (!output || !output.itinerary) {
-      console.error('Failed to generate a valid itinerary structure.');
-      // If the model fails, try to return a graceful empty state
-      // or a message indicating failure.
-      // Returning a valid, empty structure is often better than null/undefined.
-      return { destination: 'Unknown', title: 'Trip', itinerary: [], quickTips: [] };
+      console.log('📊 [ITINERARY GENERATION] LLM Usage:', usage);
+      console.log('📝 [ITINERARY GENERATION] Raw Output:', JSON.stringify(output, null, 2));
+      
+      if (!output || output === null) {
+        console.error('❌ [ITINERARY GENERATION] AI returned null or undefined');
+        throw new Error('AI model returned null - retrying with fallback');
+      }
+      
+      // Log what we're generating
+      if (output.itinerary && Array.isArray(output.itinerary)) {
+        console.log('✅ [ITINERARY GENERATION] Successfully generated itinerary:');
+        console.log(`   📍 Destination: ${output.destination}`);
+        console.log(`   📅 Days: ${output.itinerary.length}`);
+        
+        // Verify dates are sequential and make sense
+        let prevDate: Date | null = null;
+        output.itinerary.forEach(day => {
+          console.log(`   📆 Day ${day.day} (${day.date}): ${day.title}`);
+          console.log(`      Activities: ${day.activities.length}`);
+          
+          // Check date sequence
+          const currentDate = new Date(day.date);
+          if (prevDate) {
+            const dayDiff = Math.round((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (dayDiff !== 1) {
+              console.warn(`      ⚠️ DATE ISSUE: Gap of ${dayDiff} days between Day ${day.day - 1} and Day ${day.day}`);
+            }
+          }
+          prevDate = currentDate;
+          
+          // Log each activity to verify it's from APIs
+          day.activities.forEach(activity => {
+            console.log(`      ⭐ ${activity.time}: ${activity.description}`);
+            console.log(`         📍 Address: ${activity.address}`);
+            console.log(`         🏷️ Category: ${activity.category}`);
+            console.log(`         ✅ Data source: ${activity.address !== 'N/A' ? 'REAL API' : 'DEFAULT/ERROR'}`);
+          });
+        });
+      }
+      
+      // Validate critical fields
+      if (!output.destination || !output.title) {
+        console.error('❌ [ITINERARY GENERATION] Missing destination or title');
+        throw new Error('Invalid itinerary structure - missing required fields');
+      }
+      
+      // Ensure we have a valid itinerary array
+      if (!output.itinerary || !Array.isArray(output.itinerary) || output.itinerary.length === 0) {
+        console.error('❌ [ITINERARY GENERATION] Invalid or empty itinerary array');
+        throw new Error('Invalid itinerary structure - empty or invalid itinerary array');
+      }
+      
+      // Validate each day has required fields
+      for (const day of output.itinerary) {
+        if (!day.date || !day.activities || day.activities.length === 0) {
+          console.error('❌ [ITINERARY GENERATION] Invalid day structure:', day);
+          throw new Error(`Invalid day ${day.day} - missing date or activities`);
+        }
+      }
+      
+      console.log('='.repeat(80));
+      return output;
+    } catch (error) {
+      console.error('❌ [ITINERARY GENERATION] Error:', error);
+      console.log('🔄 [ITINERARY GENERATION] Attempting retry with simplified prompt...');
+      
+      // Try once more with a simpler approach
+      try {
+        const simpleInput = {
+          ...input,
+          prompt: input.prompt + '\n\nIMPORTANT: You MUST return a valid JSON itinerary structure. Use the year ' + new Date().getFullYear() + ' for all dates.'
+        };
+        
+        const {output: retryOutput} = await prompt(simpleInput);
+        
+        if (retryOutput && retryOutput.itinerary && retryOutput.itinerary.length > 0) {
+          console.log('✅ [ITINERARY GENERATION] Retry successful');
+          return retryOutput;
+        }
+      } catch (retryError) {
+        console.error('❌ [ITINERARY GENERATION] Retry also failed:', retryError);
+      }
+      
+      // Return a valid fallback structure
+      const today = new Date();
+      const dates = [];
+      for (let i = 0; i < 3; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        dates.push(date.toISOString().split('T')[0]);
+      }
+      
+      return {
+        destination: 'Your Destination',
+        title: 'Trip Itinerary',
+        itinerary: [{
+          day: 1,
+          date: dates[0],
+          title: 'Day 1 - Arrival',
+          activities: [{
+            time: 'Morning',
+            description: 'We\'re having trouble connecting to our travel APIs. Please check your connection and try again.',
+            category: 'Travel' as const,
+            address: 'Location pending'
+          }]
+        }],
+        quickTips: [
+          'Ensure you have a stable internet connection',
+          'Try specifying a major city as your destination',
+          'Include specific dates in your request'
+        ]
+      };
     }
-    
-    return output;
   }
 );

@@ -16,6 +16,7 @@ import {
 import StartItinerary from '@/components/start-itinerary';
 import type { FormValues } from '@/components/itinerary-form';
 import ChatDisplay from '@/components/chat-display';
+import { Button } from '@/components/ui/button';
 
 
 export interface ChatState {
@@ -34,84 +35,77 @@ export interface RecentSearch {
   lastUpdated: string;
 }
 
+export type View = 'start' | 'chat' | 'itinerary';
+
 export default function Home() {
+  const [currentView, setCurrentView] = useState<View>('start');
   const [itinerary, setItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(null);
-  const [isChatting, setIsChatting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
   const [currentSearchId, setCurrentSearchId] = useState<string | undefined>(undefined);
   
   const handleItineraryRequest = (values: FormValues, chatState?: ChatState, searchId?: string) => {
-    setIsChatting(true);
     setInitialPrompt(values);
     setSavedChatState(chatState);
     setCurrentSearchId(searchId);
+    setCurrentView('chat');
   };
   
-  const handleReturn = () => {
+  const handleReturnToStart = () => {
+    setCurrentView('start');
     setItinerary(null);
     setError(null);
-    setIsChatting(false);
     setInitialPrompt(null);
     setSavedChatState(undefined);
     setCurrentSearchId(undefined);
   };
+  
+  const handleItineraryGenerated = (newItinerary: GeneratePersonalizedItineraryOutput) => {
+    setItinerary(newItinerary);
+    setCurrentView('itinerary');
+  };
+  
+  const handleChatError = (errorMessage: string) => {
+    setError(errorMessage);
+    setCurrentView('start');
+  };
+
 
   const renderMainContent = () => {
-    if (isChatting) {
+    switch (currentView) {
+      case 'chat':
         return (
-            <ChatDisplay
-              initialPrompt={initialPrompt!}
-              savedChatState={savedChatState}
-              searchId={currentSearchId}
-              onItineraryGenerated={(itinerary) => {
-                setItinerary(itinerary);
-                setIsChatting(false);
-              }}
-              onError={(error) => {
-                setError(error);
-                setIsChatting(false);
-              }}
-              onReturn={handleReturn}
-            />
-        )
-    }
-
-    if (error) {
-      return (
-        <main className="flex-1 flex flex-col items-center justify-center">
-          <ItineraryDisplay
-            itinerary={null}
-            error={error}
-            setItinerary={setItinerary}
-            onReturn={handleReturn}
+          <ChatDisplay
+            initialPrompt={initialPrompt!}
+            savedChatState={savedChatState}
+            searchId={currentSearchId}
+            onItineraryGenerated={handleItineraryGenerated}
+            onError={handleChatError}
+            onReturn={handleReturnToStart}
           />
-        </main>
-      );
+        );
+      case 'itinerary':
+        return (
+          <ItineraryDisplay
+            itinerary={itinerary!}
+            setItinerary={setItinerary}
+            onReturn={handleReturnToStart}
+          />
+        );
+      case 'start':
+      default:
+        return (
+          <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+        );
     }
-
-    if (itinerary) {
-      return (
-        <ItineraryDisplay
-          itinerary={itinerary}
-          error={null}
-          setItinerary={setItinerary}
-          onReturn={handleReturn}
-        />
-      );
-    }
-
-    return (
-      <StartItinerary onItineraryRequest={handleItineraryRequest}/>
-    );
   }
 
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between p-6">
+      <header className="flex items-center justify-between p-6 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center animate-float">
             <div className="w-4 h-4 bg-slate-800 rounded-sm animate-rotate-and-breathe"></div>
@@ -137,6 +131,15 @@ export default function Home() {
           </SheetContent>
         </Sheet>
       </header>
+      
+      {error && (
+        <div className="p-6 pt-0">
+            <div className="bg-red-900/50 border border-red-500/50 text-red-300 p-4 rounded-lg">
+                <p><strong>Error:</strong> {error}</p>
+                <Button onClick={() => setError(null)} className="mt-2 text-white">Dismiss</Button>
+            </div>
+        </div>
+      )}
       
       {renderMainContent()}
     </div>

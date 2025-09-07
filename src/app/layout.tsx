@@ -1,6 +1,5 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: 'Nomad Navigator',
@@ -22,7 +21,6 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
         {children}
-        <Toaster />
       </body>
     </html>
   );
