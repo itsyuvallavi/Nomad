@@ -153,7 +153,8 @@ export default function ChatDisplay({
             saveChatStateToStorage(true, itinerary);
 
         } catch (e) {
-            logger.apiResponse(timerId, 'generatePersonalizedItinerary', { success: false });
+            const duration = logger.endTimer(timerId);
+            logger.apiResponse(timerId, 'generatePersonalizedItinerary', { success: false, duration });
             logger.error('AI', 'Itinerary generation failed', { error: e, id: thisGenerationId });
             const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
             onError(`I'm sorry, there was an error creating your itinerary. ${errorMessage}`);
@@ -171,7 +172,8 @@ export default function ChatDisplay({
 
 
     useEffect(() => {
-        if (savedChatState) {
+        const hasStarted = generationIdRef.current !== null;
+        if (savedChatState || hasStarted) {
             return;
         }
         
@@ -183,7 +185,7 @@ export default function ChatDisplay({
 
         startConversation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [initialPrompt.prompt, savedChatState]);
 
     const handleUserInputSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();

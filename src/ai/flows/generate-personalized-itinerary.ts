@@ -61,13 +61,16 @@ export async function generatePersonalizedItinerary(
     // Parse destinations to check if it's a multi-destination trip
     const parsedTrip = parseDestinations(input.prompt);
     const isMultiDestination = parsedTrip.destinations.length > 1;
-    const isLongTrip = parsedTrip.totalDays > 14;
+    // Lowered threshold to 5 days to prevent timeouts on standard week-long trips
+    const isLongTrip = parsedTrip.totalDays > 5;
     
     // Use chunked approach for multi-destination or long trips to avoid timeouts
     if (isMultiDestination || isLongTrip) {
-      logger.info('AI', 'Using CHUNKED generation for multi-destination trip', {
+      logger.info('AI', 'Using CHUNKED generation for multi-destination or long trip', {
         destinations: parsedTrip.destinations.length,
-        totalDays: parsedTrip.totalDays
+        totalDays: parsedTrip.totalDays,
+        isMulti: isMultiDestination,
+        isLong: isLongTrip,
       });
       
       const result = await generateChunkedItinerary(
@@ -80,6 +83,7 @@ export async function generatePersonalizedItinerary(
       return result;
     } else {
       // Use regular generation for simple trips
+      logger.info('AI', 'Using DIRECT generation for simple trip');
       const result = await generateItineraryWithOpenAI(
         input.prompt,
         input.attachedFile,

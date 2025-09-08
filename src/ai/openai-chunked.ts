@@ -25,7 +25,7 @@ function getOpenAIClient(): OpenAI {
   if (!openai) {
     openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
-      timeout: 30000, // 30 second timeout per chunk
+      timeout: 45000, // 45 second timeout per chunk
       maxRetries: 2, // Add automatic retries
     });
   }
@@ -58,12 +58,12 @@ async function generateDestinationChunk(
 Days should be numbered ${chunk.startDay} to ${chunk.endDay}.
 Start date: ${chunkStartDate.toISOString().split('T')[0]}
 
-Return JSON array of day objects:
+Return ONLY a valid JSON array of day objects:
 [{"day": number, "date": "YYYY-MM-DD", "title": "string", "activities": [3-4 activities]}]
-Activity: {"time": "string", "description": "string", "category": "Travel/Food/Leisure", "address": "string"}`;
+An activity is: {"time": "string", "description": "string", "category": "Travel/Food/Leisure", "address": "string"}`;
 
   const userPrompt = `Create a detailed ${chunk.days}-day itinerary for ${chunk.destination}.
-Context: ${tripContext}
+Context for the whole trip: ${tripContext}
 Include realistic activities, local restaurants, and cultural experiences.`;
 
   try {
@@ -74,15 +74,16 @@ Include realistic activities, local restaurants, and cultural experiences.`;
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.7,
-      max_tokens: 2048, // Smaller per chunk
+      max_tokens: 4096, // Increased token limit per chunk
       response_format: { type: 'json_object' },
     });
 
     const content = response.choices[0]?.message?.content || '{"days": []}';
+    // The AI might return the array directly or wrapped in an object.
     const result = JSON.parse(content);
     
     // Extract the days array from various possible response formats
-    const days = result.days || result.itinerary || result || [];
+    const days = result.days || result.itinerary || (Array.isArray(result) ? result : []);
     
     return Array.isArray(days) ? days : [];
   } catch (error: any) {
@@ -114,7 +115,17 @@ export async function generateChunkedItinerary(
   const parsedTrip = parseDestinations(prompt);
   
   if (parsedTrip.destinations.length === 0) {
-    throw new Error('No destinations found in prompt');
+    // If no destinations parsed, but we have a totalDays, create one chunk
+    if (parsedTrip.totalDays > 0) {
+        parsedTrip.destinations.push({
+            name: "Destination", // Generic name
+            duration: parsedTrip.totalDays,
+            durationText: `${parsedTrip.totalDays} days`,
+            order: 1,
+        });
+    } else {
+        throw new Error('No destinations or duration found in prompt for chunked generation.');
+    }
   }
 
   // Calculate start date (default to next Monday)
@@ -127,32 +138,10 @@ export async function generateChunkedItinerary(
   let currentDay = 1;
   
   for (const dest of parsedTrip.destinations) {
-    // Extract days from the destination info
-    const daysMatch = dest.name.match(/\((\d+)\s*days?\)/);
-    let days = 7; // default
-    
-    // First check if days is directly provided in the parsed destination
-    if (dest.days && typeof dest.days === 'number') {
-      days = dest.days;
-    } else if (daysMatch) {
-      // Extract from parentheses in name
-      days = parseInt(daysMatch[1]);
-    } else if (dest.duration && typeof dest.duration === 'number') {
-      // Use duration field if available
-      days = dest.duration;
-    } else if (dest.name.toLowerCase().includes('denmark')) {
-      // Special case for Denmark which should be 3 days
-      days = 3;
-    }
-    
-    // Clean destination name - remove days info and convert parentheses
-    const cleanName = dest.name
-      .replace(/\s*\(\d+\s*days?\)/, '') // Remove (3 days)
-      .replace(/\s*\(([^)]+)\)/, ' $1')   // Convert (Copenhagen) to Copenhagen
-      .trim();
+    const days = dest.duration || 7; // Use duration, default to 7
     
     const chunk: DestinationChunk = {
-      destination: cleanName,
+      destination: dest.name,
       days: days,
       startDay: currentDay,
       endDay: currentDay + days - 1
@@ -204,21 +193,21 @@ export async function generateChunkedItinerary(
   const itineraryWithTravel: any[] = [];
   
   for (let i = 0; i < allDays.length; i++) {
-    const currentDay = allDays[i];
-    const nextDay = allDays[i + 1];
+    const currentDayData = allDays[i];
+    const nextDayData = allDays[i + 1];
     
-    itineraryWithTravel.push(currentDay);
+    itineraryWithTravel.push(currentDayData);
     
     // Check if we're transitioning between destinations
-    if (nextDay && i < chunks.length - 1) {
-      const currentChunk = chunks.find(c => currentDay.day >= c.startDay && currentDay.day <= c.endDay);
-      const nextChunk = chunks.find(c => nextDay.day >= c.startDay && nextDay.day <= c.endDay);
+    if (nextDayData && i < chunks.length - 1) {
+      const currentChunk = chunks.find(c => currentDayData.day >= c.startDay && currentDayData.day <= c.endDay);
+      const nextChunk = chunks.find(c => nextDayData.day >= c.startDay && nextDayData.day <= c.endDay);
       
       if (currentChunk && nextChunk && currentChunk.destination !== nextChunk.destination) {
         // This is the last day of a destination, add travel to the first activity of the next day
-        if (nextDay.activities && nextDay.activities.length > 0) {
+        if (nextDayData.activities && nextDayData.activities.length > 0) {
           // Add travel as first activity
-          nextDay.activities.unshift({
+          nextDayData.activities.unshift({
             time: "Morning",
             description: `Travel from ${currentChunk.destination} to ${nextChunk.destination}`,
             category: "Travel",
@@ -231,7 +220,7 @@ export async function generateChunkedItinerary(
 
   // Build the final itinerary
   const destinationNames = parsedTrip.destinations.map(d => d.name).join(', ');
-  const title = `${parsedTrip.totalDays}-Day Multi-Country Adventure`;
+  const title = `${parsedTrip.totalDays}-Day Adventure to ${destinationNames}`;
   
   // Generate quick tips via OpenAI API - NO HARDCODED DATA!
   const tipsPrompt = `Generate 5 travel tips for a trip to: ${destinationNames}. Format as JSON array of strings.`;
@@ -271,7 +260,7 @@ export async function generateChunkedItinerary(
   const itinerary: GeneratePersonalizedItineraryOutput = {
     destination: destinationNames,
     title: title,
-    itinerary: itineraryWithTravel,
+    itinerary: itineraryWithTravel.length > 0 ? itineraryWithTravel : allDays,
     quickTips: quickTips
   };
 
@@ -283,48 +272,4 @@ export async function generateChunkedItinerary(
   });
 
   return itinerary;
-}
-
-/**
- * Generate with streaming (alternative approach)
- */
-export async function generateStreamingItinerary(
-  prompt: string,
-  onProgress?: (progress: string) => void
-): Promise<GeneratePersonalizedItineraryOutput> {
-  const client = getOpenAIClient();
-  const parsedTrip = parseDestinations(prompt);
-  
-  const systemPrompt = `Create a ${parsedTrip.totalDays}-day travel itinerary for ${parsedTrip.destinations.map(d => d.name).join(', ')}.
-Return complete JSON with destination, title, itinerary array, and quickTips array.`;
-
-  const stream = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.7,
-    max_tokens: 16384,
-    stream: true,
-  });
-
-  let fullResponse = '';
-  
-  for await (const chunk of stream) {
-    const content = chunk.choices[0]?.delta?.content || '';
-    fullResponse += content;
-    
-    // Notify progress
-    if (onProgress && content) {
-      onProgress(content);
-    }
-  }
-
-  try {
-    return JSON.parse(fullResponse) as GeneratePersonalizedItineraryOutput;
-  } catch (error) {
-    logger.error('AI', 'Failed to parse streaming response', error);
-    throw new Error('Invalid response format from streaming API');
-  }
 }
