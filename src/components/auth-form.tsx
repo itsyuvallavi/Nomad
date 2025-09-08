@@ -23,8 +23,8 @@ const GoogleIcon = () => (
 
 // SVG Icon for Apple
 const AppleIcon = () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19.39,14.83C19.35,14.83,19.32,14.83,19.28,14.83C18.15,14.73,17.02,15.2,16.28,16.03C15.53,16.88,14.9,17.93,14.84,19.06C14.83,19.14,14.83,19.21,14.83,19.29C14.83,19.33,14.83,19.38,14.83,19.42C15.8,19.5,16.79,19.03,17.58,18.23C18.39,17.43,19,16.37,19.12,15.24C19.15,15.1,19.18,14.96,19.2,14.83H19.39M18.82,7.43C18.25,6.66,17.2,6.33,16.14,6.5C15,6.7,14,7.28,13.25,8.13C13.25,8.13,13.24,8.14,13.24,8.14C12.5,7.27,11.45,6.7,10.35,6.5C9.26,6.3,8.2,6.64,7.59,7.4C6.34,8.83,6.3,10.95,7.46,12.33C8.04,13,8.79,13.43,9.54,13.68C10.26,13.92,11.03,14,11.75,14H12C11.94,13.3,11.93,12.6,12.03,11.93C12.18,11,12.58,10.15,13.25,9.5C13.25,9.5,13.25,9.5,13.25,9.5C13.88,8.8,14.84,8.34,15.82,8.19C16.83,8.04,17.82,8.27,18.53,9C18.69,8.49,18.82,7.96,18.82,7.43M12.15,0C10.15,0,8.3,0.67,6.86,1.86C5.3,3.15,4.26,5.03,4.06,7.03C2.86,7.23,1.66,7.86,0.85,8.99C-0.41,10.61,-0.19,12.94,1.26,14.41C2,15.19,2.94,15.71,3.93,15.88C3.96,16.1,3.99,16.32,4.03,16.54C4.24,18.7,5.34,20.67,6.9,21.94C8.36,23.11,10.14,24,12.08,24C12.11,24,12.13,24,12.15,24C14.15,24,16,23.33,17.44,22.14C18.9,20.85,19.94,18.97,20.14,16.97C21.34,16.77,22.54,16.14,23.35,15.01C24.61,13.39,24.39,11.06,22.94,9.59C22.2,8.81,21.26,8.29,20.27,8.12C20.24,7.9,20.21,7.68,20.17,7.46C19.96,5.3,18.86,3.33,17.4,2.06C15.94,0.89,14.16,0,12.22,0H12.15Z"></path>
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12.01,1.96C10.94,2.05 9.87,2.54 9.09,3.3C8.03,4.28 7.5,5.65 7.5,7.03C7.5,7.08 7.5,7.13 7.5,7.18C7.51,8.58 8.12,9.84 9.07,10.74C9.5,11.12 9.99,11.38 10.51,11.53C11.02,11.68 11.55,11.72 12.08,11.64C12.07,12.33 12.04,13.01 11.97,13.68C11.08,13.56 10.18,13.89 9.53,14.54C8.34,15.65 8.11,17.47 9,18.86C9.84,20.15 11.29,21 12.8,21C13.04,21 13.27,20.97 13.5,20.92C14.47,20.73 15.42,20.13 16.03,19.33C16.21,19.12 16.38,18.9 16.54,18.67C15.34,17.8 15.05,16.23 15.8,15.05C16.83,13.44 18.9,12.83 20.5,13.88C20.9,13.3 21.2,12.67 21.35,12C20.13,11.83 18.94,11.25 18.13,10.28C17.1,9.04 16.97,7.29 17.88,6.03C18.66,5 19.92,4.64 21.05,4.88C21.05,3.71 20.69,2.56 19.97,1.75C18.82,0.58 17.11,0 15.4,0C14.25,0 13.1,0.42 12.01,1.96Z" />
     </svg>
 );
 
@@ -117,24 +117,7 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
 
         {/* Auth Form */}
         <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-600/50 p-6">
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <Button variant="outline" className="bg-slate-700/50 border-slate-600/50 hover:bg-slate-700/80 text-white" onClick={handleSocialLogin}>
-              <GoogleIcon />
-              <span>Google</span>
-            </Button>
-            <Button variant="outline" className="bg-slate-700/50 border-slate-600/50 hover:bg-slate-700/80 text-white" onClick={handleSocialLogin}>
-              <AppleIcon />
-              <span>Apple</span>
-            </Button>
-          </div>
-
-          <div className="relative flex py-2 items-center">
-              <div className="flex-grow border-t border-slate-600/50"></div>
-              <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase">Or continue with</span>
-              <div className="flex-grow border-t border-slate-600/50"></div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
             
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-300">Email</Label>
@@ -195,10 +178,15 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 group"
             >
-              {isLoading ? (
+              {isLoading && !isLogin ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{isLogin ? 'Signing in...' : 'Redirecting...'}</span>
+                  <span>Creating Account...</span>
+                </div>
+              ) : isLoading && isLogin ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Signing In...</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-2">
@@ -208,6 +196,23 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
               )}
             </Button>
           </form>
+
+          <div className="relative flex py-5 items-center">
+              <div className="flex-grow border-t border-slate-600/50"></div>
+              <span className="flex-shrink mx-4 text-slate-400 text-xs uppercase">Or</span>
+              <div className="flex-grow border-t border-slate-600/50"></div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="outline" className="bg-slate-700/50 border-slate-600/50 hover:bg-slate-700/80 text-white" onClick={handleSocialLogin}>
+              <GoogleIcon />
+              <span>Google</span>
+            </Button>
+            <Button variant="outline" className="bg-slate-700/50 border-slate-600/50 hover:bg-slate-700/80 text-white" onClick={handleSocialLogin}>
+              <AppleIcon />
+              <span>Apple</span>
+            </Button>
+          </div>
 
           <div className="mt-6 text-center">
             <span className="text-slate-400">
