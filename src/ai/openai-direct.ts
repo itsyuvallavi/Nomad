@@ -26,7 +26,7 @@ function getOpenAIClient(): OpenAI {
     openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
       timeout: 50000, // 50 second timeout (under Next.js 60s limit)
-      maxRetries: 1,
+      maxRetries: 2, // Add automatic retries
     });
   }
   
@@ -172,12 +172,12 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
     } else if (error.status === 401) {
       throw new Error('Invalid OpenAI API key. Please check your OPENAI_API_KEY in .env file.');
     } else if (error.status === 429) {
-      throw new Error('OpenAI rate limit exceeded. Please wait a moment and try again.');
+      throw new Error('AI service is temporarily overloaded (Rate Limit). Please wait a moment and try again.');
     } else if (error.status === 500 || error.status === 503) {
-      throw new Error('OpenAI service is temporarily unavailable. Please try again.');
+      throw new Error('The AI service is currently unavailable. Please try again later.');
     }
     
-    throw new Error(`OpenAI API error: ${error.message}`);
+    throw new Error(`AI generation failed: ${error.message}`);
   }
 }
 

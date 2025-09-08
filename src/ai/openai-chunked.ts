@@ -26,7 +26,7 @@ function getOpenAIClient(): OpenAI {
     openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
       timeout: 30000, // 30 second timeout per chunk
-      maxRetries: 2,
+      maxRetries: 2, // Add automatic retries
     });
   }
   
@@ -87,7 +87,11 @@ Include realistic activities, local restaurants, and cultural experiences.`;
     return Array.isArray(days) ? days : [];
   } catch (error: any) {
     logger.error('AI', `Failed to generate chunk for ${chunk.destination}`, error);
-    throw error;
+    // Provide more specific error messages for chunk generation
+    if (error.status === 429) {
+      throw new Error(`AI service is overloaded while generating plans for ${chunk.destination}. Please try again shortly.`);
+    }
+    throw new Error(`Failed to generate itinerary for ${chunk.destination}: ${error.message}`);
   }
 }
 
@@ -187,7 +191,7 @@ export async function generateChunkedItinerary(
       // ⚠️ CRITICAL: NO FALLBACK DATA! If API fails, the whole generation must fail
       // We NEVER use hardcoded data - ALL data must come from APIs
       logger.error('AI', `CRITICAL: API failed for ${chunk.destination} - cannot continue without real data`);
-      throw new Error(`Failed to generate itinerary for ${chunk.destination}: ${error.message}. ALL data must come from OpenAI API - no fallbacks allowed.`);
+      throw error; // Re-throw the specific error from generateDestinationChunk
     }
   }
 
