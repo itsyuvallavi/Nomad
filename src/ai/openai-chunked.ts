@@ -115,7 +115,7 @@ export async function generateChunkedItinerary(
   const parsedTrip = parseDestinations(prompt);
   
   if (parsedTrip.destinations.length === 0) {
-    // If no destinations parsed, but we have a totalDays, create one chunk
+    // If no destinations parsed, but we have a totalDays, create one chunk for it.
     if (parsedTrip.totalDays > 0) {
         parsedTrip.destinations.push({
             name: "Destination", // Generic name
