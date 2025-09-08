@@ -6,8 +6,7 @@ import { Label } from './ui/label';
 import { Card } from './ui/card';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { FaApple } from "react-icons/fa";
-import { FaGoogle } from "react-icons/fa";
+import { FaApple, FaGoogle } from "react-icons/fa";
 
 interface AuthFormProps {
   onLogin: () => void;
@@ -21,9 +20,6 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -175,10 +171,12 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
           
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" className="bg-slate-700/50 border-slate-600/50 hover:bg-slate-700/80 text-white" onClick={handleSocialLogin}>
-            <FaGoogle />
+              <FaGoogle className="w-5 h-5 mr-2" />
+              <span>Google</span>
             </Button>
             <Button variant="outline" className="bg-slate-700/50 border-slate-600/50 hover:bg-slate-700/80 text-white" onClick={handleSocialLogin}>
-              <FaApple className="w-5 h-5" />
+              <FaApple className="w-5 h-5 mr-2" />
+              <span>Apple</span>
             </Button>
           </div>
 
