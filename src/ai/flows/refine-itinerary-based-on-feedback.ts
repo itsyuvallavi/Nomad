@@ -2,19 +2,18 @@
 'use server';
 
 /**
- * @fileOverview Refines a given itinerary based on user feedback.
+ * @fileOverview Refines a given itinerary based on user feedback using direct OpenAI calls.
  *
  * - refineItineraryBasedOnFeedback - A function that takes an itinerary and user feedback, and returns a refined itinerary.
  * - RefineItineraryBasedOnFeedbackInput - The input type for the refineItineraryBasedOnFeedback function.
  * - RefineItineraryBasedOnFeedbackOutput - The return type for the refineItineraryBasedOnFeedback function.
  */
-
-import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-// We get the schemas from the central schemas file to ensure consistency
-import { GeneratePersonalizedItineraryOutputSchema } from '@/ai/schemas';
+import { logger } from '@/lib/logger';
+import { openai, MODEL_CONFIG } from '@/ai/openai-config';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import { GeneratePersonalizedItineraryOutputSchema } from '@/ai/schemas';
+
 
 const RefineItineraryBasedOnFeedbackInputSchema = z.object({
   originalItinerary: GeneratePersonalizedItineraryOutputSchema.describe("The original itinerary in JSON format."),
@@ -32,48 +31,59 @@ export type RefineItineraryBasedOnFeedbackOutput = GeneratePersonalizedItinerary
 export async function refineItineraryBasedOnFeedback(
   input: RefineItineraryBasedOnFeedbackInput
 ): Promise<RefineItineraryBasedOnFeedbackOutput> {
-  return refineItineraryBasedOnFeedbackFlow(input);
-}
-
-const refineItineraryBasedOnFeedbackPrompt = ai.definePrompt({
-  name: 'refineItineraryBasedOnFeedbackPrompt',
-  input: {schema: RefineItineraryBasedOnFeedbackInputSchema},
-  output: {schema: GeneratePersonalizedItineraryOutputSchema},
-  prompt: `You are an expert travel assistant. A user has provided an itinerary and some feedback.
-
-  Original Itinerary:
-  {{{json originalItinerary}}}
-
-  User Feedback:
-  "{{{userFeedback}}}"
-
-  Based on this feedback, please refine the itinerary. Your response must be only the refined itinerary in the exact same JSON structure as the original.
+  const { originalItinerary, userFeedback } = input;
   
-  IMPORTANT for multi-destination trips:
-  - When adding a new destination (e.g., "add 7 days in Brussels"), ensure each day has a clear title indicating the location
-  - Use format like "Brussels Day 1" or "Day 8: Brussels" for clarity
-  - Include travel activities between cities (e.g., "Travel from London to Brussels")
-  - Ensure addresses include the city name for location detection
-  
-  Only change the content of the fields based on the feedback. Ensure all fields for each activity (time, description, category, address) are present.
-`,
-});
+  logger.info('AI', 'Refining itinerary with direct OpenAI call', { feedback: userFeedback });
 
-const refineItineraryBasedOnFeedbackFlow = ai.defineFlow(
-  {
-    name: 'refineItineraryBasedOnFeedbackFlow',
-    inputSchema: RefineItineraryBasedOnFeedbackInputSchema,
-    outputSchema: GeneratePersonalizedItineraryOutputSchema,
-  },
-  async input => {
-    console.log('🔄 [AI Flow] Refining itinerary based on feedback...');
-    console.log('   [AI Flow] Feedback:', input.userFeedback);
-    const {output} = await refineItineraryBasedOnFeedbackPrompt(input);
-    if (!output) {
-        console.error('❌ [AI Flow] Refinement failed, model returned no output.');
-        throw new Error("The model failed to generate a refined itinerary.");
+  const systemPrompt = `You are an expert travel assistant. A user has provided an itinerary and some feedback.
+
+Based on this feedback, please refine the itinerary. Your response must be only the refined itinerary in the exact same JSON structure as the original.
+
+IMPORTANT for multi-destination trips:
+- When adding a new destination (e.g., "add 7 days in Brussels"), ensure each day has a clear title indicating the location.
+- Use format like "Brussels Day 1" or "Day 8: Brussels" for clarity.
+- Include travel activities between cities (e.g., "Travel from London to Brussels").
+- Ensure addresses include the city name for location detection.
+- ONLY change the content of the fields based on the feedback. Ensure all fields for each activity (time, description, category, address) are present.
+- The entire, complete, new itinerary must be returned.
+`;
+
+  const userMessage = `
+Original Itinerary:
+${JSON.stringify(originalItinerary, null, 2)}
+
+User Feedback:
+"${userFeedback}"
+`;
+
+  try {
+    if (!openai) {
+        throw new Error('OpenAI client not initialized. Check OPENAI_API_KEY.');
     }
-    console.log('✅ [AI Flow] Itinerary refined successfully.');
-    return output;
+      
+    const response = await openai.chat.completions.create({
+      model: MODEL_CONFIG.model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: MODEL_CONFIG.temperature,
+      max_tokens: MODEL_CONFIG.max_tokens,
+      response_format: MODEL_CONFIG.response_format,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('OpenAI returned an empty response.');
+    }
+    
+    const refinedItinerary = JSON.parse(content) as GeneratePersonalizedItineraryOutput;
+
+    logger.info('AI', '✅ Itinerary refined successfully via OpenAI');
+    return refinedItinerary;
+      
+  } catch (error: any) {
+    logger.error('AI', 'Failed to refine itinerary with OpenAI', error);
+    throw new Error(`Failed to refine itinerary: ${error.message}`);
   }
-);
+}
