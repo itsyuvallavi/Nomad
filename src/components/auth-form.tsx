@@ -36,20 +36,13 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
     lastName: ''
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    setIsLoading(true); // Show loading state, redirect will happen after
     if (isLogin) {
-      setTimeout(() => {
-        setIsLoading(false);
-        onLogin();
-      }, 800);
+      onLogin();
     } else {
-        setTimeout(() => {
-            setIsLoading(false);
-            onSignUp();
-          }, 800);
+      onSignUp();
     }
   };
 
@@ -59,10 +52,7 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
   
   const handleSocialLogin = () => {
     setIsLoading(true);
-    setTimeout(() => {
-        setIsLoading(false);
-        onLogin();
-    }, 800);
+    onLogin();
   }
 
   return (
@@ -173,15 +163,10 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 group"
             >
-              {isLoading && !isLogin ? (
+              {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Creating Account...</span>
-                </div>
-              ) : isLoading && isLogin ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Signing In...</span>
+                  <span>Redirecting...</span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center space-x-2">
