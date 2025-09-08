@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
+import { logger } from '@/lib/logger';
 
 interface ItineraryPanelProps {
   itinerary: GeneratePersonalizedItineraryOutput;
@@ -27,30 +28,6 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
   
   // Extract budget info (using quickTips or default)
   const budgetLevel = 'Budget-friendly';
-  
-  // Fetch images for each destination using Pexels
-  useEffect(() => {
-    const fetchImages = async () => {
-      const allDestinations = itinerary.destination.split(',').map(d => d.trim());
-      console.log('📸 [Pexels] Fetching images for destinations:', allDestinations);
-      
-      for (const destination of allDestinations) {
-        try {
-          const images = await searchPexelsImages(destination, 3);
-          if (images.length > 0) {
-            console.log(`📸 [Pexels] Found ${images.length} images for ${destination}`);
-            setDestinationImages(prev => ({ ...prev, [destination]: images }));
-          } else {
-            console.warn(`📸 [Pexels] No images found for ${destination}`);
-          }
-        } catch (error) {
-          console.error(`📸 [Pexels] Error fetching images for ${destination}:`, error);
-        }
-      }
-    };
-    
-    fetchImages();
-  }, [itinerary.destination]);
   
   // Group days by main country/destination - following chronological order
   let currentCountry = '';
@@ -159,43 +136,37 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
   
   // Log destination detection for debugging
   useEffect(() => {
-    console.log('[ItineraryPanel] Destination Analysis:', {
+    logger.debug('SYSTEM', 'Destination Analysis in ItineraryPanel', {
       rawDestination: itinerary.destination,
       parsedLocations: locations,
       daysByLocation: Object.entries(daysByLocation).map(([loc, data]) => ({
         location: loc,
         days: data.days.length,
         dayNumbers: data.days.map(d => d.day),
-        dayTitles: data.days.map(d => d.title),
         startDay: data.startDay,
         endDay: data.endDay
       }))
     });
-  }, [itinerary.destination]);
+  }, [itinerary.destination, daysByLocation, locations]);
   
   // Fetch images for each destination from Pexels
   useEffect(() => {
     const fetchImages = async () => {
-      console.log('[Pexels] Starting image fetch for locations:', locations);
+      logger.info('IMAGE', 'Starting Pexels image fetch', { locations });
       const newImages: Record<string, PexelsImage[]> = {};
       
       for (const location of locations) {
         try {
-          console.log(`[Pexels] Fetching images for: ${location}`);
           const images = await searchPexelsImages(location, 3);
           newImages[location] = images;
-          console.log(`[Pexels] Found ${images.length} images for ${location}:`, images.map(img => ({
-            url: img.src.large,
-            photographer: img.photographer
-          })));
+          logger.info('IMAGE', `Pexels found ${images.length} images for ${location}`);
         } catch (error) {
-          console.error(`[Pexels] Failed to fetch images for ${location}:`, error);
+          logger.error('IMAGE', `Pexels failed to fetch images for ${location}`, { error });
           newImages[location] = [];
         }
       }
       
       setDestinationImages(newImages);
-      console.log('[Pexels] All images fetched:', newImages);
     };
     
     if (locations.length > 0) {
@@ -206,8 +177,6 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
   // Generate image search terms based on destination
   const destinationName = selectedLocation || itinerary.destination.split(',')[0].trim();
   
-  // Only log once on initial load, not on every re-render
-  // Remove or comment out for production
 
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">

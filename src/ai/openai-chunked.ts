@@ -105,8 +105,7 @@ export async function generateChunkedItinerary(
 ): Promise<GeneratePersonalizedItineraryOutput> {
   const startTime = Date.now();
   
-  console.log('🤖 [Server] Starting CHUNKED OpenAI generation');
-  logger.info('AI', '🤖 Starting chunked generation', {
+  logger.info('AI', 'Starting CHUNKED OpenAI generation', {
     model: 'gpt-4o-mini',
     timestamp: new Date().toISOString(),
   });
@@ -174,7 +173,10 @@ export async function generateChunkedItinerary(
   const allDays: any[] = [];
   
   for (const chunk of chunks) {
-    console.log(`📤 [Server] Generating chunk ${chunks.indexOf(chunk) + 1}/${chunks.length}: ${chunk.destination} (Days ${chunk.startDay}-${chunk.endDay})`);
+    logger.info('AI', `Generating chunk ${chunks.indexOf(chunk) + 1}/${chunks.length}`, {
+        destination: chunk.destination,
+        days: `${chunk.startDay}-${chunk.endDay}`
+    });
     
     try {
       const chunkDays = await generateDestinationChunk(chunk, prompt, startDate);
@@ -185,9 +187,9 @@ export async function generateChunkedItinerary(
       }));
       allDays.push(...daysWithDestination);
       
-      console.log(`✅ [Server] Chunk completed: ${chunk.destination} - Generated ${chunkDays.length} days`);
+      logger.info('AI', `Chunk completed: ${chunk.destination}`, { generatedDays: chunkDays.length });
     } catch (error: any) {
-      console.error(`❌ [Server] Failed to generate chunk for ${chunk.destination}:`, error.message);
+      logger.error('AI', `Failed to generate chunk for ${chunk.destination}`, { error });
       // ⚠️ CRITICAL: NO FALLBACK DATA! If API fails, the whole generation must fail
       // We NEVER use hardcoded data - ALL data must come from APIs
       logger.error('AI', `CRITICAL: API failed for ${chunk.destination} - cannot continue without real data`);

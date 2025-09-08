@@ -1,4 +1,6 @@
 // OpenWeatherMap API integration
+import { logger } from '@/lib/logger';
+
 const OPENWEATHERMAP_API_KEY = process.env.OPENWEATHERMAP;
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
@@ -59,30 +61,30 @@ export async function getWeatherForecast(
   cityName: string,
   days: number = 5
 ): Promise<WeatherData[]> {
-  console.log('🌤️ [WEATHER API] Getting forecast for:', cityName, 'for', days, 'days');
+  logger.info('WEATHER', `Getting forecast for ${cityName}`, { days });
   
   if (!OPENWEATHERMAP_API_KEY) {
-    console.error('❌ [WEATHER API] No API key configured');
+    logger.error('API', 'OpenWeatherMap API key not configured');
     throw new Error('OpenWeatherMap API key not configured');
   }
 
   // First get city coordinates
   const coords = await getCityCoordinates(cityName);
-  console.log('📍 [WEATHER API] City coordinates:', coords);
+  logger.info('WEATHER', `City coordinates found`, { coords });
   
   // Then get the forecast
   const url = `${WEATHER_BASE_URL}/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${OPENWEATHERMAP_API_KEY}&units=metric&cnt=${days * 8}`;
-  console.log('📡 [WEATHER API] Request URL:', url.replace(OPENWEATHERMAP_API_KEY, 'API_KEY_HIDDEN'));
+  logger.debug('WEATHER', 'Request URL', { url: url.replace(OPENWEATHERMAP_API_KEY, 'API_KEY_HIDDEN')});
   
   const response = await fetch(url);
 
   if (!response.ok) {
-    console.error('❌ [WEATHER API] Error:', response.status, response.statusText);
+    logger.error('API', `Weather API Error`, { status: response.status, text: response.statusText });
     throw new Error(`Weather API error: ${response.statusText}`);
   }
 
   const data = await response.json();
-  console.log(`✅ [WEATHER API] Received ${data.list?.length || 0} forecast points`);
+  logger.info('WEATHER', `Received ${data.list?.length || 0} forecast points`);
   
   // Group forecasts by day and calculate daily summary
   const dailyForecasts = new Map<string, any[]>();
@@ -98,7 +100,7 @@ export async function getWeatherForecast(
   // Convert to daily weather data
   const weatherData: WeatherData[] = [];
   
-  console.log('📅 [WEATHER API] Processing daily forecasts for dates:', Array.from(dailyForecasts.keys()));
+  logger.debug('WEATHER', 'Processing daily forecasts for dates', { dates: Array.from(dailyForecasts.keys()) });
   
   for (const [date, forecasts] of dailyForecasts) {
     if (weatherData.length >= days) break;
@@ -210,7 +212,7 @@ export async function getWeatherSummary(
     
     return summary;
   } catch (error) {
-    console.error('Error getting weather summary:', error);
+    logger.error('WEATHER', 'Error getting weather summary', { error });
     return 'Weather information unavailable';
   }
 }

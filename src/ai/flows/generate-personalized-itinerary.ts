@@ -51,11 +51,10 @@ export async function generatePersonalizedItinerary(
   
   // ONLY USE OPENAI - NO GEMINI
   if (!isOpenAIConfigured()) {
-    console.error('❌ [Server] OpenAI API key is not configured!');
+    logger.error('SYSTEM', 'OpenAI API key is not configured!');
     throw new Error('OpenAI API key is required. Please add OPENAI_API_KEY to your .env file.');
   }
   
-  console.log('🤖 [Server] Using OpenAI GPT-4o-mini for generation');
   logger.info('AI', 'Using OpenAI GPT-4o-mini for generation');
   
   try {
@@ -66,8 +65,7 @@ export async function generatePersonalizedItinerary(
     
     // Use chunked approach for multi-destination or long trips to avoid timeouts
     if (isMultiDestination || isLongTrip) {
-      console.log('🔄 [Server] Using CHUNKED generation for multi-destination trip');
-      logger.info('AI', 'Using chunked generation', {
+      logger.info('AI', 'Using CHUNKED generation for multi-destination trip', {
         destinations: parsedTrip.destinations.length,
         totalDays: parsedTrip.totalDays
       });
@@ -78,7 +76,7 @@ export async function generatePersonalizedItinerary(
         input.conversationHistory
       );
       
-      console.log('✅ [Server] Chunked OpenAI generation successful');
+      logger.info('AI', 'Chunked OpenAI generation successful');
       return result;
     } else {
       // Use regular generation for simple trips
@@ -88,12 +86,11 @@ export async function generatePersonalizedItinerary(
         input.conversationHistory
       );
       
-      console.log('✅ [Server] OpenAI generation successful');
+      logger.info('AI', 'Direct OpenAI generation successful');
       return result;
     }
   } catch (error: any) {
-    console.error('❌ [Server] OpenAI generation failed:', error.message);
-    logger.error('AI', 'OpenAI generation failed', error);
+    logger.error('AI', 'OpenAI generation failed', { error: error.message, stack: error.stack });
     throw new Error(`OpenAI generation failed: ${error.message}`);
   }
 }

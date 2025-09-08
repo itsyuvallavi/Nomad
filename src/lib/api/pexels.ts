@@ -2,6 +2,7 @@
  * Pexels API Integration
  * Alternative image provider with simpler API
  */
+import { logger } from '@/lib/logger';
 
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || 'JDkOJu5vNAQmnwxkw9mGixEZsvuAmzNBPSOjuwtmyQiKpUdlG3fdwpKF';
 const PEXELS_API_URL = 'https://api.pexels.com/v1';
@@ -31,7 +32,7 @@ export async function searchPexelsImages(
     const query = `${destination} travel destination landscape`;
     const url = `${PEXELS_API_URL}/search?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`;
     
-    console.log(`📷 [Pexels] Searching for: ${destination}`);
+    logger.info('IMAGE', `Searching Pexels for: ${destination}`);
     
     const response = await fetch(url, {
       headers: {
@@ -40,16 +41,16 @@ export async function searchPexelsImages(
     });
 
     if (!response.ok) {
-      console.error(`❌ [Pexels] API error: ${response.status}`);
+      logger.error('API', 'Pexels API error', { status: response.status });
       return [];
     }
 
     const data = await response.json();
-    console.log(`✅ [Pexels] Found ${data.photos?.length || 0} images for ${destination}`);
+    logger.info('IMAGE', `Found ${data.photos?.length || 0} images for ${destination} from Pexels`);
     
     return data.photos || [];
   } catch (error: any) {
-    console.error(`❌ [Pexels] Error fetching images:`, error.message);
+    logger.error('API', `Error fetching Pexels images:`, { error: error.message });
     return [];
   }
 }

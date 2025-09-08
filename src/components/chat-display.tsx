@@ -12,6 +12,7 @@ import type { RecentSearch, ChatState } from '@/app/page';
 import { ChatPanel } from './figma/ChatPanel';
 import { ItineraryPanel } from './figma/ItineraryPanel';
 import { ThinkingPanel } from './figma/ThinkingPanel';
+import { logger } from '@/lib/logger';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -83,7 +84,7 @@ export default function ChatDisplay({
             
             localStorage.setItem('recentSearches', JSON.stringify(recentSearches.slice(0, 5)));
         } catch (e) {
-            console.error('Could not save chat state:', e);
+            logger.error('SYSTEM', 'Could not save chat state', e);
         }
     };
 
@@ -97,7 +98,7 @@ export default function ChatDisplay({
         
         // If there's already a generation in progress, skip this one
         if (generationIdRef.current && generationIdRef.current !== thisGenerationId) {
-            console.log('[Itinerary] Skipping duplicate call, generation already in progress');
+            logger.warn('AI', 'Skipping duplicate call, generation already in progress');
             return;
         }
         
@@ -109,8 +110,7 @@ export default function ChatDisplay({
             return;
         }
         
-        console.log('[Itinerary] Starting generation for:', initialPrompt.prompt, 'ID:', thisGenerationId);
-        console.time(`Generation time ${thisGenerationId}`);
+        logger.info('USER', 'Starting itinerary generation', { prompt: initialPrompt.prompt, id: thisGenerationId });
         
         setIsGenerating(true);
         const conversationHistory = getConversationHistory(currentMessages);
@@ -119,14 +119,14 @@ export default function ChatDisplay({
             role: 'assistant', 
             content: "Great, I'm working on your itinerary now..." 
         }]);
+        
+        const timerId = logger.apiCall('AI', 'generatePersonalizedItinerary');
 
         try {
-            console.log('[API CALL START] Calling generatePersonalizedItinerary');
-            console.log('[API Details]', {
+            logger.info('API', 'Calling generatePersonalizedItinerary', {
                 promptLength: initialPrompt.prompt.length,
                 hasFile: !!initialPrompt.fileDataUrl,
                 hasHistory: !!conversationHistory,
-                provider: 'Will be determined server-side (OpenAI if configured, else Gemini)'
             });
             
             const itinerary = await generatePersonalizedItinerary({
@@ -135,33 +135,25 @@ export default function ChatDisplay({
                 conversationHistory: conversationHistory
             });
             
-            // Log the actual itinerary received
-            console.log('[DEBUG] Full itinerary structure:', {
+            logger.apiResponse(timerId, 'generatePersonalizedItinerary', { success: true });
+            
+            logger.debug('AI', 'Full itinerary structure received', {
                 destination: itinerary.destination,
                 title: itinerary.title,
                 totalDays: itinerary.itinerary.length,
-                dayBreakdown: itinerary.itinerary.map(day => ({
-                    day: day.day,
-                    date: day.date,
-                    title: day.title,
-                    activities: day.activities.length
-                }))
             });
-            
-            console.log('[API CALL END] Response received from server', 'ID:', thisGenerationId);
             
             // Check if this is an error response
             if (itinerary.title && itinerary.title.includes('Error:')) {
-                console.error('[API ERROR] Generation failed:', itinerary.title);
+                logger.error('API', 'Generation failed with error in title', { title: itinerary.title });
             }
             
-            console.log('[Generated Itinerary]', {
+            logger.info('AI', 'Generated Itinerary Summary', {
                 destination: itinerary.destination,
                 title: itinerary.title,
                 days: itinerary.itinerary.length,
                 activities: itinerary.itinerary.reduce((acc, day) => acc + day.activities.length, 0)
             });
-            console.timeEnd(`Generation time ${thisGenerationId}`);
             
             setMessages(prev => [...prev, { 
                 role: 'assistant', 
@@ -172,8 +164,8 @@ export default function ChatDisplay({
             saveChatStateToStorage(true, itinerary);
 
         } catch (e) {
-            console.error('[Itinerary] Generation failed:', e, 'ID:', thisGenerationId);
-            console.timeEnd(`Generation time ${thisGenerationId}`);
+            logger.apiResponse(timerId, 'generatePersonalizedItinerary', { success: false });
+            logger.error('AI', 'Itinerary generation failed', { error: e, id: thisGenerationId });
             const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
             onError(`I'm sorry, there was an error creating your itinerary. ${errorMessage}`);
             setMessages(prev => [...prev, { 
@@ -214,7 +206,7 @@ export default function ChatDisplay({
         if (e) e.preventDefault();
         if (!userInput.trim() || isGenerating) return;
 
-        console.log('[User] New message:', userInput);
+        logger.info('USER', 'New message submitted', { message: userInput });
         
         const newUserMessage: Message = { role: 'user', content: userInput };
         const newMessages = [...messages, newUserMessage];
@@ -231,9 +223,8 @@ export default function ChatDisplay({
     const handleRefine = async (feedback: string, _currentMessages: Message[]) => {
         if (!currentItinerary) return;
         
-        console.log('[Refine] User feedback:', feedback);
-        console.log('[API CALL START] Calling refineItineraryBasedOnFeedback API');
-        console.time('API Call Duration');
+        logger.info('USER', 'Refining itinerary', { feedback });
+        const timerId = logger.apiCall('AI', 'refineItineraryBasedOnFeedback');
         
         setMessages(prev => [...prev, { role: 'assistant', content: "I understand. Refining the itinerary..." }]);
         setIsGenerating(true);
@@ -244,15 +235,14 @@ export default function ChatDisplay({
                 userFeedback: feedback,
             });
             
-            console.log('[API CALL END] Response received from server');
-            console.timeEnd('API Call Duration');
-            console.log('[Refine Result] Success - itinerary updated');
+            logger.apiResponse(timerId, 'refineItineraryBasedOnFeedback', { success: true });
+            logger.info('AI', 'Refinement successful');
             setCurrentItinerary(refinedItinerary);
             saveChatStateToStorage(true, refinedItinerary);
             setMessages(prev => [...prev, { role: 'assistant', content: "✅ Itinerary updated!" }]);
         } catch (error) {
-            console.error('[Refine] Failed:', error);
-            console.timeEnd('Refinement time');
+            logger.apiResponse(timerId, 'refineItineraryBasedOnFeedback', { success: false });
+            logger.error('AI', 'Refinement failed', { error });
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             onError(`I'm sorry, there was an error refining your itinerary. ${errorMessage}`);
             setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't refine the itinerary. Please try again." }]);

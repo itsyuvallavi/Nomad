@@ -48,8 +48,7 @@ export async function generateItineraryWithOpenAI(
     throw new Error('This function must be called from server-side code');
   }
   
-  console.log('🤖 [Server] Starting OpenAI generation with GPT-4o-mini');
-  logger.info('AI', '🤖 Starting OpenAI generation', {
+  logger.info('AI', 'Starting OpenAI generation with GPT-4o-mini', {
     model: 'gpt-4o-mini',
     promptLength: prompt.length,
     timestamp: new Date().toISOString(),
@@ -87,7 +86,7 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
     : enhancedPrompt;
 
   try {
-    console.log('📤 [Server] Calling OpenAI API...');
+    logger.info('API', 'Calling OpenAI API...');
     const client = getOpenAIClient();
     
     const messages = [
@@ -95,7 +94,7 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
       { role: 'user' as const, content: userPrompt }
     ];
     
-    console.log('📋 [Server] Request details:', {
+    logger.debug('AI', 'Request details:', {
       messageCount: messages.length,
       systemPromptLength: systemPrompt.length,
       userPromptLength: userPrompt.length,
@@ -112,7 +111,7 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
 
     const duration = Date.now() - startTime;
     
-    logger.info('AI', '✅ OpenAI response received', {
+    logger.info('API', 'OpenAI response received', {
       duration: `${duration}ms`,
       usage: response.usage,
       finishReason: response.choices[0]?.finish_reason,
@@ -127,7 +126,7 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
       throw new Error('Invalid itinerary structure from OpenAI');
     }
 
-    logger.info('AI', '✅ Itinerary generated successfully', {
+    logger.info('AI', 'Itinerary generated successfully', {
       destination: itinerary.destination,
       days: itinerary.itinerary.length,
       title: itinerary.title
@@ -143,7 +142,7 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
       );
       
       if (missingDestinations.length > 0) {
-        logger.warn('AI', '⚠️ Missing destinations detected', {
+        logger.warn('AI', 'Missing destinations detected', {
           missing: missingDestinations.map(d => d.name),
           generated: generatedCities
         });
@@ -153,14 +152,7 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
     return itinerary;
   } catch (error: any) {
     const duration = Date.now() - startTime;
-    console.error('❌ [Server] OpenAI API call failed:', {
-      error: error.message,
-      errorType: error.constructor.name,
-      duration: `${duration}ms`,
-      statusCode: error.status || error.response?.status
-    });
-    
-    logger.error('AI', `OpenAI generation failed after ${duration}ms`, {
+    logger.error('API', `OpenAI API call failed after ${duration}ms`, {
       error: error.message,
       errorType: error.constructor.name,
       statusCode: error.status || error.response?.status
@@ -186,7 +178,7 @@ Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
  */
 export function isOpenAIConfigured(): boolean {
   const hasKey = !!process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 20;
-  console.log('🔑 [OpenAI] API Key Check:', {
+  logger.info('SYSTEM', 'OpenAI API Key Check', {
     hasKey,
     keyLength: process.env.OPENAI_API_KEY?.length || 0,
     keyPrefix: process.env.OPENAI_API_KEY?.substring(0, 10) || 'not set'

@@ -1,4 +1,6 @@
 // Foursquare Places API integration
+import { logger } from '@/lib/logger';
+
 const FOURSQUARE_API_KEY = process.env.FOURSQUARE_API_KEY;
 const FOURSQUARE_BASE_URL = 'https://api.foursquare.com/v3/places';
 
@@ -39,15 +41,10 @@ export async function searchPlaces(
   categories?: string,
   limit: number = 10
 ): Promise<FoursquarePlace[]> {
-  console.log('🔍 [FOURSQUARE API] Searching places:', {
-    query,
-    near,
-    categories,
-    limit
-  });
+  logger.info('PLACES', 'Searching Foursquare places', { query, near, categories, limit });
 
   if (!FOURSQUARE_API_KEY) {
-    console.error('❌ [FOURSQUARE API] No API key configured');
+    logger.error('API', 'Foursquare API key not configured');
     throw new Error('Foursquare API key not configured');
   }
 
@@ -59,7 +56,7 @@ export async function searchPlaces(
   });
 
   const url = `${FOURSQUARE_BASE_URL}/search?${params}`;
-  console.log('📡 [FOURSQUARE API] Request URL:', url);
+  logger.debug('PLACES', 'Foursquare request URL', { url });
 
   const response = await fetch(url, {
     headers: {
@@ -69,20 +66,22 @@ export async function searchPlaces(
   });
 
   if (!response.ok) {
-    console.error('❌ [FOURSQUARE API] Error:', response.status, response.statusText);
+    logger.error('API', 'Foursquare API Error', { status: response.status, text: response.statusText });
     throw new Error(`Foursquare API error: ${response.statusText}`);
   }
 
   const data = await response.json();
-  console.log(`✅ [FOURSQUARE API] Found ${data.results?.length || 0} places`);
+  logger.info('PLACES', `Found ${data.results?.length || 0} places from Foursquare`);
   
   // Log first 3 results for debugging
   if (data.results && data.results.length > 0) {
-    console.log('📍 [FOURSQUARE API] Sample results:', data.results.slice(0, 3).map((p: any) => ({
-      name: p.name,
-      address: p.location?.formatted_address,
-      category: p.categories?.[0]?.name
-    })));
+    logger.debug('PLACES', 'Foursquare sample results', { 
+        results: data.results.slice(0, 3).map((p: any) => ({
+            name: p.name,
+            address: p.location?.formatted_address,
+            category: p.categories?.[0]?.name
+        }))
+    });
   }
   
   return data.results;
