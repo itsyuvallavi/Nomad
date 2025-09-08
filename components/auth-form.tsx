@@ -6,6 +6,7 @@ import { Label } from './ui/label';
 import { Card } from './ui/card';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { FaApple } from "react-icons/fa";
 
 interface AuthFormProps {
   onLogin: () => void;
@@ -20,15 +21,6 @@ const GoogleIcon = () => (
     <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
     <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.012,35.836,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
   </svg>
-);
-
-// INCORRECT APPLE LOGO - REPLACE THIS
-const AppleIcon = () => (
-  <img
-      src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/976px-Apple_logo_black.svg.png"
-      alt="Apple Logo"
-      className="w-5 h-5"
-  />
 );
 
 
@@ -212,7 +204,7 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
               <span>Google</span>
             </Button>
             <Button variant="outline" className="bg-slate-700/50 border-slate-600/50 hover:bg-slate-700/80 text-white" onClick={handleSocialLogin}>
-              <AppleIcon />
+              <FaApple className="w-5 h-5" />
               <span>Apple</span>
             </Button>
           </div>
