@@ -24,10 +24,8 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Show loading state, redirect will happen after
+    setIsLoading(true); 
     if (isLogin) {
-      // In a real app, you'd send formData to your backend to verify
-      // before calling onLogin(), but for Auth0 redirect, we call it directly.
       onLogin();
     } else {
       onSignUp();

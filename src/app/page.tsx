@@ -94,27 +94,27 @@ export default function Home() {
       )
     }
     
-    if (!user) {
-      return <AuthForm onLogin={handleLogin} onSignUp={handleSignUp} />;
+    if (user) {
+        switch (currentView) {
+          case 'chat':
+            return (
+              <ChatDisplay
+                initialPrompt={initialPrompt!}
+                savedChatState={savedChatState}
+                searchId={currentSearchId}
+                onError={handleChatError}
+                onReturn={handleReturnToStart}
+              />
+            );
+          case 'start':
+          default:
+            return (
+              <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+            );
+        }
     }
 
-    switch (currentView) {
-      case 'chat':
-        return (
-          <ChatDisplay
-            initialPrompt={initialPrompt!}
-            savedChatState={savedChatState}
-            searchId={currentSearchId}
-            onError={handleChatError}
-            onReturn={handleReturnToStart}
-          />
-        );
-      case 'start':
-      default:
-        return (
-          <StartItinerary onItineraryRequest={handleItineraryRequest}/>
-        );
-    }
+    return <AuthForm onLogin={handleLogin} onSignUp={handleSignUp} />;
   }
 
 
