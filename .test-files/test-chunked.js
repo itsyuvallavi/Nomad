@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 // Mock the necessary modules
-const { parseDestinations } = require('./src/ai/utils/destination-parser');
+const { parseDestinations } = require('../src/ai/utils/destination-parser.ts');
 
 async function testChunkedGeneration() {
   console.log('🧪 Testing Chunked OpenAI Generation\n');
@@ -26,7 +26,7 @@ async function testChunkedGeneration() {
   });
   
   // Import the chunked generator
-  const { generateChunkedItinerary } = await import('./src/ai/openai-chunked.ts');
+  const { generateChunkedItinerary } = await import('../src/ai/openai-chunked.ts');
   
   try {
     console.log('\n🚀 Starting chunked generation...\n');

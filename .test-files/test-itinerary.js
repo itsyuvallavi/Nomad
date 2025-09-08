@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Test script to verify itinerary generation with real API data
-const { generatePersonalizedItinerary } = require('./src/ai/flows/generate-personalized-itinerary');
+const { generatePersonalizedItinerary } = require('../src/ai/flows/generate-personalized-itinerary');
 
 async function testItinerary() {
     console.log('🧪 Testing itinerary generation with real API data...\n');
