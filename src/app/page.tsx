@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { Settings } from 'lucide-react';
 import {
@@ -36,14 +36,17 @@ export interface RecentSearch {
 export type View = 'start' | 'chat';
 
 export default function Home() {
-  console.log('Nomad Navigator loaded');
-  console.log('Browser console working - logs will appear here during itinerary generation');
-  
   const [currentView, setCurrentView] = useState<View>('start');
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
   const [currentSearchId, setCurrentSearchId] = useState<string | undefined>(undefined);
+  
+  // Log only once on component mount
+  useEffect(() => {
+    console.log('Nomad Navigator loaded');
+    console.log('Browser console working - logs will appear here during itinerary generation');
+  }, []);
   
   const handleItineraryRequest = (values: FormValues, chatState?: ChatState, searchId?: string) => {
     setInitialPrompt(values);

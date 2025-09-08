@@ -47,7 +47,15 @@ const refineItineraryBasedOnFeedbackPrompt = ai.definePrompt({
   User Feedback:
   "{{{userFeedback}}}"
 
-  Based on this feedback, please refine the itinerary. Your response must be only the refined itinerary in the exact same JSON structure as the original. Only change the content of the fields based on the feedback. Ensure all fields for each activity (time, description, category, address) are present.
+  Based on this feedback, please refine the itinerary. Your response must be only the refined itinerary in the exact same JSON structure as the original.
+  
+  IMPORTANT for multi-destination trips:
+  - When adding a new destination (e.g., "add 7 days in Brussels"), ensure each day has a clear title indicating the location
+  - Use format like "Brussels Day 1" or "Day 8: Brussels" for clarity
+  - Include travel activities between cities (e.g., "Travel from London to Brussels")
+  - Ensure addresses include the city name for location detection
+  
+  Only change the content of the fields based on the feedback. Ensure all fields for each activity (time, description, category, address) are present.
 `,
 });
 

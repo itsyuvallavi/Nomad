@@ -125,13 +125,27 @@ export default function ChatDisplay({
             console.log('[API Details]', {
                 promptLength: initialPrompt.prompt.length,
                 hasFile: !!initialPrompt.fileDataUrl,
-                hasHistory: !!conversationHistory
+                hasHistory: !!conversationHistory,
+                provider: 'Will be determined server-side (OpenAI if configured, else Gemini)'
             });
             
             const itinerary = await generatePersonalizedItinerary({
                 prompt: initialPrompt.prompt,
                 attachedFile: initialPrompt.fileDataUrl,
                 conversationHistory: conversationHistory
+            });
+            
+            // Log the actual itinerary received
+            console.log('[DEBUG] Full itinerary structure:', {
+                destination: itinerary.destination,
+                title: itinerary.title,
+                totalDays: itinerary.itinerary.length,
+                dayBreakdown: itinerary.itinerary.map(day => ({
+                    day: day.day,
+                    date: day.date,
+                    title: day.title,
+                    activities: day.activities.length
+                }))
             });
             
             console.log('[API CALL END] Response received from server', 'ID:', thisGenerationId);

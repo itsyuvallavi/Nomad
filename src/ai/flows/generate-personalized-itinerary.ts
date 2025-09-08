@@ -17,7 +17,11 @@ import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { findAccommodation, findRestaurants, findWorkspaces, findAttractions } from '@/lib/api/foursquare';
 import { getWeatherForecast, getWeatherSummary } from '@/lib/api/weather';
 import { validateAPIKeys, logAPIKeyStatus } from '@/lib/api-validation';
-import { mockItinerary } from '@/lib/mock-data';
+// ❌ REMOVED: import { mockItinerary } from '@/lib/mock-data'; - NO MOCK DATA ALLOWED!
+import { parseDestinations, buildStructuredPrompt } from '@/ai/utils/destination-parser';
+import { logger } from '@/lib/logger';
+import { generateItineraryWithOpenAI, isOpenAIConfigured } from '@/ai/openai-direct';
+import { generateChunkedItinerary } from '@/ai/openai-chunked';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -41,50 +45,64 @@ export { type GeneratePersonalizedItineraryOutput };
 export async function generatePersonalizedItinerary(
   input: GeneratePersonalizedItineraryInput
 ): Promise<GeneratePersonalizedItineraryOutput> {
-  // Check if we should use mock data for testing
+  // ⚠️ CRITICAL: NEVER USE MOCK DATA!
+  // ✅ ALL data MUST come from OpenAI API
+  // ❌ NO hardcoded itineraries allowed
+  // ❌ NO fallback data allowed
+  // This app MUST use REAL API data ALWAYS!
+  
   if (process.env.USE_MOCK_DATA === 'true') {
-    console.log('[MOCK MODE] Using mock data instead of API calls');
-    // Simulate a small delay to mimic API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Customize the mock based on the prompt (optional)
-    const customMock = { ...mockItinerary };
-    if (input.prompt.toLowerCase().includes('paris')) {
-      customMock.destination = 'Paris, France';
-      customMock.title = 'Paris Work & Culture Week';
-    } else if (input.prompt.toLowerCase().includes('tokyo')) {
-      customMock.destination = 'Tokyo, Japan';
-      customMock.title = 'Tokyo Digital Nomad Experience';
-    } else if (input.prompt.toLowerCase().includes('brussels') || input.prompt.toLowerCase().includes('belgium')) {
-      // For Brussels, modify some days to show Brussels activities
-      customMock.destination = 'London & Brussels';
-      customMock.title = 'London & Brussels Multi-City Adventure';
-      // Change day 4-6 to Brussels
-      if (customMock.itinerary[3]) {
-        customMock.itinerary[3].title = 'Travel to Brussels';
-        customMock.itinerary[3].activities[0] = {
-          time: '9:00 AM',
-          description: 'Eurostar train from London to Brussels',
-          category: 'Travel',
-          address: 'St Pancras International, London'
-        };
-      }
-      if (customMock.itinerary[4]) {
-        customMock.itinerary[4].title = 'Brussels City Center';
-        customMock.itinerary[4].activities[0].description = 'Grand Place - UNESCO World Heritage Site';
-        customMock.itinerary[4].activities[0].address = 'Grand Place, Brussels, Belgium';
-      }
-      if (customMock.itinerary[5]) {
-        customMock.itinerary[5].title = 'Brussels Museums & Culture';
-        customMock.itinerary[5].activities[0].description = 'Royal Museums of Fine Arts';
-        customMock.itinerary[5].activities[0].address = 'Rue de la Régence 3, Brussels';
-      }
-    }
-    
-    return customMock;
+    logger.error('AI', '❌ CRITICAL ERROR: Mock data requested but NOT ALLOWED!');
+    throw new Error('MOCK DATA IS FORBIDDEN! All itineraries MUST come from real OpenAI API calls. Set USE_MOCK_DATA=false');
   }
   
-  return generatePersonalizedItineraryFlow(input);
+  // ONLY USE OPENAI - NO GEMINI
+  if (!isOpenAIConfigured()) {
+    console.error('❌ [Server] OpenAI API key is not configured!');
+    throw new Error('OpenAI API key is required. Please add OPENAI_API_KEY to your .env file.');
+  }
+  
+  console.log('🤖 [Server] Using OpenAI GPT-4o-mini for generation');
+  logger.info('AI', 'Using OpenAI GPT-4o-mini for generation');
+  
+  try {
+    // Parse destinations to check if it's a multi-destination trip
+    const parsedTrip = parseDestinations(input.prompt);
+    const isMultiDestination = parsedTrip.destinations.length > 1;
+    const isLongTrip = parsedTrip.totalDays > 14;
+    
+    // Use chunked approach for multi-destination or long trips to avoid timeouts
+    if (isMultiDestination || isLongTrip) {
+      console.log('🔄 [Server] Using CHUNKED generation for multi-destination trip');
+      logger.info('AI', 'Using chunked generation', {
+        destinations: parsedTrip.destinations.length,
+        totalDays: parsedTrip.totalDays
+      });
+      
+      const result = await generateChunkedItinerary(
+        input.prompt,
+        input.attachedFile,
+        input.conversationHistory
+      );
+      
+      console.log('✅ [Server] Chunked OpenAI generation successful');
+      return result;
+    } else {
+      // Use regular generation for simple trips
+      const result = await generateItineraryWithOpenAI(
+        input.prompt,
+        input.attachedFile,
+        input.conversationHistory
+      );
+      
+      console.log('✅ [Server] OpenAI generation successful');
+      return result;
+    }
+  } catch (error: any) {
+    console.error('❌ [Server] OpenAI generation failed:', error.message);
+    logger.error('AI', 'OpenAI generation failed', error);
+    throw new Error(`OpenAI generation failed: ${error.message}`);
+  }
 }
 
 const estimateFlightTime = ai.defineTool(
@@ -102,8 +120,10 @@ const estimateFlightTime = ai.defineTool(
     }),
   },
   async (input) => {
-    console.log('\n✈️ [Flight Tool] CALLED by AI model');
-    console.log('✈️ [Flight Tool] Estimating flight:', input.origin, '→', input.destination);
+    logger.info('AI', '✈️ Flight Tool Called', {
+      origin: input.origin,
+      destination: input.destination
+    });
     
     // Common flight routes with approximate times
     const routes: Record<string, Record<string, {duration: string, airports: [string, string]}>> = {
@@ -199,8 +219,9 @@ const getWeatherForecastTool = ai.defineTool(
                 success: false 
             };
         }
-        console.log('\n🔔 [Weather Tool] CALLED by AI model');
-        console.log('🌤️ [Weather Tool] Getting weather for:', input.location);
+        logger.info('WEATHER', '🌤️ Weather Tool Called', {
+          location: input.location
+        });
         try {
             const weatherData = await getWeatherForecast(input.location, 5);
             if (weatherData && weatherData.length > 0) {
@@ -250,9 +271,11 @@ const findRealPlacesTool = ai.defineTool(
                 success: false 
             };
         }
-        console.log('\n🔔 [Places Tool] CALLED by AI model');
-        console.log('🔍 [Places Tool] Searching for', input.placeType, 'in', input.destination);
-        console.log('📍 [Places Tool] Request details:', JSON.stringify(input));
+        logger.info('PLACES', '📍 Places Tool Called', {
+          placeType: input.placeType,
+          destination: input.destination,
+          limit: input.limit
+        });
         
         try {
             let places: any[] = [];
@@ -325,7 +348,7 @@ const prompt = ai.definePrompt({
   tools: [estimateFlightTime, getWeatherForecastTool, findRealPlacesTool],
   config: {
     temperature: 0.7,
-    maxOutputTokens: 8192,
+    maxOutputTokens: 16384, // Increased for multi-destination trips
   },
   prompt: `You are a master travel agent specializing in creating personalized itineraries for nomad travelers. Your response must be a detailed day-by-day itinerary in a structured JSON format.
 
@@ -341,9 +364,20 @@ const prompt = ai.definePrompt({
   6. ALWAYS use YYYY-MM-DD format for dates.
   7. The number of days in the itinerary array MUST EXACTLY match the requested trip duration.
 
+  **MULTI-DESTINATION TRIP HANDLING - CRITICAL:**
+  If the user requests multiple destinations:
+  1. Parse EACH destination with its EXACT duration (e.g., "Zimbabwe for 7 days" = 7 days in Zimbabwe)
+  2. Create itinerary covering ALL destinations in the order mentioned
+  3. Include travel days between cities (these are ADDITIONAL to stay duration)
+  4. Title format for multi-city trips: "Day X: [City Name]" or "[City] Day Y"
+  5. The destination field should list all cities: "Harare, Managua, Antananarivo, Copenhagen"
+  
+  Example: "Zimbabwe 7 days, Nicaragua a week, Madagascar a week, Ethiopia a week, Denmark 3 days"
+  Should create: 7 days Zimbabwe + 1 travel + 7 days Nicaragua + 1 travel + 7 days Madagascar + 1 travel + 7 days Ethiopia + 1 travel + 3 days Denmark = 35 total days
+
   Analyze the user's request to extract:
-  - Trip duration and EXACT dates (very important!)
-  - Destination(s) 
+  - Trip duration for EACH destination separately
+  - ALL destinations in order (don't skip any!)
   - Origin/departure location (CRITICAL for flight information)
   - Any specific preferences mentioned
   
@@ -390,6 +424,9 @@ const prompt = ai.definePrompt({
   4. Your itinerary MUST contain real places with real addresses.
   5. ALWAYS include departure and return flights.
   6. Extract and use the origin location from the user's prompt for flight information.
+  7. NEVER skip destinations - if user mentions 5 cities, ALL 5 must be in the itinerary.
+  8. Use EXACT durations specified (7 days means 7 days, not 14 days).
+  9. For multi-city trips, include inter-city travel as separate activities.
 
   {{#if attachedFile}}
   The user has also attached a file for reference. Use this to inform the itinerary.
@@ -435,7 +472,33 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
       }
       
       if (output.itinerary && Array.isArray(output.itinerary)) {
-        console.log(`✅ Generated itinerary for ${output.destination}: ${output.itinerary.length} days`);
+        logger.info('AI', '✅ Itinerary generated successfully', {
+          destination: output.destination,
+          days: output.itinerary.length,
+          title: output.title
+        });
+        
+        // Validate multi-destination trips
+        const requestedDestinations = input.prompt.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b(?=\s+(?:for|[\d]+\s*days?|a\s+week))/gi);
+        if (requestedDestinations && requestedDestinations.length > 1) {
+          const generatedCities = output.destination.split(',').map(d => d.trim());
+          logger.info('AI', '📍 Multi-destination validation', {
+            requested: requestedDestinations,
+            generated: generatedCities
+          });
+          
+          // Check if all requested destinations are included
+          const missingDestinations = requestedDestinations.filter(
+            dest => !generatedCities.some(city => city.toLowerCase().includes(dest.toLowerCase()))
+          );
+          
+          if (missingDestinations.length > 0) {
+            logger.warn('AI', '⚠️ Missing destinations detected', {
+              missing: missingDestinations,
+              message: 'AI may need to be re-prompted to include all destinations'
+            });
+          }
+        }
       }
       
       if (!output.destination || !output.title) {
@@ -446,9 +509,15 @@ const generatePersonalizedItineraryFlow = ai.defineFlow(
         throw new Error('Invalid itinerary structure - empty or invalid itinerary array');
       }
       
+      // Validate each day has required fields
       for (const day of output.itinerary) {
         if (!day.date || !day.activities || day.activities.length === 0) {
           throw new Error(`Invalid day ${day.day} - missing date or activities`);
+        }
+        
+        // Ensure day titles are present for multi-destination trips
+        if (!day.title && output.destination.includes(',')) {
+          console.warn(`⚠️ Day ${day.day} missing title - may affect location detection`);
         }
       }
       

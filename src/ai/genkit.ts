@@ -1,9 +1,15 @@
 import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
 
+// OpenAI ONLY - No Gemini
+// We're using direct OpenAI integration, not through Genkit
 export const ai = genkit({
-  plugins: [googleAI({
-    apiKey: process.env.GEMINI_API_KEY
-  })],
-  model: googleAI.model('gemini-1.5-flash-latest'),
+  plugins: [], // No plugins needed - using OpenAI directly
 });
+
+// Export helper to check which provider is active
+export const isUsingOpenAI = () => true; // Always OpenAI
+
+// Log API configuration status
+if (typeof window !== 'undefined') {
+  console.log(`🤖 AI Provider: OpenAI GPT-4o-mini (Gemini removed)`);
+}

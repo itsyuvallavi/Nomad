@@ -3,8 +3,10 @@ import { CoworkingSection } from './CoworkingSection';
 import { TripActions } from './TripActions';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
+import Image from 'next/image';
+import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
 
 interface ItineraryPanelProps {
   itinerary: GeneratePersonalizedItineraryOutput;
@@ -13,6 +15,8 @@ interface ItineraryPanelProps {
 }
 
 export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
+  const [destinationImages, setDestinationImages] = useState<Record<string, PexelsImage[]>>({});
+  
   // Extract all activities for coworking section
   const allActivities = itinerary.itinerary.flatMap(day => day.activities);
   
@@ -24,106 +28,128 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
   // Extract budget info (using quickTips or default)
   const budgetLevel = 'Budget-friendly';
   
-  // Group days by destination/city/country
+  // Fetch images for each destination using Pexels
+  useEffect(() => {
+    const fetchImages = async () => {
+      const allDestinations = itinerary.destination.split(',').map(d => d.trim());
+      console.log('📸 [Pexels] Fetching images for destinations:', allDestinations);
+      
+      for (const destination of allDestinations) {
+        try {
+          const images = await searchPexelsImages(destination, 3);
+          if (images.length > 0) {
+            console.log(`📸 [Pexels] Found ${images.length} images for ${destination}`);
+            setDestinationImages(prev => ({ ...prev, [destination]: images }));
+          } else {
+            console.warn(`📸 [Pexels] No images found for ${destination}`);
+          }
+        } catch (error) {
+          console.error(`📸 [Pexels] Error fetching images for ${destination}:`, error);
+        }
+      }
+    };
+    
+    fetchImages();
+  }, [itinerary.destination]);
+  
+  // Group days by main country/destination - following chronological order
+  let currentCountry = '';
+  const countryOrder: string[] = [];
+  
+  // Parse the main destinations from the itinerary (countries, not cities)
+  const mainDestinations = itinerary.destination.split(',').map(d => {
+    // Clean up destination names, removing parenthetical additions
+    let cleaned = d.trim().replace(/\s*\([^)]*\)/g, '');
+    // Handle "Denmark Copenhagen" format (from chunked generation)
+    if (cleaned === 'Denmark Copenhagen') {
+      cleaned = 'Denmark';
+    }
+    return cleaned;
+  });
+  
+  // ⚠️ NO HARDCODED DATA! Detect countries dynamically from API response
+  // Build country mapping dynamically from the destinations in the itinerary
+  const countryMapping: Record<string, string[]> = {};
+  
+  // Extract countries from the destination string
+  for (const destination of mainDestinations) {
+    // Each destination is its own key, we'll look for it in the content
+    countryMapping[destination] = [destination, destination.toLowerCase()];
+  }
+  
+  // First pass: identify country for each day based on content  
+  const dayCountries = itinerary.itinerary.map((day: any, index) => {
+    // Check if day has destination metadata from chunked generation
+    if (day._destination) {
+      // Use the destination metadata directly - most reliable!
+      const destination = mainDestinations.find(d => 
+        day._destination.toLowerCase().includes(d.toLowerCase()) || 
+        d.toLowerCase().includes(day._destination.toLowerCase().replace(' copenhagen', ''))
+      ) || day._destination;
+      
+      if (!countryOrder.includes(destination)) {
+        countryOrder.push(destination);
+      }
+      return destination;
+    }
+    
+    // Fallback: analyze content if no metadata
+    const dayText = `${day.title} ${day.activities.map(a => a.description + ' ' + (a.address || '')).join(' ')}`.toLowerCase();
+    
+    // Check each destination to see if this day belongs to it
+    for (const destination of mainDestinations) {
+      // Check for partial matches (e.g., "Korea" in "South Korea")
+      // Split destination into words and check if any significant word appears
+      const destWords = destination.toLowerCase().split(/\s+/);
+      const significantWords = destWords.filter(word => word.length > 3); // Skip short words like "the", "and"
+      
+      // Check if destination name or any significant part appears in content
+      const isMatch = dayText.includes(destination.toLowerCase()) || 
+                      significantWords.some(word => dayText.includes(word));
+      
+      if (isMatch) {
+        // Found the country for this day
+        currentCountry = destination; // Update current country
+        if (!countryOrder.includes(destination)) {
+          countryOrder.push(destination);
+        }
+        return destination;
+      }
+    }
+    
+    // If no country detected, use the current country (continuation)
+    // Or if it's the first day and we couldn't detect, use day ranges
+    if (!currentCountry) {
+      // ⚠️ NO HARDCODED LOGIC! Use dynamic detection based on day ranges
+      // Assume roughly equal distribution of days across destinations
+      const dayNum = day.day;
+      const avgDaysPerDestination = Math.ceil(itinerary.itinerary.length / mainDestinations.length);
+      const destinationIndex = Math.floor((dayNum - 1) / avgDaysPerDestination);
+      
+      currentCountry = mainDestinations[Math.min(destinationIndex, mainDestinations.length - 1)] || 'Unknown';
+      
+      if (!countryOrder.includes(currentCountry)) {
+        countryOrder.push(currentCountry);
+      }
+    }
+    
+    return currentCountry;
+  });
+  
+  // Second pass: group consecutive days by country
   const daysByLocation = itinerary.itinerary.reduce((acc, day, index) => {
-    let location = itinerary.destination.split(',')[0].trim(); // Default to main destination
-    let currentLocation = location;
+    const country = dayCountries[index];
     
-    // First priority: Check day title for location (most reliable)
-    if (day.title) {
-      // Enhanced patterns for titles like "Brussels Day 1", "Day 8: Brussels", "Brussels - Historic Center"
-      const titlePatterns = [
-        /^([A-Z][\w\s]+?)(?:\s+Day\s+\d+|\s+-|:)/i,
-        /^Day\s+\d+:\s+([A-Z][\w\s]+)/i,
-        /in\s+([A-Z][\w\s]+?)$/i,
-        /^([A-Z][\w\s]+?)\s*$/i, // Just the city name
-      ];
-      
-      for (const pattern of titlePatterns) {
-        const match = day.title.match(pattern);
-        if (match && match[1]) {
-          const extractedLocation = match[1].trim();
-          // Filter out generic words that aren't locations
-          if (!['Arrival', 'Departure', 'Day', 'Morning', 'Evening', 'Afternoon'].includes(extractedLocation)) {
-            currentLocation = extractedLocation;
-            console.log(`[Location] Day ${day.day} - Detected from title: "${currentLocation}" (from "${day.title}")`);
-          }
-          break;
-        }
-      }
-    }
-    
-    // Second priority: Look through activities for location clues
-    let locationFromActivity = null;
-    day.activities.forEach(activity => {
-      // Check for travel activities that mention destinations (strongest signal)
-      if (activity.category === 'Travel' && !locationFromActivity) {
-        // Look for patterns like "to Brussels", "arrive in Brussels", "Brussels Airport"
-        const patterns = [
-          /(?:to|arrive at|arrive in|arrival in)\s+([A-Z][\w\s]+?)(?:\s+Airport|\s+Station|\s|,|$)/i,
-          /([A-Z][\w\s]+?)\s+(?:Airport|Station|Terminal)/i,
-          /^(?:Travel to|Depart for|Journey to)\s+([A-Z][\w\s]+)/i,
-        ];
-        
-        for (const pattern of patterns) {
-          const match = activity.description.match(pattern);
-          if (match && match[1]) {
-            locationFromActivity = match[1].trim();
-            console.log(`[Location] Day ${day.day} - Detected from travel activity: "${locationFromActivity}" (from "${activity.description}")`);
-            break;
-          }
-        }
-      }
-      
-      // Check addresses for city names (weaker signal, only use if no travel activity found)
-      if (!locationFromActivity && activity.address) {
-        const addressParts = activity.address.split(',');
-        if (addressParts.length >= 2) {
-          // Get the second-to-last part (usually the city)
-          const possibleLocation = addressParts[addressParts.length - 2]?.trim();
-          // Make sure it looks like a city name
-          if (possibleLocation && 
-              possibleLocation.length > 2 && 
-              /^[A-Z]/.test(possibleLocation) &&
-              !possibleLocation.match(/^\d/) && // Not a postal code
-              !possibleLocation.match(/^[A-Z]{2,3}\d/) // Not a postal code like "SE1"
-          ) {
-            // Only use address location if we haven't found a better one from title
-            if (currentLocation === location) {
-              currentLocation = possibleLocation;
-              console.log(`[Location] Day ${day.day} - Detected from address: "${currentLocation}" (from "${activity.address}")`);
-            }
-          }
-        }
-      }
-    });
-    
-    // If we found a location from travel activity, use it (it's the strongest signal after title)
-    if (locationFromActivity) {
-      currentLocation = locationFromActivity;
-    }
-    
-    // Clean up location name
-    currentLocation = currentLocation
-      .replace(/\s+(Airport|Station|Terminal|City|Center|Centre)$/i, '')
-      .replace(/^(The|Visit|Explore|Tour)\s+/i, '') // Remove action words
-      .trim();
-    
-    // Make sure we got a valid location
-    if (!currentLocation || currentLocation.length < 2) {
-      currentLocation = location; // Fall back to main destination
-    }
-    
-    if (!acc[currentLocation]) {
-      acc[currentLocation] = {
+    if (!acc[country]) {
+      acc[country] = {
         days: [],
         startDay: index + 1,
         endDay: index + 1
       };
     }
     
-    acc[currentLocation].days.push(day);
-    acc[currentLocation].endDay = index + 1;
+    acc[country].days.push(day);
+    acc[country].endDay = index + 1;
     
     return acc;
   }, {} as Record<string, { days: typeof itinerary.itinerary, startDay: number, endDay: number }>);
@@ -131,18 +157,57 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
   const locations = Object.keys(daysByLocation);
   const [selectedLocation, setSelectedLocation] = useState(locations[0] || '');
   
+  // Log destination detection for debugging
+  useEffect(() => {
+    console.log('[ItineraryPanel] Destination Analysis:', {
+      rawDestination: itinerary.destination,
+      parsedLocations: locations,
+      daysByLocation: Object.entries(daysByLocation).map(([loc, data]) => ({
+        location: loc,
+        days: data.days.length,
+        dayNumbers: data.days.map(d => d.day),
+        dayTitles: data.days.map(d => d.title),
+        startDay: data.startDay,
+        endDay: data.endDay
+      }))
+    });
+  }, [itinerary.destination]);
+  
+  // Fetch images for each destination from Pexels
+  useEffect(() => {
+    const fetchImages = async () => {
+      console.log('[Pexels] Starting image fetch for locations:', locations);
+      const newImages: Record<string, PexelsImage[]> = {};
+      
+      for (const location of locations) {
+        try {
+          console.log(`[Pexels] Fetching images for: ${location}`);
+          const images = await searchPexelsImages(location, 3);
+          newImages[location] = images;
+          console.log(`[Pexels] Found ${images.length} images for ${location}:`, images.map(img => ({
+            url: img.src.large,
+            photographer: img.photographer
+          })));
+        } catch (error) {
+          console.error(`[Pexels] Failed to fetch images for ${location}:`, error);
+          newImages[location] = [];
+        }
+      }
+      
+      setDestinationImages(newImages);
+      console.log('[Pexels] All images fetched:', newImages);
+    };
+    
+    if (locations.length > 0) {
+      fetchImages();
+    }
+  }, [locations.join(',')]); // Use locations string as dependency
+  
   // Generate image search terms based on destination
   const destinationName = selectedLocation || itinerary.destination.split(',')[0].trim();
   
-  console.log('[ItineraryPanel] ====== Location Detection Results ======');
-  console.log('[ItineraryPanel] Total days:', itinerary.itinerary.length);
-  console.log('[ItineraryPanel] Detected locations:', locations);
-  console.log('[ItineraryPanel] Days grouped by location:', Object.entries(daysByLocation).map(([loc, data]) => 
-    `${loc}: Days ${data.startDay}-${data.endDay} (${data.days.length} days)`
-  ));
-  console.log('[ItineraryPanel] Selected location:', selectedLocation);
-  console.log('[ItineraryPanel] Loading images for:', destinationName);
-  console.log('[ItineraryPanel] ========================================');
+  // Only log once on initial load, not on every re-render
+  // Remove or comment out for production
 
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
@@ -169,41 +234,59 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
             </span>
           </div>
 
-          {/* Destination Images using Picsum (more reliable) */}
+          {/* Destination Images - Using Unsplash API with city-specific searches */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[1, 2, 3].map((num, index) => {
-              const imageUrl = `https://picsum.photos/400/300?random=${destinationName}-${num}`;
-              console.log('[Image] Attempting to load:', imageUrl);
+              // More specific search terms for better results
+              const searchTerms = [
+                `${destinationName} city`,
+                `${destinationName} landmark tourist`,  
+                `${destinationName} street view`
+              ];
+              
+              // Use Pexels images if available
+              const pexelsImages = destinationImages[destinationName] || [];
+              const pexelsImage = pexelsImages[index];
+              const imageUrl = pexelsImage?.src?.large || 
+                `https://source.unsplash.com/400x300/?${encodeURIComponent(searchTerms[index])}&sig=${Date.now()}-${index}`;
+              const photographer = pexelsImage?.photographer;
+              const photographerUrl = pexelsImage?.photographer_url;
               
               return (
-                <div key={index} className="relative aspect-video bg-slate-600/50 rounded-xl overflow-hidden group">
-                  <img 
+                <div key={index} className="relative aspect-video bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl overflow-hidden">
+                  {/* Emoji fallback always rendered behind image */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-4xl">
+                      {['🏛️', '🌆', '🎭', '🏰', '🌉'][index] || '🏛️'}
+                    </span>
+                  </div>
+                  
+                  {/* Actual image on top */}
+                  <Image 
                     src={imageUrl}
-                    alt={`${destinationName} view ${num}`}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    loading="eager"
+                    alt={`${destinationName} - ${searchTerms[index].split(' ').slice(1).join(' ')}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 400px"
+                    className="object-cover opacity-0"
+                    priority
+                    unoptimized // Use unoptimized for dynamic Unsplash images
                     onLoad={(e) => {
-                      console.log('[Image] Successfully loaded:', imageUrl);
-                      const target = e.target as HTMLImageElement;
-                      target.style.opacity = '1';
+                      const imgElement = e.target as HTMLImageElement;
+                      imgElement.classList.remove('opacity-0');
+                      imgElement.classList.add('opacity-100');
                     }}
-                    onError={(e) => {
-                      console.error('[Image] Failed to load:', imageUrl);
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent && !parent.querySelector('.fallback-emoji')) {
-                        const fallback = document.createElement('div');
-                        fallback.className = 'fallback-emoji w-full h-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center';
-                        const emojis = ['🏛️', '🌆', '🎭', '🏰', '🌉'];
-                        fallback.innerHTML = `<span class="text-4xl">${emojis[index] || '🏛️'}</span>`;
-                        parent.appendChild(fallback);
-                      }
+                    onError={() => {
+                      // Silently fail - emoji fallback is visible
                     }}
-                    style={{ opacity: 0, transition: 'opacity 0.3s' }}
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                  
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 z-10">
                     <p className="text-white text-xs truncate">{destinationName}</p>
+                    {photographer && (
+                      <p className="text-white/70 text-[10px] truncate">
+                        Photo: <a href={photographerUrl} target="_blank" rel="noopener noreferrer" className="underline">{photographer}</a>
+                      </p>
+                    )}
                   </div>
                 </div>
               );
@@ -214,8 +297,8 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
 
       {/* Main Content */}
       <div className="p-6 pb-12">
-        {/* Trip Actions */}
-        <TripActions itinerary={itinerary} />
+        {/* Trip Actions - Tips specific to selected location */}
+        <TripActions itinerary={itinerary} selectedLocation={selectedLocation} />
 
         {/* Coworking Spaces (if any) */}
         <CoworkingSection activities={allActivities} />
