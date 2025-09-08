@@ -25,7 +25,7 @@ function getOpenAIClient(): OpenAI {
   if (!openai) {
     openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
-      timeout: 45000, // 45 second timeout per chunk
+      timeout: 30000, // 30 second timeout per chunk
       maxRetries: 2, // Add automatic retries
     });
   }

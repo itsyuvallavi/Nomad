@@ -172,20 +172,16 @@ export default function ChatDisplay({
 
 
     useEffect(() => {
-        const hasStarted = generationIdRef.current !== null;
-        if (savedChatState || hasStarted) {
-            return;
-        }
-        
-        const startConversation = async () => {
-            const userMessage: Message = { role: 'user', content: initialPrompt.prompt };
-            setMessages([userMessage]);
-            await generateItinerary([userMessage]);
-        };
-
-        startConversation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialPrompt.prompt, savedChatState]);
+      if (savedChatState || generationIdRef.current) {
+        return;
+      }
+      
+      const userMessage: Message = { role: 'user', content: initialPrompt.prompt };
+      setMessages([userMessage]);
+      generateItinerary([userMessage]);
+      
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleUserInputSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();

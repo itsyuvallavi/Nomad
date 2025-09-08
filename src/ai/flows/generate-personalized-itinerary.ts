@@ -61,7 +61,7 @@ export async function generatePersonalizedItinerary(
     // Parse destinations to check if it's a multi-destination trip
     const parsedTrip = parseDestinations(input.prompt);
     const isMultiDestination = parsedTrip.destinations.length > 1;
-    // Lowered threshold to 2 days to force chunked generation for most trips, preventing timeouts.
+    // Lowered threshold to 1 day to force chunked generation for almost all trips, preventing timeouts.
     const isLongTrip = parsedTrip.totalDays > 1;
     
     // Use chunked approach for multi-destination or long trips to avoid timeouts
