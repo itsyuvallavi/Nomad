@@ -3,20 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import { Settings } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import StartItinerary from '@/components/start-itinerary';
 import type { FormValues } from '@/components/itinerary-form';
 import ChatDisplay from '@/components/chat-display';
-import { Button } from '@/components/ui/button';
-
+import { AuthForm } from '@/components/auth-form';
 
 export interface ChatState {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;
@@ -33,18 +23,24 @@ export interface RecentSearch {
   lastUpdated: string;
 }
 
-export type View = 'start' | 'chat';
+export type View = 'auth' | 'start' | 'chat';
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<View>('start');
+  const [currentView, setCurrentView] = useState<View>('auth');
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
   const [currentSearchId, setCurrentSearchId] = useState<string | undefined>(undefined);
   
-  useEffect(() => {
-    console.log('Nomad Navigator loaded');
-  }, []);
+  // This function now just switches the view to the app
+  const handleLogin = () => {
+    setCurrentView('start');
+  };
+
+  // This function also just switches the view to the app
+  const handleSignUp = () => {
+    setCurrentView('start');
+  };
 
   const handleItineraryRequest = (values: FormValues, chatState?: ChatState, searchId?: string) => {
     setInitialPrompt(values);
@@ -65,7 +61,6 @@ export default function Home() {
     setError(errorMessage);
   };
 
-
   const renderMainContent = () => {
     switch (currentView) {
       case 'chat':
@@ -79,56 +74,22 @@ export default function Home() {
           />
         );
       case 'start':
-      default:
         return (
           <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+        );
+      case 'auth':
+      default:
+        return (
+            <div className="flex items-center justify-center min-h-full p-6">
+                <AuthForm onLogin={handleLogin} onSignUp={handleSignUp} />
+            </div>
         );
     }
   }
 
-
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      {/* Header */}
-      <header className="flex items-center justify-between p-6 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center animate-float">
-            <div className="w-4 h-4 bg-slate-800 rounded-sm animate-rotate-and-breathe"></div>
-          </div>
-          <span className="text-white font-medium">Nomad Navigator</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="w-8 h-8 text-slate-400 hover:text-white transition-colors">
-                <Settings size={20} />
-              </button>
-            </SheetTrigger>
-            <SheetContent className="bg-slate-800 border-slate-700 text-white">
-              <SheetHeader>
-                <SheetTitle className="text-white">Settings</SheetTitle>
-                <SheetDescription className="text-slate-400">
-                  Manage your application settings here.
-                </SheetDescription>
-              </SheetHeader>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </header>
-      
-      {error && (
-        <div className="p-6 pt-0">
-            <div className="bg-red-900/50 border border-red-500/50 text-red-300 p-4 rounded-lg flex justify-between items-center">
-                <p><strong>Error:</strong> {error}</p>
-                <Button onClick={() => setError(null)} variant="ghost" size="icon" className="text-white hover:bg-red-800/50">X</Button>
-            </div>
-        </div>
-      )}
-      
-      <div className="flex-1 overflow-y-auto">
+    <div className="h-screen overflow-hidden">
         {renderMainContent()}
-      </div>
     </div>
   );
 }
