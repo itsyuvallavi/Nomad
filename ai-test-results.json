@@ -1,0 +1,1823 @@
+[
+  {
+    "testId": "tokyo_kyoto",
+    "input": "Week in Tokyo and 3 days in Kyoto",
+    "response": {
+      "destinations": 2,
+      "days": 3,
+      "activities": [
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        }
+      ]
+    },
+    "passed": false,
+    "errors": [
+      "Expected 10 days, got 3",
+      "Expected 25-35 activities, got 10"
+    ],
+    "timestamp": "2025-09-08T08:35:34.926Z",
+    "responseTime": 0
+  },
+  {
+    "testId": "europe_tour",
+    "input": "2 weeks across London, Paris, Rome, and Barcelona with budget under $3000",
+    "response": {
+      "destinations": 1,
+      "days": 7,
+      "activities": [
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        },
+        {
+          "name": "Sample Activity",
+          "time": "10:00 AM"
+        }
+      ]
+    },
+    "passed": false,
+    "errors": [
+      "Expected 4 destinations, got 1",
+      "Expected 14 days, got 7",
+      "Expected 35-50 activities, got 10"
+    ],
+    "timestamp": "2025-09-08T08:35:34.926Z",
+    "responseTime": 0
+  },
+  {
+    "runId": 1757321054017,
+    "timestamp": "2025-09-08T08:44:14.017Z",
+    "isBaseline": true,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "3 days in London",
+        "response": {
+          "destination": "3 days",
+          "title": "5-Day Adventure to 3 days",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-09-15",
+              "title": "Exploring Central London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the British Museum to explore its vast collection of art and artifacts.",
+                  "category": "Leisure",
+                  "address": "Great Russell St, Bloomsbury, London WC1B 3DG, UK"
+                },
+                {
+                  "time": "12:30",
+                  "description": "Lunch at Dishoom, featuring delicious Bombay-style cuisine.",
+                  "category": "Food",
+                  "address": "12 Upper St Martin's Ln, London WC2H 9FB, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Take a stroll through Covent Garden, enjoying the shops and street performances.",
+                  "category": "Leisure",
+                  "address": "Covent Garden, London WC2E 8RF, UK"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at Hawksmoor Seven Dials, known for its high-quality steaks.",
+                  "category": "Food",
+                  "address": "11 Langley St, London WC2H 9JG, UK"
+                }
+              ],
+              "_destination": "3 days"
+            },
+            {
+              "day": 2,
+              "date": "2025-09-16",
+              "title": "Cultural Landmarks and River Thames",
+              "activities": [
+                {
+                  "time": "09:30",
+                  "description": "Visit the iconic Tower of London and see the Crown Jewels.",
+                  "category": "Leisure",
+                  "address": "Tower Hill, London EC3N 4AB, UK"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at The Ivy Tower Bridge, with stunning views of the river.",
+                  "category": "Food",
+                  "address": "Unit 1, 1 Tower Bridge Rd, London SE1 2AA, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Take a river cruise on the Thames, passing major landmarks.",
+                  "category": "Travel",
+                  "address": "Embankment Pier, London WC2N 6NU, UK"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Explore Borough Market, sampling local food and drinks.",
+                  "category": "Food",
+                  "address": "8 Southwark St, London SE1 1TL, UK"
+                }
+              ],
+              "_destination": "3 days"
+            },
+            {
+              "day": 3,
+              "date": "2025-09-17",
+              "title": "Royal Parks and Shopping",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Walk through Hyde Park, enjoy the serene environment and the Serpentine Lake.",
+                  "category": "Leisure",
+                  "address": "Hyde Park, London, UK"
+                },
+                {
+                  "time": "11:30",
+                  "description": "Visit Kensington Palace and its beautiful gardens.",
+                  "category": "Leisure",
+                  "address": "Kensington Gardens, London W8 4PX, UK"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at The Orangery, located in Kensington Gardens, serving afternoon tea.",
+                  "category": "Food",
+                  "address": "Kensington Gardens, London W8 4PX, UK"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Shopping at Oxford Street, exploring various shops and boutiques.",
+                  "category": "Leisure",
+                  "address": "Oxford St, London, UK"
+                }
+              ],
+              "_destination": "3 days"
+            },
+            {
+              "day": 4,
+              "date": "2025-09-18",
+              "title": "Day Trip to Windsor",
+              "activities": [
+                {
+                  "time": "08:00",
+                  "description": "Take a train from London to Windsor to explore Windsor Castle.",
+                  "category": "Travel",
+                  "address": "Windsor Castle, Windsor SL4 1NJ, UK"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at The Duchess of Cambridge pub near the castle.",
+                  "category": "Food",
+                  "address": "15-16 Thames St, Windsor SL4 1PL, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Stroll around the beautiful grounds of Windsor Great Park.",
+                  "category": "Leisure",
+                  "address": "Windsor SL4 2HT, UK"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Return to London, enjoying the scenic train ride back.",
+                  "category": "Travel",
+                  "address": "Windsor and Eton Central Station, Windsor SL4 1PJ, UK"
+                }
+              ],
+              "_destination": "3 days"
+            },
+            {
+              "day": 5,
+              "date": "2025-09-19",
+              "title": "Museum and Farewell",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the Natural History Museum to see fascinating exhibits.",
+                  "category": "Leisure",
+                  "address": "Cromwell Rd, South Kensington, London SW7 5BD, UK"
+                },
+                {
+                  "time": "12:30",
+                  "description": "Lunch at the nearby Comptoir Libanais, enjoying Lebanese cuisine.",
+                  "category": "Food",
+                  "address": "1-5 Exhibition Rd, South Kensington, London SW7 2HE, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Visit the Victoria and Albert Museum, exploring art and design.",
+                  "category": "Leisure",
+                  "address": "Cromwell Rd, London SW7 2RL, UK"
+                },
+                {
+                  "time": "17:00",
+                  "description": "End the trip with a farewell dinner at Sketch, known for its unique decor.",
+                  "category": "Food",
+                  "address": "9 Conduit St, Mayfair, London W1S 2XG, UK"
+                }
+              ],
+              "_destination": "3 days"
+            }
+          ],
+          "quickTips": [
+            "Multi-destination trip to 1 countries"
+          ]
+        },
+        "passed": false,
+        "errors": [
+          "Destination \"3 days\" doesn't match expected: London",
+          "Expected 3 days, got 5",
+          "Expected 9-15 activities, got 20",
+          "Insufficient quick tips (1 < 3)"
+        ],
+        "timestamp": "2025-09-08T08:44:14.015Z",
+        "responseTime": 26317,
+        "details": {
+          "actualDestination": "3 days",
+          "actualDays": 5,
+          "actualActivities": 20
+        }
+      }
+    ]
+  },
+  {
+    "runId": 1757321338694,
+    "timestamp": "2025-09-08T08:48:58.694Z",
+    "isBaseline": true,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "3 days in London",
+        "response": {
+          "destination": "3 days",
+          "title": "Multi-Country Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-01-01",
+              "title": "Exploring Central London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the British Museum",
+                  "category": "Leisure",
+                  "address": "Great Russell St, Bloomsbury, London WC1B 3DG, UK"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at a local pub",
+                  "category": "Food",
+                  "address": "The Crown, 50 Brentford Rd, London W5 5BQ, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Walk through Covent Garden",
+                  "category": "Leisure",
+                  "address": "Covent Garden, London WC2E 8RF, UK"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at a restaurant in Soho",
+                  "category": "Food",
+                  "address": "Dishoom, 12 Upper St Martin's Ln, London WC2H 9FB, UK"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-01-02",
+              "title": "Historical Landmarks",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Tour the Tower of London",
+                  "category": "Leisure",
+                  "address": "St Katharine's & Wapping, London EC3N 4AB, UK"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch near the Thames River",
+                  "category": "Food",
+                  "address": "The Anchor, 34 Park St, London SE1 9EF, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Visit the Houses of Parliament and Big Ben",
+                  "category": "Leisure",
+                  "address": "Westminster, London SW1A 0AA, UK"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at a traditional fish and chips shop",
+                  "category": "Food",
+                  "address": "Poppies Fish & Chips, 6-8 Hanbury St, London E1 6QR, UK"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-01-03",
+              "title": "Cultural Experiences",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Explore the Tate Modern",
+                  "category": "Leisure",
+                  "address": "Bankside, London SE1 9TG, UK"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at Borough Market",
+                  "category": "Food",
+                  "address": "8 Southwark St, London SE1 1TL, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Stroll through Hyde Park",
+                  "category": "Leisure",
+                  "address": "Hyde Park, London W2 2UH, UK"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at a rooftop restaurant",
+                  "category": "Food",
+                  "address": "Sky Garden, 1 Sky Garden Walk, London EC3M 8AF, UK"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Purchase an Oyster Card for easy travel on public transport.",
+            "Always check the opening hours of attractions in advance.",
+            "Try to eat at local spots for an authentic experience."
+          ]
+        },
+        "passed": false,
+        "errors": [
+          "Destination \"3 days\" doesn't match expected: London"
+        ],
+        "timestamp": "2025-09-08T08:48:58.691Z",
+        "responseTime": 17444,
+        "details": {
+          "actualDestination": "3 days",
+          "actualDays": 3,
+          "actualActivities": 12
+        }
+      }
+    ]
+  },
+  {
+    "runId": 1757321642201,
+    "timestamp": "2025-09-08T08:54:02.201Z",
+    "isBaseline": true,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "3 days in London",
+        "response": {
+          "destination": "London",
+          "title": "Multi-Country Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-01-01",
+              "title": "Exploring Central London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the British Museum",
+                  "category": "Leisure",
+                  "address": "Great Russell St, Bloomsbury, London WC1B 3DG, UK"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at a local pub",
+                  "category": "Food",
+                  "address": "The Crown & Anchor, 22 Craven St, London WC2N 5NG, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Walk along the South Bank",
+                  "category": "Leisure",
+                  "address": "South Bank, London SE1, UK"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Take a ride on the London Eye",
+                  "category": "Travel",
+                  "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB, UK"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-01-02",
+              "title": "Historic Landmarks",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the Tower of London",
+                  "category": "Leisure",
+                  "address": "St Katharine's & Wapping, London EC3N 4AB, UK"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at Borough Market",
+                  "category": "Food",
+                  "address": "8 Southwark St, London SE1 1TL, UK"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Explore Westminster Abbey",
+                  "category": "Leisure",
+                  "address": "20 Deans Yd, Westminster, London SW1P 3PA, UK"
+                },
+                {
+                  "time": "16:00",
+                  "description": "See Buckingham Palace",
+                  "category": "Travel",
+                  "address": "Buckingham Palace, London SW1A 1AA, UK"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-01-03",
+              "title": "Culture and Relaxation",
+              "activities": [
+                {
+                  "time": "10:00",
+                  "description": "Visit the Tate Modern",
+                  "category": "Leisure",
+                  "address": "Bankside, London SE1 9TG, UK"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at a café near the Thames",
+                  "category": "Food",
+                  "address": "The Swan, 18 Upper Ground, London SE1 9PX, UK"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Stroll through Hyde Park",
+                  "category": "Leisure",
+                  "address": "Hyde Park, London, UK"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at a traditional British restaurant",
+                  "category": "Food",
+                  "address": "Rules, 35 Maiden Ln, Covent Garden, London WC2E 7LB, UK"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Purchase an Oyster card for easy travel on public transport.",
+            "Check the weather forecast and dress accordingly.",
+            "Book tickets to major attractions in advance to avoid long lines."
+          ]
+        },
+        "passed": true,
+        "errors": [],
+        "timestamp": "2025-09-08T08:54:02.196Z",
+        "responseTime": 17436,
+        "details": {
+          "actualDestination": "London",
+          "actualDays": 3,
+          "actualActivities": 12
+        }
+      }
+    ]
+  },
+  {
+    "runId": 1757322891460,
+    "timestamp": "2025-09-08T09:14:51.460Z",
+    "isBaseline": true,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "3 days in London",
+        "response": {
+          "destination": "London",
+          "title": "3 Days in London: Explore the Heart of England",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2023-10-01",
+              "title": "Historical London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the Tower of London and see the Crown Jewels",
+                  "category": "Attraction",
+                  "address": "London city center"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at The Liberty Tavern, a cozy pub nearby",
+                  "category": "Food",
+                  "address": "London city center"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Walk across Tower Bridge and enjoy the views",
+                  "category": "Leisure",
+                  "address": "London city center"
+                },
+                {
+                  "time": "16:00",
+                  "description": "Explore the historic Borough Market for snacks and local flavors",
+                  "category": "Food",
+                  "address": "London city center"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at a nearby restaurant, The Coal Shed, known for its grilled meats",
+                  "category": "Food",
+                  "address": "London city center"
+                },
+                {
+                  "time": "20:00",
+                  "description": "Enjoy a night-time river cruise on the Thames",
+                  "category": "Leisure",
+                  "address": "London city center"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2023-10-02",
+              "title": "Cultural Exploration",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the British Museum and see the Rosetta Stone and Egyptian artifacts",
+                  "category": "Attraction",
+                  "address": "London city center"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at Dishoom, a popular Indian restaurant",
+                  "category": "Food",
+                  "address": "London city center"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Take a stroll through Covent Garden and enjoy street performances",
+                  "category": "Leisure",
+                  "address": "London city center"
+                },
+                {
+                  "time": "16:00",
+                  "description": "Visit the National Gallery to see classical artworks",
+                  "category": "Attraction",
+                  "address": "London city center"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at The Ivy, a classic British restaurant",
+                  "category": "Food",
+                  "address": "London city center"
+                },
+                {
+                  "time": "20:00",
+                  "description": "Watch a West End show in the Theatre District",
+                  "category": "Leisure",
+                  "address": "London city center"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2023-10-03",
+              "title": "Royal London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit Buckingham Palace and watch the Changing of the Guard",
+                  "category": "Attraction",
+                  "address": "London city center"
+                },
+                {
+                  "time": "11:00",
+                  "description": "Walk through St. James's Park and enjoy the scenery",
+                  "category": "Leisure",
+                  "address": "London city center"
+                },
+                {
+                  "time": "12:30",
+                  "description": "Lunch at The Goring, known for its afternoon tea",
+                  "category": "Food",
+                  "address": "London city center"
+                },
+                {
+                  "time": "14:30",
+                  "description": "Visit the Victoria and Albert Museum for design and fashion history",
+                  "category": "Attraction",
+                  "address": "London city center"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Explore Harrods for high-end shopping",
+                  "category": "Leisure",
+                  "address": "London city center"
+                },
+                {
+                  "time": "19:00",
+                  "description": "Dinner at a restaurant in Knightsbridge, The Ledbury, known for its fine dining",
+                  "category": "Food",
+                  "address": "London city center"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Purchase an Oyster card for easy travel on public transport.",
+            "Book museum tickets in advance to skip the lines.",
+            "Wear comfortable shoes for walking as London is best explored on foot.",
+            "Check for free walking tours for a budget-friendly way to see the city.",
+            "Try to visit local markets for authentic food experiences."
+          ]
+        },
+        "passed": false,
+        "errors": [
+          "Expected 9-15 activities, got 18"
+        ],
+        "timestamp": "2025-09-08T09:14:51.457Z",
+        "responseTime": 24981,
+        "details": {
+          "actualDestination": "London",
+          "actualDays": 3,
+          "actualActivities": 18
+        }
+      }
+    ]
+  },
+  {
+    "runId": 1757324818798,
+    "timestamp": "2025-09-08T09:46:58.798Z",
+    "isBaseline": true,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "Flying from New York to London for 3 days",
+        "response": {
+          "destination": "London",
+          "title": "3-Day London Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2023-10-01",
+              "title": "Arrival and Exploring the Heart of London",
+              "activities": [
+                {
+                  "time": "10:00",
+                  "description": "Arrive at Heathrow Airport and take the Heathrow Express to Paddington Station.",
+                  "category": "Travel",
+                  "address": "Travel to/from London"
+                },
+                {
+                  "time": "11:00",
+                  "description": "Check in to your hotel and freshen up. - Visit Tower of London",
+                  "category": "Leisure",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "12:30",
+                  "description": "Lunch at Dishoom, a popular Indian restaurant. - Visit Fallow",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Visit the British Museum to see world-famous artifacts. - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Stroll through Covent Garden and enjoy street performances. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "19:00",
+                  "description": "Dinner at The Ivy, a classic London dining experience. - Visit Fallow",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2023-10-02",
+              "title": "Royal and Historical London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at your hotel. - Visit Fallow",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP"
+                },
+                {
+                  "time": "10:30",
+                  "description": "Visit Buckingham Palace and watch the Changing of the Guard. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Walk through St. James's Park. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at a nearby cafe. - Visit Fallow",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP"
+                },
+                {
+                  "time": "14:30",
+                  "description": "Explore the Tower of London and see the Crown Jewels. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Take a walk along the Thames River and see the Tower Bridge. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "19:30",
+                  "description": "Dinner at Duck & Waffle with a stunning view of the city. - Visit Fallow",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2023-10-03",
+              "title": "Art, Shopping, and Departure",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at a local bakery. - Visit Fallow",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP"
+                },
+                {
+                  "time": "10:30",
+                  "description": "Visit the Tate Modern for contemporary art. - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at Borough Market, sampling various local foods. - Visit Fallow",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Last-minute shopping at Oxford Street. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Return to hotel and check out.",
+                  "category": "Travel",
+                  "address": "Travel to/from London"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Head to Heathrow Airport for your flight back to New York.",
+                  "category": "Travel",
+                  "address": "Travel to/from London"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Use an Oyster card for easy travel on public transport.",
+            "Book tickets for attractions in advance to save time.",
+            "Try to experience a West End show for a taste of London's theatre scene.",
+            "Keep an umbrella handy, as London weather can be unpredictable.",
+            "Take time to explore local neighborhoods for unique shops and eateries."
+          ]
+        },
+        "passed": false,
+        "errors": [
+          "Expected 9-15 activities, got 19"
+        ],
+        "timestamp": "2025-09-08T09:46:58.796Z",
+        "responseTime": 27555,
+        "details": {
+          "actualDestination": "London",
+          "actualDays": 3,
+          "actualActivities": 19
+        }
+      }
+    ]
+  },
+  {
+    "runId": 1757325016503,
+    "timestamp": "2025-09-08T09:50:16.503Z",
+    "isBaseline": true,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "Flying from New York to London for 3 days",
+        "response": {
+          "destination": "London",
+          "title": "3-Day London Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2023-10-15",
+              "title": "Exploring Central London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at a traditional English café - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "10:30",
+                  "description": "Visit the British Museum to explore ancient artifacts - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at a nearby pub with local cuisine - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Stroll through Covent Garden and enjoy street performances - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at a popular Indian restaurant in Soho - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "20:00",
+                  "description": "Catch a West End show for an evening of entertainment - Visit Tower of London",
+                  "category": "Leisure",
+                  "address": "London EC3N 4AB"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2023-10-16",
+              "title": "Historical Landmarks and Royal Palaces",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at a café near Buckingham Palace - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "10:00",
+                  "description": "Witness the Changing of the Guard at Buckingham Palace - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "11:30",
+                  "description": "Explore the beautiful St. James's Park - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at a café in Westminster - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "14:30",
+                  "description": "Visit the Houses of Parliament and Big Ben - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Tour the historic Westminster Abbey - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "19:00",
+                  "description": "Dinner at a rooftop restaurant with views of the Thames - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2023-10-17",
+              "title": "Culture and Shopping",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at a trendy café in Shoreditch - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "10:30",
+                  "description": "Visit the Tate Modern for contemporary art - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at Borough Market, sampling diverse cuisines - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Shopping at Oxford Street and Regent Street - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Enjoy a farewell dinner at a classic British steakhouse - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "20:00",
+                  "description": "Take a nighttime ride on the London Eye for stunning views - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Purchase an Oyster card for convenient travel on public transport.",
+            "Always check the opening hours of attractions before visiting.",
+            "Try traditional English breakfast at least once during your stay.",
+            "Make reservations for popular restaurants in advance.",
+            "Wear comfortable shoes as you'll be doing a lot of walking."
+          ]
+        },
+        "passed": true,
+        "errors": [],
+        "timestamp": "2025-09-08T09:50:16.502Z",
+        "responseTime": 24367,
+        "details": {
+          "actualDestination": "London",
+          "actualDays": 3,
+          "actualActivities": 19
+        }
+      }
+    ]
+  },
+  {
+    "runId": 1757326022699,
+    "timestamp": "2025-09-08T10:07:02.699Z",
+    "isBaseline": false,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "Flying from New York to London for 3 days",
+        "response": {
+          "destination": "London",
+          "title": "3-Day London Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2023-10-10",
+              "title": "Exploring Central London",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at a traditional English café. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "10:30",
+                  "description": "Visit the British Museum and explore its vast collection. - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at a local pub, trying classic fish and chips. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Take a walk in Hyde Park and enjoy the scenery. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Visit Buckingham Palace and witness the changing of the guard. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "19:00",
+                  "description": "Dinner at a trendy restaurant in Soho. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2023-10-11",
+              "title": "Cultural Highlights and Markets",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at a local bakery. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "10:30",
+                  "description": "Visit the Tower of London and see the Crown Jewels. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "13:00",
+                  "description": "Lunch at Borough Market, sampling various foods. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Explore the South Bank and take in views of the Thames. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Visit the Tate Modern for contemporary art exhibits. - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "19:00",
+                  "description": "Dinner at a Michelin-starred restaurant. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2023-10-12",
+              "title": "West End and Iconic Sites",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Breakfast at a café near Covent Garden. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "10:30",
+                  "description": "Visit the London Eye for panoramic views of the city. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Take a stroll through Covent Garden and explore its shops. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "13:30",
+                  "description": "Lunch at a popular café in Covent Garden. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Catch a matinee show in the West End. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at a restaurant with views of the Thames. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Purchase an Oyster card for easy travel on public transport.",
+            "Check the weather and dress in layers, as it can be unpredictable.",
+            "Book tickets for major attractions in advance to avoid long lines.",
+            "Try to experience traditional afternoon tea during your stay.",
+            "Stay aware of your surroundings and keep valuables secure."
+          ]
+        },
+        "passed": true,
+        "errors": [],
+        "timestamp": "2025-09-08T10:01:20.927Z",
+        "responseTime": 28327,
+        "details": {
+          "actualDestination": "London",
+          "actualDays": 3,
+          "actualActivities": 18
+        }
+      },
+      {
+        "testId": "paris_weekend",
+        "input": "Weekend trip from Los Angeles to Paris",
+        "response": {
+          "destination": "Paris",
+          "title": "Weekend Getaway to Paris",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2023-11-10",
+              "title": "Arrival and Evening Stroll",
+              "activities": [
+                {
+                  "time": "17:00",
+                  "description": "Arrive in Paris and check into the hotel",
+                  "category": "Travel",
+                  "address": "Travel to/from Paris"
+                },
+                {
+                  "time": "18:30",
+                  "description": "Stroll along the Seine River and enjoy the sunset - Visit Parc des Buttes-Chaumont",
+                  "category": "Leisure",
+                  "address": "75019 Paris"
+                },
+                {
+                  "time": "20:00",
+                  "description": "Dinner at a traditional French bistro - Visit Bouillon République",
+                  "category": "Food",
+                  "address": "39 Bd du Temple, 75003 Paris"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2023-11-11",
+              "title": "Exploring Iconic Landmarks",
+              "activities": [
+                {
+                  "time": "09:00",
+                  "description": "Visit the Eiffel Tower and take in panoramic views of the city - Visit Eiffel Tower",
+                  "category": "Attraction",
+                  "address": "Av. Gustave Eiffel, 75007 Paris"
+                },
+                {
+                  "time": "11:00",
+                  "description": "Explore the Trocadéro Gardens - Visit Parc des Buttes-Chaumont",
+                  "category": "Leisure",
+                  "address": "75019 Paris"
+                },
+                {
+                  "time": "12:30",
+                  "description": "Lunch at a café with views of the Eiffel Tower - Visit Bouillon République",
+                  "category": "Food",
+                  "address": "39 Bd du Temple, 75003 Paris"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Visit the Louvre Museum and see the Mona Lisa - Visit Carnavalet Museum",
+                  "category": "Attraction",
+                  "address": "23 Rue de Sévigné, 75003 Paris"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner in the Montmartre district - Visit Bouillon République",
+                  "category": "Food",
+                  "address": "39 Bd du Temple, 75003 Paris"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2023-11-12",
+              "title": "Cultural Immersion",
+              "activities": [
+                {
+                  "time": "08:30",
+                  "description": "Breakfast at a local bakery - Visit Bouillon République",
+                  "category": "Food",
+                  "address": "39 Bd du Temple, 75003 Paris"
+                },
+                {
+                  "time": "10:00",
+                  "description": "Visit the Notre-Dame Cathedral and admire its architecture - Visit Eiffel Tower",
+                  "category": "Attraction",
+                  "address": "Av. Gustave Eiffel, 75007 Paris"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Explore the Latin Quarter and its charming streets - Visit Parc des Buttes-Chaumont",
+                  "category": "Leisure",
+                  "address": "75019 Paris"
+                },
+                {
+                  "time": "13:30",
+                  "description": "Lunch at a traditional creperie - Visit Bouillon République",
+                  "category": "Food",
+                  "address": "39 Bd du Temple, 75003 Paris"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Visit the Musée d'Orsay to see Impressionist artworks - Visit Carnavalet Museum",
+                  "category": "Attraction",
+                  "address": "23 Rue de Sévigné, 75003 Paris"
+                },
+                {
+                  "time": "19:00",
+                  "description": "Dinner cruise on the Seine River - Visit Bouillon République",
+                  "category": "Food",
+                  "address": "39 Bd du Temple, 75003 Paris"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Learn basic French phrases to enhance your experience.",
+            "Book museum tickets in advance to avoid long lines.",
+            "Use the metro for quick and easy transportation around the city.",
+            "Try local specialties like croissants and macarons.",
+            "Be mindful of pickpockets in crowded tourist areas."
+          ]
+        },
+        "passed": true,
+        "errors": [],
+        "timestamp": "2025-09-08T10:01:41.151Z",
+        "responseTime": 20224,
+        "details": {
+          "actualDestination": "Paris",
+          "actualDays": 3,
+          "actualActivities": 14
+        }
+      },
+      {
+        "testId": "tokyo_kyoto",
+        "input": "Departing from San Francisco for one week in Tokyo and 3 days in Kyoto",
+        "response": null,
+        "passed": false,
+        "errors": [
+          "Error: OpenAI generation failed: Failed to generate itinerary for Tokyo: Request timed out."
+        ],
+        "timestamp": "2025-09-08T10:05:04.793Z",
+        "responseTime": 203641,
+        "details": {}
+      },
+      {
+        "testId": "europe_tour",
+        "input": "Starting from Boston for 2 weeks across London, Paris, Rome, and Barcelona",
+        "response": null,
+        "passed": false,
+        "errors": [
+          "Error: No valid destinations found. Please specify at least one destination."
+        ],
+        "timestamp": "2025-09-08T10:05:04.808Z",
+        "responseTime": 14,
+        "details": {}
+      },
+      {
+        "testId": "max_complexity",
+        "input": "Leaving from Chicago for 30 days visiting London, Paris, Rome, Barcelona, and Amsterdam",
+        "response": null,
+        "passed": false,
+        "errors": [
+          "Error: No valid destinations found. Please specify at least one destination."
+        ],
+        "timestamp": "2025-09-08T10:05:04.812Z",
+        "responseTime": 4,
+        "details": {}
+      },
+      {
+        "testId": "over_limit_destinations",
+        "input": "From Miami for 3 weeks in London, Paris, Rome, Barcelona, Amsterdam, and Berlin",
+        "response": {
+          "destination": "London, Paris, Rome, Barcelona, Amsterdam, and Berlin",
+          "title": "Multi-Country Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-01-01",
+              "title": "Arrival in London",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Check into hotel and freshen up",
+                  "category": "Leisure",
+                  "address": "Hotel Address, London"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at Borough Market",
+                  "category": "Food",
+                  "address": "Borough Market, London"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Visit the Tower of London",
+                  "category": "Travel",
+                  "address": "Tower Hill, London"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at a local pub",
+                  "category": "Food",
+                  "address": "Pub Address, London"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-01-02",
+              "title": "Exploring London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the British Museum",
+                  "category": "Travel",
+                  "address": "Great Russell St, London"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at Covent Garden",
+                  "category": "Food",
+                  "address": "Covent Garden, London"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Stroll through Hyde Park",
+                  "category": "Leisure",
+                  "address": "Hyde Park, London"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "West End show",
+                  "category": "Leisure",
+                  "address": "Theater District, London"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-01-03",
+              "title": "Travel to Paris",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Take Eurostar to Paris",
+                  "category": "Travel",
+                  "address": "Eurostar Terminal, London"
+                },
+                {
+                  "time": "11:00 AM",
+                  "description": "Check into hotel in Paris",
+                  "category": "Leisure",
+                  "address": "Hotel Address, Paris"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at a bistro",
+                  "category": "Food",
+                  "address": "Bistro Address, Paris"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Visit the Eiffel Tower",
+                  "category": "Travel",
+                  "address": "Champ de Mars, Paris"
+                }
+              ]
+            },
+            {
+              "day": 4,
+              "date": "2025-01-04",
+              "title": "Discovering Paris",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the Louvre Museum",
+                  "category": "Travel",
+                  "address": "Rue de Rivoli, Paris"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at Le Marais",
+                  "category": "Food",
+                  "address": "Le Marais, Paris"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Explore Montmartre and Sacré-Cœur",
+                  "category": "Travel",
+                  "address": "Montmartre, Paris"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner cruise on the Seine",
+                  "category": "Food",
+                  "address": "Seine River, Paris"
+                }
+              ]
+            },
+            {
+              "day": 5,
+              "date": "2025-01-05",
+              "title": "Travel to Rome",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Flight to Rome",
+                  "category": "Travel",
+                  "address": "Airport, Paris"
+                },
+                {
+                  "time": "11:00 AM",
+                  "description": "Check into hotel in Rome",
+                  "category": "Leisure",
+                  "address": "Hotel Address, Rome"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at Trastevere",
+                  "category": "Food",
+                  "address": "Trastevere, Rome"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Visit the Colosseum",
+                  "category": "Travel",
+                  "address": "Piazza del Colosseo, Rome"
+                }
+              ]
+            },
+            {
+              "day": 6,
+              "date": "2025-01-06",
+              "title": "Exploring Rome",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the Vatican Museums",
+                  "category": "Travel",
+                  "address": "Viale Vaticano, Rome"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch near St. Peter's Basilica",
+                  "category": "Food",
+                  "address": "Piazza San Pietro, Rome"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Stroll through Piazza Navona",
+                  "category": "Leisure",
+                  "address": "Piazza Navona, Rome"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Dinner at a local trattoria",
+                  "category": "Food",
+                  "address": "Trattoria Address, Rome"
+                }
+              ]
+            },
+            {
+              "day": 7,
+              "date": "2025-01-07",
+              "title": "Travel to Barcelona",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Flight to Barcelona",
+                  "category": "Travel",
+                  "address": "Airport, Rome"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Check into hotel in Barcelona",
+                  "category": "Leisure",
+                  "address": "Hotel Address, Barcelona"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at La Boqueria Market",
+                  "category": "Food",
+                  "address": "La Boqueria, Barcelona"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Visit Sagrada Familia",
+                  "category": "Travel",
+                  "address": "Carrer de Mallorca, Barcelona"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Book transportation in advance.",
+            "Try local cuisine in each city.",
+            "Keep an eye on your belongings while traveling."
+          ]
+        },
+        "passed": false,
+        "errors": [
+          "Destination \"London, Paris, Rome, Barcelona, Amsterdam, and Berlin\" doesn't match expected: ",
+          "Expected 0 days, got 7",
+          "Expected 0-0 activities, got 28"
+        ],
+        "timestamp": "2025-09-08T10:07:02.694Z",
+        "responseTime": 117882,
+        "details": {
+          "actualDestination": "London, Paris, Rome, Barcelona, Amsterdam, and Berlin",
+          "actualDays": 7,
+          "actualActivities": 28
+        }
+      },
+      {
+        "testId": "over_limit_days",
+        "input": "From Seattle for 35 days exploring Europe",
+        "response": null,
+        "passed": false,
+        "errors": [
+          "Error: No valid destinations found. Please specify at least one destination."
+        ],
+        "timestamp": "2025-09-08T10:07:02.696Z",
+        "responseTime": 2,
+        "details": {}
+      }
+    ]
+  },
+  {
+    "runId": 1757326618750,
+    "timestamp": "2025-09-08T10:16:58.750Z",
+    "isBaseline": true,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "Flying from New York to London for 3 days",
+        "response": {
+          "destination": "London",
+          "title": "3-Day London Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2023-10-01",
+              "title": "Welcome to London",
+              "activities": [
+                {
+                  "time": "10:00",
+                  "description": "Arrive at Heathrow Airport and take the Heathrow Express to Paddington Station.",
+                  "category": "Travel",
+                  "address": "Travel to/from London"
+                },
+                {
+                  "time": "11:00",
+                  "description": "Check into your hotel and freshen up. - Visit Tower of London",
+                  "category": "Leisure",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "12:30",
+                  "description": "Lunch at Dishoom, a vibrant Indian restaurant. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Visit the British Museum and explore the vast collection of art and antiquities. - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Enjoy a leisurely stroll through Covent Garden, visiting shops and street performers. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "19:00",
+                  "description": "Dinner at The Ivy, a classic British restaurant. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2023-10-02",
+              "title": "Historic Sights and Culture",
+              "activities": [
+                {
+                  "time": "08:00",
+                  "description": "Breakfast at your hotel or a nearby café. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "09:30",
+                  "description": "Tour of the Tower of London, including the Crown Jewels. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "12:00",
+                  "description": "Lunch at a local pub, try traditional fish and chips. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "13:30",
+                  "description": "Walk across Tower Bridge and enjoy the views. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "15:00",
+                  "description": "Visit the Tate Modern for contemporary art exhibitions. - Visit The British Museum",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Dinner at Hawksmoor, known for its steak and British cuisine. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "20:00",
+                  "description": "Enjoy a West End show (book tickets in advance). - Visit Tower of London",
+                  "category": "Leisure",
+                  "address": "London EC3N 4AB"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2023-10-03",
+              "title": "Parks and Markets",
+              "activities": [
+                {
+                  "time": "08:00",
+                  "description": "Breakfast at a local bakery. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "09:30",
+                  "description": "Visit Buckingham Palace and watch the Changing of the Guard. - Visit Tower of London",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB"
+                },
+                {
+                  "time": "11:00",
+                  "description": "Stroll through St. James's Park. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "12:30",
+                  "description": "Lunch at Borough Market, sampling local and international delicacies. - Visit Carlotta",
+                  "category": "Food",
+                  "address": "77-78 Marylebone High St, London W1U 5JX"
+                },
+                {
+                  "time": "14:00",
+                  "description": "Explore the shops and boutiques at Camden Market. - Visit Hyde Park",
+                  "category": "Leisure",
+                  "address": "London"
+                },
+                {
+                  "time": "17:00",
+                  "description": "Return to hotel to collect luggage.",
+                  "category": "Travel",
+                  "address": "Travel to/from London"
+                },
+                {
+                  "time": "18:00",
+                  "description": "Depart for Heathrow Airport for your flight back to New York.",
+                  "category": "Travel",
+                  "address": "Travel to/from London"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Purchase an Oyster card for easy travel on public transport.",
+            "Check the weather forecast and pack accordingly.",
+            "Try to book attractions and restaurants in advance to avoid long waits.",
+            "Always have an umbrella or raincoat, as London weather can be unpredictable.",
+            "Be mindful of traffic rules when crossing the street; look right first."
+          ]
+        },
+        "passed": true,
+        "errors": [],
+        "timestamp": "2025-09-08T10:16:58.746Z",
+        "responseTime": 32958,
+        "details": {
+          "actualDestination": "London",
+          "actualDays": 3,
+          "actualActivities": 20
+        }
+      }
+    ]
+  }
+]

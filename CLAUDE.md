@@ -5,6 +5,125 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 Nomad Navigator - AI-powered travel planning application for digital nomads using Next.js 15, Firebase Genkit, and Google Gemini AI.
 
+## Plan & Review
+
+### Before starting work
+•⁠  ⁠Always in plan mode to make a plan
+•⁠  ⁠After get the plan, make sure you Write the plan to .claude/tasks/TASK_NAME.md.
+•⁠  ⁠The plan should be a detailed implementation plan and the reasoning behind them, as well as tasks broken down.
+•⁠  ⁠If the task require external knowledge or certain package, also research to get latest knowledge (Use Task tool for research)
+•⁠  ⁠Don't over plan it, always think MVP.
+•⁠  ⁠Once you write the plan, firstly ask me to review it. Do not continue until I approve the plan.
+
+### While implementing
+•⁠  ⁠You should update the plan as you work.
+•⁠  ⁠After you complete tasks in the plan, you should update and append detailed descriptions of the changes you made, so following tasks can be easily hand over to other engineers.
+•⁠  ⁠After you complete the task, you should update the plan to mark the task as completed.
+
+## AI Testing & Consistency Guidelines
+
+### CRITICAL: Always Test Before Deploying
+
+**Before making any changes to AI prompts or logic, you MUST:**
+
+1. **Run baseline test**: `npm run test:ai --baseline`
+2. **If baseline fails**: DO NOT proceed with complex changes
+3. **After any prompt changes**: Run full test suite with `npm run test:ai`
+
+### Testing Strategy
+
+#### Regression Prevention
+- The "3 days in London" test is our **golden standard**
+- If this simple request breaks, something is fundamentally wrong
+- Never deploy if baseline test fails
+
+#### Test Cases Priority
+1. **Simple requests** (London, Paris weekend) - must ALWAYS work
+2. **Medium complexity** (multi-city trips) - should work consistently  
+3. **Complex requests** (multi-week, constrained) - can have occasional issues
+
+#### When Making Changes to AI Flows
+
+**WORKFLOW:**
+```bash
+# 1. Before any changes
+npm run test:ai --baseline
+
+# 2. Make your prompt/logic changes in src/ai/flows/
+
+# 3. Test immediately after changes
+npm run test:ai --baseline
+
+# 4. If baseline passes, run full suite
+npm run test:ai
+
+# 5. Only deploy if all simple tests pass
+```
+
+### Monitoring Rules
+
+#### Daily Checks
+- Run `npm run test:ai` at least once per day during active development
+- Check `ai-test-results.json` for trends and regressions
+
+#### Red Flags 🚨
+- Simple tests failing after working previously
+- Response times increasing dramatically
+- Missing required fields in responses
+- Inconsistent destination/day counts
+- Genkit flows returning malformed schemas
+
+#### Response Quality Metrics
+- **Response Time**: Should be < 10 seconds for simple requests
+- **Structure Validation**: All required fields present (see `src/ai/schemas.ts`)
+- **Logical Consistency**: Days/destinations match request
+- **Activity Count**: Reasonable number of activities per day
+
+### Debugging Failed Tests
+
+When tests fail:
+
+1. **Check the last working version** - what changed in AI flows?
+2. **Isolate the issue** - test with fresh conversation context
+3. **Validate your test case** - is the expected structure correct?
+4. **Check for prompt pollution** - are complex prompts affecting simple ones?
+5. **Use Genkit UI** - `npm run genkit:dev` to debug individual flows
+
+### Integration with Development
+
+#### Before Code Reviews
+- Include test results in your PR description
+- Show baseline test passes
+- Document any test changes and why
+
+#### Before Deployments
+- Full test suite must pass
+- No regressions in simple test cases
+- Response times within acceptable range
+
+### MCP Integration
+
+When adding new MCPs:
+1. Run baseline test before adding MCP
+2. Add MCP and test again
+3. Ensure MCP doesn't break existing functionality
+4. Update test cases if MCP changes expected behavior
+
+#### Quick Commands Reference
+
+```bash
+# Run just the critical baseline test
+npm run test:ai --baseline
+
+# Run all tests
+npm run test:ai
+
+# View test history
+cat ai-test-results.json | jq '.[-5:]'  # Last 5 results
+```
+
+**Remember**: AI development is like traditional software development - test early, test often, and never deploy broken code!
+
 ## Development Workflow
 
 ### Planning Requirements
@@ -31,6 +150,10 @@ npm run genkit:watch      # Genkit with hot reload
 # Code quality
 npm run typecheck         # TypeScript type checking
 npm run lint              # ESLint code linting
+
+# AI Testing (NEW)
+npm run test:ai           # Run full AI consistency test suite
+npm run test:ai --baseline # Run just the baseline London test
 
 # Production
 npm run build             # Production build
@@ -119,7 +242,8 @@ When modifying AI functionality:
 1. Update relevant flow in `src/ai/flows/`
 2. Ensure schema compliance in `src/ai/schemas.ts`
 3. Test using `npm run genkit:dev` to access the Genkit UI
-4. Keep questions minimal - only ask for essential missing info
+4. **RUN AI TESTS**: `npm run test:ai --baseline` before and after changes
+5. Keep questions minimal - only ask for essential missing info
 
 ### File Attachments
 Files converted to base64 data URIs before AI processing. See `itinerary-form.tsx` for implementation.

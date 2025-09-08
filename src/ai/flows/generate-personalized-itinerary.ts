@@ -15,6 +15,7 @@ import { parseDestinations } from '@/ai/utils/destination-parser';
 import { logger } from '@/lib/logger';
 import { generateItineraryWithOpenAI, isOpenAIConfigured } from '@/ai/openai-direct';
 import { generateChunkedItinerary } from '@/ai/openai-chunked';
+import { generateEnhancedItinerary, validateTripComplexity } from '@/ai/enhanced-generator';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -55,14 +56,52 @@ export async function generatePersonalizedItinerary(
     throw new Error('OpenAI API key is required. Please add OPENAI_API_KEY to your .env file.');
   }
   
-  logger.info('AI', 'Using OpenAI GPT-4o-mini for generation');
+  // First validate trip complexity
+  const validation = validateTripComplexity(input.prompt);
+  if (!validation.valid) {
+    logger.error('AI', 'Trip complexity validation failed', { error: validation.error });
+    throw new Error(validation.error);
+  }
+  
+  logger.info('AI', 'Trip complexity validated - proceeding with generation');
+  
+  // Use enhanced generator if we have the APIs configured
+  const hasGoogleAPI = !!process.env.GOOGLE_API_KEY;
+  const hasWeatherAPI = !!process.env.OPENWEATHERMAP;
+  const hasGeminiAPI = !!process.env.GEMINI_API_KEY;
+  const useEnhanced = hasGoogleAPI || hasWeatherAPI;
+  
+  if (useEnhanced) {
+    logger.info('AI', 'Using ENHANCED generation with multiple APIs', {
+      hasGoogle: hasGoogleAPI,
+      hasWeather: hasWeatherAPI,
+      hasGemini: hasGeminiAPI
+    });
+    
+    try {
+      const result = await generateEnhancedItinerary(
+        input.prompt,
+        input.attachedFile,
+        input.conversationHistory
+      );
+      
+      logger.info('AI', 'Enhanced generation successful');
+      return result;
+    } catch (error: any) {
+      logger.error('AI', 'Enhanced generation failed, falling back to standard', { error: error.message });
+      // Fall through to standard generation
+    }
+  }
+  
+  // Fallback to standard generation
+  logger.info('AI', 'Using standard OpenAI generation');
   
   try {
     // Parse destinations to check if it's a multi-destination trip
     const parsedTrip = parseDestinations(input.prompt);
     const isMultiDestination = parsedTrip.destinations.length > 1;
-    // Lowered threshold to 1 day to force chunked generation for almost all trips, preventing timeouts.
-    const isLongTrip = parsedTrip.totalDays > 1;
+    // Use chunked for trips longer than 7 days to prevent timeouts
+    const isLongTrip = parsedTrip.totalDays > 7;
     
     // Use chunked approach for multi-destination or long trips to avoid timeouts
     if (isMultiDestination || isLongTrip) {
@@ -82,8 +121,8 @@ export async function generatePersonalizedItinerary(
       logger.info('AI', 'Chunked OpenAI generation successful');
       return result;
     } else {
-      // Use regular generation for simple trips (1 day only)
-      logger.info('AI', 'Using DIRECT generation for very short trip');
+      // Use regular generation for simple trips
+      logger.info('AI', 'Using DIRECT generation for simple trip');
       const result = await generateItineraryWithOpenAI(
         input.prompt,
         input.attachedFile,

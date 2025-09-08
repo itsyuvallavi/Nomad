@@ -115,17 +115,8 @@ export async function generateChunkedItinerary(
   const parsedTrip = parseDestinations(prompt);
   
   if (parsedTrip.destinations.length === 0) {
-    // If no destinations parsed, but we have a totalDays, create one chunk for it.
-    if (parsedTrip.totalDays > 0) {
-        parsedTrip.destinations.push({
-            name: "Destination", // Generic name
-            duration: parsedTrip.totalDays,
-            durationText: `${parsedTrip.totalDays} days`,
-            order: 1,
-        });
-    } else {
-        throw new Error('No destinations or duration found in prompt for chunked generation.');
-    }
+    // NO FALLBACK - if we can't parse destinations, we must fail
+    throw new Error('Failed to parse destinations from prompt. Cannot generate itinerary without clear destination information.');
   }
 
   // Calculate start date (default to next Monday)
@@ -249,12 +240,13 @@ export async function generateChunkedItinerary(
     } else if (tipsData.quickTips && Array.isArray(tipsData.quickTips)) {
       quickTips = tipsData.quickTips;
     } else {
-      quickTips = [`Multi-destination trip to ${parsedTrip.destinations.length} countries`];
+      // NO HARDCODED DATA - must fail if API doesn't return proper format
+      throw new Error('OpenAI API returned invalid tips format - cannot proceed without real data');
     }
   } catch (error: any) {
-    logger.warn('AI', 'Failed to generate tips, using minimal defaults', error);
-    // Even tips must come from API - if API fails, provide minimal info
-    quickTips = [`Multi-destination trip to ${parsedTrip.destinations.length} countries`];
+    logger.error('AI', '❌ CRITICAL: Failed to generate tips from OpenAI', error);
+    // NO FALLBACK DATA ALLOWED - must fail completely if API fails
+    throw new Error(`Failed to generate travel tips from OpenAI API: ${error.message}. All data MUST come from real API calls.`);
   }
   
   const itinerary: GeneratePersonalizedItineraryOutput = {
