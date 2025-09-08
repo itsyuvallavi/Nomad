@@ -70,20 +70,19 @@ function parseDuration(durationText: string): number {
 function extractOrigin(input: string): string {
   // Common patterns for origin
   const patterns = [
-    /from\s+([A-Z][a-zA-Z\s]+?)(?:\s+(?:to|on|in|next|this))/i,
-    /departing\s+(?:from\s+)?([A-Z][a-zA-Z\s]+?)(?:\s+(?:to|on|in))/i,
-    /leaving\s+(?:from\s+)?([A-Z][a-zA-Z\s]+?)(?:\s+(?:to|on|in))/i,
-    /starting\s+(?:from|in)\s+([A-Z][a-zA-Z\s]+?)(?:\s+(?:to|on|in))/i,
+    /from\s+([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|next|this|for))/i,
+    /departing\s+(?:from\s+)?([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|for))/i,
+    /leaving\s+(?:from\s+)?([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|for))/i,
+    /starting\s+(?:from|in)\s+([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|for))/i,
   ];
   
   for (const pattern of patterns) {
     const match = input.match(pattern);
     if (match) {
-      return match[1].trim();
+      return match[1].trim().replace(/,$/, '');
     }
   }
   
-  // Default to common cities if not found
   logger.warn('AI', 'Could not extract origin from input, will ask user');
   return '';
 }
@@ -94,15 +93,15 @@ function extractOrigin(input: string): string {
 function extractReturn(input: string): string {
   // Common patterns for return destination
   const patterns = [
-    /(?:return|go back|fly back|head back|back home)\s+to\s+([A-Z][a-zA-Z\s]+?)(?:\.|,|$)/i,
-    /home\s+(?:to|in)\s+([A-Z][a-zA-Z\s]+?)(?:\.|,|$)/i,
-    /back\s+to\s+([A-Z][a-zA-Z\s]+?)(?:\.|,|$)/i,
+    /(?:return|go back|fly back|head back|back home)\s+to\s+([A-Z][a-zA-Z\s,]+?)(?:\.|,|$)/i,
+    /home\s+(?:to|in)\s+([A-Z][a-zA-Z\s,]+?)(?:\.|,|$)/i,
+    /back\s+to\s+([A-Z][a-zA-Z\s,]+?)(?:\.|,|$)/i,
   ];
   
   for (const pattern of patterns) {
     const match = input.match(pattern);
     if (match) {
-      return match[1].trim();
+      return match[1].trim().replace(/,$/, '');
     }
   }
   
@@ -122,16 +121,17 @@ export function parseDestinations(input: string): ParsedTrip {
   
   // Patterns to match destinations with durations
   const patterns = [
-    // "visit Zimbabwe for a week" - exclude "i want to visit"
-    /(?<!i want to\s)visit\s+([A-Z][a-zA-Z\s]+?)\s+for\s+([\w\s]+?)(?:,|then|after|and|before|\.|$)/gi,
-    // "spend a week in Madagascar"
-    /spend\s+([\w\s]+?)\s+in\s+([A-Z][a-zA-Z\s]+?)(?:,|then|after|and|before|\.|$)/gi,
+    // "visit Zimbabwe for a week"
+    /(?:visit|plan|trip to|explore)\s+([A-Z][a-zA-Z\s,]+?)\s+for\s+([\w\s]+?)(?:,|then|after|and|before|\.|$)/gi,
+    // "spend a week in Madagascar" / "one week in London"
+    /spend\s+([\w\s]+?)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?:,|then|after|and|before|\.|$)/gi,
+    /([\w\s]+?week)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?:,|then|after|and|before|\.|$)/gi,
     // "Zimbabwe for 7 days" - be more specific about country names
     /(?:^|[,\s])([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\s+for\s+([\d\w\s]+?days?)(?:,|then|after|and|before|\.|$)/gi,
     // "3 days in Denmark"
-    /([\d\w\s]+?days?)\s+in\s+([A-Z][a-zA-Z\s]+?)(?:,|then|after|and|before|\.|$)/gi,
+    /([\d\w\s]+?days?)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?:,|then|after|and|before|\.|$)/gi,
     // "to Zimbabwe" (without duration) - exclude common phrases
-    /(?:travel to|fly to|go to)\s+([A-Z][a-zA-Z\s]+?)(?:\s+(?:for|from|on|,|\.|$))/gi,
+    /(?:travel to|fly to|go to)\s+([A-Z][a-zA-Z\s,]+?)(?=\s+(?:for|from|on|,|\.|$))/gi,
   ];
   
   // Extract all destinations
@@ -144,28 +144,22 @@ export function parseDestinations(input: string): ParsedTrip {
       let destination = '';
       let durationText = '';
       
-      // Handle different capture group positions
-      if (pattern.source.includes('spend')) {
-        // "spend X in Y" pattern
+      if (pattern.source.includes('spend') || pattern.source.includes('week\\s+in')) {
         durationText = match[1];
         destination = match[2];
-      } else if (pattern.source.includes('days?)\\s+in')) {
-        // "X days in Y" pattern
+      } else if (pattern.source.includes('days?\\s+in')) {
         durationText = match[1];
         destination = match[2];
       } else if (match[2]) {
-        // Standard "place for duration" pattern
         destination = match[1];
         durationText = match[2];
       } else {
-        // Just destination, no duration
         destination = match[1];
         durationText = '';
       }
       
-      destination = destination.trim();
+      destination = destination.trim().replace(/,$/, '');
       
-      // Skip if already found or if it's the origin/return
       if (foundDestinations.has(destination.toLowerCase())) continue;
       if (destination.toLowerCase() === origin.toLowerCase()) continue;
       if (destination.toLowerCase() === returnTo.toLowerCase() && destination !== '') continue;
@@ -174,88 +168,41 @@ export function parseDestinations(input: string): ParsedTrip {
       
       destinations.push({
         name: destination,
-        days: durationText ? parseDuration(durationText) : 5,  // Add 'days' field
-        duration: durationText ? parseDuration(durationText) : 5,
-        durationText: durationText || 'unspecified (5 days assumed)',
+        days: durationText ? parseDuration(durationText) : 7,  // Default to 7 days if unspecified
+        duration: durationText ? parseDuration(durationText) : 7,
+        durationText: durationText || 'unspecified (7 days assumed)',
         order: order++
       });
     }
   }
-  
-  // Special case: handle the test case more accurately
-  if (input.toLowerCase().includes('zimbabwe') && input.toLowerCase().includes('nicaragua')) {
-    // Clear any incorrect parsing and use manual extraction for this specific format
-    destinations.length = 0;
-    foundDestinations.clear();
-    
-    // Extract in the exact order mentioned
-    const orderedDestinations = [
-      { name: 'Zimbabwe', duration: 7, durationText: 'unspecified (7 days assumed)' },
-      { name: 'Nicaragua', duration: 7, durationText: 'a week' },
-      { name: 'Madagascar', duration: 7, durationText: 'a week' },
-      { name: 'Ethiopia', duration: 7, durationText: 'a week' },
-      { name: 'Denmark', duration: 3, durationText: '3 days' }
-    ];
-    
-    orderedDestinations.forEach((dest, idx) => {
-      if (input.toLowerCase().includes(dest.name.toLowerCase())) {
-        destinations.push({ ...dest, order: idx + 1 });
-      }
-    });
-  }
-  
-  // Special case: handle Japan/China/Korea/Vietnam trip
-  if (input.toLowerCase().includes('japan') && input.toLowerCase().includes('china') && input.toLowerCase().includes('korea')) {
-    // Clear any incorrect parsing and use manual extraction for this specific format
-    destinations.length = 0;
-    foundDestinations.clear();
-    
-    // Extract in the exact order mentioned
-    const orderedDestinations = [
-      { name: 'Japan', duration: 7, durationText: 'unspecified (assumed 7 days)' },
-      { name: 'China', duration: 7, durationText: 'a week' },
-      { name: 'South Korea', duration: 7, durationText: 'a week' },
-      { name: 'Vietnam', duration: 7, durationText: 'a week' },
-      { name: 'Denmark', duration: 3, durationText: '3 days' }
-    ];
-    
-    orderedDestinations.forEach((dest, idx) => {
-      if (input.toLowerCase().includes(dest.name.toLowerCase()) || 
-          (dest.name === 'South Korea' && input.toLowerCase().includes('korea'))) {
-        destinations.push({ ...dest, order: idx + 1, days: dest.duration });
-      }
-    });
-  }
-  
-  // Clean up duplicate destinations and city/country confusion
-  const cleanedDestinations = destinations.reduce((acc, dest) => {
-    // Copenhagen is in Denmark, consolidate them
-    if (dest.name === 'Copenhagen' || dest.name === 'Denmark') {
-      const existing = acc.find(d => d.name === 'Denmark' || d.name === 'Copenhagen');
-      if (!existing) {
-        acc.push({ ...dest, name: 'Denmark (Copenhagen)' });
-      }
-    } else {
-      // Check if destination already exists
-      const existing = acc.find(d => d.name.toLowerCase() === dest.name.toLowerCase());
-      if (!existing) {
-        acc.push(dest);
-      }
+
+  // If no destinations were found with patterns, try a simple extraction
+  if (destinations.length === 0) {
+    const simpleMatch = input.match(/(?:in|to|visit|explore)\s+([A-Z][a-zA-Z\s,]+)/);
+    if (simpleMatch) {
+      const durationMatch = input.match(/(\d+\s*days?|a week|one week)/);
+      const durationText = durationMatch ? durationMatch[0] : 'one week';
+      destinations.push({
+        name: simpleMatch[1].trim().replace(/,$/, ''),
+        days: parseDuration(durationText),
+        duration: parseDuration(durationText),
+        durationText: durationText,
+        order: 1
+      });
     }
-    return acc;
-  }, [] as ParsedDestination[]);
+  }
+
+  // Calculate total days
+  let totalDays = destinations.reduce((sum, dest) => sum + dest.duration, 0);
   
-  // Calculate total days (including travel days between destinations)
-  let totalDays = 0;
-  cleanedDestinations.forEach((dest, idx) => {
-    totalDays += dest.duration;
-    // Don't add extra travel days - they should be included in the itinerary days
-    // The API will handle travel days within the generated content
-  });
-  
+  if(totalDays === 0) {
+    logger.warn('AI', 'Total days calculated is 0, defaulting to 7');
+    totalDays = 7;
+  }
+
   const result: ParsedTrip = {
     origin,
-    destinations: cleanedDestinations,
+    destinations,
     returnTo,
     totalDays
   };
@@ -270,6 +217,7 @@ export function parseDestinations(input: string): ParsedTrip {
   
   return result;
 }
+
 
 /**
  * Convert parsed trip to structured prompt for AI

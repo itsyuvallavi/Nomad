@@ -92,23 +92,13 @@ export default function ChatDisplay({
         return currentMessages.map(m => `${m.role}: ${m.content}`).join('\n');
     }
 
-    const generateItinerary = async (currentMessages: Message[], generationId?: string) => {
-        // Create a unique ID for this generation attempt
-        const thisGenerationId = generationId || `gen-${Date.now()}-${Math.random()}`;
-        
-        // If there's already a generation in progress, skip this one
-        if (generationIdRef.current && generationIdRef.current !== thisGenerationId) {
+    const generateItinerary = async (currentMessages: Message[]) => {
+        const thisGenerationId = `gen-${Date.now()}-${Math.random()}`;
+        if (generationIdRef.current) {
             logger.warn('AI', 'Skipping duplicate call, generation already in progress');
             return;
         }
-        
-        // Claim this generation
-        if (!generationIdRef.current) {
-            generationIdRef.current = thisGenerationId;
-        } else if (generationIdRef.current !== thisGenerationId) {
-            // Another generation claimed it first
-            return;
-        }
+        generationIdRef.current = thisGenerationId;
         
         logger.info('USER', 'Starting itinerary generation', { prompt: initialPrompt.prompt, id: thisGenerationId });
         
@@ -143,9 +133,8 @@ export default function ChatDisplay({
                 totalDays: itinerary.itinerary.length,
             });
             
-            // Check if this is an error response
-            if (itinerary.title && itinerary.title.includes('Error:')) {
-                logger.error('API', 'Generation failed with error in title', { title: itinerary.title });
+            if (!itinerary.itinerary || itinerary.itinerary.length === 0) {
+                throw new Error('The AI returned an empty itinerary. Please try rephrasing your request.');
             }
             
             logger.info('AI', 'Generated Itinerary Summary', {
@@ -173,7 +162,6 @@ export default function ChatDisplay({
                 content: `I'm sorry, there was an error creating your itinerary. Please try again. \n\nDetails: ${errorMessage}`
             }]);
         } finally {
-            // Only clear if this was the active generation
             if (generationIdRef.current === thisGenerationId) {
                 setIsGenerating(false);
                 generationIdRef.current = null;
@@ -184,20 +172,15 @@ export default function ChatDisplay({
 
     useEffect(() => {
         if (savedChatState) {
-            // If resuming a saved chat, just load the state
             return;
         }
-
-        // Create a unique ID for this mount's generation
-        const mountGenerationId = `mount-${Date.now()}-${Math.random()}`;
         
         const startConversation = async () => {
             const userMessage: Message = { role: 'user', content: initialPrompt.prompt };
             setMessages([userMessage]);
-            await generateItinerary([userMessage], mountGenerationId);
+            await generateItinerary([userMessage]);
         };
 
-        // Start immediately - the generation function will handle deduplication
         startConversation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
