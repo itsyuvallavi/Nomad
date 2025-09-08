@@ -35,7 +35,7 @@ export interface RecentSearch {
   lastUpdated: string;
 }
 
-export type View = 'start' | 'chat' | 'auth';
+export type View = 'start' | 'chat';
 
 export default function Home() {
   const { user, error: authError, isLoading: isAuthLoading } = useUser();
@@ -45,10 +45,8 @@ export default function Home() {
   const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
   const [currentSearchId, setCurrentSearchId] = useState<string | undefined>(undefined);
   
-  // Log only once on component mount
   useEffect(() => {
     console.log('Nomad Navigator loaded');
-    console.log('Browser console working - logs will appear here during itinerary generation');
   }, []);
 
   const handleLogin = () => {
@@ -82,7 +80,7 @@ export default function Home() {
   const renderMainContent = () => {
     if (isAuthLoading) {
       return (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
           <div className="w-16 h-16 border-4 border-slate-600 border-t-white rounded-full animate-spin"></div>
         </div>
       );
@@ -167,8 +165,9 @@ export default function Home() {
         </div>
       )}
       
-      {renderMainContent()}
+      <div className="flex-1 overflow-y-auto">
+        {renderMainContent()}
+      </div>
     </div>
   );
 }
-

@@ -26,6 +26,8 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
     e.preventDefault();
     setIsLoading(true); // Show loading state, redirect will happen after
     if (isLogin) {
+      // In a real app, you'd send formData to your backend to verify
+      // before calling onLogin(), but for Auth0 redirect, we call it directly.
       onLogin();
     } else {
       onSignUp();
@@ -42,7 +44,7 @@ export function AuthForm({ onLogin, onSignUp }: AuthFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 flex items-center justify-center p-6">
+    <div className="min-h-full bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-6">
         {/* Logo/Header */}
         <div className="text-center space-y-4">
