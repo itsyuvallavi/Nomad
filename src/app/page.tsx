@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import { Settings, LogOut } from 'lucide-react';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { Settings } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -17,7 +16,6 @@ import StartItinerary from '@/components/start-itinerary';
 import type { FormValues } from '@/components/itinerary-form';
 import ChatDisplay from '@/components/chat-display';
 import { Button } from '@/components/ui/button';
-import { AuthForm } from '@/components/auth-form';
 
 
 export interface ChatState {
@@ -38,7 +36,6 @@ export interface RecentSearch {
 export type View = 'start' | 'chat';
 
 export default function Home() {
-  const { user, error: authError, isLoading: isAuthLoading } = useUser();
   const [currentView, setCurrentView] = useState<View>('start');
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
@@ -49,14 +46,6 @@ export default function Home() {
     console.log('Nomad Navigator loaded');
   }, []);
 
-  const handleLogin = () => {
-    window.location.href = '/api/auth/login';
-  };
-
-  const handleSignUp = () => {
-    window.location.href = '/api/auth/login?screen_hint=signup';
-  };
-  
   const handleItineraryRequest = (values: FormValues, chatState?: ChatState, searchId?: string) => {
     setInitialPrompt(values);
     setSavedChatState(chatState);
@@ -78,43 +67,23 @@ export default function Home() {
 
 
   const renderMainContent = () => {
-    if (isAuthLoading) {
-      return (
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
-          <div className="w-16 h-16 border-4 border-slate-600 border-t-white rounded-full animate-spin"></div>
-        </div>
-      );
+    switch (currentView) {
+      case 'chat':
+        return (
+          <ChatDisplay
+            initialPrompt={initialPrompt!}
+            savedChatState={savedChatState}
+            searchId={currentSearchId}
+            onError={handleChatError}
+            onReturn={handleReturnToStart}
+          />
+        );
+      case 'start':
+      default:
+        return (
+          <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+        );
     }
-    
-    if (authError) {
-      return (
-        <div className="flex-1 flex items-center justify-center text-red-400">
-          Error: {authError.message}
-        </div>
-      )
-    }
-    
-    if (user) {
-        switch (currentView) {
-          case 'chat':
-            return (
-              <ChatDisplay
-                initialPrompt={initialPrompt!}
-                savedChatState={savedChatState}
-                searchId={currentSearchId}
-                onError={handleChatError}
-                onReturn={handleReturnToStart}
-              />
-            );
-          case 'start':
-          default:
-            return (
-              <StartItinerary onItineraryRequest={handleItineraryRequest}/>
-            );
-        }
-    }
-
-    return <AuthForm onLogin={handleLogin} onSignUp={handleSignUp} />;
   }
 
 
@@ -129,31 +98,23 @@ export default function Home() {
           <span className="text-white font-medium">Nomad Navigator</span>
         </div>
         
-        {user && (
-           <div className="flex items-center gap-4">
-            <a href="/api/auth/logout" className="text-slate-400 hover:text-white transition-colors">
-              <LogOut size={20} />
-            </a>
-            <Sheet>
-              <SheetTrigger asChild>
-                <button className="w-8 h-8 text-slate-400 hover:text-white transition-colors">
-                  <Settings size={20} />
-                </button>
-              </SheetTrigger>
-              <SheetContent className="bg-slate-800 border-slate-700 text-white">
-                <SheetHeader>
-                  <SheetTitle className="text-white">Settings</SheetTitle>
-                  <SheetDescription className="text-slate-400">
-                    Manage your application settings here.
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="py-4">
-                  <p className="text-slate-300">Logged in as {user.name}</p>
-                </div>
-              </SheetContent>
-            </Sheet>
-           </div>
-        )}
+        <div className="flex items-center gap-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="w-8 h-8 text-slate-400 hover:text-white transition-colors">
+                <Settings size={20} />
+              </button>
+            </SheetTrigger>
+            <SheetContent className="bg-slate-800 border-slate-700 text-white">
+              <SheetHeader>
+                <SheetTitle className="text-white">Settings</SheetTitle>
+                <SheetDescription className="text-slate-400">
+                  Manage your application settings here.
+                </SheetDescription>
+              </SheetHeader>
+            </SheetContent>
+          </Sheet>
+        </div>
       </header>
       
       {error && (
