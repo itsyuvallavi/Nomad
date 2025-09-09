@@ -81,7 +81,7 @@ Important rules:
 10. The total days should be the sum of all destination durations`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await openai!.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },

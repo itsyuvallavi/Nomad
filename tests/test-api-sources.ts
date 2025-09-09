@@ -8,11 +8,11 @@ dotenv.config();
 
 import fs from 'fs';
 import path from 'path';
-import { generatePersonalizedItinerary } from './src/ai/flows/generate-personalized-itinerary';
-import { searchGooglePlaces } from './src/lib/api/google-places';
-import { getWeatherForecast } from './src/lib/api/weather';
-import { estimateFlightCost, estimateHotelCost, estimateTripCost } from './src/ai/utils/openai-travel-costs';
-import { logger } from './src/lib/logger';
+import { generatePersonalizedItinerary } from '../src/ai/flows/generate-personalized-itinerary';
+import { searchGooglePlaces } from '../src/lib/api/google-places';
+import { getWeatherForecast } from '../src/lib/api/weather';
+import { estimateFlightCost, estimateHotelCost, estimateTripCost } from '../src/ai/utils/openai-travel-costs';
+import { logger } from '../src/lib/logger';
 
 interface APICall {
   api: string;
@@ -545,7 +545,7 @@ async function runComprehensiveTest(
   
   try {
     // Parse the prompt first
-    const { parseDestinations } = await import('./src/ai/utils/destination-parser');
+    const { parseDestinations } = await import('../src/ai/utils/destination-parser');
     const parsedTrip = parseDestinations(prompt);
     
     result.parsedTrip = {

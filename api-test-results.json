@@ -1,0 +1,74 @@
+[
+  {
+    "timestamp": "2025-09-09T20:08:57.476Z",
+    "phase": "Phase 2 with API",
+    "results": {
+      "totalTests": 5,
+      "successful": 2,
+      "apiSuccessful": 2,
+      "parsingSuccessful": 5,
+      "successRate": 40,
+      "avgResponseTime": 15370,
+      "totalTime": 85
+    },
+    "details": [
+      {
+        "testId": "simple_1",
+        "success": true,
+        "parsingSuccess": true,
+        "apiSuccess": true,
+        "responseTime": 19798,
+        "details": {
+          "hasItinerary": true,
+          "dayCount": 3,
+          "activitiesCount": 20,
+          "destinationsFound": [
+            "London, United Kingdom"
+          ]
+        }
+      },
+      {
+        "testId": "multi_city_1",
+        "success": true,
+        "parsingSuccess": true,
+        "apiSuccess": true,
+        "responseTime": 56943,
+        "details": {
+          "hasItinerary": true,
+          "dayCount": 13,
+          "activitiesCount": 64,
+          "destinationsFound": [
+            "Bali, Indonesia & Bangkok, Thailand"
+          ]
+        }
+      },
+      {
+        "testId": "budget_1",
+        "success": false,
+        "parsingSuccess": true,
+        "apiSuccess": false,
+        "responseTime": 46,
+        "details": {},
+        "error": "I couldn't understand where you're traveling from. Please include your departure city in your search, like \"3 days in Orlando, Boston from New York\""
+      },
+      {
+        "testId": "complex_1",
+        "success": false,
+        "parsingSuccess": true,
+        "apiSuccess": false,
+        "responseTime": 6,
+        "details": {},
+        "error": "Please tell me where you'd like to go! For example: \"3 days in Paris from New York\" or \"One week in Tokyo from Los Angeles\""
+      },
+      {
+        "testId": "date_test_1",
+        "success": false,
+        "parsingSuccess": true,
+        "apiSuccess": false,
+        "responseTime": 59,
+        "details": {},
+        "error": "I couldn't understand where you're traveling from. Please include your departure city in your search, like \"3 days in New York, Chicago, Christmas from New York\""
+      }
+    ]
+  }
+]

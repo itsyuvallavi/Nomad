@@ -3,8 +3,8 @@
  * Tests that the destination parser correctly extracts cities from complex prompts
  */
 
-import { parseDestinations } from './src/ai/utils/destination-parser';
-import { logger } from './src/lib/logger';
+import { parseDestinations } from '../src/ai/utils/destination-parser';
+import { logger } from '../src/lib/logger';
 
 const testCases = [
   {

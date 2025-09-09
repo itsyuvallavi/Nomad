@@ -6,8 +6,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { generatePersonalizedItinerary } from './src/ai/flows/generate-personalized-itinerary';
-import { logger } from './src/lib/logger';
+import { generatePersonalizedItinerary } from '../src/ai/flows/generate-personalized-itinerary';
+import { logger } from '../src/lib/logger';
 
 // Color codes for terminal output
 const colors = {

@@ -62,15 +62,15 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
   };
 
   return (
-    <main className="w-full h-full flex items-center justify-center p-6">
+    <main className="w-full h-full flex items-center justify-center p-4 md:p-6">
       <div className="w-full max-w-4xl flex flex-col items-center justify-center">
         {/* Welcome Section */}
-        <div className="flex flex-col items-center text-center max-w-md mb-8">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 animate-float">
-            <div className="w-8 h-8 bg-slate-800 rounded-md animate-rotate-and-breathe"></div>
+        <div className="flex flex-col items-center text-center max-w-md mb-6 md:mb-8">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center mb-6 md:mb-8 animate-float">
+            <div className="w-6 h-6 md:w-8 md:h-8 bg-slate-800 rounded-md animate-rotate-and-breathe"></div>
           </div>
-          <h1 className="text-white text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
-          <h2 className="text-white text-xl mb-6">Can I help you with anything?</h2>
+          <h1 className="text-white text-xl md:text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
+          <h2 className="text-white text-lg md:text-xl mb-4 md:mb-6">Can I help you with anything?</h2>
         </div>
         
         {/* Input Area */}

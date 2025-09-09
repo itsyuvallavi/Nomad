@@ -12,11 +12,12 @@
 import {z} from 'genkit';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { parseDestinations } from '@/ai/utils/destination-parser';
+import { EnhancedDestinationParser } from '@/ai/utils/enhanced-destination-parser';
+import { MasterTravelParser } from '@/lib/utils/master-parser';
 import { logger } from '@/lib/logger';
-import { generateItineraryWithOpenAI, isOpenAIConfigured } from '@/ai/openai-direct';
-import { generateChunkedItinerary } from '@/ai/openai-chunked';
-import { generateEnhancedItinerary as generateEnhancedV1, validateTripComplexity } from '@/ai/enhanced-generator';
-import { generateEnhancedItinerary as generateEnhancedV2 } from '@/ai/enhanced-generator-v2';
+import { generateUnifiedItinerary, getUnifiedGenerator } from '@/ai/unified-generator';
+import { validateTripComplexity } from '@/ai/enhanced-generator';
+// Keep ultra-fast for now as primary until fully tested
 import { generateUltraFastItinerary } from '@/ai/enhanced-generator-ultra-fast';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
@@ -74,7 +75,8 @@ export async function generatePersonalizedItinerary(
   }
   
   // ONLY USE OPENAI - NO GEMINI
-  if (!isOpenAIConfigured()) {
+  const generator = getUnifiedGenerator();
+  if (!generator.isConfigured()) {
     logger.error('SYSTEM', 'OpenAI API key is not configured!');
     throw new Error('OpenAI API key is required. Please add OPENAI_API_KEY to your .env file.');
   }
@@ -101,22 +103,39 @@ export async function generatePersonalizedItinerary(
       destination: 'Input Validation',
       title: 'More Information Needed',
       itinerary: [],
+      quickTips: [],
       needsMoreInfo: true,
       validationError: true,
-      errorMessage: userFriendlyError || "Please provide more details about your trip",
-      quickTips: []
+      errorMessage: userFriendlyError || "Please provide more details about your trip"
     } as any;
   }
   
-  // Check for origin location
-  const parsedTrip = parseDestinations(actualPrompt);
+  // Use master parser for Phase 2 improvements
+  const masterResult = await MasterTravelParser.parseUserInput(actualPrompt);
+  
+  // Map master parser results to expected format
+  const parsedTrip = masterResult.destinations.length > 0 ? {
+    origin: masterResult.origin || '',
+    destinations: masterResult.destinations.map(d => ({
+      name: d.city,
+      days: d.days
+    })),
+    totalDays: masterResult.duration,
+    returnToOrigin: false
+  } : parseDestinations(actualPrompt);
   
   // Also check conversation history for origin if not in current prompt
   let origin = parsedTrip.origin;
   if ((!origin || origin === '') && input.conversationHistory) {
-    // Try to extract origin from conversation history
-    const historyParsed = parseDestinations(input.conversationHistory);
-    origin = historyParsed.origin || '';
+    // Try enhanced parser on history
+    const historyEnhanced = EnhancedDestinationParser.parse(input.conversationHistory);
+    origin = historyEnhanced.origin || '';
+    
+    // Fall back to old parser if needed
+    if (!origin) {
+      const historyParsed = parseDestinations(input.conversationHistory);
+      origin = historyParsed.origin || '';
+    }
   }
   
   if (!origin || origin === '') {
@@ -134,10 +153,10 @@ export async function generatePersonalizedItinerary(
       destination: 'Input Validation',
       title: 'Origin Required',
       itinerary: [],
+      quickTips: [],
       needsMoreInfo: true,
       validationError: true,
-      errorMessage: `I couldn't understand where you're traveling from. Please include your departure city in your search, like "3 days in ${destinations} from New York"`,
-      quickTips: []
+      errorMessage: `I couldn't understand where you're traveling from. Please include your departure city in your search, like "3 days in ${destinations} from New York"`
     } as any;
   }
   
@@ -193,50 +212,28 @@ export async function generatePersonalizedItinerary(
     }
   }
   
-  // Fallback to standard generation
+  // Fallback to unified generation
   if (typeof window !== 'undefined') {
-    console.log('🤖 Using standard OpenAI generation');
+    console.log('🤖 Using unified OpenAI generation');
   }
-  logger.info('AI', 'Using standard OpenAI generation');
+  logger.info('AI', 'Using unified OpenAI generation');
   
   try {
-    // Parse destinations to check if it's a multi-destination trip
-    const parsedTrip = parseDestinations(actualPrompt);
-    const isMultiDestination = parsedTrip.destinations.length > 1;
-    // Use chunked for trips longer than 7 days to prevent timeouts
-    const isLongTrip = parsedTrip.totalDays > 7;
+    const result = await generateUnifiedItinerary(
+      actualPrompt,
+      input.attachedFile,
+      input.conversationHistory
+    );
     
-    // Use chunked approach for multi-destination or long trips to avoid timeouts
-    if (isMultiDestination || isLongTrip) {
-      logger.info('AI', 'Using CHUNKED generation for multi-destination or long trip', {
-        destinations: parsedTrip.destinations.length,
-        totalDays: parsedTrip.totalDays,
-        isMulti: isMultiDestination,
-        isLong: isLongTrip,
-      });
-      
-      const result = await generateChunkedItinerary(
-        actualPrompt,
-        input.attachedFile,
-        input.conversationHistory
-      );
-      
-      logger.info('AI', 'Chunked OpenAI generation successful');
-      return result;
-    } else {
-      // Use regular generation for simple trips
-      logger.info('AI', 'Using DIRECT generation for simple trip');
-      const result = await generateItineraryWithOpenAI(
-        actualPrompt,
-        input.attachedFile,
-        input.conversationHistory
-      );
-      
-      logger.info('AI', 'Direct OpenAI generation successful');
-      return result;
-    }
+    logger.info('AI', 'Unified OpenAI generation successful');
+    
+    // Log performance metrics
+    const metrics = generator.getMetrics();
+    logger.info('AI', 'Generation metrics', metrics);
+    
+    return result;
   } catch (error: any) {
-    logger.error('AI', 'OpenAI generation failed', { error: error.message, stack: error.stack });
+    logger.error('AI', 'Unified generation failed', { error: error.message, stack: error.stack });
     throw new Error(`OpenAI generation failed: ${error.message}`);
   }
 }

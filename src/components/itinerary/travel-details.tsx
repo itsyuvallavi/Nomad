@@ -62,7 +62,7 @@ export function TravelDetails({ flights = [], hotels = [], totalCost, currency =
                   </div>
                   <div className="text-right">
                     <div className="text-green-400 font-semibold">
-                      ${typeof flight.price === 'object' ? flight.price.total?.toFixed(0) || flight.price.perPerson?.toFixed(0) || '0' : flight.price.toFixed(0)}
+                      ${typeof flight.price === 'object' ? (flight.price as any).total?.toFixed(0) || (flight.price as any).perPerson?.toFixed(0) || '0' : flight.price.toFixed(0)}
                     </div>
                     {flight.duration && (
                       <div className="text-slate-400 text-sm">{flight.duration}</div>
@@ -103,7 +103,7 @@ export function TravelDetails({ flights = [], hotels = [], totalCost, currency =
                     {hotel.address && (
                       <div className="flex items-center gap-1 text-slate-400 text-sm mt-1">
                         <MapPin className="w-3 h-3" />
-                        <span>{typeof hotel.address === 'object' ? hotel.address.lines?.[0] || JSON.stringify(hotel.address) : hotel.address}</span>
+                        <span>{typeof hotel.address === 'object' ? (hotel.address as any).lines?.[0] || JSON.stringify(hotel.address) : hotel.address}</span>
                       </div>
                     )}
                     {hotel.rating && (

@@ -37,21 +37,21 @@ export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryPr
 
   return (
     <motion.div
-      className="mb-8"
-      initial={{ opacity: 0, y: 30 }}
+      className="mb-6"
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: dayIndex * 0.2 }}
+      transition={{ duration: 0.4, delay: dayIndex * 0.1, ease: "easeOut" }}
     >
       <div 
-        className="flex items-center gap-3 mb-4 cursor-pointer group"
+        className="flex items-center gap-2 mb-3 cursor-pointer group"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
-          <span className="text-white font-medium">{day}</span>
+        <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg flex items-center justify-center">
+          <span className="text-white font-medium text-sm">{day}</span>
         </div>
         <div className="flex-1">
-          <h2 className="text-white font-medium">Day {day}</h2>
-          <p className="text-slate-400 text-sm">{date}</p>
+          <h2 className="text-white font-medium text-sm">Day {day}</h2>
+          <p className="text-slate-400 text-xs">{date}</p>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -71,7 +71,7 @@ export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryPr
         transition={{ duration: 0.3 }}
         className="overflow-hidden"
       >
-        <div className="space-y-3 ml-6 border-l-2 border-slate-600 pl-6">
+        <div className="space-y-2 ml-2 md:ml-4 border-l-2 border-slate-600 pl-3 md:pl-4">
           {activities.map((activity, index) => (
             <EventCard
               key={`${day}-${index}`}

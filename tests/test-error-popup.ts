@@ -4,8 +4,8 @@
  * Test script to verify error popup displays correctly for complex/invalid searches
  */
 
-import { generatePersonalizedItinerary } from './src/ai/flows/generate-personalized-itinerary';
-import { logger } from './src/lib/logger';
+import { generatePersonalizedItinerary } from '../src/ai/flows/generate-personalized-itinerary';
+import { logger } from '../src/lib/logger';
 
 console.log('🧪 Testing Error Popup Scenarios\n');
 console.log('=' .repeat(60));

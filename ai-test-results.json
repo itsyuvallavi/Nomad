@@ -473,5 +473,4097 @@
         "error": "TypeError: (0 , import_enhanced_generator_ultra_fast.generateEnhancedItineraryUltraFast) is not a function"
       }
     ]
+  },
+  {
+    "runId": 1757446167368,
+    "timestamp": "2025-09-09T19:29:27.368Z",
+    "isBaseline": false,
+    "results": [
+      {
+        "testId": "london_simple",
+        "input": "Flying from New York to London for 3 days",
+        "response": {
+          "destination": "London",
+          "title": "5 Days in London",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-09-09",
+              "title": "New York → London",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Departure from New York",
+                  "category": "Travel",
+                  "address": "Head to airport",
+                  "_tips": "Head to airport"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Flight to London",
+                  "category": "Travel",
+                  "address": "Check in online 24h before",
+                  "_tips": "Check in online 24h before"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Arrival in London",
+                  "category": "Travel",
+                  "address": "Transfer to accommodation",
+                  "_tips": "Transfer to accommodation"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented",
+                  "_tips": "Get settled and oriented"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP",
+                  "venue_name": "Fallow",
+                  "rating": 4.7,
+                  "_tips": "First meal in London"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-09-10",
+              "title": "Day 1 in London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "383 Kennington Ln, London SE11 5QY",
+                  "venue_name": "Kennington Lane Cafe",
+                  "rating": 4.9,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB",
+                  "venue_name": "Tower of London",
+                  "rating": 4.7,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "The Now Building Rooftop, Outernet, Denmark St, London WC2H 0LA",
+                  "venue_name": "Tattu London",
+                  "rating": 4.7,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
+                  "venue_name": "London Eye",
+                  "rating": 4.5,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "23 St James's St, London SW1A 1HA",
+                  "venue_name": "Riviera",
+                  "rating": 4.8,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-09-11",
+              "title": "Day 2 in London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "17-19 Regency St, London SW1P 4BY",
+                  "venue_name": "Regency Cafe",
+                  "rating": 4.7,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "Tower Bridge Rd, London SE1 2UP",
+                  "venue_name": "Tower Bridge",
+                  "rating": 4.8,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "3 Bedale St, London SE1 9AL",
+                  "venue_name": "OMA",
+                  "rating": 4.7,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "32 London Bridge St, London SE1 9SG",
+                  "venue_name": "The Shard",
+                  "rating": 4.6,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "First Floor, 41-43 Mount St, London W1K 2RX",
+                  "venue_name": "Mount St. Restaurant",
+                  "rating": 4.7,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 4,
+              "date": "2025-09-12",
+              "title": "Day 3 in London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "18 Chiltern St, London W1U 7QA",
+                  "venue_name": "The Monocle Café",
+                  "rating": 4.4,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "London SW1A 1AA",
+                  "venue_name": "Buckingham Palace",
+                  "rating": 4.5,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "28 Rupert St, London W1D 6DJ",
+                  "venue_name": "Evelyn's Table",
+                  "rating": 4.8,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "London SW1A 0AA",
+                  "venue_name": "Big Ben",
+                  "rating": 4.6,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "85 Piccadilly, London W1J 7NB",
+                  "venue_name": "HIDE",
+                  "rating": 4.5,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 5,
+              "date": "2025-09-13",
+              "title": "London → New York",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave London accommodation",
+                  "_tips": "Leave London accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for airport",
+                  "category": "Travel",
+                  "address": "Head to London airport",
+                  "_tips": "Head to London airport"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Return flight to New York",
+                  "category": "Travel",
+                  "address": "London to New York",
+                  "_tips": "London to New York"
+                },
+                {
+                  "time": "10:00 PM",
+                  "description": "Arrival back home",
+                  "category": "Travel",
+                  "address": "Arrive in New York",
+                  "_tips": "Arrive in New York"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Book accommodations in advance",
+            "Check visa requirements",
+            "Get travel insurance",
+            "Download offline maps",
+            "Keep digital copies of documents"
+          ],
+          "_costEstimate": {
+            "total": 2300,
+            "flights": 1400,
+            "accommodation": 600,
+            "dailyExpenses": 300,
+            "currency": "USD",
+            "breakdown": [
+              {
+                "type": "flight",
+                "description": "New York → London",
+                "amount": 700
+              },
+              {
+                "type": "flight",
+                "description": "London → New York",
+                "amount": 700
+              },
+              {
+                "type": "accommodation",
+                "description": "London (3 nights)",
+                "amount": 600
+              }
+            ]
+          },
+          "_hotelOptions": {},
+          "_flightOptions": {}
+        },
+        "passed": false,
+        "errors": [
+          "Expected 3 days, got 5",
+          "Expected 9-21 activities, got 24"
+        ],
+        "timestamp": "2025-09-09T19:27:43.135Z",
+        "responseTime": 12253,
+        "details": {
+          "actualDestination": "London",
+          "actualDays": 5,
+          "actualActivities": 24
+        }
+      },
+      {
+        "testId": "paris_weekend",
+        "input": "Weekend trip from Los Angeles to Paris",
+        "response": {
+          "destination": "Paris",
+          "title": "5 Days in Paris",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-09-09",
+              "title": "Los Angeles → Paris",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Departure from Los Angeles",
+                  "category": "Travel",
+                  "address": "Head to airport",
+                  "_tips": "Head to airport"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Flight to Paris",
+                  "category": "Travel",
+                  "address": "Check in online 24h before",
+                  "_tips": "Check in online 24h before"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Arrival in Paris",
+                  "category": "Travel",
+                  "address": "Transfer to accommodation",
+                  "_tips": "Transfer to accommodation"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented",
+                  "_tips": "Get settled and oriented"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "18 Rue La Boétie, 75008 Paris",
+                  "venue_name": "Sphère",
+                  "rating": 4.8,
+                  "_tips": "First meal in Paris"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-09-10",
+              "title": "Day 1 in Paris",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "10 Rue de Buci, 75006 Paris",
+                  "venue_name": "Café de Paris",
+                  "rating": 4,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "Bois de Boulogne, Rte de la Prte Dauphine à la Prte des Sablons, 75116 Paris",
+                  "venue_name": "Jardin d'Acclimatation",
+                  "rating": 4.3,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "31 Av. George V, 75008 Paris",
+                  "venue_name": "Le Cinq",
+                  "rating": 4.7,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "75001 Paris",
+                  "venue_name": "Tuileries Garden",
+                  "rating": 4.6,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "47 R. de Turbigo, 75003 Paris",
+                  "venue_name": "Le Marais Restaurant Paris",
+                  "rating": 4.6,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-09-11",
+              "title": "Day 2 in Paris",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "172 Bd Saint-Germain, 75006 Paris",
+                  "venue_name": "Café de Flore",
+                  "rating": 3.9,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "Pont de Bir-Hakeim, 75015 Paris",
+                  "venue_name": "Promenade Jean-Paul Belmondo",
+                  "rating": 4.8,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "31 Av. George V, 75008 Paris",
+                  "venue_name": "L'Orangerie",
+                  "rating": 4.8,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "8 Av. du Mahatma Gandhi, 75116 Paris",
+                  "venue_name": "Canots du Lac",
+                  "rating": 4.6,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "1 Rue du Pré aux Clercs, 75007 Paris",
+                  "venue_name": "Les Parisiens",
+                  "rating": 4.7,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 4,
+              "date": "2025-09-12",
+              "title": "Day 3 in Paris",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "52 Rue de l'Hôtel de ville, 75004 Paris",
+                  "venue_name": "The Caféothèque of Paris",
+                  "rating": 4.3,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "75008 Paris",
+                  "venue_name": "Pinky Tour - Paris",
+                  "rating": 5,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "8 Quai du Louvre, 75001 Paris",
+                  "venue_name": "Le Tout-Paris",
+                  "rating": 4.6,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "15 Av. Winston Churchill, 75008 Paris",
+                  "venue_name": "Paris TUKTUK",
+                  "rating": 4.8,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "6 Rue Desaix, 75015 Paris",
+                  "venue_name": "De la Tour",
+                  "rating": 4.8,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 5,
+              "date": "2025-09-13",
+              "title": "Paris → Los Angeles",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave Paris accommodation",
+                  "_tips": "Leave Paris accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for airport",
+                  "category": "Travel",
+                  "address": "Head to Paris airport",
+                  "_tips": "Head to Paris airport"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Return flight to Los Angeles",
+                  "category": "Travel",
+                  "address": "Paris to Los Angeles",
+                  "_tips": "Paris to Los Angeles"
+                },
+                {
+                  "time": "10:00 PM",
+                  "description": "Arrival back home",
+                  "category": "Travel",
+                  "address": "Arrive in Los Angeles",
+                  "_tips": "Arrive in Los Angeles"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Book accommodations in advance",
+            "Check visa requirements",
+            "Get travel insurance",
+            "Download offline maps",
+            "Keep digital copies of documents"
+          ],
+          "_costEstimate": {
+            "total": 2600,
+            "flights": 1550,
+            "accommodation": 750,
+            "dailyExpenses": 300,
+            "currency": "USD",
+            "breakdown": [
+              {
+                "type": "flight",
+                "description": "Los Angeles → Paris",
+                "amount": 750
+              },
+              {
+                "type": "flight",
+                "description": "Paris → Los Angeles",
+                "amount": 800
+              },
+              {
+                "type": "accommodation",
+                "description": "Paris (3 nights)",
+                "amount": 750
+              }
+            ]
+          },
+          "_hotelOptions": {},
+          "_flightOptions": {}
+        },
+        "passed": false,
+        "errors": [
+          "Expected 3 days, got 5",
+          "Expected 9-21 activities, got 24"
+        ],
+        "timestamp": "2025-09-09T19:28:09.343Z",
+        "responseTime": 26208,
+        "details": {
+          "actualDestination": "Paris",
+          "actualDays": 5,
+          "actualActivities": 24
+        }
+      },
+      {
+        "testId": "tokyo_kyoto",
+        "input": "Departing from San Francisco for one week in Tokyo and 3 days in Kyoto",
+        "response": {
+          "destination": "Tokyo, Kyoto",
+          "title": "12-Day Multi-City Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-09-09",
+              "title": "San Francisco → Tokyo",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Departure from San Francisco",
+                  "category": "Travel",
+                  "address": "Head to airport",
+                  "_tips": "Head to airport"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Flight to Tokyo",
+                  "category": "Travel",
+                  "address": "Check in online 24h before",
+                  "_tips": "Check in online 24h before"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Arrival in Tokyo",
+                  "category": "Travel",
+                  "address": "Transfer to accommodation",
+                  "_tips": "Transfer to accommodation"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented",
+                  "_tips": "Get settled and oriented"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "2 Chome-26-4 Nishiazabu, Minato City, Tokyo 106-0031",
+                  "venue_name": "L’Effervescence",
+                  "rating": 4.6,
+                  "_tips": "First meal in Tokyo"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-09-10",
+              "title": "Exploring Traditional Tokyo",
+              "_destination": "Tokyo",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit Senso-ji Temple in Asakusa",
+                  "category": "Attraction",
+                  "address": "4 Chome-2-8 Shibakoen, Minato City, Tokyo 105-0011",
+                  "venue_name": "Tokyo Tower",
+                  "rating": 4.5,
+                  "_tips": "Arrive early to avoid crowds"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Stroll through Nakamise Shopping Street",
+                  "category": "Leisure",
+                  "address": "9 Chome-7-1 Akasaka, Minato City, Tokyo 107-0052",
+                  "venue_name": "Tokyo Midtown",
+                  "rating": 4.1,
+                  "_tips": "Try local street food"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at a traditional Japanese restaurant",
+                  "category": "Food",
+                  "address": "〒107-0062 Tokyo, Minato City, Minamiaoyama, 2 Chome−6−15 南青山ガーデンコート",
+                  "venue_name": "Narisawa",
+                  "rating": 4.6,
+                  "_tips": "Try tempura or sushi"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Explore Ueno Park and its museums",
+                  "category": "Attraction",
+                  "address": "13-9 Uenokoen, Taito City, Tokyo 110-8712",
+                  "venue_name": "Tokyo National Museum",
+                  "rating": 4.5,
+                  "_tips": "Visit the Tokyo National Museum"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Dinner at an izakaya for a taste of local nightlife",
+                  "category": "Food",
+                  "address": "〒105-0001 Tokyo, Minato City, Toranomon, 4 Chome−1−28 １Ｆ",
+                  "venue_name": "NOBU Tokyo",
+                  "rating": 4.3,
+                  "_tips": "Try sake and yakitori"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-09-11",
+              "title": "Modern Tokyo Marvels",
+              "_destination": "Tokyo",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit the iconic Tokyo Tower",
+                  "category": "Attraction",
+                  "address": "〒135-0091 Tokyo, Minato City, Daiba, 1 Chome−6−1 DECKS Tokyo Beach, 3F～5F",
+                  "venue_name": "Tokyo Joypolis",
+                  "rating": 4,
+                  "_tips": "Take the elevator to the main observatory"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Lunch at a trendy café in Shibuya",
+                  "category": "Food",
+                  "address": "〒150-0001 Tokyo, Shibuya, Jingumae, 2 Chome−3−18 建築家会館ＪＩＡ館",
+                  "venue_name": "Den",
+                  "rating": 4.4,
+                  "_tips": "Try matcha desserts"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Explore the bustling Shibuya Crossing",
+                  "category": "Attraction",
+                  "address": "1 Chome-1-2 Oshiage, Sumida City, Tokyo 131-0045",
+                  "venue_name": "Tokyo Skytree",
+                  "rating": 4.4,
+                  "_tips": "Capture the chaos on camera"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Shop for electronics in Akihabara",
+                  "category": "Leisure",
+                  "address": "1 Chome-1-10 Aomi, Koto City, Tokyo 135-0064",
+                  "venue_name": "DiverCity Tokyo Plaza",
+                  "rating": 4.2,
+                  "_tips": "Compare prices before buying"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner at a robot-themed restaurant in Shinjuku",
+                  "category": "Food",
+                  "address": "2 Chome-1-1 Nihonbashimuromachi, Chuo City, Tokyo 103-8328",
+                  "venue_name": "Tapas Molecular Bar",
+                  "rating": 4.6,
+                  "_tips": "Experience a futuristic show"
+                }
+              ]
+            },
+            {
+              "day": 4,
+              "date": "2025-09-12",
+              "title": "Nature and Relaxation",
+              "_destination": "Tokyo",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Visit Meiji Shrine in Yoyogi Park",
+                  "category": "Leisure",
+                  "address": "1 Chome-18-31 Gotenyama, Musashino, Tokyo 180-0005",
+                  "venue_name": "Inokashira Park",
+                  "rating": 4.4,
+                  "_tips": "Experience a traditional Shinto ceremony"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Picnic lunch by the pond at Shinjuku Gyoen National Garden",
+                  "category": "Leisure",
+                  "address": "〒105-7108 Tokyo, Minato City, Higashishinbashi, 1 Chome−5−2 汐留シティセンタ ４１F",
+                  "venue_name": "Fish Bank TOKYO",
+                  "rating": 4.5,
+                  "_tips": "Rent a rowboat for a serene experience"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Explore the Odaiba waterfront and visit teamLab Borderless",
+                  "category": "Attraction",
+                  "address": "〒100-0005 Tokyo, Chiyoda City, Marunouchi, 2 Chome−6−2 三菱一号館美術館 1F",
+                  "venue_name": "Café 1894",
+                  "rating": 3.9,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Relax at an onsen in Odaiba",
+                  "category": "Attraction",
+                  "address": "4 Chome-3-25 Shibakoen, Minato City, Tokyo 105-0011",
+                  "venue_name": "Momiji Waterfall",
+                  "rating": 4.1,
+                  "_tips": "Enjoy a traditional hot spring bath"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Dinner at a waterfront restaurant with a view of Rainbow Bridge",
+                  "category": "Food",
+                  "address": "〒150-0002 Tokyo, Shibuya, 3 Chome−6−18 第４矢木ビル 1F",
+                  "venue_name": "Yamamoto no Hamburg Shibuya Shokudo",
+                  "rating": 4.3,
+                  "_tips": "Try fresh seafood dishes"
+                }
+              ]
+            },
+            {
+              "day": 5,
+              "date": "2025-09-13",
+              "title": "Art and Culture",
+              "_destination": "Tokyo",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit the Mori Art Museum in Roppongi Hills",
+                  "category": "Attraction",
+                  "address": "〒107-0062 Tokyo, Minato City, Minamiaoyama, 2 Chome−26−37 Vort 外苑前 I 1F",
+                  "venue_name": "ART GALLERY M【アートギャラリーエム】",
+                  "rating": 5,
+                  "_tips": "Check out the current exhibition"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Lunch at a modern art café in Roppongi",
+                  "category": "Food",
+                  "address": "〒150-0042 Tokyo, Shibuya, Udagawacho, 31−2 渋谷 BEAM, 6F",
+                  "venue_name": "Mo-Mo-Paradise Shibuya Center Street store",
+                  "rating": 4.9,
+                  "_tips": "Try fusion cuisine"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Explore the teamLab Planets digital art museum",
+                  "category": "Attraction",
+                  "address": "1 Chome-23-28 Jingumae, Shibuya, Tokyo 150-0001",
+                  "venue_name": "ANAKUMA CAFE Harajuku",
+                  "rating": 4.8,
+                  "_tips": "Prepare to get interactive"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Discover street art in the trendy neighborhood of Shimokitazawa",
+                  "category": "Attraction",
+                  "address": "〒150-0034 Tokyo, Shibuya, Daikanyamacho, 3−13 代官山エーデルハイム 103",
+                  "venue_name": "ART Is. TOKYO GALLERY",
+                  "rating": 4.8,
+                  "_tips": "Wander through narrow alleys"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at a themed café in Harajuku",
+                  "category": "Food",
+                  "address": "〒150-0001 Tokyo, Shibuya, Jingumae, 3 Chome−23−2 青山ＮＳビル 1F",
+                  "venue_name": "WAGYU SUKIYAKI 極〜GOKU〜 原宿 Harajuku",
+                  "rating": 4.9,
+                  "_tips": "Indulge in kawaii treats"
+                }
+              ]
+            },
+            {
+              "day": 6,
+              "date": "2025-09-14",
+              "title": "Tokyo's Culinary Scene",
+              "_destination": "Tokyo",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at Tsukiji Outer Market for fresh seafood and sushi",
+                  "category": "Food",
+                  "address": "2 Chome-12-9 Jingumae, Shibuya, Tokyo 150-0001",
+                  "venue_name": "CENSU TOKYO",
+                  "rating": 4.7,
+                  "_tips": "Try uni and toro"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Join a food tour in Yanaka to sample traditional snacks",
+                  "category": "Food",
+                  "address": "〒150-0002 Tokyo, Shibuya, 3 Chome−6−18 第４矢木ビル 1F",
+                  "venue_name": "Yamamoto no Hamburg Shibuya Shokudo",
+                  "rating": 4.3,
+                  "_tips": "Learn about local ingredients"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Visit a depachika (department store food basement) in Ginza",
+                  "category": "Food",
+                  "address": "〒150-0042 Tokyo, Shibuya, Udagawacho, 31−2 渋谷 BEAM, 6F",
+                  "venue_name": "Mo-Mo-Paradise Shibuya Center Street store",
+                  "rating": 4.9,
+                  "_tips": "Try various samples"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Take a wagashi (traditional Japanese sweets) making class",
+                  "category": "Food",
+                  "address": "〒150-0001 Tokyo, Shibuya, Jingumae, 3 Chome−23−2 青山ＮＳビル 1F",
+                  "venue_name": "WAGYU SUKIYAKI 極〜GOKU〜 原宿 Harajuku",
+                  "rating": 4.9,
+                  "_tips": "Get hands-on with sweet treats"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner at a Michelin-starred restaurant for a gourmet experience",
+                  "category": "Food",
+                  "address": "2 Chome-12-9 Jingumae, Shibuya, Tokyo 150-0001",
+                  "venue_name": "CENSU TOKYO",
+                  "rating": 4.7,
+                  "_tips": "Savor each course"
+                }
+              ]
+            },
+            {
+              "day": 7,
+              "date": "2025-09-15",
+              "title": "Historical Tokyo",
+              "_destination": "Tokyo",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Explore the Edo-Tokyo Museum in Ryogoku",
+                  "category": "Attraction",
+                  "address": "7-20 Uenokoen, Taito City, Tokyo 110-8718",
+                  "venue_name": "National Museum of Nature and Science",
+                  "rating": 4.5,
+                  "_tips": "Learn about Tokyo's history"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Lunch at a traditional soba restaurant in Kagurazaka",
+                  "category": "Food",
+                  "address": "〒150-0042 Tokyo, Shibuya, Udagawacho, 31−2 渋谷 BEAM, 6F",
+                  "venue_name": "Mo-Mo-Paradise Shibuya Center Street store",
+                  "rating": 4.9,
+                  "_tips": "Try handmade soba noodles"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Visit the Imperial Palace East Gardens",
+                  "category": "Leisure",
+                  "address": "Uenokoen, Taito City, Tokyo 110-0007",
+                  "venue_name": "Ueno Park",
+                  "rating": 4.3,
+                  "_tips": "Enjoy the serene atmosphere"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Discover the history of samurai at the Samurai Museum",
+                  "category": "Attraction",
+                  "address": "2 Chome-3-6 Aomi, Koto City, Tokyo 135-0064",
+                  "venue_name": "The National Museum of Emerging Science and Innovation Japan (Miraikan)",
+                  "rating": 4.1,
+                  "_tips": "Take photos with samurai armor"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at a traditional ryotei for kaiseki cuisine",
+                  "category": "Food",
+                  "address": "2 Chome-26-4 Nishiazabu, Minato City, Tokyo 106-0031",
+                  "venue_name": "L’Effervescence",
+                  "rating": 4.6,
+                  "_tips": "Experience a multi-course meal"
+                }
+              ]
+            },
+            {
+              "day": 8,
+              "date": "2025-09-16",
+              "title": "Tokyo's Urban Vibes",
+              "_destination": "Tokyo",
+              "activities": [
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit the Tsukiji Honganji Temple in Tsukiji",
+                  "category": "Attraction",
+                  "address": "1 Chome Aomi, Koto City, Tokyo 135-0064",
+                  "venue_name": "TOKYO Word Mark Monument",
+                  "rating": 3.9,
+                  "_tips": "Admire the unique architecture"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at a trendy café in Daikanyama",
+                  "category": "Food",
+                  "address": "〒150-0001 Tokyo, Shibuya, Jingumae, 3 Chome−23−2 青山ＮＳビル 1F",
+                  "venue_name": "WAGYU SUKIYAKI 極〜GOKU〜 原宿 Harajuku",
+                  "rating": 4.9,
+                  "_tips": "Relax in a stylish setting"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Shop for fashion in Omotesando",
+                  "category": "Leisure",
+                  "address": "1 Chome-1-2 Oshiage, Sumida City, Tokyo 131-0045",
+                  "venue_name": "Tokyo Solamachi",
+                  "rating": 4.2,
+                  "_tips": "Explore designer boutiques"
+                },
+                {
+                  "time": "4:30 PM",
+                  "description": "Relax at a cat café in Shinjuku",
+                  "category": "Attraction",
+                  "address": "2 Chome-6 Aomi, Koto City, Tokyo 135-0064",
+                  "venue_name": "Lookout",
+                  "rating": 4.4,
+                  "_tips": "Sip coffee surrounded by feline friends"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Dinner at a themed restaurant in Omoide Yokocho",
+                  "category": "Food",
+                  "address": "〒107-0062 Tokyo, Minato City, Minamiaoyama, 2 Chome−6−15 南青山ガーデンコート",
+                  "venue_name": "Narisawa",
+                  "rating": 4.6,
+                  "_tips": "Try yakitori and sake"
+                }
+              ]
+            },
+            {
+              "day": 9,
+              "date": "2025-09-17",
+              "title": "Tokyo → Kyoto",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave Tokyo accommodation",
+                  "_tips": "Leave Tokyo accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for airport",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Shinkansen",
+                  "category": "Travel",
+                  "address": "Tokyo to Kyoto - Seat reservations recommended",
+                  "_tips": "Tokyo to Kyoto - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Kyoto, head to accommodation",
+                  "_tips": "Arrive in Kyoto, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "32 Kinugasa Goshonouchicho, Kita Ward, Kyoto, 603-8378",
+                  "venue_name": "Kyoto Dining",
+                  "rating": 4.9,
+                  "_tips": "First meal in Kyoto - try something local"
+                }
+              ]
+            },
+            {
+              "day": 10,
+              "date": "2025-09-18",
+              "title": "Exploring Historic Kyoto",
+              "_destination": "Kyoto",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit Kiyomizu-dera Temple",
+                  "category": "Attraction",
+                  "address": "541 Nijojocho, Nakagyo Ward, Kyoto, 604-8301",
+                  "venue_name": "Nijō Castle",
+                  "rating": 4.4,
+                  "_tips": "Wear comfortable shoes for the uphill walk"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Stroll through Gion District",
+                  "category": "Attraction",
+                  "address": "68 Fukakusa Yabunouchicho, Fushimi Ward, Kyoto, 612-0882",
+                  "venue_name": "Fushimi Inari Taisha",
+                  "rating": 4.6,
+                  "_tips": "Keep an eye out for geishas"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at Nishiki Market",
+                  "category": "Food",
+                  "address": "149 Toichicho, Shimogyo Ward, Kyoto, 600-8111",
+                  "venue_name": "[ki:]",
+                  "rating": 4.5,
+                  "_tips": "Try some street food snacks"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore Nijo Castle",
+                  "category": "Attraction",
+                  "address": "1 Kinkakujicho, Kita Ward, Kyoto, 603-8361",
+                  "venue_name": "Kinkaku-ji",
+                  "rating": 4.5,
+                  "_tips": "Don't miss the nightingale floors"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Dinner at Pontocho Alley",
+                  "category": "Food",
+                  "address": "〒604-0924 Kyoto, Nakagyo Ward, Ichinofunairicho, 386-2",
+                  "venue_name": "Fortune Garden Kyoto",
+                  "rating": 4.2,
+                  "_tips": "Reserve a table in advance"
+                }
+              ]
+            },
+            {
+              "day": 11,
+              "date": "2025-09-19",
+              "title": "Nature and Tranquility",
+              "_destination": "Kyoto",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Morning meditation at Ryoan-ji Temple",
+                  "category": "Leisure",
+                  "address": "3 Kyotogyoen, Kamigyo Ward, Kyoto, 602-0881",
+                  "venue_name": "Kyoto Gyoen National Garden",
+                  "rating": 4.5,
+                  "_tips": "Maintain silence in the garden"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Arashiyama Bamboo Grove",
+                  "category": "Leisure",
+                  "address": "13 Ryoanji Goryonoshitacho, Ukyo Ward, Kyoto, 616-8001",
+                  "venue_name": "Ryōan-ji",
+                  "rating": 4.5,
+                  "_tips": "Early morning visit for fewer crowds"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at Saga Tofu Ine",
+                  "category": "Food",
+                  "address": "〒605-0802 Kyoto, Higashiyama Ward, Yamatocho, 7−1 祇園モーリヤビル 1F",
+                  "venue_name": "Kobe Beef Steak Mouriya Gion",
+                  "rating": 4.8,
+                  "_tips": "Try their famous tofu dishes"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Explore Fushimi Inari Taisha Shrine",
+                  "category": "Attraction",
+                  "address": "梅小路公園, 内, 35-1 Kankijicho, Shimogyo Ward, Kyoto, 600-8835",
+                  "venue_name": "Kyoto Aquarium",
+                  "rating": 4.2,
+                  "_tips": "Hike up to the mountain for a panoramic view"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Tea ceremony at Camellia Flower",
+                  "category": "Attraction",
+                  "address": "235-2 Shinmeicho, Shimogyo Ward, Kyoto, 600-8092",
+                  "venue_name": "Okaffe Kyoto",
+                  "rating": 4.5,
+                  "_tips": "Respect the traditional tea ceremony etiquette"
+                }
+              ]
+            },
+            {
+              "day": 12,
+              "date": "2025-09-20",
+              "title": "Art and Tradition",
+              "_destination": "Kyoto",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Visit Kyoto National Museum",
+                  "category": "Attraction",
+                  "address": "527 Chayacho, Higashiyama Ward, Kyoto, 605-0931",
+                  "venue_name": "Kyoto National Museum",
+                  "rating": 4.3,
+                  "_tips": "Check out the special exhibitions"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at Nishiki Warai",
+                  "category": "Food",
+                  "address": "245-2 Kurumayacho, Nakagyo Ward, Kyoto, 604-8185",
+                  "venue_name": "Kōsa",
+                  "rating": 4.5,
+                  "_tips": "Try their unique Kyoto-style dishes"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Explore Gion Corner",
+                  "category": "Attraction",
+                  "address": "2 Ginkakujicho, Sakyo Ward, Kyoto, 606-8402",
+                  "venue_name": "Ginkaku-ji",
+                  "rating": 4.5,
+                  "_tips": "Watch traditional dance and theater performances"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Visit Eikan-do Zenrin-ji Temple",
+                  "category": "Leisure",
+                  "address": "〒600-8216 Kyoto, Shimogyo Ward, Higashishiokojicho, 721-1 ニデック京都タワー 展望室 ３階",
+                  "venue_name": "Nidec Kyoto Tower",
+                  "rating": 4.2,
+                  "_tips": "Enjoy the autumn foliage in the garden"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at Kaiseki Mizuki",
+                  "category": "Food",
+                  "address": "〒605-0862 Kyoto, Higashiyama Ward, Kiyomizu, 2 Chome−258 2F",
+                  "venue_name": "Wagyu teppanyaki steak house Kiyomizu 創 SOU",
+                  "rating": 4.9,
+                  "_tips": "Experience a traditional kaiseki meal"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Book accommodations in advance",
+            "Check visa requirements",
+            "Get travel insurance",
+            "Download offline maps",
+            "Keep digital copies of documents"
+          ],
+          "_costEstimate": {
+            "total": 4660,
+            "flights": 1950,
+            "accommodation": 1710,
+            "dailyExpenses": 1000,
+            "currency": "USD",
+            "breakdown": [
+              {
+                "type": "flight",
+                "description": "San Francisco → Tokyo",
+                "amount": 900
+              },
+              {
+                "type": "flight",
+                "description": "Tokyo → Kyoto",
+                "amount": 150
+              },
+              {
+                "type": "flight",
+                "description": "Kyoto → San Francisco",
+                "amount": 900
+              },
+              {
+                "type": "accommodation",
+                "description": "Tokyo (7 nights)",
+                "amount": 1260
+              },
+              {
+                "type": "accommodation",
+                "description": "Kyoto (3 nights)",
+                "amount": 450
+              }
+            ]
+          },
+          "_hotelOptions": {},
+          "_flightOptions": {}
+        },
+        "passed": false,
+        "errors": [
+          "Expected 10 days, got 12"
+        ],
+        "timestamp": "2025-09-09T19:28:31.469Z",
+        "responseTime": 22126,
+        "details": {
+          "actualDestination": "Tokyo, Kyoto",
+          "actualDays": 12,
+          "actualActivities": 61
+        }
+      },
+      {
+        "testId": "europe_tour",
+        "input": "Starting from Boston for 2 weeks across London, Paris, Rome, and Barcelona",
+        "response": {
+          "destination": "London, Paris, Rome, Barcelona",
+          "title": "16-Day Multi-City Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-09-09",
+              "title": "Boston → London",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Departure from Boston",
+                  "category": "Travel",
+                  "address": "Head to airport",
+                  "_tips": "Head to airport"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Flight to London",
+                  "category": "Travel",
+                  "address": "Check in online 24h before",
+                  "_tips": "Check in online 24h before"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Arrival in London",
+                  "category": "Travel",
+                  "address": "Transfer to accommodation",
+                  "_tips": "Transfer to accommodation"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented",
+                  "_tips": "Get settled and oriented"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP",
+                  "venue_name": "Fallow",
+                  "rating": 4.7,
+                  "_tips": "First meal in London"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-09-10",
+              "title": "Day 1 in London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "383 Kennington Ln, London SE11 5QY",
+                  "venue_name": "Kennington Lane Cafe",
+                  "rating": 4.9,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "London EC3N 4AB",
+                  "venue_name": "Tower of London",
+                  "rating": 4.7,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "The Now Building Rooftop, Outernet, Denmark St, London WC2H 0LA",
+                  "venue_name": "Tattu London",
+                  "rating": 4.7,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
+                  "venue_name": "London Eye",
+                  "rating": 4.5,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "23 St James's St, London SW1A 1HA",
+                  "venue_name": "Riviera",
+                  "rating": 4.8,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-09-11",
+              "title": "Day 2 in London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "17-19 Regency St, London SW1P 4BY",
+                  "venue_name": "Regency Cafe",
+                  "rating": 4.7,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "Tower Bridge Rd, London SE1 2UP",
+                  "venue_name": "Tower Bridge",
+                  "rating": 4.8,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "3 Bedale St, London SE1 9AL",
+                  "venue_name": "OMA",
+                  "rating": 4.7,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "32 London Bridge St, London SE1 9SG",
+                  "venue_name": "The Shard",
+                  "rating": 4.6,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "First Floor, 41-43 Mount St, London W1K 2RX",
+                  "venue_name": "Mount St. Restaurant",
+                  "rating": 4.7,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 4,
+              "date": "2025-09-12",
+              "title": "Day 3 in London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Breakfast at local cafe",
+                  "category": "Food",
+                  "address": "18 Chiltern St, London W1U 7QA",
+                  "venue_name": "The Monocle Café",
+                  "rating": 4.4,
+                  "_tips": "Try local specialties"
+                },
+                {
+                  "time": "10:30 AM",
+                  "description": "Visit main attraction",
+                  "category": "Attraction",
+                  "address": "London SW1A 1AA",
+                  "venue_name": "Buckingham Palace",
+                  "rating": 4.5,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at recommended restaurant",
+                  "category": "Food",
+                  "address": "28 Rupert St, London W1D 6DJ",
+                  "venue_name": "Evelyn's Table",
+                  "rating": 4.8,
+                  "_tips": "Make reservations"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore local area",
+                  "category": "Attraction",
+                  "address": "London SW1A 0AA",
+                  "venue_name": "Big Ben",
+                  "rating": 4.6,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner and evening activities",
+                  "category": "Food",
+                  "address": "85 Piccadilly, London W1J 7NB",
+                  "venue_name": "HIDE",
+                  "rating": 4.5,
+                  "_tips": "Enjoy local cuisine"
+                }
+              ]
+            },
+            {
+              "day": 5,
+              "date": "2025-09-13",
+              "title": "London → Paris",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave London accommodation",
+                  "_tips": "Leave London accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for airport",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Eurostar",
+                  "category": "Travel",
+                  "address": "London to Paris - Seat reservations recommended",
+                  "_tips": "London to Paris - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Paris, head to accommodation",
+                  "_tips": "Arrive in Paris, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "18 Rue La Boétie, 75008 Paris",
+                  "venue_name": "Sphère",
+                  "rating": 4.8,
+                  "_tips": "First meal in Paris - try something local"
+                }
+              ]
+            },
+            {
+              "day": 6,
+              "date": "2025-09-14",
+              "title": "Exploring the City of Lights",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the Eiffel Tower",
+                  "category": "Attraction",
+                  "address": "Bois de Boulogne, Rte de la Prte Dauphine à la Prte des Sablons, 75116 Paris",
+                  "venue_name": "Jardin d'Acclimatation",
+                  "rating": 4.3,
+                  "_tips": "Buy tickets online to skip the line"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Louvre Museum tour",
+                  "category": "Attraction",
+                  "address": "23 Rue de Sévigné, 75003 Paris",
+                  "venue_name": "Carnavalet Museum",
+                  "rating": 4.7,
+                  "_tips": "Don't miss the Mona Lisa"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Stroll through Tuileries Garden",
+                  "category": "Leisure",
+                  "address": "75008 Paris",
+                  "venue_name": "Parc Monceau",
+                  "rating": 4.6,
+                  "_tips": "Relax by the ponds"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Shopping on Champs-Elysées",
+                  "category": "Leisure",
+                  "address": "12 Rue Linois, 75015 Paris",
+                  "venue_name": "Centre Commercial Beaugrenelle",
+                  "rating": 4.2,
+                  "_tips": "Boutique stores offer unique finds"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Dinner at a local bistro",
+                  "category": "Food",
+                  "address": "31 Av. George V, 75008 Paris",
+                  "venue_name": "Le Cinq",
+                  "rating": 4.7,
+                  "_tips": "Try the escargot for a traditional taste"
+                }
+              ]
+            },
+            {
+              "day": 7,
+              "date": "2025-09-15",
+              "title": "Art and Culture Day",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Explore Musée d'Orsay",
+                  "category": "Attraction",
+                  "address": "75001 Paris",
+                  "venue_name": "Tuileries Garden",
+                  "rating": 4.6,
+                  "_tips": "Admire the Impressionist masterpieces"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at a charming café",
+                  "category": "Food",
+                  "address": "47 R. de Turbigo, 75003 Paris",
+                  "venue_name": "Le Marais Restaurant Paris",
+                  "rating": 4.6,
+                  "_tips": "Try the croque-monsieur for a classic French bite"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Walk around Montmartre",
+                  "category": "Attraction",
+                  "address": "24 Rue de l'Echaudé, 75006 Paris",
+                  "venue_name": "A2Z Art Gallery",
+                  "rating": 4.6,
+                  "_tips": "Visit the Sacré-Cœur Basilica for panoramic views"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Discover street art in Le Marais",
+                  "category": "Attraction",
+                  "address": "27 Rue de Charonne, 75011 Paris",
+                  "venue_name": "Galerie Arts Factory",
+                  "rating": 4.6,
+                  "_tips": "Look for hidden gems in this artistic district"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at a Michelin-starred restaurant",
+                  "category": "Food",
+                  "address": "31 Av. George V, 75008 Paris",
+                  "venue_name": "L'Orangerie",
+                  "rating": 4.8,
+                  "_tips": "Savor a gastronomic experience"
+                }
+              ]
+            },
+            {
+              "day": 8,
+              "date": "2025-09-16",
+              "title": "River Seine Exploration",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Seine River cruise",
+                  "category": "Attraction",
+                  "address": "Pont de Bir-Hakeim, 75015 Paris",
+                  "venue_name": "Promenade Jean-Paul Belmondo",
+                  "rating": 4.8,
+                  "_tips": "Opt for a sightseeing boat with an open deck"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Visit Notre-Dame Cathedral",
+                  "category": "Attraction",
+                  "address": "8 Av. du Mahatma Gandhi, 75116 Paris",
+                  "venue_name": "Canots du Lac",
+                  "rating": 4.6,
+                  "_tips": "Marvel at the Gothic architecture"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Picnic at Luxembourg Gardens",
+                  "category": "Leisure",
+                  "address": "75019 Paris",
+                  "venue_name": "Parc des Buttes-Chaumont",
+                  "rating": 4.6,
+                  "_tips": "Buy fresh pastries from a nearby bakery"
+                },
+                {
+                  "time": "4:30 PM",
+                  "description": "Explore Saint-Germain-des-Prés",
+                  "category": "Attraction",
+                  "address": "75008 Paris",
+                  "venue_name": "Pinky Tour - Paris",
+                  "rating": 5,
+                  "_tips": "Visit historic bookstores and cafés"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Farewell dinner at a rooftop restaurant",
+                  "category": "Food",
+                  "address": "1 Rue du Pré aux Clercs, 75007 Paris",
+                  "venue_name": "Les Parisiens",
+                  "rating": 4.7,
+                  "_tips": "Enjoy the stunning views of the city"
+                }
+              ]
+            },
+            {
+              "day": 9,
+              "date": "2025-09-17",
+              "title": "Paris → Rome",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave Paris accommodation",
+                  "_tips": "Leave Paris accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for train station",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Train",
+                  "category": "Travel",
+                  "address": "Paris to Rome - Seat reservations recommended",
+                  "_tips": "Paris to Rome - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Rome, head to accommodation",
+                  "_tips": "Arrive in Rome, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "V. della Paglia, 1/2/3, 00153 Roma RM",
+                  "venue_name": "Tonnarello | Paglia",
+                  "rating": 4.7,
+                  "_tips": "First meal in Rome - try something local"
+                }
+              ]
+            },
+            {
+              "day": 10,
+              "date": "2025-09-18",
+              "title": "Exploring Ancient Rome",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the Colosseum",
+                  "category": "Attraction",
+                  "address": "Botanical Garden of Rome, Largo Cristina di Svezia, 23 A - 24, 00165 Roma RM",
+                  "venue_name": "Fontana dei Tritoni",
+                  "rating": 4.2,
+                  "_tips": "Buy tickets in advance"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Explore the Roman Forum",
+                  "category": "Attraction",
+                  "address": "Vicolo Lucchesi, 00187 Roma RM",
+                  "venue_name": "Croce di Via dei Lucchesi",
+                  "rating": 4.3,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Lunch at a local trattoria",
+                  "category": "Food",
+                  "address": "V. del Governo Vecchio, 87, 00186 Roma RM",
+                  "venue_name": "Cantina e Cucina",
+                  "rating": 4.7,
+                  "_tips": "Try the pasta carbonara"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Visit Palatine Hill",
+                  "category": "Attraction",
+                  "address": "Piazza dei Calcarari, 00186 Roma RM",
+                  "venue_name": "Free Walking Tour Of Ancient Rome And Colosseum",
+                  "rating": 5,
+                  "_tips": "Enjoy the panoramic views"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Stroll through Piazza Navona",
+                  "category": "Attraction",
+                  "address": "Piazza del Popolo, 00187 Roma RM",
+                  "venue_name": "Piazza del Popolo",
+                  "rating": 4.7,
+                  "_tips": "Admire the fountains"
+                }
+              ]
+            },
+            {
+              "day": 11,
+              "date": "2025-09-19",
+              "title": "Vatican City and Art",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Visit St. Peter's Basilica",
+                  "category": "Attraction",
+                  "address": "Via Labicana, 56, 00184 Roma RM",
+                  "venue_name": "Tourist Point",
+                  "rating": 3.7,
+                  "_tips": "Dress modestly"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Explore the Vatican Museums",
+                  "category": "Attraction",
+                  "address": "Piazza del Campidoglio, 1, 00186 Roma RM",
+                  "venue_name": "Capitoline Museums",
+                  "rating": 4.7,
+                  "_tips": "Book a guided tour"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Lunch near the Vatican",
+                  "category": "Food",
+                  "address": "Vicolo del Buon Consiglio, 23/a, 00184 Roma RM",
+                  "venue_name": "La Nuova Piazzetta",
+                  "rating": 4.8,
+                  "_tips": "Try the gelato"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Admire the Sistine Chapel",
+                  "category": "Attraction",
+                  "address": "Via dei Portoghesi, 18, 00186 Roma RM",
+                  "venue_name": "Torre della Scimmia (Tower of the Monkey)",
+                  "rating": 4.5,
+                  "_tips": "Silence is required"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Evening walk along the Tiber River",
+                  "category": "Leisure",
+                  "address": "Piazza di Spagna, 00187 Roma RM",
+                  "venue_name": "Spanish Steps",
+                  "rating": 4.6,
+                  "_tips": "Enjoy the sunset"
+                }
+              ]
+            },
+            {
+              "day": 12,
+              "date": "2025-09-20",
+              "title": "Local Flavors and Shopping",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Food tour in Testaccio neighborhood",
+                  "category": "Food",
+                  "address": "Via Santa Maria in Via, 19, 00187 Roma RM",
+                  "venue_name": "Pane e Salame",
+                  "rating": 4.8,
+                  "_tips": "Taste local specialties"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Explore Campo de' Fiori market",
+                  "category": "Attraction",
+                  "address": "Largo di Torre Argentina, 00186 Roma RM",
+                  "venue_name": "Largo di Torre Argentina",
+                  "rating": 4.5,
+                  "_tips": "Buy fresh produce"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Coffee break at a traditional cafe",
+                  "category": "Food",
+                  "address": "Via dei Due Macelli, 107, 00187 Roma RM",
+                  "venue_name": "Trecaffè - Via dei due Macelli",
+                  "rating": 4.6,
+                  "_tips": "Order an espresso"
+                },
+                {
+                  "time": "4:30 PM",
+                  "description": "Shop for souvenirs on Via del Corso",
+                  "category": "Leisure",
+                  "address": "Via Alberto Lionello, 201, 00139 Roma RM",
+                  "venue_name": "Shopping Mall Porta di Roma",
+                  "rating": 4.4,
+                  "_tips": "Bargain with vendors"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at a local trattoria",
+                  "category": "Food",
+                  "address": "Via del Mascherino, 80, 00193 Roma RM",
+                  "venue_name": "Tonnarello San Pietro",
+                  "rating": 4.8,
+                  "_tips": "Try the Roman-style pizza"
+                }
+              ]
+            },
+            {
+              "day": 13,
+              "date": "2025-09-21",
+              "title": "Rome → Barcelona",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave Rome accommodation",
+                  "_tips": "Leave Rome accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for train station",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Train",
+                  "category": "Travel",
+                  "address": "Rome to Barcelona - Seat reservations recommended",
+                  "_tips": "Rome to Barcelona - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Barcelona, head to accommodation",
+                  "_tips": "Arrive in Barcelona, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "First meal in Barcelona - try something local",
+                  "_tips": "First meal in Barcelona - try something local"
+                }
+              ]
+            },
+            {
+              "day": 14,
+              "date": "2025-09-22",
+              "title": "Discovering the Gothic Quarter",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the Barcelona Cathedral",
+                  "category": "Attraction",
+                  "address": "Arrive early to avoid crowds",
+                  "_tips": "Arrive early to avoid crowds"
+                },
+                {
+                  "time": "11:00 AM",
+                  "description": "Stroll through Plaça Reial",
+                  "category": "Leisure",
+                  "address": "Enjoy the beautiful architecture",
+                  "_tips": "Enjoy the beautiful architecture"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at La Boqueria Market",
+                  "category": "Food",
+                  "address": "Try the local tapas",
+                  "_tips": "Try the local tapas"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore the Picasso Museum",
+                  "category": "Attraction",
+                  "address": "Don't miss the early works of Picasso",
+                  "_tips": "Don't miss the early works of Picasso"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Shopping at Portal de l'Àngel",
+                  "category": "Leisure",
+                  "address": "Great for fashion finds",
+                  "_tips": "Great for fashion finds"
+                }
+              ]
+            },
+            {
+              "day": 15,
+              "date": "2025-09-23",
+              "title": "Park Güell and Modernist Architecture",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Park Güell",
+                  "category": "Leisure",
+                  "address": "Buy tickets online in advance",
+                  "_tips": "Buy tickets online in advance"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Lunch at Casa Calvet",
+                  "category": "Food",
+                  "address": "Try the traditional Catalan dishes",
+                  "_tips": "Try the traditional Catalan dishes"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Explore Casa Batlló",
+                  "category": "Attraction",
+                  "address": "Learn about Gaudí's work",
+                  "_tips": "Learn about Gaudí's work"
+                },
+                {
+                  "time": "4:30 PM",
+                  "description": "Visit Palau de la Música Catalana",
+                  "category": "Attraction",
+                  "address": "Take a guided tour for the best experience",
+                  "_tips": "Take a guided tour for the best experience"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Relax at Parc de la Ciutadella",
+                  "category": "Leisure",
+                  "address": "Perfect for a leisurely evening",
+                  "_tips": "Perfect for a leisurely evening"
+                }
+              ]
+            },
+            {
+              "day": 16,
+              "date": "2025-09-24",
+              "title": "Beach Day at Barceloneta",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Morning swim at Barceloneta Beach",
+                  "category": "Leisure",
+                  "address": "Rent a beach chair for comfort",
+                  "_tips": "Rent a beach chair for comfort"
+                },
+                {
+                  "time": "11:00 AM",
+                  "description": "Walk along the Passeig Marítim",
+                  "category": "Leisure",
+                  "address": "Enjoy the sea breeze",
+                  "_tips": "Enjoy the sea breeze"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at a beachfront restaurant",
+                  "category": "Food",
+                  "address": "Try the fresh seafood dishes",
+                  "_tips": "Try the fresh seafood dishes"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore the Barceloneta Market",
+                  "category": "Leisure",
+                  "address": "Bargain for souvenirs",
+                  "_tips": "Bargain for souvenirs"
+                },
+                {
+                  "time": "5:30 PM",
+                  "description": "Relax with a cocktail at a beach bar",
+                  "category": "Food",
+                  "address": "Enjoy the sunset views",
+                  "_tips": "Enjoy the sunset views"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Book accommodations in advance",
+            "Check visa requirements",
+            "Get travel insurance",
+            "Download offline maps",
+            "Keep digital copies of documents"
+          ],
+          "_costEstimate": {
+            "total": 5270,
+            "flights": 1670,
+            "accommodation": 2400,
+            "dailyExpenses": 1200,
+            "currency": "USD",
+            "breakdown": [
+              {
+                "type": "flight",
+                "description": "Boston → London",
+                "amount": 700
+              },
+              {
+                "type": "flight",
+                "description": "London → Paris",
+                "amount": 150
+              },
+              {
+                "type": "flight",
+                "description": "Paris → Rome",
+                "amount": 120
+              },
+              {
+                "type": "flight",
+                "description": "Rome → Barcelona",
+                "amount": 100
+              },
+              {
+                "type": "flight",
+                "description": "Barcelona → Boston",
+                "amount": 600
+              },
+              {
+                "type": "accommodation",
+                "description": "London (3 nights)",
+                "amount": 660
+              },
+              {
+                "type": "accommodation",
+                "description": "Paris (3 nights)",
+                "amount": 750
+              },
+              {
+                "type": "accommodation",
+                "description": "Rome (3 nights)",
+                "amount": 540
+              },
+              {
+                "type": "accommodation",
+                "description": "Barcelona (3 nights)",
+                "amount": 450
+              }
+            ]
+          },
+          "_hotelOptions": {},
+          "_flightOptions": {}
+        },
+        "passed": false,
+        "errors": [
+          "Expected 14 days, got 16"
+        ],
+        "timestamp": "2025-09-09T19:28:57.090Z",
+        "responseTime": 25621,
+        "details": {
+          "actualDestination": "London, Paris, Rome, Barcelona",
+          "actualDays": 16,
+          "actualActivities": 83
+        }
+      },
+      {
+        "testId": "max_complexity",
+        "input": "Leaving from Chicago for 30 days visiting London, Paris, Rome, Barcelona, and Amsterdam",
+        "response": {
+          "destination": "London, Paris, Rome, Barcelona, Amsterdam",
+          "title": "35-Day Multi-City Adventure",
+          "itinerary": [
+            {
+              "day": 1,
+              "date": "2025-09-09",
+              "title": "Chicago → London",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Departure from Chicago",
+                  "category": "Travel",
+                  "address": "Head to airport",
+                  "_tips": "Head to airport"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Flight to London",
+                  "category": "Travel",
+                  "address": "Check in online 24h before",
+                  "_tips": "Check in online 24h before"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Arrival in London",
+                  "category": "Travel",
+                  "address": "Transfer to accommodation",
+                  "_tips": "Transfer to accommodation"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented",
+                  "_tips": "Get settled and oriented"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP",
+                  "venue_name": "Fallow",
+                  "rating": 4.7,
+                  "_tips": "First meal in London"
+                }
+              ]
+            },
+            {
+              "day": 2,
+              "date": "2025-09-10",
+              "title": "Explore Central London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the British Museum",
+                  "category": "Attraction",
+                  "address": "Cromwell Rd, London SW7 2RL",
+                  "venue_name": "Victoria and Albert Museum",
+                  "rating": 4.7,
+                  "_tips": "Arrive early to avoid crowds"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at Borough Market",
+                  "category": "Food",
+                  "address": "The Now Building Rooftop, Outernet, Denmark St, London WC2H 0LA",
+                  "venue_name": "Tattu London",
+                  "rating": 4.7,
+                  "_tips": "Try the street food stalls"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Walk along the River Thames",
+                  "category": "Leisure",
+                  "address": "London EC3N 4AB",
+                  "venue_name": "Tower of London",
+                  "rating": 4.7,
+                  "_tips": "Enjoy the views of iconic landmarks"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Visit the Tower of London",
+                  "category": "Attraction",
+                  "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
+                  "venue_name": "London Eye",
+                  "rating": 4.5,
+                  "_tips": "Join a guided tour for insights"
+                },
+                {
+                  "time": "8:00 PM",
+                  "description": "Dinner at a traditional pub",
+                  "category": "Food",
+                  "address": "23 St James's St, London SW1A 1HA",
+                  "venue_name": "Riviera",
+                  "rating": 4.8,
+                  "_tips": "Try classic British dishes"
+                }
+              ]
+            },
+            {
+              "day": 3,
+              "date": "2025-09-11",
+              "title": "Royal Day Out",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Buckingham Palace",
+                  "category": "Attraction",
+                  "address": "Tower Bridge Rd, London SE1 2UP",
+                  "venue_name": "Tower Bridge",
+                  "rating": 4.8,
+                  "_tips": "Watch the Changing of the Guard"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at The Orangery",
+                  "category": "Food",
+                  "address": "3 Bedale St, London SE1 9AL",
+                  "venue_name": "OMA",
+                  "rating": 4.7,
+                  "_tips": "Try the afternoon tea"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore Kensington Palace",
+                  "category": "Attraction",
+                  "address": "32 London Bridge St, London SE1 9SG",
+                  "venue_name": "The Shard",
+                  "rating": 4.6,
+                  "_tips": "Visit the beautiful gardens"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Walk in Hyde Park",
+                  "category": "Leisure",
+                  "address": "London",
+                  "venue_name": "Hyde Park",
+                  "rating": 4.7,
+                  "_tips": "Rent a boat at the Serpentine"
+                },
+                {
+                  "time": "8:00 PM",
+                  "description": "Dinner at a fine dining restaurant",
+                  "category": "Food",
+                  "address": "First Floor, 41-43 Mount St, London W1K 2RX",
+                  "venue_name": "Mount St. Restaurant",
+                  "rating": 4.7,
+                  "_tips": "Enjoy the elegant atmosphere"
+                }
+              ]
+            },
+            {
+              "day": 4,
+              "date": "2025-09-12",
+              "title": "Art & Culture Day",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Explore Tate Modern",
+                  "category": "Attraction",
+                  "address": "London SW1A 1AA",
+                  "venue_name": "Buckingham Palace",
+                  "rating": 4.5,
+                  "_tips": "Don't miss the Turbine Hall installations"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at The Wallace Collection",
+                  "category": "Food",
+                  "address": "28 Rupert St, London W1D 6DJ",
+                  "venue_name": "Evelyn's Table",
+                  "rating": 4.8,
+                  "_tips": "Admire the exquisite art while dining"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Visit Shakespeare's Globe Theatre",
+                  "category": "Attraction",
+                  "address": "85 Piccadilly, London W1J 7NB",
+                  "venue_name": "HIDE",
+                  "rating": 4.5,
+                  "_tips": "Attend a guided tour or play"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Stroll through Covent Garden",
+                  "category": "Leisure",
+                  "address": "London",
+                  "venue_name": "Kensington Gardens",
+                  "rating": 4.7,
+                  "_tips": "Discover unique boutiques and street performers"
+                },
+                {
+                  "time": "8:30 PM",
+                  "description": "Dinner at a trendy restaurant in Soho",
+                  "category": "Food",
+                  "address": "Barge House St, London SE1 9PH",
+                  "venue_name": "OXO Restaurant",
+                  "rating": 4.4,
+                  "_tips": "Try the diverse culinary options"
+                }
+              ]
+            },
+            {
+              "day": 5,
+              "date": "2025-09-13",
+              "title": "Historic London",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Tour St. Paul's Cathedral",
+                  "category": "Attraction",
+                  "address": "London SW1A 0AA",
+                  "venue_name": "Big Ben",
+                  "rating": 4.6,
+                  "_tips": "Climb to the Whispering Gallery"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Lunch at The Ivy",
+                  "category": "Food",
+                  "address": "4-5 London Rd, London SE1 6JZ",
+                  "venue_name": "Paladar",
+                  "rating": 4.7,
+                  "_tips": "Savor the elegant dining experience"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Explore the Tower Bridge Exhibition",
+                  "category": "Attraction",
+                  "address": "Great Russell St, London WC1B 3DG",
+                  "venue_name": "The British Museum",
+                  "rating": 4.7,
+                  "_tips": "Walk on the glass floor for a thrill"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Walk along the South Bank",
+                  "category": "Leisure",
+                  "address": "32 London Bridge St, London SE1 9SG",
+                  "venue_name": "The View from The Shard",
+                  "rating": 4.6,
+                  "_tips": "Enjoy street performers and views"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Dinner at a riverside restaurant",
+                  "category": "Food",
+                  "address": "4 St James's Market, London SW1Y 4AH",
+                  "venue_name": "Scully",
+                  "rating": 4.8,
+                  "_tips": "Watch the sunset over the Thames"
+                }
+              ]
+            },
+            {
+              "day": 6,
+              "date": "2025-09-14",
+              "title": "Shopping Extravaganza",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Shop on Oxford Street",
+                  "category": "Leisure",
+                  "address": "Ariel Way, London W12 7GF",
+                  "venue_name": "Westfield London",
+                  "rating": 4.5,
+                  "_tips": "Visit flagship stores and department stores"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at Sketch",
+                  "category": "Food",
+                  "address": "85 Piccadilly, London W1J 7NB",
+                  "venue_name": "HIDE",
+                  "rating": 4.5,
+                  "_tips": "Experience the unique interiors"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Explore Carnaby Street",
+                  "category": "Leisure",
+                  "address": "Dean's Yard, London SW1P 3PA",
+                  "venue_name": "Westminster Abbey",
+                  "rating": 4.6,
+                  "_tips": "Discover independent boutiques"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Visit Covent Garden Market",
+                  "category": "Leisure",
+                  "address": "London",
+                  "venue_name": "The Regent's Park",
+                  "rating": 4.7,
+                  "_tips": "Enjoy the street performers"
+                },
+                {
+                  "time": "8:30 PM",
+                  "description": "Dinner at a chic restaurant in Mayfair",
+                  "category": "Food",
+                  "address": "4 St James's Market, London SW1Y 4AH",
+                  "venue_name": "Scully",
+                  "rating": 4.8,
+                  "_tips": "Indulge in gourmet cuisine"
+                }
+              ]
+            },
+            {
+              "day": 7,
+              "date": "2025-09-15",
+              "title": "Green Spaces & Museums",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Relax in Regent's Park",
+                  "category": "Leisure",
+                  "address": "London SW1A 2BJ",
+                  "venue_name": "St James's Park",
+                  "rating": 4.7,
+                  "_tips": "Visit the Queen Mary's Rose Garden"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at The V&A Cafe",
+                  "category": "Food",
+                  "address": "383 Kennington Ln, London SE11 5QY",
+                  "venue_name": "Kennington Lane Cafe",
+                  "rating": 4.9,
+                  "_tips": "Enjoy the museum cafe ambiance"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Visit the Natural History Museum",
+                  "category": "Attraction",
+                  "address": "Cromwell Rd, South Kensington, London SW7 5BD",
+                  "venue_name": "Natural History Museum",
+                  "rating": 4.6,
+                  "_tips": "Don't miss the dinosaur exhibit"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Walk in Green Park",
+                  "category": "Leisure",
+                  "address": "Green Park, London SW1A 1AA",
+                  "venue_name": "The Green Park",
+                  "rating": 4.6,
+                  "_tips": "See the Canada Gate"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at a cozy restaurant in Marylebone",
+                  "category": "Food",
+                  "address": "52 Haymarket, London SW1Y 4RP",
+                  "venue_name": "Fallow",
+                  "rating": 4.7,
+                  "_tips": "Try the local British fare"
+                }
+              ]
+            },
+            {
+              "day": 8,
+              "date": "2025-09-16",
+              "title": "Thames Exploration",
+              "_destination": "London",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Take a Thames River Cruise",
+                  "category": "Attraction",
+                  "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
+                  "venue_name": "The London Dungeon",
+                  "rating": 4.3,
+                  "_tips": "Enjoy the views from the water"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at The Shard",
+                  "category": "Food",
+                  "address": "4-5 London Rd, London SE1 6JZ",
+                  "venue_name": "Paladar",
+                  "rating": 4.7,
+                  "_tips": "Dine with panoramic views of London"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Visit the HMS Belfast",
+                  "category": "Attraction",
+                  "address": "London SW1A 0AA",
+                  "venue_name": "Palace of Westminster",
+                  "rating": 4.6,
+                  "_tips": "Explore the historic warship"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Stroll along the South Bank",
+                  "category": "Leisure",
+                  "address": "London EC3N 4AB",
+                  "venue_name": "Tower of London",
+                  "rating": 4.7,
+                  "_tips": "Enjoy the street performers and views"
+                },
+                {
+                  "time": "8:00 PM",
+                  "description": "Dinner at a riverside restaurant near London Bridge",
+                  "category": "Food",
+                  "address": "The Now Building Rooftop, Outernet, Denmark St, London WC2H 0LA",
+                  "venue_name": "Tattu London",
+                  "rating": 4.7,
+                  "_tips": "Watch the lights of the city"
+                }
+              ]
+            },
+            {
+              "day": 9,
+              "date": "2025-09-17",
+              "title": "London → Paris",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave London accommodation",
+                  "_tips": "Leave London accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for airport",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Eurostar",
+                  "category": "Travel",
+                  "address": "London to Paris - Seat reservations recommended",
+                  "_tips": "London to Paris - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Paris, head to accommodation",
+                  "_tips": "Arrive in Paris, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "18 Rue La Boétie, 75008 Paris",
+                  "venue_name": "Sphère",
+                  "rating": 4.8,
+                  "_tips": "First meal in Paris - try something local"
+                }
+              ]
+            },
+            {
+              "day": 10,
+              "date": "2025-09-18",
+              "title": "Exploring the City of Light",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit Louvre Museum",
+                  "category": "Attraction",
+                  "address": "23 Rue de Sévigné, 75003 Paris",
+                  "venue_name": "Carnavalet Museum",
+                  "rating": 4.7,
+                  "_tips": "Get there early to avoid the crowds"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at a local bistro",
+                  "category": "Food",
+                  "address": "31 Av. George V, 75008 Paris",
+                  "venue_name": "Le Cinq",
+                  "rating": 4.7,
+                  "_tips": "Try the escargot!"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Walk along the Seine River",
+                  "category": "Leisure",
+                  "address": "Bois de Boulogne, Rte de la Prte Dauphine à la Prte des Sablons, 75116 Paris",
+                  "venue_name": "Jardin d'Acclimatation",
+                  "rating": 4.3,
+                  "_tips": "Enjoy the beautiful views"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Eiffel Tower evening visit",
+                  "category": "Attraction",
+                  "address": "75001 Paris",
+                  "venue_name": "Tuileries Garden",
+                  "rating": 4.6,
+                  "_tips": "Witness the sunset from the top"
+                },
+                {
+                  "time": "9:00 PM",
+                  "description": "Dinner at a cozy brasserie",
+                  "category": "Food",
+                  "address": "47 R. de Turbigo, 75003 Paris",
+                  "venue_name": "Le Marais Restaurant Paris",
+                  "rating": 4.6,
+                  "_tips": "Try the French onion soup"
+                }
+              ]
+            },
+            {
+              "day": 11,
+              "date": "2025-09-19",
+              "title": "Historical Paris",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Notre Dame Cathedral",
+                  "category": "Attraction",
+                  "address": "Pont de Bir-Hakeim, 75015 Paris",
+                  "venue_name": "Promenade Jean-Paul Belmondo",
+                  "rating": 4.8,
+                  "_tips": "Admire the stunning architecture"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at a sidewalk cafe",
+                  "category": "Food",
+                  "address": "10 Rue de Buci, 75006 Paris",
+                  "venue_name": "Café de Paris",
+                  "rating": 4,
+                  "_tips": "People watch while you eat"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore the Latin Quarter",
+                  "category": "Attraction",
+                  "address": "24 Rue de l'Echaudé, 75006 Paris",
+                  "venue_name": "A2Z Art Gallery",
+                  "rating": 4.6,
+                  "_tips": "Visit the Sorbonne University"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Dinner at a traditional French restaurant",
+                  "category": "Food",
+                  "address": "31 Av. George V, 75008 Paris",
+                  "venue_name": "L'Orangerie",
+                  "rating": 4.8,
+                  "_tips": "Try the coq au vin"
+                },
+                {
+                  "time": "9:00 PM",
+                  "description": "Evening stroll in Montmartre",
+                  "category": "Leisure",
+                  "address": "27 Rue de Charonne, 75011 Paris",
+                  "venue_name": "Galerie Arts Factory",
+                  "rating": 4.6,
+                  "_tips": "Visit Sacre-Coeur Basilica for a panoramic view"
+                }
+              ]
+            },
+            {
+              "day": 12,
+              "date": "2025-09-20",
+              "title": "Artistic Paris",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Musée d'Orsay",
+                  "category": "Attraction",
+                  "address": "8 Av. du Mahatma Gandhi, 75116 Paris",
+                  "venue_name": "Canots du Lac",
+                  "rating": 4.6,
+                  "_tips": "Don't miss the Impressionist paintings"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at a trendy cafe in Le Marais",
+                  "category": "Food",
+                  "address": "172 Bd Saint-Germain, 75006 Paris",
+                  "venue_name": "Café de Flore",
+                  "rating": 3.9,
+                  "_tips": "Try the croque-monsieur"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore street art in Belleville",
+                  "category": "Attraction",
+                  "address": "21 Rue de la Forge Royale, 75011 Paris",
+                  "venue_name": "Galerie Da-End",
+                  "rating": 4.7,
+                  "_tips": "Discover hidden gems in this artistic neighborhood"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Visit Centre Pompidou",
+                  "category": "Attraction",
+                  "address": "75008 Paris",
+                  "venue_name": "Pinky Tour - Paris",
+                  "rating": 5,
+                  "_tips": "Check out the modern art collection"
+                },
+                {
+                  "time": "8:30 PM",
+                  "description": "Dinner at a Michelin-starred restaurant",
+                  "category": "Food",
+                  "address": "1 Rue du Pré aux Clercs, 75007 Paris",
+                  "venue_name": "Les Parisiens",
+                  "rating": 4.7,
+                  "_tips": "Indulge in a gastronomic experience"
+                }
+              ]
+            },
+            {
+              "day": 13,
+              "date": "2025-09-21",
+              "title": "Charming Parisian Streets",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Stroll through Le Marais",
+                  "category": "Leisure",
+                  "address": "15 Av. Winston Churchill, 75008 Paris",
+                  "venue_name": "Paris TUKTUK",
+                  "rating": 4.8,
+                  "_tips": "Visit Place des Vosges"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at a local market",
+                  "category": "Food",
+                  "address": "8 Quai du Louvre, 75001 Paris",
+                  "venue_name": "Le Tout-Paris",
+                  "rating": 4.6,
+                  "_tips": "Try fresh baguettes and cheese"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Explore the trendy Canal Saint-Martin",
+                  "category": "Attraction",
+                  "address": "172 Rue de Rivoli, 75001 Paris",
+                  "venue_name": "Artclub Gallery",
+                  "rating": 4.7,
+                  "_tips": "Take a scenic boat ride"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Shopping in Le Marais boutiques",
+                  "category": "Leisure",
+                  "address": "12 Rue Linois, 75015 Paris",
+                  "venue_name": "Centre Commercial Beaugrenelle",
+                  "rating": 4.2,
+                  "_tips": "Find unique French fashion pieces"
+                },
+                {
+                  "time": "8:30 PM",
+                  "description": "Dinner at a cozy bistro",
+                  "category": "Food",
+                  "address": "6 Rue Desaix, 75015 Paris",
+                  "venue_name": "De la Tour",
+                  "rating": 4.8,
+                  "_tips": "Try the ratatouille"
+                }
+              ]
+            },
+            {
+              "day": 14,
+              "date": "2025-09-22",
+              "title": "Gardens and Palaces",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Palace of Versailles",
+                  "category": "Attraction",
+                  "address": "34 Quai d'Orléans, 75004 Paris",
+                  "venue_name": "Turtle de Seine",
+                  "rating": 4.5,
+                  "_tips": "Explore the gardens and the Hall of Mirrors"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Lunch at a cafe in Versailles",
+                  "category": "Food",
+                  "address": "52 Rue de l'Hôtel de ville, 75004 Paris",
+                  "venue_name": "The Caféothèque of Paris",
+                  "rating": 4.3,
+                  "_tips": "Enjoy a leisurely meal"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Explore the gardens of Versailles",
+                  "category": "Leisure",
+                  "address": "75008 Paris",
+                  "venue_name": "Parc Monceau",
+                  "rating": 4.6,
+                  "_tips": "Don't miss the Grand Trianon"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Return to Paris",
+                  "category": "Attraction",
+                  "address": "square Frédérick-Lemaître, 35 Quai de Jemmapes, 75010 Paris",
+                  "venue_name": "Canal Saint Martin",
+                  "rating": 4.8,
+                  "_tips": "Take the RER train back"
+                },
+                {
+                  "time": "8:00 PM",
+                  "description": "Dinner at a charming brasserie in Paris",
+                  "category": "Food",
+                  "address": "44 Rue Vieille du Temple, 75004 Paris",
+                  "venue_name": "Le Colimaçon",
+                  "rating": 4.7,
+                  "_tips": "Try the escargot"
+                }
+              ]
+            },
+            {
+              "day": 15,
+              "date": "2025-09-23",
+              "title": "Culinary Delights",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Food tour in Saint-Germain-des-Prés",
+                  "category": "Food",
+                  "address": "8 Rue de Montfaucon, 75006 Paris",
+                  "venue_name": "Le Paris Paris",
+                  "rating": 4.4,
+                  "_tips": "Sample French pastries and cheeses"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Cooking class in a local kitchen",
+                  "category": "Food",
+                  "address": "32 Av. Matignon, 75008 Paris",
+                  "venue_name": "La Scène",
+                  "rating": 4.7,
+                  "_tips": "Learn to make classic French dishes"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Wine tasting at a cellar in Montmartre",
+                  "category": "Food",
+                  "address": "6 Rue Desaix, 75015 Paris",
+                  "venue_name": "De la Tour",
+                  "rating": 4.8,
+                  "_tips": "Discover French wines"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Dinner at a Michelin-starred restaurant",
+                  "category": "Food",
+                  "address": "44 Rue Vieille du Temple, 75004 Paris",
+                  "venue_name": "Le Colimaçon",
+                  "rating": 4.7,
+                  "_tips": "Indulge in a gourmet experience"
+                },
+                {
+                  "time": "9:00 PM",
+                  "description": "Evening dessert cruise on the Seine",
+                  "category": "Food",
+                  "address": "8 Rue de Montfaucon, 75006 Paris",
+                  "venue_name": "Le Paris Paris",
+                  "rating": 4.4,
+                  "_tips": "Enjoy Paris by night"
+                }
+              ]
+            },
+            {
+              "day": 16,
+              "date": "2025-09-24",
+              "title": "Relaxing Paris",
+              "_destination": "Paris",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Picnic at Luxembourg Gardens",
+                  "category": "Leisure",
+                  "address": "75019 Paris",
+                  "venue_name": "Parc des Buttes-Chaumont",
+                  "rating": 4.6,
+                  "_tips": "Buy fresh pastries for the picnic"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Visit Shakespeare and Company bookstore",
+                  "category": "Attraction",
+                  "address": "33 Av. du Maine, 75015 Paris",
+                  "venue_name": "Paris Montparnasse – Top of the city",
+                  "rating": 4.5,
+                  "_tips": "Browse for unique books"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Seine River cruise",
+                  "category": "Attraction",
+                  "address": "45 Rue des Pirogues de Bercy, 75012 Paris",
+                  "venue_name": "ECLIPSO Paris",
+                  "rating": 4.9,
+                  "_tips": "Relax and enjoy the city views"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Shopping on Champs-Élysées",
+                  "category": "Leisure",
+                  "address": "101 Porte Berger, 75001 Paris",
+                  "venue_name": "Westfield Forum des Halles",
+                  "rating": 4.1,
+                  "_tips": "Explore luxury boutiques"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Farewell dinner at a traditional bistro",
+                  "category": "Food",
+                  "address": "32 Av. Matignon, 75008 Paris",
+                  "venue_name": "La Scène",
+                  "rating": 4.7,
+                  "_tips": "Toast to a wonderful time in Paris"
+                }
+              ]
+            },
+            {
+              "day": 17,
+              "date": "2025-09-25",
+              "title": "Paris → Rome",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave Paris accommodation",
+                  "_tips": "Leave Paris accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for train station",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Train",
+                  "category": "Travel",
+                  "address": "Paris to Rome - Seat reservations recommended",
+                  "_tips": "Paris to Rome - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Rome, head to accommodation",
+                  "_tips": "Arrive in Rome, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "V. della Paglia, 1/2/3, 00153 Roma RM",
+                  "venue_name": "Tonnarello | Paglia",
+                  "rating": 4.7,
+                  "_tips": "First meal in Rome - try something local"
+                }
+              ]
+            },
+            {
+              "day": 18,
+              "date": "2025-09-26",
+              "title": "Exploring Ancient Rome",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit the Colosseum",
+                  "category": "Attraction",
+                  "address": "Botanical Garden of Rome, Largo Cristina di Svezia, 23 A - 24, 00165 Roma RM",
+                  "venue_name": "Fontana dei Tritoni",
+                  "rating": 4.2,
+                  "_tips": "Arrive early to avoid crowds"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Explore Roman Forum",
+                  "category": "Attraction",
+                  "address": "Vicolo Lucchesi, 00187 Roma RM",
+                  "venue_name": "Croce di Via dei Lucchesi",
+                  "rating": 4.3,
+                  "_tips": "Wear comfortable shoes"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Lunch at a local trattoria",
+                  "category": "Food",
+                  "address": "V. del Governo Vecchio, 87, 00186 Roma RM",
+                  "venue_name": "Cantina e Cucina",
+                  "rating": 4.7,
+                  "_tips": "Try the traditional Roman dishes"
+                },
+                {
+                  "time": "4:30 PM",
+                  "description": "Visit Palatine Hill",
+                  "category": "Leisure",
+                  "address": "Piazza dei Calcarari, 00186 Roma RM",
+                  "venue_name": "Free Walking Tour Of Ancient Rome And Colosseum",
+                  "rating": 5,
+                  "_tips": "Enjoy the panoramic views"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Stroll through Circus Maximus",
+                  "category": "Leisure",
+                  "address": "Piazza del Popolo, 00187 Roma RM",
+                  "venue_name": "Piazza del Popolo",
+                  "rating": 4.7,
+                  "_tips": "Capture the sunset"
+                }
+              ]
+            },
+            {
+              "day": 19,
+              "date": "2025-09-27",
+              "title": "Vatican City Tour",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Visit St. Peter's Basilica",
+                  "category": "Attraction",
+                  "address": "Via Labicana, 56, 00184 Roma RM",
+                  "venue_name": "Tourist Point",
+                  "rating": 3.7,
+                  "_tips": "Dress modestly"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Explore Vatican Museums",
+                  "category": "Attraction",
+                  "address": "Piazza del Campidoglio, 1, 00186 Roma RM",
+                  "venue_name": "Capitoline Museums",
+                  "rating": 4.7,
+                  "_tips": "Book tickets in advance"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Lunch at a nearby cafe",
+                  "category": "Food",
+                  "address": "Via dei Due Macelli, 107, 00187 Roma RM",
+                  "venue_name": "Trecaffè - Via dei due Macelli",
+                  "rating": 4.6,
+                  "_tips": "Try the gelato"
+                },
+                {
+                  "time": "4:30 PM",
+                  "description": "Visit Sistine Chapel",
+                  "category": "Attraction",
+                  "address": "Via dei Portoghesi, 18, 00186 Roma RM",
+                  "venue_name": "Torre della Scimmia (Tower of the Monkey)",
+                  "rating": 4.5,
+                  "_tips": "Silence is appreciated"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Walk around St. Peter's Square",
+                  "category": "Attraction",
+                  "address": "Piazza di Spagna, 00187 Roma RM",
+                  "venue_name": "Spanish Steps",
+                  "rating": 4.6,
+                  "_tips": "Observe the obelisk"
+                }
+              ]
+            },
+            {
+              "day": 20,
+              "date": "2025-09-28",
+              "title": "Culinary Delights",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Food tour in Trastevere",
+                  "category": "Food",
+                  "address": "Vicolo del Buon Consiglio, 23/a, 00184 Roma RM",
+                  "venue_name": "La Nuova Piazzetta",
+                  "rating": 4.8,
+                  "_tips": "Come hungry"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at a family-run osteria",
+                  "category": "Food",
+                  "address": "Via Santa Maria in Via, 19, 00187 Roma RM",
+                  "venue_name": "Pane e Salame",
+                  "rating": 4.8,
+                  "_tips": "Taste the local wines"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Gelato tasting at Giolitti",
+                  "category": "Food",
+                  "address": "Via del Mascherino, 80, 00193 Roma RM",
+                  "venue_name": "Tonnarello San Pietro",
+                  "rating": 4.8,
+                  "_tips": "Try their signature flavors"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Visit Campo de' Fiori Market",
+                  "category": "Leisure",
+                  "address": "Largo di Torre Argentina, 00186 Roma RM",
+                  "venue_name": "Largo di Torre Argentina",
+                  "rating": 4.5,
+                  "_tips": "Bargain with the vendors"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Cooking class for traditional Roman dishes",
+                  "category": "Food",
+                  "address": "Via del Pellegrino, 11, 00186 Roma RM",
+                  "venue_name": "Osteria da Fortunata",
+                  "rating": 4.3,
+                  "_tips": "Hands-on experience"
+                }
+              ]
+            },
+            {
+              "day": 21,
+              "date": "2025-09-29",
+              "title": "Artistic Marvels",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "9:30 AM",
+                  "description": "Visit Galleria Borghese",
+                  "category": "Attraction",
+                  "address": "Piazza del Campidoglio, 00186 Roma RM",
+                  "venue_name": "Fountain of the Goddess Roma",
+                  "rating": 4.7,
+                  "_tips": "Reserve tickets in advance"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Explore Pantheon",
+                  "category": "Attraction",
+                  "address": "Viale Gabriele D'Annunzio, 00197 Roma RM",
+                  "venue_name": "Passeggiata del Pincio",
+                  "rating": 4.7,
+                  "_tips": "Admire the architecture"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at a rooftop restaurant",
+                  "category": "Food",
+                  "address": "Viale Manzoni, 107, 00185 Roma RM",
+                  "venue_name": "Taverna dei migliori",
+                  "rating": 4.6,
+                  "_tips": "Enjoy the view"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Visit MAXXI National Museum of 21st Century Arts",
+                  "category": "Attraction",
+                  "address": "Piazzale Scipione Borghese, 5, 00197 Roma RM",
+                  "venue_name": "Galleria Borghese",
+                  "rating": 4.6,
+                  "_tips": "Explore contemporary art"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Stroll through Piazza Navona",
+                  "category": "Attraction",
+                  "address": "Piazza del Campidoglio, 00186 Roma RM",
+                  "venue_name": "Fountain of the Goddess Roma",
+                  "rating": 4.7,
+                  "_tips": "Watch the street performers"
+                }
+              ]
+            },
+            {
+              "day": 22,
+              "date": "2025-09-30",
+              "title": "Roman Gardens and Villas",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Villa Borghese Gardens",
+                  "category": "Leisure",
+                  "address": "00197 Rome, Metropolitan City of Rome Capital",
+                  "venue_name": "Villa Borghese",
+                  "rating": 4.6,
+                  "_tips": "Rent a bike for exploring"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Lunch at a lakeside restaurant",
+                  "category": "Food",
+                  "address": "Piazza della Scala, 19/21, 00153 Roma RM",
+                  "venue_name": "Tonnarello Scala",
+                  "rating": 4.8,
+                  "_tips": "Try the seafood pasta"
+                },
+                {
+                  "time": "2:30 PM",
+                  "description": "Explore the ruins at Palazzo Massimo",
+                  "category": "Attraction",
+                  "address": "Largo di Torre Argentina, 00186 Roma RM",
+                  "venue_name": "Largo di Torre Argentina",
+                  "rating": 4.5,
+                  "_tips": "Learn about ancient Rome"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Visit Villa d'Este in Tivoli",
+                  "category": "Attraction",
+                  "address": "Piazza del Campidoglio, 00186 Roma RM",
+                  "venue_name": "Fountain of the Goddess Roma",
+                  "rating": 4.7,
+                  "_tips": "Admire the fountains"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Dinner at a garden restaurant",
+                  "category": "Food",
+                  "address": "Via di Pietra, 85, 00186 Roma RM",
+                  "venue_name": "La locanda del tempio",
+                  "rating": 4.6,
+                  "_tips": "Savor the outdoor ambiance"
+                }
+              ]
+            },
+            {
+              "day": 23,
+              "date": "2025-10-01",
+              "title": "Shopping Extravaganza",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "10:30 AM",
+                  "description": "Shop on Via del Corso",
+                  "category": "Leisure",
+                  "address": "Via Alberto Lionello, 201, 00139 Roma RM",
+                  "venue_name": "Shopping Mall Porta di Roma",
+                  "rating": 4.4,
+                  "_tips": "Check out the designer boutiques"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Lunch at a trendy cafe",
+                  "category": "Food",
+                  "address": "Via Venti Settembre, 25, 00185 Roma RM",
+                  "venue_name": "D’Angelo Caffè & Gastronomia - Bar Bistro Caffetteria Napoletana a Roma",
+                  "rating": 4.7,
+                  "_tips": "Try the Roman-style pizza"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Explore Campo Marzio District",
+                  "category": "Leisure",
+                  "address": "Piazza del Campidoglio, 00186 Roma RM",
+                  "venue_name": "Fountain of the Goddess Roma",
+                  "rating": 4.7,
+                  "_tips": "Find unique souvenirs"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Visit Mercato Monti for vintage finds",
+                  "category": "Leisure",
+                  "address": "Viale Gabriele D'Annunzio, 00197 Roma RM",
+                  "venue_name": "Passeggiata del Pincio",
+                  "rating": 4.7,
+                  "_tips": "Haggle for a good deal"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Dinner at a local trattoria",
+                  "category": "Food",
+                  "address": "Piazza del Colosseo, 2A, 00184 Roma RM",
+                  "venue_name": "Ristoro Della Salute",
+                  "rating": 4.8,
+                  "_tips": "Taste the Roman specialties"
+                }
+              ]
+            },
+            {
+              "day": 24,
+              "date": "2025-10-02",
+              "title": "Relaxation and Leisure",
+              "_destination": "Rome",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Morning at Terme di Caracalla",
+                  "category": "Leisure",
+                  "address": "Largo di Torre Argentina, 00186 Roma RM",
+                  "venue_name": "Largo di Torre Argentina",
+                  "rating": 4.5,
+                  "_tips": "Indulge in the thermal baths"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at a garden cafe",
+                  "category": "Food",
+                  "address": "Via Marianna Dionigi, 32, 00193 Roma RM",
+                  "venue_name": "Mus Caffe",
+                  "rating": 4.9,
+                  "_tips": "Enjoy the outdoor seating"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Visit Villa Farnesina",
+                  "category": "Attraction",
+                  "address": "Viale Gabriele D'Annunzio, 00197 Roma RM",
+                  "venue_name": "Passeggiata del Pincio",
+                  "rating": 4.7,
+                  "_tips": "Admire the frescoes"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Evening walk along Tiber River",
+                  "category": "Leisure",
+                  "address": "Botanical Garden of Rome, Largo Cristina di Svezia, 23 A - 24, 00165 Roma RM",
+                  "venue_name": "Fontana dei Tritoni",
+                  "rating": 4.2,
+                  "_tips": "Enjoy the sunset views"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Dinner at a riverside restaurant",
+                  "category": "Food",
+                  "address": "V. del Governo Vecchio, 87, 00186 Roma RM",
+                  "venue_name": "Cantina e Cucina",
+                  "rating": 4.7,
+                  "_tips": "Try the seafood specialties"
+                }
+              ]
+            },
+            {
+              "day": 25,
+              "date": "2025-10-03",
+              "title": "Rome → Barcelona",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave Rome accommodation",
+                  "_tips": "Leave Rome accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for train station",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Train",
+                  "category": "Travel",
+                  "address": "Rome to Barcelona - Seat reservations recommended",
+                  "_tips": "Rome to Barcelona - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Barcelona, head to accommodation",
+                  "_tips": "Arrive in Barcelona, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "First meal in Barcelona - try something local",
+                  "_tips": "First meal in Barcelona - try something local"
+                }
+              ]
+            },
+            {
+              "day": 26,
+              "date": "2025-10-04",
+              "title": "Exploring the Gothic Quarter",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit Barcelona Cathedral",
+                  "category": "Attraction",
+                  "address": "Arrive early to avoid crowds",
+                  "_tips": "Arrive early to avoid crowds"
+                },
+                {
+                  "time": "11:00 AM",
+                  "description": "Walk through Plaça Reial",
+                  "category": "Leisure",
+                  "address": "Enjoy the beautiful architecture",
+                  "_tips": "Enjoy the beautiful architecture"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at La Boqueria Market",
+                  "category": "Food",
+                  "address": "Try the local tapas",
+                  "_tips": "Try the local tapas"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore Picasso Museum",
+                  "category": "Attraction",
+                  "address": "Buy tickets online to skip the line",
+                  "_tips": "Buy tickets online to skip the line"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Shopping on La Rambla",
+                  "category": "Leisure",
+                  "address": "Bargain with the vendors",
+                  "_tips": "Bargain with the vendors"
+                }
+              ]
+            },
+            {
+              "day": 27,
+              "date": "2025-10-05",
+              "title": "A Day at Park Güell",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Explore Park Güell",
+                  "category": "Leisure",
+                  "address": "Book the early morning slot for fewer crowds",
+                  "_tips": "Book the early morning slot for fewer crowds"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Lunch at Gaudí House Museum",
+                  "category": "Food",
+                  "address": "Try the traditional Catalan cuisine",
+                  "_tips": "Try the traditional Catalan cuisine"
+                },
+                {
+                  "time": "3:30 PM",
+                  "description": "Visit Casa Batlló",
+                  "category": "Attraction",
+                  "address": "Audio guide is highly recommended",
+                  "_tips": "Audio guide is highly recommended"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Relax at Barceloneta Beach",
+                  "category": "Leisure",
+                  "address": "Don't forget sunscreen",
+                  "_tips": "Don't forget sunscreen"
+                },
+                {
+                  "time": "8:30 PM",
+                  "description": "Dinner at a beachfront restaurant",
+                  "category": "Food",
+                  "address": "Enjoy the sunset views",
+                  "_tips": "Enjoy the sunset views"
+                }
+              ]
+            },
+            {
+              "day": 28,
+              "date": "2025-10-06",
+              "title": "Sagrada Família and Gothic Quarter",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit Sagrada Família",
+                  "category": "Attraction",
+                  "address": "Buy skip-the-line tickets in advance",
+                  "_tips": "Buy skip-the-line tickets in advance"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Stroll through El Born district",
+                  "category": "Leisure",
+                  "address": "Visit the local boutiques",
+                  "_tips": "Visit the local boutiques"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at a local tapas bar",
+                  "category": "Food",
+                  "address": "Try the patatas bravas",
+                  "_tips": "Try the patatas bravas"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Explore Palau de la Música Catalana",
+                  "category": "Attraction",
+                  "address": "Guided tours available in multiple languages",
+                  "_tips": "Guided tours available in multiple languages"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Dinner at a rooftop restaurant",
+                  "category": "Food",
+                  "address": "Enjoy panoramic city views",
+                  "_tips": "Enjoy panoramic city views"
+                }
+              ]
+            },
+            {
+              "day": 29,
+              "date": "2025-10-07",
+              "title": "Montjuïc Hill and Magic Fountain",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Take the Montjuïc Cable Car",
+                  "category": "Attraction",
+                  "address": "Breathtaking views of the city",
+                  "_tips": "Breathtaking views of the city"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Explore Montjuïc Castle",
+                  "category": "Attraction",
+                  "address": "Learn about the history of Barcelona",
+                  "_tips": "Learn about the history of Barcelona"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Visit Fundació Joan Miró",
+                  "category": "Attraction",
+                  "address": "Modern art enthusiasts will love it",
+                  "_tips": "Modern art enthusiasts will love it"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Relax at Mirador del Poble Sec",
+                  "category": "Leisure",
+                  "address": "Great spot for sunset views",
+                  "_tips": "Great spot for sunset views"
+                },
+                {
+                  "time": "8:00 PM",
+                  "description": "Witness the Magic Fountain Show",
+                  "category": "Attraction",
+                  "address": "Check the show timings in advance",
+                  "_tips": "Check the show timings in advance"
+                }
+              ]
+            },
+            {
+              "day": 30,
+              "date": "2025-10-08",
+              "title": "Day Trip to Sitges",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Travel to Sitges by train",
+                  "category": "Attraction",
+                  "address": "Scenic coastal journey",
+                  "_tips": "Scenic coastal journey"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Stroll along the Sitges Promenade",
+                  "category": "Leisure",
+                  "address": "Visit the beachfront cafés",
+                  "_tips": "Visit the beachfront cafés"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Explore Sitges Old Town",
+                  "category": "Leisure",
+                  "address": "Discover the charming narrow streets",
+                  "_tips": "Discover the charming narrow streets"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Relax on Sitges Beach",
+                  "category": "Leisure",
+                  "address": "Swim in the Mediterranean Sea",
+                  "_tips": "Swim in the Mediterranean Sea"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Enjoy tapas by the sea",
+                  "category": "Food",
+                  "address": "Try the fresh seafood dishes",
+                  "_tips": "Try the fresh seafood dishes"
+                }
+              ]
+            },
+            {
+              "day": 31,
+              "date": "2025-10-09",
+              "title": "Park de la Ciutadella and El Born",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Visit Park de la Ciutadella",
+                  "category": "Leisure",
+                  "address": "Row a boat on the lake",
+                  "_tips": "Row a boat on the lake"
+                },
+                {
+                  "time": "12:30 PM",
+                  "description": "Lunch at a local café",
+                  "category": "Food",
+                  "address": "Enjoy the outdoor seating",
+                  "_tips": "Enjoy the outdoor seating"
+                },
+                {
+                  "time": "2:00 PM",
+                  "description": "Explore Barcelona Zoo",
+                  "category": "Attraction",
+                  "address": "Great for families with kids",
+                  "_tips": "Great for families with kids"
+                },
+                {
+                  "time": "4:30 PM",
+                  "description": "Visit Museu Picasso",
+                  "category": "Attraction",
+                  "address": "Learn about Picasso's early works",
+                  "_tips": "Learn about Picasso's early works"
+                },
+                {
+                  "time": "7:00 PM",
+                  "description": "Tapas dinner in El Born district",
+                  "category": "Food",
+                  "address": "Experience the vibrant nightlife",
+                  "_tips": "Experience the vibrant nightlife"
+                }
+              ]
+            },
+            {
+              "day": 32,
+              "date": "2025-10-10",
+              "title": "Day at the Beach",
+              "_destination": "Barcelona",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Morning yoga on Barceloneta Beach",
+                  "category": "Leisure",
+                  "address": "Join a beachfront yoga class",
+                  "_tips": "Join a beachfront yoga class"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Swim in the Mediterranean Sea",
+                  "category": "Leisure",
+                  "address": "Cool off in the crystal-clear water",
+                  "_tips": "Cool off in the crystal-clear water"
+                },
+                {
+                  "time": "1:00 PM",
+                  "description": "Seafood lunch at a beachfront restaurant",
+                  "category": "Food",
+                  "address": "Try the paella",
+                  "_tips": "Try the paella"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Relax on the sandy beach",
+                  "category": "Leisure",
+                  "address": "Rent a sunbed and umbrella",
+                  "_tips": "Rent a sunbed and umbrella"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Beach volleyball with locals",
+                  "category": "Leisure",
+                  "address": "Join a friendly game",
+                  "_tips": "Join a friendly game"
+                }
+              ]
+            },
+            {
+              "day": 33,
+              "date": "2025-10-11",
+              "title": "Barcelona → Amsterdam",
+              "_destination": "Travel Day",
+              "activities": [
+                {
+                  "time": "8:00 AM",
+                  "description": "Check out and pack",
+                  "category": "Accommodation",
+                  "address": "Leave Barcelona accommodation",
+                  "_tips": "Leave Barcelona accommodation"
+                },
+                {
+                  "time": "10:00 AM",
+                  "description": "Depart for train station",
+                  "category": "Travel",
+                  "address": "Account for traffic and check-in time",
+                  "_tips": "Account for traffic and check-in time"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Train",
+                  "category": "Travel",
+                  "address": "Barcelona to Amsterdam - Seat reservations recommended",
+                  "_tips": "Barcelona to Amsterdam - Seat reservations recommended"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Arrival and transfer",
+                  "category": "Travel",
+                  "address": "Arrive in Amsterdam, head to accommodation",
+                  "_tips": "Arrive in Amsterdam, head to accommodation"
+                },
+                {
+                  "time": "6:00 PM",
+                  "description": "Hotel check-in",
+                  "category": "Accommodation",
+                  "address": "Get settled and oriented with the area",
+                  "_tips": "Get settled and oriented with the area"
+                },
+                {
+                  "time": "7:30 PM",
+                  "description": "Welcome dinner",
+                  "category": "Food",
+                  "address": "Leidsekruisstraat 21, 1017 RE Amsterdam",
+                  "venue_name": "The Pantry",
+                  "rating": 4.7,
+                  "_tips": "First meal in Amsterdam - try something local"
+                }
+              ]
+            },
+            {
+              "day": 34,
+              "date": "2025-10-12",
+              "title": "Exploring Amsterdam's Culture",
+              "_destination": "Amsterdam",
+              "activities": [
+                {
+                  "time": "9:00 AM",
+                  "description": "Visit Rijksmuseum",
+                  "category": "Attraction",
+                  "address": "Amstel 51, 1018 EH Amsterdam",
+                  "venue_name": "Amsterdam Museum",
+                  "rating": 4.3,
+                  "_tips": "Get the multimedia guide for a richer experience"
+                },
+                {
+                  "time": "11:30 AM",
+                  "description": "Explore Anne Frank House",
+                  "category": "Attraction",
+                  "address": "The Amsterdam Dungeon, Rokin 78, 1012 KW Amsterdam",
+                  "venue_name": "Dungeon Amsterdam",
+                  "rating": 4.5,
+                  "_tips": "Book tickets in advance to avoid long queues"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Lunch at Foodhallen Amsterdam",
+                  "category": "Food",
+                  "address": "Leliegracht 46, 1015 DH Amsterdam",
+                  "venue_name": "Black and Blue",
+                  "rating": 4.3,
+                  "_tips": "Try out multiple food stalls for a variety of flavors"
+                },
+                {
+                  "time": "3:00 PM",
+                  "description": "Stroll through Vondelpark",
+                  "category": "Leisure",
+                  "address": "1071 AA Amsterdam",
+                  "venue_name": "Vondelpark",
+                  "rating": 4.7,
+                  "_tips": "Rent a bike for a quicker exploration"
+                },
+                {
+                  "time": "5:00 PM",
+                  "description": "Shopping at Nine Streets",
+                  "category": "Leisure",
+                  "address": "Nieuwezijds Voorburgwal 182I, 1012 SJ Amsterdam",
+                  "venue_name": "Magna Plaza",
+                  "rating": 3.7,
+                  "_tips": "Discover unique boutiques and local designers"
+                }
+              ]
+            },
+            {
+              "day": 35,
+              "date": "2025-10-13",
+              "title": "Canal Cruise and Dutch Delights",
+              "_destination": "Amsterdam",
+              "activities": [
+                {
+                  "time": "10:00 AM",
+                  "description": "Take a Canal Cruise",
+                  "category": "Attraction",
+                  "address": "Overhoeksplein 51, 1031 KS Amsterdam",
+                  "venue_name": "This is Holland",
+                  "rating": 4.7,
+                  "_tips": "Opt for an open boat for better views"
+                },
+                {
+                  "time": "12:00 PM",
+                  "description": "Lunch at Pancakes Amsterdam",
+                  "category": "Food",
+                  "address": "Linnaeusstraat 88, 1092 CP Amsterdam",
+                  "venue_name": "The Cottage",
+                  "rating": 4.8,
+                  "_tips": "Try their traditional Dutch pancakes with various toppings"
+                },
+                {
+                  "time": "1:30 PM",
+                  "description": "Visit Van Gogh Museum",
+                  "category": "Attraction",
+                  "address": "Museumstraat 1, 1071 XX Amsterdam",
+                  "venue_name": "Rijksmuseum",
+                  "rating": 4.7,
+                  "_tips": "Don't miss the Sunflowers and Starry Night"
+                },
+                {
+                  "time": "4:00 PM",
+                  "description": "Explore Jordaan District",
+                  "category": "Attraction",
+                  "address": "Plantage Kerklaan 38-40, 1018 CZ Amsterdam",
+                  "venue_name": "ARTIS",
+                  "rating": 4.5,
+                  "_tips": "Walk along the picturesque canals and visit local art galleries"
+                },
+                {
+                  "time": "6:30 PM",
+                  "description": "Dinner at De Kas",
+                  "category": "Food",
+                  "address": "Watertorenplein 6, 1051 PA Amsterdam",
+                  "venue_name": "Café-Restaurant Amsterdam",
+                  "rating": 4.2,
+                  "_tips": "Savor farm-to-table dining in a greenhouse setting"
+                }
+              ]
+            }
+          ],
+          "quickTips": [
+            "Book accommodations in advance",
+            "Check visa requirements",
+            "Get travel insurance",
+            "Download offline maps",
+            "Keep digital copies of documents"
+          ],
+          "_costEstimate": {
+            "total": 10390,
+            "flights": 1840,
+            "accommodation": 5550,
+            "dailyExpenses": 3000,
+            "currency": "USD",
+            "breakdown": [
+              {
+                "type": "flight",
+                "description": "Chicago → London",
+                "amount": 700
+              },
+              {
+                "type": "flight",
+                "description": "London → Paris",
+                "amount": 120
+              },
+              {
+                "type": "flight",
+                "description": "Paris → Rome",
+                "amount": 120
+              },
+              {
+                "type": "flight",
+                "description": "Rome → Barcelona",
+                "amount": 80
+              },
+              {
+                "type": "flight",
+                "description": "Barcelona → Amsterdam",
+                "amount": 120
+              },
+              {
+                "type": "flight",
+                "description": "Amsterdam → Chicago",
+                "amount": 700
+              },
+              {
+                "type": "accommodation",
+                "description": "London (7 nights)",
+                "amount": 1400
+              },
+              {
+                "type": "accommodation",
+                "description": "Paris (7 nights)",
+                "amount": 1750
+              },
+              {
+                "type": "accommodation",
+                "description": "Rome (7 nights)",
+                "amount": 1050
+              },
+              {
+                "type": "accommodation",
+                "description": "Barcelona (7 nights)",
+                "amount": 1050
+              },
+              {
+                "type": "accommodation",
+                "description": "Amsterdam (2 nights)",
+                "amount": 300
+              }
+            ]
+          },
+          "_hotelOptions": {},
+          "_flightOptions": {}
+        },
+        "passed": false,
+        "errors": [
+          "Expected 30 days, got 35"
+        ],
+        "timestamp": "2025-09-09T19:29:27.360Z",
+        "responseTime": 30270,
+        "details": {
+          "actualDestination": "London, Paris, Rome, Barcelona, Amsterdam",
+          "actualDays": 35,
+          "actualActivities": 179
+        }
+      },
+      {
+        "testId": "over_limit_destinations",
+        "input": "From Miami for 3 weeks in London, Paris, Rome, Barcelona, Amsterdam, and Berlin",
+        "response": {
+          "destination": "Input Validation",
+          "title": "More Information Needed",
+          "itinerary": [],
+          "quickTips": [],
+          "needsMoreInfo": true,
+          "validationError": true,
+          "errorMessage": "Your search is too complex for our beta version. Try a simpler trip with fewer destinations!"
+        },
+        "passed": false,
+        "errors": [
+          "Destination \"Input Validation\" doesn't match expected: ",
+          "Insufficient quick tips (0 < 3)"
+        ],
+        "timestamp": "2025-09-09T19:29:27.363Z",
+        "responseTime": 3,
+        "details": {
+          "actualDestination": "Input Validation",
+          "actualDays": 0,
+          "actualActivities": 0
+        }
+      },
+      {
+        "testId": "over_limit_days",
+        "input": "From Seattle for 35 days exploring Europe",
+        "response": {
+          "destination": "Input Validation",
+          "title": "More Information Needed",
+          "itinerary": [],
+          "quickTips": [],
+          "needsMoreInfo": true,
+          "validationError": true,
+          "errorMessage": "Your search is too complex for our beta version. Try a simpler trip with fewer destinations!"
+        },
+        "passed": false,
+        "errors": [
+          "Destination \"Input Validation\" doesn't match expected: ",
+          "Insufficient quick tips (0 < 3)"
+        ],
+        "timestamp": "2025-09-09T19:29:27.366Z",
+        "responseTime": 2,
+        "details": {
+          "actualDestination": "Input Validation",
+          "actualDays": 0,
+          "actualActivities": 0
+        }
+      }
+    ]
   }
 ]

@@ -1,13 +1,31 @@
 import { DayItinerary } from './day-schedule';
 import { CoworkingSection } from './coworking-spots';
 import { TripActions } from './trip-tips';
+import { ExportMenu } from './export-menu';
+import { ItineraryLoadingSkeleton } from './loading-skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Map } from 'lucide-react';
 import Image from 'next/image';
 import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
 import { logger } from '@/lib/logger';
+import dynamic from 'next/dynamic';
+import { Button } from '@/components/ui/button';
+
+// Dynamically import map to avoid SSR issues
+const ItineraryMap = dynamic(
+  () => import('@/components/map/itinerary-map').then(mod => ({ default: mod.ItineraryMap })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-[400px] bg-slate-800/50 rounded-lg flex items-center justify-center">
+        <Map className="h-8 w-8 text-slate-500 animate-pulse" />
+      </div>
+    )
+  }
+);
 
 interface ItineraryPanelProps {
   itinerary: GeneratePersonalizedItineraryOutput & {
@@ -28,10 +46,34 @@ interface ItineraryPanelProps {
   };
   onRefine?: (feedback: string) => void;
   isRefining?: boolean;
+  showMapToggle?: boolean;
 }
 
-export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
+export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: ItineraryPanelProps) {
+  // Show loading skeleton while refining
+  if (isRefining) {
+    return (
+      <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
+        <ItineraryLoadingSkeleton />
+      </div>
+    );
+  }
+
+  // Show empty state if no itinerary
+  if (!itinerary || !itinerary.itinerary || itinerary.itinerary.length === 0) {
+    return (
+      <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
+        <EmptyState 
+          type="no-itinerary"
+          title="Your Journey Awaits"
+          description="Start a conversation to create your personalized travel itinerary."
+        />
+      </div>
+    );
+  }
   const [destinationImages, setDestinationImages] = useState<Record<string, PexelsImage[]>>({});
+  const [showMap, setShowMap] = useState(false);
+  const [selectedMapDay, setSelectedMapDay] = useState<number | undefined>(undefined);
   
   // Extract all activities for coworking section
   const allActivities = itinerary.itinerary.flatMap(day => day.activities);
@@ -215,24 +257,42 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
       {/* Trip Overview */}
-      <div className="p-6 border-b border-slate-600/50">
+      <div className="p-4 md:p-6 border-b border-slate-600/50">
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-2xl font-medium mb-2 text-white">{itinerary.title}</h1>
-          <p className="text-slate-400 mb-4">{tripDuration}</p>
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-3">
+            <div>
+              <h1 className="text-xl md:text-2xl font-medium mb-2 text-white">{itinerary.title}</h1>
+              <p className="text-slate-400 text-sm md:text-base">{tripDuration}</p>
+            </div>
+            <div className="flex gap-2">
+              {showMapToggle && (
+                <Button
+                  onClick={() => setShowMap(!showMap)}
+                  variant={showMap ? "default" : "secondary"}
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Map className="h-4 w-4" />
+                  {showMap ? 'Hide Map' : 'Show Map'}
+                </Button>
+              )}
+              <ExportMenu itinerary={itinerary} className="self-start" />
+            </div>
+          </div>
           
-          <div className="flex flex-wrap gap-2 mb-6">
-            <span className="px-3 py-1 bg-slate-700/50 rounded-full text-sm text-slate-300">
+          <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
+            <span className="px-2 py-1 md:px-3 bg-slate-700/50 rounded-full text-xs md:text-sm text-slate-300">
               {itinerary.destination}
             </span>
-            <span className="px-3 py-1 bg-slate-700/50 rounded-full text-sm text-slate-300">
+            <span className="px-2 py-1 md:px-3 bg-slate-700/50 rounded-full text-xs md:text-sm text-slate-300">
               {itinerary.itinerary.length} days
             </span>
-            <span className="px-3 py-1 bg-slate-700/50 rounded-full text-sm text-slate-300">
+            <span className="px-2 py-1 md:px-3 bg-slate-700/50 rounded-full text-xs md:text-sm text-slate-300">
               {budgetLevel}
             </span>
             {itinerary._costEstimate && (
@@ -357,6 +417,62 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
               );
             })}
           </div>
+
+          {/* Interactive Map View - Only show if map toggle is enabled */}
+          {showMapToggle && showMap && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-6"
+            >
+              <div className="rounded-xl border border-slate-700 overflow-hidden p-2">
+                <ItineraryMap
+                  itinerary={{
+                    ...itinerary,
+                    days: locations.length > 1 
+                      ? (daysByLocation[selectedLocation]?.days || itinerary.itinerary)
+                      : itinerary.itinerary
+                  }}
+                  selectedDay={selectedMapDay}
+                  onDaySelect={(day) => {
+                    setSelectedMapDay(day);
+                    // Scroll to the selected day in the itinerary
+                    const dayElement = document.getElementById(`day-${day}`);
+                    if (dayElement) {
+                      dayElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                  }}
+                  className="h-[400px] md:h-[500px]"
+                />
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant={selectedMapDay === undefined ? "default" : "outline"}
+                  onClick={() => setSelectedMapDay(undefined)}
+                  className="text-xs"
+                >
+                  All Days
+                </Button>
+                {(locations.length > 1 
+                  ? (daysByLocation[selectedLocation]?.days || itinerary.itinerary)
+                  : itinerary.itinerary
+                ).map((day) => (
+                  <Button
+                    key={`day-btn-${day.day}`}
+                    size="sm"
+                    variant={selectedMapDay === day.day ? "default" : "outline"}
+                    onClick={() => setSelectedMapDay(day.day)}
+                    className="text-xs"
+                  >
+                    Day {day.day}
+                  </Button>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
@@ -439,13 +555,14 @@ export function ItineraryPanel({ itinerary }: ItineraryPanelProps) {
         
         <div className="space-y-6">
           {(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map((day, index) => (
-            <DayItinerary
-              key={`${selectedLocation}-day-${day.day}-${index}`}
-              day={day.day}
-              date={day.date}
-              activities={day.activities}
-              dayIndex={index}
-            />
+            <div key={`${selectedLocation}-day-${day.day}-${index}`} id={`day-${day.day}`}>
+              <DayItinerary
+                day={day.day}
+                date={day.date}
+                activities={day.activities}
+                dayIndex={index}
+              />
+            </div>
           ))}
         </div>
 

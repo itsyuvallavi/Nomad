@@ -4,7 +4,7 @@
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogCategory = 'AI' | 'API' | 'IMAGE' | 'WEATHER' | 'PLACES' | 'SYSTEM' | 'USER';
+export type LogCategory = 'AI' | 'API' | 'IMAGE' | 'WEATHER' | 'PLACES' | 'SYSTEM' | 'USER' | 'DRAFT' | 'RETRY' | 'ERROR' | 'CIRCUIT' | 'Transport' | 'Amadeus' | 'Polygon';
 
 interface LogEntry {
   timestamp: string;
@@ -108,6 +108,13 @@ class Logger {
       PLACES: '📍',
       SYSTEM: '⚙️',
       USER: '👤',
+      DRAFT: '📋',
+      RETRY: '🔁',
+      ERROR: '❌',
+      CIRCUIT: '🔋',
+      Transport: '✈️',
+      Amadeus: '✈️',
+      Polygon: '📊'
     };
     return emojis[category] || '📝';
   }

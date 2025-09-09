@@ -275,7 +275,7 @@ async function generateItineraryStructure(prompt: string, parsedTrip: any): Prom
     }
   }`;
 
-  const completion = await openai.chat.completions.create({
+  const completion = await openai!.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: systemPrompt },
@@ -347,16 +347,31 @@ export async function generateEnhancedItinerary(
     hasWeather: weatherData.size > 0
   });
   
-  return {
-    origin: parsedTrip.origin || '',
+  const result: any = {
     destination: itinerary.destination,
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(Date.now() + parsedTrip.totalDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    tripDuration: `${parsedTrip.totalDays} days`,
     title: itinerary.title,
     itinerary: itinerary.itinerary,
-    packingSuggestions: itinerary.packing_suggestions || [],
-    budgetEstimate: itinerary.budget_estimate || {},
-    missingInfo: parsedTrip.origin ? [] : ['origin']
+    quickTips: generateQuickTips([itinerary.destination])
   };
+  
+  // Add extended metadata
+  result.origin = parsedTrip.origin || '';
+  result.startDate = new Date().toISOString().split('T')[0];
+  result.endDate = new Date(Date.now() + parsedTrip.totalDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  result.tripDuration = `${parsedTrip.totalDays} days`;
+  result.packingSuggestions = itinerary.packing_suggestions || [];
+  result.budgetEstimate = itinerary.budget_estimate || {};
+  result.missingInfo = parsedTrip.origin ? [] : ['origin'];
+  
+  return result;
+}
+
+function generateQuickTips(destinations: string[]): string[] {
+  return [
+    'Book accommodations in advance',
+    'Check visa requirements',
+    'Get travel insurance',
+    'Download offline maps',
+    'Keep digital copies of documents'
+  ];
 }

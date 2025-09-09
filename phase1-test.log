@@ -1,0 +1,222 @@
+🤖 [AI] Initializing OpenAI client { keyPrefix: 'sk-proj-Nz' }
+🔍 Text Processing Benchmark Tool
+==================================
+Phase: phase1-complete
+Time: 2025-09-09T19:51:18.513Z
+
+🚀 Starting Text Processing Benchmark - Phase: phase1-complete
+
+================================================================================
+
+📊 Testing Category: DATE-PARSING
+------------------------------------------------------------
+🤖 [AI] OpenAI client initialized 
+🤖 [AI] Parsing destinations from user input { inputLength: 23 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris next week (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Enhanced parsing starting { inputLength: 23 }
+🤖 [AI] Enhanced parsing complete {
+  processingTime: 26,
+  confidence: 'high',
+  destinationCount: 1,
+  totalDays: 7,
+  hasOrigin: true
+}
+🤖 [AI] Trip complexity validated - proceeding with generation 
+🤖 [AI] Using ENHANCED generation with multiple APIs { hasGoogle: true, hasWeather: true, hasGemini: true }
+🤖 [AI] 🚀 Starting ULTRA-FAST itinerary generation 
+🤖 [AI] Fast extraction completed in 842ms 
+🤖 [AI] Ultra-fast generation failed { error: 'No destinations found in prompt' }
+🤖 [AI] Enhanced generation failed, falling back to standard { error: 'No destinations found in prompt' }
+🤖 [AI] Using unified OpenAI generation 
+🤖 [AI] Parsing destinations from user input { inputLength: 23 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris next week (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Using simple strategy 
+🤖 [AI] Generation metrics { strategy: 'simple', duration: '36.52s', success: true }
+🤖 [AI] Unified OpenAI generation successful 
+🤖 [AI] Generation metrics {
+  totalGenerations: 1,
+  averageDuration: 36518,
+  successRate: 1,
+  byStrategy: { fast: [], chunked: [], simple: [ [Object] ] }
+}
+✅ date_1: Relative date - next week [37440ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 38 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Tokyo mid (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Enhanced parsing starting { inputLength: 38 }
+🤖 [AI] Enhanced parsing complete {
+  processingTime: 15,
+  confidence: 'high',
+  destinationCount: 1,
+  totalDays: 7,
+  hasOrigin: true
+}
+🤖 [AI] Trip complexity validated - proceeding with generation 
+🤖 [AI] Using ENHANCED generation with multiple APIs { hasGoogle: true, hasWeather: true, hasGemini: true }
+🤖 [AI] 🚀 Starting ULTRA-FAST itinerary generation 
+🤖 [AI] Fast extraction completed in 699ms 
+🤖 [AI] Ultra-fast generation failed { error: 'No destinations found in prompt' }
+🤖 [AI] Enhanced generation failed, falling back to standard { error: 'No destinations found in prompt' }
+🤖 [AI] Using unified OpenAI generation 
+🤖 [AI] Parsing destinations from user input { inputLength: 38 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Tokyo mid (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Using simple strategy 
+🤖 [AI] Generation metrics { strategy: 'simple', duration: '53.85s', success: true }
+🤖 [AI] Unified OpenAI generation successful 
+🤖 [AI] Generation metrics {
+  totalGenerations: 2,
+  averageDuration: 45183,
+  successRate: 1,
+  byStrategy: { fast: [], chunked: [], simple: [ [Object], [Object] ] }
+}
+✅ date_2: Partial date - mid-month [54580ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 30 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'New York (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Enhanced parsing starting { inputLength: 30 }
+🤖 [AI] Enhanced parsing complete {
+  processingTime: 2,
+  confidence: 'high',
+  destinationCount: 1,
+  totalDays: 12,
+  hasOrigin: false
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ date_3: Holiday reference [11ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 25 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Total days calculated is 0, defaulting to 7 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 0,
+  destinations: [],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Trip validation - needs more info {
+  reason: `Please tell me where you'd like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"`
+}
+❌ date_4: Seasonal date [8ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 42 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Miami starting tomorrow (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Enhanced parsing starting { inputLength: 42 }
+🤖 [AI] Enhanced parsing complete {
+  processingTime: 1,
+  confidence: 'high',
+  destinationCount: 1,
+  totalDays: 3,
+  hasOrigin: true
+}
+🤖 [AI] Trip complexity validated - proceeding with generation 
+🤖 [AI] Using ENHANCED generation with multiple APIs { hasGoogle: true, hasWeather: true, hasGemini: true }
+🤖 [AI] 🚀 Starting ULTRA-FAST itinerary generation 
+🤖 [AI] Fast extraction completed in 421ms 
+🤖 [AI] Ultra-fast generation failed { error: 'No destinations found in prompt' }
+🤖 [AI] Enhanced generation failed, falling back to standard { error: 'No destinations found in prompt' }
+🤖 [AI] Using unified OpenAI generation 
+🤖 [AI] Parsing destinations from user input { inputLength: 42 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Miami starting tomorrow (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Using simple strategy 
+🤖 [AI] Generation metrics { strategy: 'simple', duration: '16.91s', success: true }
+🤖 [AI] Unified OpenAI generation successful 
+🤖 [AI] Generation metrics {
+  totalGenerations: 3,
+  averageDuration: 35760.333333333336,
+  successRate: 1,
+  byStrategy: { fast: [], chunked: [], simple: [ [Object], [Object], [Object] ] }
+}
+✅ date_5: Immediate travel - tomorrow [17346ms]
+
+📊 Testing Category: VALIDATION
+------------------------------------------------------------
+🤖 [AI] Parsing destinations from user input { inputLength: 49 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Total days calculated is 0, defaulting to 7 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 0,
+  destinations: [],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Trip validation - needs more info {
+  reason: `Please tell me where you'd like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"`
+}
+❌ val_1: XSS attempt in destination [37ms]
+   └─ Errors: Input should have been rejected but was processed
+🤖 [AI] Parsing destinations from user input { inputLength: 49 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Enhanced parsing starting { inputLength: 49 }
+🤖 [AI] Enhanced parsing complete {
+  processingTime: 26,
+  confidence: 'medium',
+  destinationCount: 0,
+  totalDays: 7,
+  hasOrigin: true
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 49 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ val_2: SQL injection attempt [73ms]
+   └─ Errors: Input should have been rejected but was processed

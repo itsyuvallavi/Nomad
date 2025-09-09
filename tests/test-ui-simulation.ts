@@ -9,7 +9,7 @@ dotenv.config();
 
 import fs from 'fs';
 import path from 'path';
-import { generatePersonalizedItinerary } from './src/ai/flows/generate-personalized-itinerary';
+import { generatePersonalizedItinerary } from '../src/ai/flows/generate-personalized-itinerary';
 
 interface UITestResult {
   testId: string;
@@ -162,15 +162,15 @@ async function simulateUIInteraction(
       result.apiTracking.apisUsed.push('Gemini/OpenAI-Generation');
       
       console.log('✅ GENERATION SUCCESSFUL');
-      console.log(`   Title: ${response.data.title}`);
-      console.log(`   Destination: ${response.data.destination}`);
-      console.log(`   Duration: ${response.data.duration}`);
-      console.log(`   Days: ${response.data.days.length}`);
+      console.log(`   Title: ${response.title}`);
+      console.log(`   Destination: ${response.destination}`);
+      console.log(`   Duration: ${response.itinerary.length} days`);
+      console.log(`   Days: ${response.itinerary.length}`);
       console.log(`   Activities: ${result.uiMetrics.totalActivities}`);
       console.log(`   Generation Time: ${(result.response.generationTime / 1000).toFixed(2)}s`);
     } else {
       result.response.success = false;
-      result.response.error = response.error || 'Unknown error';
+      result.response.error = 'No itinerary generated';
       console.log(`❌ GENERATION FAILED: ${result.response.error}`);
     }
     

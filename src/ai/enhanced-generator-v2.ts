@@ -76,7 +76,7 @@ async function generateItineraryWithStructuredPrompt(
   - Include 4-6 activities per day
   - Ensure each day has a unique title and theme`;
 
-  const completion = await openai.chat.completions.create({
+  const completion = await openai!.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: systemPrompt },
@@ -253,19 +253,23 @@ export async function generateEnhancedItinerary(
     const startDate = extractedInfo.startDate || new Date().toISOString().split('T')[0];
     const endDate = new Date(Date.now() + extractedInfo.totalDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    return {
-      origin: `${extractedInfo.origin.city}${extractedInfo.origin.country ? ', ' + extractedInfo.origin.country : ''}`,
+    const result: any = {
       destination: itinerary.destination || 'Multi-City Trip',
-      startDate,
-      endDate,
-      tripDuration: `${extractedInfo.totalDays} days`,
       title: itinerary.title,
       itinerary: itinerary.itinerary,
-      packingSuggestions: itinerary.packing_suggestions || [],
-      budgetEstimate: itinerary.budget_estimate || {},
-      missingInfo: [],
       quickTips: itinerary.quickTips || []
     };
+    
+    // Add extended metadata
+    result.origin = `${extractedInfo.origin.city}${extractedInfo.origin.country ? ', ' + extractedInfo.origin.country : ''}`;
+    result.startDate = startDate;
+    result.endDate = endDate;
+    result.tripDuration = `${extractedInfo.totalDays} days`;
+    result.packingSuggestions = itinerary.packing_suggestions || [];
+    result.budgetEstimate = itinerary.budget_estimate || {};
+    result.missingInfo = [];
+    
+    return result;
     
   } catch (error: any) {
     logger.error('AI', 'Enhanced V2 generation failed', { error: error.message });

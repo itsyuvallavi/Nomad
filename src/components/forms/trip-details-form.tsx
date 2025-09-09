@@ -112,7 +112,7 @@ export default function ItineraryForm({
     <div className="relative max-w-2xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-          <div className="bg-slate-700/80 backdrop-blur-sm rounded-2xl px-4 py-3 flex items-center gap-3">
+          <div className="bg-slate-700/80 backdrop-blur-sm rounded-2xl px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 md:gap-3">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -120,10 +120,10 @@ export default function ItineraryForm({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="w-8 h-8 text-slate-400 hover:text-white transition-colors flex-shrink-0 rounded-full hover:bg-slate-600"
+                    className="min-w-[44px] min-h-[44px] text-slate-400 hover:text-white transition-colors flex-shrink-0 rounded-full hover:bg-slate-600 flex items-center justify-center"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <Plus size={16} />
+                    <Plus size={18} />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="bg-slate-800 border-slate-700 text-white">
@@ -161,7 +161,7 @@ export default function ItineraryForm({
                       )}
                       <Input
                         placeholder={placeholder}
-                        className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base md:text-sm"
                         autoComplete="off"
                         {...field}
                       />
@@ -192,17 +192,17 @@ export default function ItineraryForm({
                   type="submit"
                   variant="ghost"
                   size="icon"
-                  className="w-8 h-8 text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600"
+                  className="min-w-[44px] min-h-[44px] text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600 flex items-center justify-center"
                   disabled={isSubmitting}
                 >
-                  <ArrowUp size={16} />
+                  <ArrowUp size={18} />
                 </Button>
               ) : (
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="w-8 h-8 text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600"
+                  className="min-w-[44px] min-h-[44px] text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600 flex items-center justify-center"
                 >
                   <Mic size={16} />
                 </Button>

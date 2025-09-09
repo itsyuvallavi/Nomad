@@ -1,0 +1,354 @@
+🤖 [AI] Initializing OpenAI client { keyPrefix: 'sk-proj-Nz' }
+🔍 Text Processing Benchmark Tool
+==================================
+Phase: baseline
+Time: 2025-09-09T19:43:58.791Z
+
+🚀 Starting Text Processing Benchmark - Phase: baseline
+
+================================================================================
+
+📊 Testing Category: DATE-PARSING
+------------------------------------------------------------
+🤖 [AI] OpenAI client initialized 
+🤖 [AI] Parsing destinations from user input { inputLength: 23 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris next week (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 23 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris next week (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ date_1: Relative date - next week [69ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 38 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Tokyo mid (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 38 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Tokyo mid (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ date_2: Partial date - mid-month [6ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 30 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'New York (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 30 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'New York (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ date_3: Holiday reference [3ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 25 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Total days calculated is 0, defaulting to 7 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 0,
+  destinations: [],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Trip validation - needs more info {
+  reason: `Please tell me where you'd like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"`
+}
+❌ date_4: Seasonal date [4ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 42 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Miami starting tomorrow (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 42 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Miami starting tomorrow (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ date_5: Immediate travel - tomorrow [4ms]
+
+📊 Testing Category: VALIDATION
+------------------------------------------------------------
+🤖 [AI] Parsing destinations from user input { inputLength: 49 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Total days calculated is 0, defaulting to 7 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 0,
+  destinations: [],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Trip validation - needs more info {
+  reason: `Please tell me where you'd like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"`
+}
+❌ val_1: XSS attempt in destination [4ms]
+   └─ Errors: Input should have been rejected but was processed
+🤖 [AI] Parsing destinations from user input { inputLength: 49 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 49 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Paris (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ val_2: SQL injection attempt [6ms]
+   └─ Errors: Input should have been rejected but was processed
+🤖 [AI] Parsing destinations from user input { inputLength: 42 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Bali for (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 42 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Bali for (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ val_3: Malformed budget input [18ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 27 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Mars (99999 days)' ],
+  returnTo: '',
+  totalDays: 99999
+}
+🤖 [AI] Trip validation - needs more info {
+  reason: 'Trip too long: 99999 days exceeds maximum of 30 days. Please plan a shorter trip.'
+}
+❌ val_4: Invalid duration [2ms]
+   └─ Errors: Input should have been rejected but was processed
+🤖 [AI] Parsing destinations from user input { inputLength: 47 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Disney World (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 47 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Disney World (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ val_5: Complex traveler count [13ms]
+
+📊 Testing Category: ENTITY-EXTRACTION
+------------------------------------------------------------
+🤖 [AI] Parsing destinations from user input { inputLength: 39 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Bali and Thailand (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 39 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Bali and Thailand (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ entity_1: Multi-destination extraction [7ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 63 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Total days calculated is 0, defaulting to 7 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 0,
+  destinations: [],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Trip validation - needs more info {
+  reason: `Please tell me where you'd like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"`
+}
+❌ entity_2: Multiple countries with duration [15ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 45 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'San Francisco from May (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 45 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'San Francisco from May (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ entity_3: Date range extraction [12ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 62 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Iceland northern lights in February (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 62 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Iceland northern lights in February (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ entity_4: Group size and activity extraction [14ms]
+
+📊 Testing Category: COMPLEX-REQUEST
+------------------------------------------------------------
+🤖 [AI] Parsing destinations from user input { inputLength: 114 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Lisbon starting mid (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 114 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Lisbon starting mid (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ complex_1: Workation with specific requirements [26ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 94 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Total days calculated is 0, defaulting to 7 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 0,
+  destinations: [],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Trip validation - needs more info {
+  reason: `Please tell me where you'd like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"`
+}
+❌ complex_2: Multi-city with preferences [2ms]
+🤖 [AI] Parsing destinations from user input { inputLength: 96 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Orlando during spring break, need accommodation for (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Parsing destinations from user input { inputLength: 96 }
+🤖 [AI] Could not extract origin from input, will ask user 
+🤖 [AI] Destination parsing complete {
+  origin: '',
+  destinationCount: 1,
+  destinations: [ 'Orlando during spring break, need accommodation for (7 days)' ],
+  returnTo: '',
+  totalDays: 7
+}
+🤖 [AI] Origin location not provided - throwing error for UI 
+❌ complex_3: Large group with location preferences [2ms]
+
+📝 Results saved to benchmark-results/baseline_1757447038800.json
+
+================================================================================
+📊 BENCHMARK SUMMARY
+================================================================================
+
+✅ Success Rate: 0/17 (0.0%)
+⏱️  Average Processing Time: 12ms
+🤖 Average AI Response Time: 14ms
+
+📈 Category Breakdown:
+------------------------------------------------------------
+date-parsing         0/5 (0.0%) - Avg: 17ms
+validation           0/5 (0.0%) - Avg: 9ms
+entity-extraction    0/4 (0.0%) - Avg: 12ms
+complex-request      0/3 (0.0%) - Avg: 10ms
+
+✅ Benchmark complete!
+

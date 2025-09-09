@@ -1,4 +1,4 @@
-import { parseDestinations } from './src/ai/utils/destination-parser';
+import { parseDestinations } from '../src/ai/utils/destination-parser';
 
 const testPrompt = "Plan 3 weeks in Japan from Los Angeles. Visit Tokyo, Kyoto, and Osaka. I want to experience culture, food, and technology.";
 

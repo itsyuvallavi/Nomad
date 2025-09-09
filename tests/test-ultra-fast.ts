@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { generatePersonalizedItinerary } from './src/ai/flows/generate-personalized-itinerary';
+import { generatePersonalizedItinerary } from '../src/ai/flows/generate-personalized-itinerary';
 
 async function testUltraFast() {
   console.log('🚀 Testing ULTRA-FAST Itinerary Generation\n');

@@ -8,11 +8,11 @@ dotenv.config();
 
 import fs from 'fs';
 import path from 'path';
-import { generatePersonalizedItinerary } from './src/ai/flows/generate-personalized-itinerary';
-import { searchGooglePlaces } from './src/lib/api/google-places';
-import { getWeatherForecast } from './src/lib/api/weather';
-import { estimateFlightCost, estimateHotelCost } from './src/ai/utils/openai-travel-costs';
-import { parseDestinations } from './src/ai/utils/destination-parser';
+import { generatePersonalizedItinerary } from '../src/ai/flows/generate-personalized-itinerary';
+import { searchGooglePlaces } from '../src/lib/api/google-places';
+import { getWeatherForecast } from '../src/lib/api/weather';
+import { estimateFlightCost, estimateHotelCost } from '../src/ai/utils/openai-travel-costs';
+import { parseDestinations } from '../src/ai/utils/destination-parser';
 
 interface WorkationTestResult {
   testId: string;

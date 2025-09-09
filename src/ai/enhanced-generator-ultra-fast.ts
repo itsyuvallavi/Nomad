@@ -727,10 +727,10 @@ export async function generateUltraFastItinerary(
       estimateTripCostOpenAI(extracted.origin || 'Unknown', destinations, 1)
         .then(result => ({
           total: result.totalEstimate.midRange,
-          flights: result.flights.reduce((sum, f) => sum + (f.price?.economy || 0), 0),
-          accommodation: destinations.reduce((sum, d, i) => 
+          flights: result.flights.reduce((sum: number, f: any) => sum + (f.price?.economy || 0), 0),
+          accommodation: destinations.reduce((sum: number, d: any, i: number) => 
             sum + (result.hotels[d.city]?.pricePerNight?.midRange || 200) * d.days, 0),
-          dailyExpenses: destinations.reduce((sum, d) => sum + (100 * d.days), 0),
+          dailyExpenses: destinations.reduce((sum: number, d: any) => sum + (100 * d.days), 0),
           currency: 'USD',
           breakdown: [
             ...result.flights.map(f => ({
@@ -738,7 +738,7 @@ export async function generateUltraFastItinerary(
               description: `${f.origin} → ${f.destination}`,
               amount: f.price?.economy || 0
             })),
-            ...destinations.map(d => ({
+            ...destinations.map((d: any) => ({
               type: 'accommodation',
               description: `${d.city} (${d.days} nights)`,
               amount: (result.hotels[d.city]?.pricePerNight?.midRange || 200) * d.days
@@ -1130,12 +1130,16 @@ export async function generateUltraFastItinerary(
       ? destinations.map((d: any) => d.city).join(', ')
       : destinations[0].city;
     
-    return {
+    const result: any = {
       destination: destinationString,
       title,
       itinerary: formattedDays,
-      quickTips: generateQuickTips(destinations),
-      _costEstimate: tripCostEstimate ? {
+      quickTips: generateQuickTips(destinations)
+    };
+    
+    // Add metadata as extended properties
+    if (tripCostEstimate) {
+      result._costEstimate = {
         total: Math.round(tripCostEstimate.total),
         flights: Math.round(tripCostEstimate.flights),
         accommodation: Math.round(tripCostEstimate.accommodation),
@@ -1145,10 +1149,13 @@ export async function generateUltraFastItinerary(
           ...item,
           amount: Math.round(item.amount)
         }))
-      } : null,
-      _hotelOptions: hotelData,
-      _flightOptions: flightData
-    };
+      };
+    }
+    
+    result._hotelOptions = hotelData;
+    result._flightOptions = flightData;
+    
+    return result;
     
   } catch (error: any) {
     logger.error('AI', 'Ultra-fast generation failed', { error: error.message });
