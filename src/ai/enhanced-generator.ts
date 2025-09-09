@@ -61,7 +61,7 @@ export function validateTripComplexity(prompt: string): { valid: boolean; error?
   if (parsed.destinations.length === 0) {
     return {
       valid: false,
-      error: 'No valid destinations found. Please specify at least one destination.'
+      error: 'Please tell me where you\'d like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"'
     };
   }
   

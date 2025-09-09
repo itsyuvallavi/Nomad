@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import { UserProvider } from '@auth0/nextjs-auth0/client';
+// import { UserProvider } from '@auth0/nextjs-auth0/client'; // Disabled - using mock auth
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,9 +21,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
-        <UserProvider>
-          {children}
-        </UserProvider>
+        {children}
       </body>
     </html>
   );

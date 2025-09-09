@@ -28,7 +28,7 @@ export interface ParsedTrip {
 function parseDuration(durationText: string): number {
   const text = durationText.toLowerCase().trim();
   
-  // Handle "a week" or "one week"
+  // Handle "a week" or "one week" or "two weeks"
   if (text.includes('week')) {
     const weekMatch = text.match(/(\d+|a|one|two|three|four)\s*weeks?/);
     if (weekMatch) {
@@ -39,7 +39,15 @@ function parseDuration(durationText: string): number {
       if (num === 'four') return 28;
       return parseInt(num) * 7;
     }
+    // Also check for just "two weeks" etc without the match
+    if (text === 'two weeks') return 14;
     return 7; // default to 1 week
+  }
+  
+  // Handle "X-day" format (e.g., "10-day")
+  const hyphenDayMatch = text.match(/(\d+)[\s-]*days?/);
+  if (hyphenDayMatch) {
+    return parseInt(hyphenDayMatch[1]);
   }
   
   // Handle "X days"
@@ -68,18 +76,46 @@ function parseDuration(durationText: string): number {
  * Extract origin location from user input
  */
 function extractOrigin(input: string): string {
-  // Common patterns for origin
+  // Special case for known city names with spaces
+  const knownCities = [
+    'Los Angeles', 'New York', 'San Francisco', 'Las Vegas', 'San Diego',
+    'Buenos Aires', 'Rio de Janeiro', 'Mexico City', 'Hong Kong', 'New Delhi',
+    'Kuala Lumpur', 'Cape Town', 'St Petersburg', 'St Louis', 'Salt Lake City',
+    'Washington DC', 'New Orleans', 'El Paso', 'Oklahoma City'
+  ];
+  
+  // Check for known cities first - look for "from [City Name]"
+  for (const city of knownCities) {
+    const regex = new RegExp(`from\\s+${city.replace(' ', '\\s+')}`, 'i');
+    if (regex.test(input)) {
+      logger.info('AI', 'Extracted known city origin', { origin: city });
+      return city;
+    }
+  }
+  
+  // Common patterns for origin - expanded to handle more cases
   const patterns = [
-    /from\s+([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|next|this|for))/i,
-    /departing\s+(?:from\s+)?([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|for))/i,
-    /leaving\s+(?:from\s+)?([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|for))/i,
-    /starting\s+(?:from|in)\s+([A-Z][a-zA-Z\s,]+?)(?=\s+(?:to|on|in|for))/i,
+    /from\s+([A-Z][a-zA-Z\s]+?)(?:\.|,|\s+(?:to|on|in|next|this|for|plan|visit))/i,
+    /\s+from\s+([A-Z][a-zA-Z\s]+?)(?:\.|,|$)/i,  // Handle "from X" at end of sentence
+    /departing\s+(?:from\s+)?([A-Z][a-zA-Z\s]+?)(?=,|\s+(?:to|on|in|for))/i,
+    /leaving\s+(?:from\s+)?([A-Z][a-zA-Z\s]+?)(?=,|\s+(?:to|on|in|for))/i,
+    /starting\s+(?:from|in)\s+([A-Z][a-zA-Z\s]+?)(?=,|\s+(?:to|on|in|for))/i,
   ];
   
   for (const pattern of patterns) {
     const match = input.match(pattern);
     if (match) {
-      return match[1].trim().replace(/,$/, '');
+      // Clean up the match
+      let origin = match[1].trim()
+        .replace(/,$/, '')
+        .replace(/\.$/, '')
+        .replace(/\s+(visit|Visit|to|To|next|this).*$/, ''); // Remove trailing words
+        
+      // Don't return if it's too short or contains unwanted words
+      if (origin.length > 2 && !origin.match(/^(visit|to|in|for|next|this)$/i)) {
+        logger.info('AI', 'Extracted origin via pattern', { origin, pattern: pattern.source });
+        return origin;
+      }
     }
   }
   
@@ -122,29 +158,157 @@ export function parseDestinations(input: string): ParsedTrip {
   // Patterns to match destinations with durations
   const patterns = [
     // CRITICAL: "3 days in London" - Most common pattern, MUST be first
-    /(\d+\s*(?:days?|nights?))\s+in\s+([A-Z][a-zA-Z\s,]+?)(?:,|then|after|and|before|\.|$)/gi,
-    // "a week in London" / "one week in London"  
-    /((?:a|an|one|two|three|four)\s+weeks?)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?:,|then|after|and|before|\.|$)/gi,
-    // "weekend in Paris"
-    /(weekend)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?:,|then|after|and|before|\.|$)/gi,
-    // "visit Zimbabwe for a week"
-    /(?:visit|plan|trip to|explore)\s+([A-Z][a-zA-Z\s,]+?)\s+for\s+([\w\s]+?)(?:,|then|after|and|before|\.|$)/gi,
+    // Updated to stop at "from" to avoid capturing origin info
+    /(\d+\s*(?:days?|nights?))\s+in\s+([A-Z][a-zA-Z\s,]+?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
+    // "a week in London" / "one week in London" - stop at "from"
+    /((?:a|an|one|two|three|four)\s+weeks?)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
+    // "weekend in Paris" - stop at "from"
+    /(weekend)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
+    // "visit Zimbabwe for a week" - more specific to avoid false matches
+    /(?:visit|explore)\s+([A-Z][a-zA-Z\s,]+?)\s+for\s+((?:\d+\s*)?(?:days?|weeks?))(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
     // "spend a week in Madagascar"
-    /spend\s+([\w\s]+?)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?:,|then|after|and|before|\.|$)/gi,
-    // "Zimbabwe for 7 days"
-    /(?:^|[,\s])([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\s+for\s+([\d\w\s]+?days?)(?:,|then|after|and|before|\.|$)/gi,
+    /spend\s+([\w\s]+?weeks?|[\w\s]+?days?)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
+    // "Zimbabwe for 7 days" - more specific
+    /(?:^|[,\s])([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\s+for\s+(\d+\s*days?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
     // "to Zimbabwe" (without duration) - exclude common phrases
     /(?:travel to|fly to|go to)\s+([A-Z][a-zA-Z\s,]+?)(?=\s+(?:for|from|on|,|\.|$))/gi,
   ];
 
+  // Special handling for "Plan X weeks/days in LOCATION. Visit X, Y, and Z" pattern
+  // E.g. "Plan 3 weeks in Japan from Los Angeles. Visit Tokyo, Kyoto, and Osaka."
+  const planVisitMatch = input.match(/Plan\s+(\d+\s*(?:days?|weeks?))\s+in\s+[A-Z][a-zA-Z]+.*?(?:visit|Visit)\s+(.+?)(?:\.|$)/i);
+  if (planVisitMatch && destinations.length === 0) {
+    const totalDuration = parseDuration(planVisitMatch[1]);
+    let citiesText = planVisitMatch[2];
+    
+    // Clean up the cities text - remove any trailing non-city content
+    citiesText = citiesText.replace(/\.\s*I want.*$/i, '').trim();
+    citiesText = citiesText.replace(/\.\s*.*$/i, '').trim();
+    
+    // Split by comma and "and", filtering out standalone "and"
+    const cities = citiesText
+      .split(/,\s*and\s+|,\s*/)
+      .map(c => c.trim())
+      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+    
+    if (cities.length > 0) {
+      const daysPerCity = Math.floor(totalDuration / cities.length);
+      const remainder = totalDuration % cities.length;
+      
+      cities.forEach((city, index) => {
+        const cityDays = daysPerCity + (index < remainder ? 1 : 0);
+        destinations.push({
+          name: city,
+          days: cityDays,
+          duration: cityDays,
+          durationText: `${cityDays} days`,
+          order: index + 1
+        });
+      });
+      
+      logger.info('AI', 'Parsed Plan+Visit pattern with cities', { 
+        cities: cities.length, 
+        totalDays: totalDuration,
+        destinations: cities 
+      });
+    }
+  }
+
+  // Special handling for "Include X, Y, and Z" pattern
+  // E.g. "Plan a 10-day trip from San Francisco to Southeast Asia. Include Bangkok, Singapore, and Bali."
+  const includeMatch = input.match(/(?:include|Include)\s+([A-Z][a-zA-Z\s]+(?:,\s*[A-Z][a-zA-Z\s]+)*(?:,?\s*and\s+[A-Z][a-zA-Z\s]+)?)/i);
+  if (includeMatch && destinations.length === 0) {
+    const citiesText = includeMatch[1];
+    // Split by comma and "and", allowing for multi-word city names
+    const cities = citiesText
+      .split(/,\s*and\s+|,\s*/)
+      .map(c => c.trim())
+      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+    
+    // Look for duration in the full input
+    const durationMatch = input.match(/(\d+)[\s-]*(?:days?|weeks?)/i);
+    let totalDuration = 7; // default
+    if (durationMatch) {
+      totalDuration = parseDuration(durationMatch[0]);
+    }
+    
+    if (cities.length > 0) {
+      const daysPerCity = Math.floor(totalDuration / cities.length);
+      const remainder = totalDuration % cities.length;
+      
+      cities.forEach((city, index) => {
+        const cityDays = daysPerCity + (index < remainder ? 1 : 0);
+        destinations.push({
+          name: city,
+          days: cityDays,
+          duration: cityDays,
+          durationText: `${cityDays} days`,
+          order: index + 1
+        });
+      });
+      
+      logger.info('AI', 'Parsed Include pattern with cities', { 
+        cities: cities.length, 
+        totalDays: totalDuration,
+        destinations: cities 
+      });
+    }
+  }
+
+  // Special handling for "Visit X, Y, and Z" pattern (capital V) - ONLY if no destinations yet
+  // "Visit Tokyo, Kyoto, and Osaka" or "Visit London, Paris, Rome, and Barcelona"
+  // Now handles multi-word city names like "Buenos Aires", "Rio de Janeiro"
+  const visitCitiesMatch = input.match(/(?:visit|Visit)\s+([A-Z][a-zA-Z\s]+(?:,\s*[A-Z][a-zA-Z\s]+)*(?:,?\s*and\s+[A-Z][a-zA-Z\s]+)?)/i);
+  if (visitCitiesMatch && destinations.length === 0) {
+    const citiesText = visitCitiesMatch[1];
+    // Split by comma and "and", allowing for multi-word city names
+    const cities = citiesText
+      .split(/,\s*and\s+|,\s*/)
+      .map(c => c.trim())
+      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+    
+    // Look for duration in the full input
+    const durationMatch = input.match(/(\d+\s*(?:days?|weeks?))/i);
+    let totalDuration = 7; // default
+    if (durationMatch) {
+      totalDuration = parseDuration(durationMatch[1]);
+    }
+    
+    if (cities.length > 0) {
+      const daysPerCity = Math.floor(totalDuration / cities.length);
+      const remainder = totalDuration % cities.length;
+      
+      cities.forEach((city, index) => {
+        const cityDays = daysPerCity + (index < remainder ? 1 : 0);
+        destinations.push({
+          name: city,
+          days: cityDays,
+          duration: cityDays,
+          durationText: `${cityDays} days`,
+          order: index + 1
+        });
+      });
+      
+      logger.info('AI', 'Parsed Visit pattern with cities', { 
+        cities: cities.length, 
+        totalDays: totalDuration,
+        destinations: cities 
+      });
+    }
+  }
+
   // Special handling for "across" and "visiting" patterns with multiple cities
   // "2 weeks across London, Paris, Rome, and Barcelona"
-  const acrossMatch = input.match(/(\d+\s*(?:days?|weeks?))\s+(?:across|visiting|in)\s+([A-Z][a-zA-Z\s,]+(?:,\s*(?:and\s+)?[A-Z][a-zA-Z\s,]+)*)/i);
-  if (acrossMatch) {
+  const acrossMatch = input.match(/(\d+\s*(?:days?|weeks?))\s+(?:across|visiting|in)\s+([A-Z][a-zA-Z\s,]+?)\s*(?:from|\.|$)/i);
+  if (acrossMatch && destinations.length === 0) {
     const totalDuration = parseDuration(acrossMatch[1]);
-    const citiesText = acrossMatch[2];
+    let citiesText = acrossMatch[2].trim();
+    
+    // Remove any trailing 'from ...' that got captured
+    citiesText = citiesText.replace(/\s+from\s+.*$/i, '');
+    
     // Split by comma and "and"
-    const cities = citiesText.split(/,\s*(?:and\s+)?|\s+and\s+/).map(c => c.trim()).filter(c => c && c.length > 1);
+    const cities = citiesText.split(/,\s*(?:and\s+)?|\s+and\s+/).map(c => c.trim()).filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
     
     if (cities.length > 0) {
       const daysPerCity = Math.floor(totalDuration / cities.length);
@@ -169,49 +333,92 @@ export function parseDestinations(input: string): ParsedTrip {
     }
   }
 
-  // Handle "exploring Europe" type patterns FIRST before other patterns
-  const exploringMatch = input.match(/(\d+\s*(?:days?|weeks?))\s+exploring\s+([A-Z][a-zA-Z]+)$/i);
+  // Handle "exploring" patterns (including multi-destination)
+  // "Two weeks exploring Hawaii, Fiji, and New Zealand"
+  const exploringMatch = input.match(/((?:\d+|two|three|four)\s*(?:days?|weeks?))\s+exploring\s+([A-Z][a-zA-Z\s,]+?)\s*(?:from|\.|$)/i);
   if (exploringMatch && destinations.length === 0) {
     const totalDuration = parseDuration(exploringMatch[1]);
-    const region = exploringMatch[2];
+    let citiesText = exploringMatch[2].trim();
     
-    // Map regions to common destinations
-    const regionMap: Record<string, string[]> = {
-      'Europe': ['London', 'Paris', 'Rome', 'Barcelona', 'Amsterdam'],
-      'Asia': ['Tokyo', 'Bangkok', 'Singapore', 'Hong Kong', 'Seoul'],
-      'America': ['New York', 'Los Angeles', 'Chicago', 'Miami', 'San Francisco'],
-    };
+    // Remove any trailing 'from ...' that got captured
+    citiesText = citiesText.replace(/\s+from\s+.*$/i, '');
     
-    const cities = regionMap[region] || [region];
-    const daysPerCity = Math.floor(totalDuration / cities.length);
-    const remainder = totalDuration % cities.length;
-    
-    cities.forEach((city, index) => {
-      const cityDays = daysPerCity + (index < remainder ? 1 : 0);
-      destinations.push({
-        name: city,
-        days: cityDays,
-        duration: cityDays,
-        durationText: `${cityDays} days`,
-        order: index + 1
+    // Check if it's a list of cities or a single region
+    if (citiesText.includes(',') || citiesText.toLowerCase().includes(' and ')) {
+      // Multiple cities listed
+      const cities = citiesText
+        .split(/,\s*and\s+|,\s*|\s+and\s+/)
+        .map(c => c.trim())
+        .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+      
+      if (cities.length > 0) {
+        const daysPerCity = Math.floor(totalDuration / cities.length);
+        const remainder = totalDuration % cities.length;
+        
+        cities.forEach((city, index) => {
+          const cityDays = daysPerCity + (index < remainder ? 1 : 0);
+          destinations.push({
+            name: city,
+            days: cityDays,
+            duration: cityDays,
+            durationText: `${cityDays} days`,
+            order: index + 1
+          });
+        });
+        
+        logger.info('AI', 'Parsed exploring pattern with cities', { 
+          cities: cities.length, 
+          totalDays: totalDuration,
+          destinations: cities 
+        });
+      }
+    } else {
+      // Single region - use region mapping
+      const region = citiesText;
+      const regionMap: Record<string, string[]> = {
+        'Europe': ['London', 'Paris', 'Rome', 'Barcelona', 'Amsterdam'],
+        'Asia': ['Tokyo', 'Bangkok', 'Singapore', 'Hong Kong', 'Seoul'],
+        'America': ['New York', 'Los Angeles', 'Chicago', 'Miami', 'San Francisco'],
+      };
+      
+      const cities = regionMap[region] || [region];
+      const daysPerCity = Math.floor(totalDuration / cities.length);
+      const remainder = totalDuration % cities.length;
+      
+      cities.forEach((city, index) => {
+        const cityDays = daysPerCity + (index < remainder ? 1 : 0);
+        destinations.push({
+          name: city,
+          days: cityDays,
+          duration: cityDays,
+          durationText: `${cityDays} days`,
+          order: index + 1
+        });
       });
-    });
-    
-    logger.info('AI', 'Parsed region exploration', { 
-      region,
-      cities: cities.length, 
-      totalDays: totalDuration,
-      destinations: cities 
-    });
+      
+      logger.info('AI', 'Parsed region exploration', { 
+        region,
+        cities: cities.length, 
+        totalDays: totalDuration,
+        destinations: cities 
+      });
+    }
   }
 
   // Special handling for "visiting X, Y, Z" pattern without explicit duration per city
-  // "30 days visiting London, Paris, Rome, Barcelona, and Amsterdam"
-  const visitingMatch = input.match(/(\d+\s*(?:days?|weeks?))\s+(?:visiting|in)\s+([A-Z][a-zA-Z]+(?:,\s*[A-Z][a-zA-Z]+)*(?:,?\s*and\s+[A-Z][a-zA-Z]+)?)/i);
+  // "30 days visiting Buenos Aires, Santiago, Lima, Cusco, and Rio de Janeiro"
+  const visitingMatch = input.match(/(\d+\s*(?:days?|weeks?))\s+visiting\s+([A-Z][a-zA-Z\s,]+?)\s*(?:from|\.|$)/i);
   if (visitingMatch && destinations.length === 0) {
     const totalDuration = parseDuration(visitingMatch[1]);
-    const citiesText = visitingMatch[2];
-    const cities = citiesText.split(/,\s*|\s+and\s+/).map(c => c.trim()).filter(c => c && c.length > 1);
+    let citiesText = visitingMatch[2].trim();
+    
+    // Remove any trailing 'from ...' that got captured
+    citiesText = citiesText.replace(/\s+from\s+.*$/i, '');
+    
+    const cities = citiesText
+      .split(/,\s*and\s+|,\s*/)
+      .map(c => c.trim())
+      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
     
     if (cities.length > 0) {
       const daysPerCity = Math.floor(totalDuration / cities.length);

@@ -1,0 +1,31 @@
+{
+  "testId": "ui_test_1757406388753",
+  "testName": "Custom_Test",
+  "timestamp": "2025-09-09T08:26:28.754Z",
+  "simulationType": "Chat Interface",
+  "userInput": {
+    "prompt": "3 days in Tokyo from Los Angeles",
+    "conversationHistory": "",
+    "hasAttachment": false
+  },
+  "response": {
+    "success": false,
+    "generationTime": 9964,
+    "error": "Unknown error"
+  },
+  "uiMetrics": {
+    "promptLength": 32,
+    "responseSize": 0,
+    "totalActivities": 0,
+    "totalMeals": 0,
+    "hasRealAddresses": false,
+    "hasWeather": false,
+    "hasPricing": false
+  },
+  "apiTracking": {
+    "startTime": "2025-09-09T08:26:28.754Z",
+    "endTime": "2025-09-09T08:26:38.718Z",
+    "duration": 9964,
+    "apisUsed": []
+  }
+}

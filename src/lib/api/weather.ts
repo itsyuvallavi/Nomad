@@ -1,8 +1,12 @@
 // OpenWeatherMap API integration
 import { logger } from '@/lib/logger';
 
-const OPENWEATHERMAP_API_KEY = process.env.OPENWEATHERMAP;
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+
+// Lazy load API key to ensure env vars are loaded
+function getWeatherApiKey(): string | undefined {
+  return process.env.OPENWEATHERMAP;
+}
 
 export interface WeatherData {
   date: string;
@@ -30,12 +34,13 @@ export interface CityCoordinates {
 
 // Get city coordinates (needed for weather forecast)
 export async function getCityCoordinates(cityName: string): Promise<CityCoordinates> {
-  if (!OPENWEATHERMAP_API_KEY) {
+  const apiKey = getWeatherApiKey();
+  if (!apiKey) {
     throw new Error('OpenWeatherMap API key not configured');
   }
 
   const response = await fetch(
-    `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${OPENWEATHERMAP_API_KEY}`
+    `http://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${apiKey}`
   );
 
   if (!response.ok) {
@@ -61,20 +66,30 @@ export async function getWeatherForecast(
   cityName: string,
   days: number = 5
 ): Promise<WeatherData[]> {
+  if (typeof window !== 'undefined') {
+    console.log(`🌤️ Getting weather forecast for ${cityName} (${days} days)`);
+  }
   logger.info('WEATHER', `Getting forecast for ${cityName}`, { days });
   
-  if (!OPENWEATHERMAP_API_KEY) {
+  const apiKey = getWeatherApiKey();
+  if (!apiKey) {
+    if (typeof window !== 'undefined') {
+      console.warn('🌤️ OpenWeatherMap API key not configured');
+    }
     logger.error('API', 'OpenWeatherMap API key not configured');
     throw new Error('OpenWeatherMap API key not configured');
   }
 
   // First get city coordinates
   const coords = await getCityCoordinates(cityName);
+  if (typeof window !== 'undefined') {
+    console.log(`🌤️ Found coordinates for ${cityName}:`, coords);
+  }
   logger.info('WEATHER', `City coordinates found`, { coords });
   
   // Then get the forecast
-  const url = `${WEATHER_BASE_URL}/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${OPENWEATHERMAP_API_KEY}&units=metric&cnt=${days * 8}`;
-  logger.debug('WEATHER', 'Request URL', { url: url.replace(OPENWEATHERMAP_API_KEY, 'API_KEY_HIDDEN')});
+  const url = `${WEATHER_BASE_URL}/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${apiKey}&units=metric&cnt=${days * 8}`;
+  logger.debug('WEATHER', 'Request URL', { url: url.replace(apiKey, 'API_KEY_HIDDEN')});
   
   const response = await fetch(url);
 
@@ -84,6 +99,9 @@ export async function getWeatherForecast(
   }
 
   const data = await response.json();
+  if (typeof window !== 'undefined') {
+    console.log(`🌤️ Received ${data.list?.length || 0} weather data points`);
+  }
   logger.info('WEATHER', `Received ${data.list?.length || 0} forecast points`);
   
   // Group forecasts by day and calculate daily summary
@@ -150,69 +168,4 @@ export async function getWeatherForecast(
   }
 
   return weatherData;
-}
-
-// Get weather for a specific date
-export async function getWeatherForDate(
-  cityName: string,
-  date: Date
-): Promise<WeatherData | null> {
-  const forecast = await getWeatherForecast(cityName, 5);
-  const targetDate = date.toISOString().split('T')[0];
-  
-  return forecast.find(w => w.date === targetDate) || null;
-}
-
-// Get weather summary for trip dates
-export async function getWeatherSummary(
-  destination: string,
-  startDate: Date,
-  endDate: Date
-): Promise<string> {
-  try {
-    const forecast = await getWeatherForecast(destination, 5);
-    
-    // Check if any forecast days overlap with trip dates
-    const tripStart = startDate.toISOString().split('T')[0];
-    const tripEnd = endDate.toISOString().split('T')[0];
-    
-    const relevantForecasts = forecast.filter(f => {
-      return f.date >= tripStart && f.date <= tripEnd;
-    });
-    
-    if (relevantForecasts.length === 0) {
-      // No forecast available for trip dates, return general forecast
-      const temps = forecast.map(f => f.temp.day);
-      const avgTemp = Math.round(temps.reduce((a, b) => a + b, 0) / temps.length);
-      const weatherTypes = forecast.map(f => f.weather.main);
-      const mainWeather = weatherTypes[0]; // Most common in next 5 days
-      
-      return `Expect ${mainWeather.toLowerCase()} weather with temperatures around ${avgTemp}°C`;
-    }
-    
-    // Summarize weather for trip dates
-    const temps = relevantForecasts.map(f => f.temp.day);
-    const avgTemp = Math.round(temps.reduce((a, b) => a + b, 0) / temps.length);
-    const minTemp = Math.min(...relevantForecasts.map(f => f.temp.min));
-    const maxTemp = Math.max(...relevantForecasts.map(f => f.temp.max));
-    
-    const hasRain = relevantForecasts.some(f => f.pop > 0.3);
-    const weatherTypes = [...new Set(relevantForecasts.map(f => f.weather.main))];
-    
-    let summary = `${minTemp}-${maxTemp}°C`;
-    if (weatherTypes.length === 1) {
-      summary += `, ${weatherTypes[0].toLowerCase()}`;
-    } else {
-      summary += `, mixed conditions`;
-    }
-    
-    if (hasRain) {
-      summary += ' with possible rain';
-    }
-    
-    return summary;
-  } catch (error) {
-    logger.error('WEATHER', 'Error getting weather summary', { error });
-    return 'Weather information unavailable';
-  }
 }

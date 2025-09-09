@@ -15,7 +15,9 @@ import { parseDestinations } from '@/ai/utils/destination-parser';
 import { logger } from '@/lib/logger';
 import { generateItineraryWithOpenAI, isOpenAIConfigured } from '@/ai/openai-direct';
 import { generateChunkedItinerary } from '@/ai/openai-chunked';
-import { generateEnhancedItinerary, validateTripComplexity } from '@/ai/enhanced-generator';
+import { generateEnhancedItinerary as generateEnhancedV1, validateTripComplexity } from '@/ai/enhanced-generator';
+import { generateEnhancedItinerary as generateEnhancedV2 } from '@/ai/enhanced-generator-v2';
+import { generateUltraFastItinerary } from '@/ai/enhanced-generator-ultra-fast';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -39,6 +41,27 @@ export { type GeneratePersonalizedItineraryOutput };
 export async function generatePersonalizedItinerary(
   input: GeneratePersonalizedItineraryInput
 ): Promise<GeneratePersonalizedItineraryOutput> {
+  // Extract the actual prompt from conversation history if available
+  let actualPrompt = input.prompt;
+  if (input.conversationHistory) {
+    // Parse conversation history to get the last user message
+    const lines = input.conversationHistory.split('\n');
+    const lastUserLine = lines.filter(line => line.startsWith('user:')).pop();
+    if (lastUserLine) {
+      actualPrompt = lastUserLine.replace('user:', '').trim();
+    }
+  }
+  
+  // Log to browser console if in client-side environment
+  if (typeof window !== 'undefined') {
+    console.group('🚀 Generate Personalized Itinerary');
+    console.log('📝 Initial prompt:', input.prompt);
+    console.log('💬 Actual prompt from history:', actualPrompt);
+    console.log('📎 Has attachment:', !!input.attachedFile);
+    console.log('💬 Has conversation history:', !!input.conversationHistory);
+    console.groupEnd();
+  }
+  
   // ⚠️ CRITICAL: NEVER USE MOCK DATA!
   // ✅ ALL data MUST come from OpenAI API
   // ❌ NO hardcoded itineraries allowed
@@ -57,12 +80,74 @@ export async function generatePersonalizedItinerary(
   }
   
   // First validate trip complexity
-  const validation = validateTripComplexity(input.prompt);
+  const validation = validateTripComplexity(actualPrompt);
   if (!validation.valid) {
-    logger.error('AI', 'Trip complexity validation failed', { error: validation.error });
-    throw new Error(validation.error);
+    if (typeof window !== 'undefined') {
+      console.log('ℹ️ Validation check:', validation.error);
+    }
+    // Log as info, not error, since this is expected user input validation
+    logger.info('AI', 'Trip validation - needs more info', { reason: validation.error });
+    
+    // Make the error message more user-friendly for the UI
+    const userFriendlyError = validation.error?.includes('multiple continents') || 
+                              validation.error?.includes('too many destinations') ||
+                              validation.error?.includes('too long') ||
+                              validation.error?.includes('too complex')
+      ? "Your search is too complex for our beta version. Try a simpler trip with fewer destinations!"
+      : validation.error;
+    
+    // Return a special response for validation errors instead of throwing
+    return {
+      destination: 'Input Validation',
+      title: 'More Information Needed',
+      itinerary: [],
+      needsMoreInfo: true,
+      validationError: true,
+      errorMessage: userFriendlyError || "Please provide more details about your trip",
+      quickTips: []
+    } as any;
   }
   
+  // Check for origin location
+  const parsedTrip = parseDestinations(actualPrompt);
+  
+  // Also check conversation history for origin if not in current prompt
+  let origin = parsedTrip.origin;
+  if ((!origin || origin === '') && input.conversationHistory) {
+    // Try to extract origin from conversation history
+    const historyParsed = parseDestinations(input.conversationHistory);
+    origin = historyParsed.origin || '';
+  }
+  
+  if (!origin || origin === '') {
+    if (typeof window !== 'undefined') {
+      console.log('ℹ️ Origin location missing - throwing error for UI popup');
+    }
+    logger.info('AI', 'Origin location not provided - throwing error for UI');
+    
+    // Return a special response for missing origin instead of throwing
+    const destinations = parsedTrip.destinations.length > 0 
+      ? parsedTrip.destinations.map(d => d.name).join(', ')
+      : 'your destination';
+    
+    return {
+      destination: 'Input Validation',
+      title: 'Origin Required',
+      itinerary: [],
+      needsMoreInfo: true,
+      validationError: true,
+      errorMessage: `I couldn't understand where you're traveling from. Please include your departure city in your search, like "3 days in ${destinations} from New York"`,
+      quickTips: []
+    } as any;
+  }
+  
+  // Update parsedTrip with the found origin
+  parsedTrip.origin = origin;
+  
+  if (typeof window !== 'undefined') {
+    console.log('✅ Trip complexity validated');
+    console.log('✈️ Origin detected:', parsedTrip.origin);
+  }
   logger.info('AI', 'Trip complexity validated - proceeding with generation');
   
   // Use enhanced generator if we have the APIs configured
@@ -72,6 +157,14 @@ export async function generatePersonalizedItinerary(
   const useEnhanced = hasGoogleAPI || hasWeatherAPI;
   
   if (useEnhanced) {
+    if (typeof window !== 'undefined') {
+      console.log('🎯 Using ENHANCED generation with APIs:', {
+        Google: hasGoogleAPI,
+        Weather: hasWeatherAPI,
+        Gemini: hasGeminiAPI
+      });
+    }
+    
     logger.info('AI', 'Using ENHANCED generation with multiple APIs', {
       hasGoogle: hasGoogleAPI,
       hasWeather: hasWeatherAPI,
@@ -79,26 +172,36 @@ export async function generatePersonalizedItinerary(
     });
     
     try {
-      const result = await generateEnhancedItinerary(
-        input.prompt,
+      // Always use ultra-fast version for best performance
+      const result = await generateUltraFastItinerary(
+        actualPrompt,
         input.attachedFile,
         input.conversationHistory
       );
       
-      logger.info('AI', 'Enhanced generation successful');
+      if (typeof window !== 'undefined') {
+        console.log('⚡ Ultra-fast generation successful');
+      }
+      logger.info('AI', 'Ultra-fast generation successful');
       return result;
     } catch (error: any) {
+      if (typeof window !== 'undefined') {
+        console.warn('⚠️ Enhanced generation failed, falling back:', error.message);
+      }
       logger.error('AI', 'Enhanced generation failed, falling back to standard', { error: error.message });
       // Fall through to standard generation
     }
   }
   
   // Fallback to standard generation
+  if (typeof window !== 'undefined') {
+    console.log('🤖 Using standard OpenAI generation');
+  }
   logger.info('AI', 'Using standard OpenAI generation');
   
   try {
     // Parse destinations to check if it's a multi-destination trip
-    const parsedTrip = parseDestinations(input.prompt);
+    const parsedTrip = parseDestinations(actualPrompt);
     const isMultiDestination = parsedTrip.destinations.length > 1;
     // Use chunked for trips longer than 7 days to prevent timeouts
     const isLongTrip = parsedTrip.totalDays > 7;
@@ -113,7 +216,7 @@ export async function generatePersonalizedItinerary(
       });
       
       const result = await generateChunkedItinerary(
-        input.prompt,
+        actualPrompt,
         input.attachedFile,
         input.conversationHistory
       );
@@ -124,7 +227,7 @@ export async function generatePersonalizedItinerary(
       // Use regular generation for simple trips
       logger.info('AI', 'Using DIRECT generation for simple trip');
       const result = await generateItineraryWithOpenAI(
-        input.prompt,
+        actualPrompt,
         input.attachedFile,
         input.conversationHistory
       );

@@ -6,8 +6,12 @@
 import { logger } from '@/lib/logger';
 
 // Google Maps API configuration
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_API_KEY;
 const PLACES_BASE_URL = 'https://maps.googleapis.com/maps/api/place';
+
+// Lazy load API key to ensure env vars are loaded
+function getGoogleApiKey(): string | undefined {
+  return process.env.GOOGLE_API_KEY;
+}
 
 export interface GooglePlace {
   place_id: string;
@@ -45,14 +49,29 @@ export async function searchGooglePlaces(
   type?: string
 ): Promise<GooglePlace[]> {
   try {
+    const apiKey = getGoogleApiKey();
+    if (!apiKey) {
+      if (typeof window !== 'undefined') {
+        console.warn('📍 Google Places API key not configured');
+      }
+      logger.error('PLACES', 'Google API key not configured');
+      return [];
+    }
+    
+    if (typeof window !== 'undefined') {
+      console.log(`📍 Searching Google Places: "${query}" in ${location}${type ? ` (type: ${type})` : ''}`);
+    }
     logger.info('PLACES', 'Searching Google Places', { query, location, type });
     
     // First, geocode the location to get coordinates
-    const geocodeUrl = `${PLACES_BASE_URL}/textsearch/json?query=${encodeURIComponent(location)}&key=${GOOGLE_MAPS_API_KEY}`;
+    const geocodeUrl = `${PLACES_BASE_URL}/textsearch/json?query=${encodeURIComponent(location)}&key=${apiKey}`;
     const geocodeResponse = await fetch(geocodeUrl);
     const geocodeData = await geocodeResponse.json();
     
     if (!geocodeData.results || geocodeData.results.length === 0) {
+      if (typeof window !== 'undefined') {
+        console.warn(`📍 Location not found: ${location}`);
+      }
       logger.warn('PLACES', 'Location not found', { location });
       return [];
     }
@@ -66,7 +85,7 @@ export async function searchGooglePlaces(
       `&location=${lat},${lng}` +
       `&radius=5000` + // 5km radius
       (type ? `&type=${type}` : '') +
-      `&key=${GOOGLE_MAPS_API_KEY}`;
+      `&key=${apiKey}`;
     
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
@@ -77,39 +96,22 @@ export async function searchGooglePlaces(
     }
     
     const places = searchData.results || [];
+    
+    if (typeof window !== 'undefined') {
+      console.log(`📍 Found ${places.length} places for "${query}" in ${location}`);
+    }
     logger.info('PLACES', `Found ${places.length} places`, { query, location });
     
     return places.slice(0, 10); // Return top 10 results
   } catch (error) {
+    if (typeof window !== 'undefined') {
+      console.error('📍 Google Places search failed:', error);
+    }
     logger.error('PLACES', 'Failed to search places', { error });
     return [];
   }
 }
 
-/**
- * Get place details by place ID
- */
-export async function getPlaceDetails(placeId: string): Promise<GooglePlace | null> {
-  try {
-    const detailsUrl = `${PLACES_BASE_URL}/details/json?` +
-      `place_id=${placeId}` +
-      `&fields=name,formatted_address,rating,price_level,types,geometry,opening_hours,website,formatted_phone_number,user_ratings_total,photos` +
-      `&key=${GOOGLE_MAPS_API_KEY}`;
-    
-    const response = await fetch(detailsUrl);
-    const data = await response.json();
-    
-    if (data.status !== 'OK') {
-      logger.error('PLACES', 'Failed to get place details', { status: data.status });
-      return null;
-    }
-    
-    return data.result;
-  } catch (error) {
-    logger.error('PLACES', 'Failed to get place details', { error });
-    return null;
-  }
-}
 
 /**
  * Find real venues for itinerary activities

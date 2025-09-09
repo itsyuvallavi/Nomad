@@ -67,19 +67,45 @@ export async function generateItineraryWithOpenAI(
     enhancedPrompt = buildStructuredPrompt(parsedTrip, prompt);
   }
 
-  // Build the system prompt - ultra simplified for speed
-  const systemPrompt = `Create a travel itinerary JSON with this structure:
+  // Build the system prompt with clear instructions
+  const systemPrompt = `You are a travel itinerary generator. Create a JSON response following these CRITICAL rules:
+
+IMPORTANT ADDRESS RULES:
+- NEVER provide specific street addresses or building numbers
+- Use ONLY generic area descriptions like "Downtown London" or "Paris city center"
+- DO NOT mix addresses from different cities (e.g., no London addresses for LA activities)
+- Origin activities (departure) must use origin city addresses
+- Destination activities must use destination city addresses
+
+JSON Structure:
 {
   "destination": "${parsedTrip.destinations.map(d => d.name).join(', ')}",
-  "title": "Multi-Country Adventure",
-  "itinerary": [array of day objects],
+  "title": "Descriptive trip title",
+  "itinerary": [array of ${parsedTrip.totalDays} day objects],
   "quickTips": ["tip1", "tip2", "tip3"]
 }
 
-Day structure: {"day": number, "date": "2025-01-XX", "title": "string", "activities": [3-4 activities]}
-Activity: {"time": "string", "description": "string", "category": "Travel/Food/Leisure", "address": "string"}
+Day structure: 
+{
+  "day": number,
+  "date": "2025-01-XX",
+  "title": "Day title",
+  "activities": [4-5 activities]
+}
 
-Create ${parsedTrip.totalDays} days total. Keep it simple and brief.`;
+Activity structure:
+{
+  "time": "9:00 AM",
+  "description": "Brief activity description",
+  "category": "Food|Attraction|Leisure|Travel|Accommodation",
+  "address": "Generic area description, City"
+}
+
+${parsedTrip.origin ? `Origin city: ${parsedTrip.origin} (departure location)` : ''}
+Destination(s): ${parsedTrip.destinations.map(d => `${d.name} (${d.days} days)`).join(', ')}
+Total days: ${parsedTrip.totalDays}
+
+Remember: Real venue names and exact addresses will be added later via Google Places API.`;
 
   const userPrompt = conversationHistory 
     ? `${enhancedPrompt}\n\nConversation History:\n${conversationHistory}`

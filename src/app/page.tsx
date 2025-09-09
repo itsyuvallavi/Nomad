@@ -3,10 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import StartItinerary from '@/components/start-itinerary';
-import type { FormValues } from '@/components/itinerary-form';
-import ChatDisplay from '@/components/chat-display';
-import { AuthForm } from '@/components/auth-form';
+import StartItinerary from '@/components/forms/trip-search-form';
+import type { FormValues } from '@/components/forms/trip-details-form';
+import ChatDisplay from '@/components/chat/chat-container';
+// import { AuthForm } from '@/components/auth/login-form'; // Not needed - skipping auth
 
 export interface ChatState {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;
@@ -26,7 +26,7 @@ export interface RecentSearch {
 export type View = 'auth' | 'start' | 'chat';
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<View>('auth');
+  const [currentView, setCurrentView] = useState<View>('start'); // Skip auth, go straight to start
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
@@ -65,31 +65,31 @@ export default function Home() {
     switch (currentView) {
       case 'chat':
         return (
-          <ChatDisplay
-            initialPrompt={initialPrompt!}
-            savedChatState={savedChatState}
-            searchId={currentSearchId}
-            onError={handleChatError}
-            onReturn={handleReturnToStart}
-          />
+          <div className="h-screen overflow-hidden">
+            <ChatDisplay
+              initialPrompt={initialPrompt!}
+              savedChatState={savedChatState}
+              searchId={currentSearchId}
+              onError={handleChatError}
+              onReturn={handleReturnToStart}
+            />
+          </div>
         );
       case 'start':
         return (
-          <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+          <div className="h-screen overflow-hidden flex items-center justify-center">
+            <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+          </div>
         );
-      case 'auth':
       default:
+        // Default to start view if somehow we get here
         return (
-            <div className="flex items-center justify-center min-h-full p-6">
-                <AuthForm onLogin={handleLogin} onSignUp={handleSignUp} />
-            </div>
+          <div className="h-screen overflow-hidden flex items-center justify-center">
+            <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+          </div>
         );
     }
   }
 
-  return (
-    <div className="h-screen overflow-hidden">
-        {renderMainContent()}
-    </div>
-  );
+  return renderMainContent();
 }

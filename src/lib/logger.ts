@@ -192,10 +192,3 @@ class Logger {
 
 // Export singleton instance
 export const logger = new Logger();
-
-// Export convenience functions
-export const logAPI = logger.apiCall.bind(logger);
-export const logAPIResponse = logger.apiResponse.bind(logger);
-export const logAPIError = logger.apiError.bind(logger);
-export const logAI = logger.aiGeneration.bind(logger);
-export const logImage = logger.imageLoad.bind(logger);

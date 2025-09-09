@@ -1,10 +1,29 @@
 import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 
 // Initialize OpenAI client with API key from environment
 // This must run server-side only
-export const openai = typeof window === 'undefined' ? new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-}) : null as any;
+// Handle missing API key gracefully
+function initializeOpenAI() {
+  if (typeof window !== 'undefined') {
+    return null; // Don't initialize on client side
+  }
+  
+  if (!process.env.OPENAI_API_KEY) {
+    logger.warn('AI', 'OPENAI_API_KEY not found in environment');
+    return null;
+  }
+  
+  logger.info('AI', 'Initializing OpenAI client', { 
+    keyPrefix: process.env.OPENAI_API_KEY.substring(0, 10) 
+  });
+  
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
+
+export const openai = initializeOpenAI();
 
 // Model configuration
 export const MODEL_CONFIG = {
@@ -14,8 +33,3 @@ export const MODEL_CONFIG = {
   response_format: { type: 'json_object' as const },
 };
 
-// Console logging helper
-export const logOpenAICall = (type: string, details: any) => {
-  const timestamp = new Date().toISOString();
-  console.log(`🤖 [OpenAI ${type}] ${timestamp}`, details);
-};
