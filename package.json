@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test:ai": "tsx tests/ai/ai-testing-monitor.ts",
     "test:integration": "tsx tests/integration/test-full-app.ts",
+    "test:diagnostics": "tsx src/tests/run-diagnostics.ts",
     "genkit:dev": "genkit start --dev",
     "genkit:watch": "genkit start --dev --watch",
     "dev:both": "npm-run-all --parallel dev genkit:dev"

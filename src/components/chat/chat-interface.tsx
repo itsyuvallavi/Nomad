@@ -69,11 +69,7 @@ export function ChatPanel({
               message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
             }`}>
               {message.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: index * 0.03 + 0.1, type: "spring", stiffness: 500 }}
-                >
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                   <span className="text-foreground text-xs font-bold">AI</span>
                 </div>
               )}

@@ -1,5 +1,12 @@
 import OpenAI from 'openai';
 import { logger } from '@/lib/logger';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Ensure environment variables are loaded
+if (typeof window === 'undefined' && !process.env.OPENAI_API_KEY) {
+  dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+}
 
 // Initialize OpenAI client with API key from environment
 // This must run server-side only

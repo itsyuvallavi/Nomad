@@ -1,12 +1,12 @@
 // AI Configuration
-// Consolidated from openai-config.ts
+// Using OpenAI as the primary ML provider
 
 export const AI_CONFIG = {
-  // Model settings
+  // Model settings - OpenAI
   model: {
-    name: 'gemini-1.5-flash',
+    name: 'gpt-4o-mini',
     temperature: 0.7,
-    maxTokens: 8192,
+    maxTokens: 16384,
   },
   
   // API settings
@@ -23,5 +23,5 @@ export const AI_CONFIG = {
   }
 };
 
-// Export any OpenAI specific config if needed
+// Export OpenAI configuration
 export * from './openai-config';

@@ -41,6 +41,8 @@ interface ItineraryMapProps {
   };
   selectedDay?: number;
   onDaySelect?: (day: number) => void;
+  showRoutes?: boolean;
+  mapView?: 'satellite' | 'streets';
   className?: string;
 }
 

@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useSwipeGestures } from '@/hooks/use-swipe-gestures';
 import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
@@ -16,8 +17,7 @@ import { ChatPanel } from './chat-interface';
 import { ItineraryPanel } from '../itinerary/itinerary-view';
 import { MapPanel } from '../map/map-panel';
 import { cn } from '@/lib/utils';
-import { ThinkingPanel } from './ai-thinking';
-import { EnhancedThinkingPanel } from './enhanced-thinking-panel';
+import { ModernLoadingPanel } from './modern-loading-panel';
 import { ErrorDialog } from '../ui/error-dialog';
 import { logger } from '@/lib/logger';
 import { getDraftManager } from '@/lib/draft-manager';
@@ -66,6 +66,21 @@ export default function ChatDisplay({
         stage: 'understanding',
         percentage: 0,
         message: 'Understanding your request...'
+    });
+    
+    // Swipe gestures for mobile tab switching
+    const swipeHandlers = useSwipeGestures({
+        onSwipeLeft: () => {
+            if (window.innerWidth < 768) {
+                setMobileActiveTab(mobileActiveTab === 'chat' ? 'itinerary' : 'chat');
+            }
+        },
+        onSwipeRight: () => {
+            if (window.innerWidth < 768) {
+                setMobileActiveTab(mobileActiveTab === 'itinerary' ? 'chat' : 'itinerary');
+            }
+        },
+        threshold: 100
     });
     const currentSearchId = useRef(searchId || new Date().toISOString());
     const generationIdRef = useRef<string | null>(null);
@@ -570,37 +585,115 @@ export default function ChatDisplay({
                 </div>
                 
                 {/* Mobile Tab Navigation */}
-                <div className="md:hidden flex border-b border-border px-4">
-                    <button
-                        onClick={() => setMobileActiveTab('chat')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] transition-colors ${
-                            mobileActiveTab === 'chat'
-                                ? 'text-white border-b-2 border-blue-500'
-                                : 'text-muted-foreground hover:text-foreground'
-                        }`}
+                <div className="md:hidden bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-10">
+                    <div className="flex px-2 relative">
+                        {/* Animated indicator */}
+                        <motion.div
+                            className="absolute bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                            animate={{
+                                x: mobileActiveTab === 'chat' ? '4px' : '50%',
+                                width: mobileActiveTab === 'chat' ? 'calc(50% - 8px)' : 'calc(50% - 8px)'
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                        
+                        <motion.button
+                            onClick={() => setMobileActiveTab('chat')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-4 px-3 min-h-[52px] transition-all duration-200 relative ${
+                                mobileActiveTab === 'chat'
+                                    ? 'text-white'
+                                    : 'text-muted-foreground hover:text-foreground active:scale-95'
+                            }`}
+                            whileTap={{ scale: 0.98 }}
+                            animate={{
+                                backgroundColor: mobileActiveTab === 'chat' 
+                                    ? 'rgba(59, 130, 246, 0.1)' 
+                                    : 'transparent'
+                            }}
+                        >
+                            <motion.div
+                                animate={{ 
+                                    scale: mobileActiveTab === 'chat' ? 1.1 : 1,
+                                    rotate: mobileActiveTab === 'chat' ? [0, 5, 0] : 0
+                                }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <MessageSquare className="h-5 w-5" />
+                            </motion.div>
+                            <span className="font-medium text-sm">Chat</span>
+                            <AnimatePresence>
+                                {messages.length > 0 && (
+                                    <motion.span 
+                                        className="ml-1 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center"
+                                        initial={{ scale: 0, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0, opacity: 0 }}
+                                        transition={{ type: "spring", stiffness: 400 }}
+                                    >
+                                        {messages.length}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </motion.button>
+                        
+                        <motion.button
+                            onClick={() => setMobileActiveTab('itinerary')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-4 px-3 min-h-[52px] transition-all duration-200 relative ${
+                                mobileActiveTab === 'itinerary'
+                                    ? 'text-white'
+                                    : 'text-muted-foreground hover:text-foreground active:scale-95'
+                            }`}
+                            whileTap={{ scale: 0.98 }}
+                            animate={{
+                                backgroundColor: mobileActiveTab === 'itinerary' 
+                                    ? 'rgba(59, 130, 246, 0.1)' 
+                                    : 'transparent'
+                            }}
+                        >
+                            <motion.div
+                                animate={{ 
+                                    scale: mobileActiveTab === 'itinerary' ? 1.1 : 1,
+                                    rotate: mobileActiveTab === 'itinerary' ? [0, 5, 0] : 0
+                                }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <MapIcon className="h-5 w-5" />
+                            </motion.div>
+                            <span className="font-medium text-sm">Itinerary</span>
+                            <AnimatePresence>
+                                {currentItinerary && (
+                                    <motion.div 
+                                        className="ml-1 h-2.5 w-2.5 bg-emerald-500 rounded-full shadow-lg"
+                                        initial={{ scale: 0, opacity: 0 }}
+                                        animate={{ 
+                                            scale: 1, 
+                                            opacity: 1,
+                                            boxShadow: [
+                                                "0 0 0 0 rgba(16, 185, 129, 0.7)",
+                                                "0 0 0 10px rgba(16, 185, 129, 0)",
+                                                "0 0 0 0 rgba(16, 185, 129, 0)"
+                                            ]
+                                        }}
+                                        exit={{ scale: 0, opacity: 0 }}
+                                        transition={{ 
+                                            scale: { type: "spring", stiffness: 400 },
+                                            boxShadow: { duration: 2, repeat: Infinity }
+                                        }}
+                                    />
+                                )}
+                            </AnimatePresence>
+                        </motion.button>
+                    </div>
+                    
+                    {/* Swipe hint */}
+                    <motion.div 
+                        className="flex items-center justify-center py-1 text-xs text-muted-foreground"
+                        initial={{ opacity: 1 }}
+                        animate={{ opacity: [1, 0.5, 1] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                     >
-                        <MessageSquare className="h-4 w-4" />
-                        <span className="font-medium">Chat</span>
-                        {messages.length > 0 && (
-                            <span className="ml-1 text-xs bg-muted px-2 py-0.5 rounded-full">
-                                {messages.length}
-                            </span>
-                        )}
-                    </button>
-                    <button
-                        onClick={() => setMobileActiveTab('itinerary')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] transition-colors ${
-                            mobileActiveTab === 'itinerary'
-                                ? 'text-white border-b-2 border-blue-500'
-                                : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                    >
-                        <MapIcon className="h-4 w-4" />
-                        <span className="font-medium">Itinerary</span>
-                        {currentItinerary && (
-                            <span className="ml-1 h-2 w-2 bg-green-500 rounded-full"></span>
-                        )}
-                    </button>
+                        <span className="text-[10px]">← Swipe to switch tabs →</span>
+                    </motion.div>
                 </div>
                 
                 {/* Desktop Layout - Proportional panels */}
@@ -632,7 +725,7 @@ export default function ChatDisplay({
                                 showMapToggle={false} // Hide internal map toggle when using panel
                             />
                         ) : (
-                            isGenerating ? <EnhancedThinkingPanel progress={generationProgress} /> : (
+                            isGenerating ? <ModernLoadingPanel progress={generationProgress} /> : (
                                 <div className="h-full flex items-center justify-center bg-background">
                                     <div className="text-center p-8">
                                         <svg className="w-16 h-16 mx-auto mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -656,48 +749,85 @@ export default function ChatDisplay({
                     )}
                 </div>
                 
-                {/* Mobile Layout - Tab Based */}
-                <div className="md:hidden flex-1 min-h-0 overflow-hidden">
-                    {mobileActiveTab === 'chat' ? (
-                        <div className="h-full">
-                            <ChatPanel
-                                messages={messages}
-                                inputValue={userInput}
-                                onInputChange={setUserInput}
-                                onSendMessage={handleUserInputSubmit}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleUserInputSubmit(e as any);
-                                    }
-                                }}
-                                isGenerating={isGenerating}
-                            />
-                        </div>
-                    ) : (
-                        <div className="h-full overflow-auto">
-                            {currentItinerary ? (
-                                <ItineraryPanel 
-                                    itinerary={currentItinerary}
-                                    onRefine={(feedback) => handleRefine(feedback, messages)}
-                                    isRefining={isGenerating}
+                {/* Mobile Layout - Tab Based with Swipe Support */}
+                <motion.div 
+                    className="md:hidden flex-1 min-h-0 overflow-hidden relative"
+                    {...swipeHandlers}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={(e, { offset, velocity }) => {
+                        const swipeThreshold = 50;
+                        if (offset.x > swipeThreshold || velocity.x > 500) {
+                            setMobileActiveTab('chat');
+                        } else if (offset.x < -swipeThreshold || velocity.x < -500) {
+                            setMobileActiveTab('itinerary');
+                        }
+                    }}
+                >
+                    <AnimatePresence mode="wait">
+                        {mobileActiveTab === 'chat' ? (
+                            <motion.div 
+                                key="chat"
+                                className="h-full absolute inset-0"
+                                initial={{ x: -300, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: -300, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            >
+                                <ChatPanel
+                                    messages={messages}
+                                    inputValue={userInput}
+                                    onInputChange={setUserInput}
+                                    onSendMessage={handleUserInputSubmit}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleUserInputSubmit(e as any);
+                                        }
+                                    }}
+                                    isGenerating={isGenerating}
                                 />
-                            ) : (
-                                isGenerating ? <EnhancedThinkingPanel progress={generationProgress} /> : (
-                                    <div className="h-full flex items-center justify-center bg-background">
-                                        <div className="text-center p-8">
-                                            <svg className="w-16 h-16 mx-auto mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                            <p className="text-muted-foreground text-sm">Your itinerary will appear here</p>
-                                            <p className="text-muted-foreground text-xs mt-2">Start chatting to create your travel plan</p>
+                            </motion.div>
+                        ) : (
+                            <motion.div 
+                                key="itinerary"
+                                className="h-full absolute inset-0 overflow-auto"
+                                initial={{ x: 300, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: 300, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            >
+                                {currentItinerary ? (
+                                    <ItineraryPanel 
+                                        itinerary={currentItinerary}
+                                        onRefine={(feedback) => handleRefine(feedback, messages)}
+                                        isRefining={isGenerating}
+                                    />
+                                ) : (
+                                    isGenerating ? <ModernLoadingPanel progress={generationProgress} /> : (
+                                        <div className="h-full flex items-center justify-center bg-background">
+                                            <div className="text-center p-8">
+                                                <motion.svg 
+                                                    className="w-16 h-16 mx-auto mb-4 text-muted-foreground" 
+                                                    fill="none" 
+                                                    stroke="currentColor" 
+                                                    viewBox="0 0 24 24"
+                                                    animate={{ rotate: [0, 5, 0, -5, 0] }}
+                                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </motion.svg>
+                                                <p className="text-muted-foreground text-sm">Your itinerary will appear here</p>
+                                                <p className="text-muted-foreground text-xs mt-2">Start chatting to create your travel plan</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            )}
-                        </div>
-                    )}
-                </div>
+                                    )
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
 
                 {/* Keyboard Shortcuts Modal */}
                 <AnimatePresence>

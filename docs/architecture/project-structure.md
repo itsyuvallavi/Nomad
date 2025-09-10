@@ -34,6 +34,7 @@ nomad-navigator/
 ├── docs/               # Documentation
 │   ├── api/           # API documentation
 │   ├── architecture/  # System design docs
+│   │   └── ai-processing-flow.md # NEW: Detailed AI flow
 │   ├── deployment/    # Deployment guides
 │   └── user/         # User documentation
 │

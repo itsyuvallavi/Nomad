@@ -6,6 +6,7 @@
 import { openai } from '../openai-config';
 import { searchGooglePlaces } from '@/lib/api/google-places';
 import { getWeatherForecast } from '@/lib/api/weather';
+import { searchFlights, searchHotels, getCityCode } from '@/lib/api/amadeus';
 import { estimateTripCost as estimateTripCostOpenAI, estimateFlightCost, estimateHotelCost } from '@/ai/utils/openai-travel-costs';
 import { logger } from '@/lib/logger';
 import type { GeneratePersonalizedItineraryOutput } from '../flows/generate-personalized-itinerary';
@@ -36,7 +37,7 @@ class SmartCache {
   set<T>(key: string, data: T, ttlSeconds?: number): void {
     // Determine category from key
     const cat = this.getCategoryFromKey(key);
-    const ttl = ttlSeconds || this.TTL_CONFIG[cat] || 300;
+    const ttl = ttlSeconds || (this.TTL_CONFIG as any)[cat] || 300;
     
     // LRU eviction if cache is full
     if (this.cache.size >= this.MAX_CACHE_SIZE) {
@@ -212,7 +213,7 @@ function quickExtract(prompt: string): any {
   return {
     origin,
     destinations,
-    totalDays: destinations.reduce((sum, d) => sum + d.days, 0)
+    totalDays: destinations.reduce((sum: number, d: any) => sum + d.days, 0)
   };
 }
 
@@ -492,7 +493,7 @@ function getTransportMethod(fromCity: string, toCity: string): { method: string;
  * Create fallback days if generation fails
  */
 function createFallbackDays(destination: string, days: number, dayOffset: number): any[] {
-  const result = [];
+  const result: any[] = [];
   for (let i = 0; i < days; i++) {
     result.push({
       day: dayOffset + i + 1,
@@ -561,7 +562,7 @@ async function batchFetchVenues(
       } else {
         fetchPromises.push(
           searchGooglePlaces(cat, dest, cat)
-            .then(places => {
+            .then((places: any[]) => {
               venueMap.set(`${dest}:${cat}`, places);
               cache.set(cacheKey, places, 3600); // Cache 1 hour
             })
@@ -578,42 +579,130 @@ async function batchFetchVenues(
 }
 
 /**
- * Batch fetch weather for all destinations
+ * Batch fetch Amadeus flight data
+ * (renamed to avoid duplicate identifier with the OpenAI-estimated variant)
  */
-async function batchFetchWeather(
-  destinations: string[]
-): Promise<Map<string, any[]>> {
-  const weatherMap = new Map<string, any[]>();
+async function batchFetchFlightsAmadeus(
+  origin: string,
+  destinations: string[],
+  startDate: Date
+): Promise<Map<string, any>> {
+  const flightMap = new Map<string, any>();
   const fetchPromises: Promise<void>[] = [];
   
+  // Get city codes for origin and destinations
+  const originCode = await getCityCode(origin).catch(() => null);
+  if (!originCode) {
+    logger.warn('AI', `Could not get city code for origin: ${origin}`);
+    return flightMap;
+  }
+  
   for (const dest of destinations) {
-    const cacheKey = `weather:${dest}`;
-    const cached = cache.get<any[]>(cacheKey);
+    const cacheKey = `flight:${origin}:${dest}:${startDate.toISOString().split('T')[0]}`;
+    const cached = cache.get<any>(cacheKey);
     
     if (cached) {
-      weatherMap.set(dest, cached);
+      flightMap.set(dest, cached);
     } else {
       fetchPromises.push(
-        getWeatherForecast(dest, 7)
-          .then(forecast => {
-            weatherMap.set(dest, forecast);
-            cache.set(cacheKey, forecast, 1800); // Cache 30 min
+        getCityCode(dest)
+          .then((destCode: string | null) => {
+            if (destCode) {
+              return searchFlights({
+                origin: originCode,
+                destination: destCode,
+                departureDate: startDate.toISOString().split('T')[0],
+                maxResults: 3
+              });
+            }
+            return null;
           })
-          .catch(() => {
-            weatherMap.set(dest, []);
+          .then((flights: any[] | null) => {
+            if (flights && flights.length > 0) {
+              const flightData = {
+                flights: flights.slice(0, 3),
+                averagePrice: flights.reduce((sum: number, f: any) => sum + (f.price?.total || 0), 0) / flights.length,
+                shortestDuration: flights.reduce((min: string, f: any) => {
+                  const duration = f.duration || 'PT99H';
+                  return duration < min ? duration : min;
+                }, 'PT99H')
+              };
+              flightMap.set(dest, flightData);
+              cache.set(cacheKey, flightData, 7200); // Cache 2 hours
+            }
+          })
+          .catch((err: any) => {
+            logger.debug('AI', `Failed to fetch flights for ${dest}:`, err?.message || err);
           })
       );
     }
   }
   
   await Promise.all(fetchPromises);
-  return weatherMap;
+  return flightMap;
 }
 
 /**
- * Batch fetch flights for all routes using OpenAI
+ * Batch fetch Amadeus hotel data
+ * (renamed to avoid duplicate identifier with the OpenAI-estimated variant)
  */
-async function batchFetchFlights(
+async function batchFetchHotelsAmadeus(
+  destinations: string[],
+  checkInDate: Date,
+  nights: number
+): Promise<Map<string, any>> {
+  const hotelMap = new Map<string, any>();
+  const fetchPromises: Promise<void>[] = [];
+  
+  for (const dest of destinations) {
+    const cacheKey = `hotel:${dest}:${checkInDate.toISOString().split('T')[0]}:${nights}`;
+    const cached = cache.get<any>(cacheKey);
+    
+    if (cached) {
+      hotelMap.set(dest, cached);
+    } else {
+      fetchPromises.push(
+        getCityCode(dest)
+          .then((cityCode: string | null) => {
+            if (cityCode) {
+              const checkOut = new Date(checkInDate);
+              checkOut.setDate(checkOut.getDate() + nights);
+              return searchHotels({
+                cityCode,
+                checkInDate: checkInDate.toISOString().split('T')[0],
+                checkOutDate: checkOut.toISOString().split('T')[0],
+                maxResults: 5
+              });
+            }
+            return null;
+          })
+          .then((hotels: any[] | null) => {
+            if (hotels && hotels.length > 0) {
+              const hotelData = {
+                hotels: hotels.slice(0, 5),
+                averagePrice: hotels.reduce((sum: number, h: any) => sum + (h.price?.total || 0), 0) / hotels.length,
+                topRated: hotels.sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))[0]
+              };
+              hotelMap.set(dest, hotelData);
+              cache.set(cacheKey, hotelData, 86400); // Cache 24 hours
+            }
+          })
+          .catch((err: any) => {
+            logger.debug('AI', `Failed to fetch hotels for ${dest}:`, err?.message || err);
+          })
+      );
+    }
+  }
+  
+  await Promise.all(fetchPromises);
+  return hotelMap;
+}
+
+/**
+ * Batch fetch flights for all routes using OpenAI (estimates)
+ * (renamed to avoid duplicate identifier with the Amadeus-backed variant)
+ */
+async function batchFetchFlightsEstimated(
   destinations: Array<{ city: string; days: number }>,
   origin: string,
   startDate: string
@@ -632,7 +721,7 @@ async function batchFetchFlights(
     } else {
       fetchPromises.push(
         estimateFlightCost(origin, destinations[0].city, 'next month')
-          .then(estimate => {
+          .then((estimate: any) => {
             const flightData = [{
               price: { total: estimate.price.economy, perPerson: estimate.price.economy },
               airline: estimate.airlines[0] || 'Major Airline',
@@ -660,7 +749,7 @@ async function batchFetchFlights(
     } else {
       fetchPromises.push(
         estimateFlightCost(destinations[i].city, destinations[i + 1].city, 'next month')
-          .then(estimate => {
+          .then((estimate: any) => {
             const flightData = [{
               price: { total: estimate.price.economy, perPerson: estimate.price.economy },
               airline: estimate.airlines[0] || 'Major Airline',
@@ -689,7 +778,7 @@ async function batchFetchFlights(
     } else {
       fetchPromises.push(
         estimateFlightCost(lastDest.city, origin, 'next month')
-          .then(estimate => {
+          .then((estimate: any) => {
             const flightData = [{
               price: { total: estimate.price.economy, perPerson: estimate.price.economy },
               airline: estimate.airlines[0] || 'Major Airline',
@@ -711,9 +800,10 @@ async function batchFetchFlights(
 }
 
 /**
- * Batch fetch hotels for all destinations using OpenAI
+ * Batch fetch hotels for all destinations using OpenAI (estimates)
+ * (renamed to avoid duplicate identifier with the Amadeus-backed variant)
  */
-async function batchFetchHotels(
+async function batchFetchHotelsEstimated(
   destinations: Array<{ city: string; days: number }>,
   startDate: string
 ): Promise<Map<string, any>> {
@@ -729,7 +819,7 @@ async function batchFetchHotels(
     } else {
       fetchPromises.push(
         estimateHotelCost(dest.city, dest.days)
-          .then(estimate => {
+          .then((estimate: any) => {
             const hotelData = [{
               name: `Quality Hotel in ${dest.city}`,
               price: estimate.pricePerNight.midRange,
@@ -842,23 +932,42 @@ export async function generateUltraFastItinerary(
         ? batchFetchWeather(destinations.map((d: any) => d.city))
         : Promise.resolve(new Map()),
       
-      // Fetch flight data for routes using OpenAI
-      batchFetchFlights(destinations, extracted.origin, tripStartDate),
+      // Flights: prefer Amadeus; fall back to OpenAI estimates
+      process.env.AMADEUS_API_KEY && process.env.AMADEUS_API_SECRET
+        ? batchFetchFlightsAmadeus(
+            extracted.origin || 'Unknown',
+            destinations.map((d: any) => d.city),
+            startDate
+          )
+        : batchFetchFlightsEstimated(
+            destinations as Array<{ city: string; days: number }>,
+            extracted.origin || 'Unknown',
+            tripStartDate
+          ),
       
-      // Fetch hotel data for each destination using OpenAI
-      batchFetchHotels(destinations, tripStartDate),
+      // Hotels: prefer Amadeus; fall back to OpenAI estimates
+      process.env.AMADEUS_API_KEY && process.env.AMADEUS_API_SECRET
+        ? batchFetchHotelsAmadeus(
+            destinations.map((d: any) => d.city),
+            startDate,
+            Math.max(...destinations.map((d: any) => d.days))
+          )
+        : batchFetchHotelsEstimated(
+            destinations as Array<{ city: string; days: number }>,
+            tripStartDate
+          ),
       
       // Estimate total trip cost using OpenAI
       estimateTripCostOpenAI(extracted.origin || 'Unknown', destinations, 1)
-        .then(result => ({
+        .then((result: any) => ({
           total: result.totalEstimate.midRange,
           flights: result.flights.reduce((sum: number, f: any) => sum + (f.price?.economy || 0), 0),
-          accommodation: destinations.reduce((sum: number, d: any, i: number) => 
-            sum + (result.hotels[d.city]?.pricePerNight?.midRange || 200) * d.days, 0),
+          accommodation: destinations.reduce((sum: number, d: any) => 
+            sum + ((result.hotels[d.city]?.pricePerNight?.midRange || 200) * d.days), 0),
           dailyExpenses: destinations.reduce((sum: number, d: any) => sum + (100 * d.days), 0),
           currency: 'USD',
           breakdown: [
-            ...result.flights.map(f => ({
+            ...result.flights.map((f: any) => ({
               type: 'flight',
               description: `${f.origin} → ${f.destination}`,
               amount: f.price?.economy || 0
@@ -885,7 +994,7 @@ export async function generateUltraFastItinerary(
     if (destinations.length > 1) {
       // Multi-city trips - combine all chunks
       let currentDayNum = 1;
-      itineraryChunks.forEach((chunk) => {
+      itineraryChunks.forEach((chunk: any[]) => {
         const adjustedChunk = chunk.map((day: any) => ({
           ...day,
           day: currentDayNum++
@@ -894,7 +1003,7 @@ export async function generateUltraFastItinerary(
       });
     } else {
       // Single destination - just use the days as-is
-      allDays = itineraryChunks.flat();
+      allDays = (itineraryChunks as any[]).flat();
     }
     
     // Step 4: Enhance with real data (already fetched)
@@ -936,7 +1045,7 @@ export async function generateUltraFastItinerary(
       const cityVenuesByCategory = usedVenues.get(city)!;
       
       // Add venues to activities with diversity
-      day.activities?.forEach((activity: any, activityIndex: number) => {
+      day.activities?.forEach((activity: any) => {
         const activityDesc = (activity.description || '').toLowerCase();
         const category = activity.category?.toLowerCase() || '';
         let venueType = '';
@@ -1004,11 +1113,10 @@ export async function generateUltraFastItinerary(
             const categoryUsedVenues = cityVenuesByCategory.get(venueType)!;
             
             // Enhanced selection: prioritize by usage count
-            let selectedVenue = null;
-            let minUsageCount = Infinity;
+            let selectedVenue: any = null;
             
             // Sort venues by usage count (least used first)
-            const sortedVenues = [...venues].sort((a, b) => {
+            const sortedVenues = [...venues].sort((a: any, b: any) => {
               const aCount = venueUsageCount.get(a.place_id) || 0;
               const bCount = venueUsageCount.get(b.place_id) || 0;
               return aCount - bCount;
@@ -1191,6 +1299,39 @@ function generateQuickTips(_destinations: any[]): string[] {
 }
 
 /**
+ * Batch fetch weather for all destinations
+ */
+async function batchFetchWeather(
+  destinations: string[]
+): Promise<Map<string, any[]>> {
+  const weatherMap = new Map<string, any[]>();
+  const fetchPromises: Promise<void>[] = [];
+  
+  for (const dest of destinations) {
+    const cacheKey = `weather:${dest}`;
+    const cached = cache.get<any[]>(cacheKey);
+    
+    if (cached) {
+      weatherMap.set(dest, cached);
+    } else {
+      fetchPromises.push(
+        getWeatherForecast(dest, 7)
+          .then((forecast: any[]) => {
+            weatherMap.set(dest, forecast);
+            cache.set(cacheKey, forecast, 1800); // Cache 30 min
+          })
+          .catch(() => {
+            weatherMap.set(dest, []);
+          })
+      );
+    }
+  }
+  
+  await Promise.all(fetchPromises);
+  return weatherMap;
+}
+
+/**
  * Enhanced cache pre-warming with prioritized strategy
  */
 export async function prewarmCache(priority: 'startup' | 'background' = 'startup'): Promise<void> {
@@ -1213,7 +1354,7 @@ export async function prewarmCache(priority: 'startup' | 'background' = 'startup
       if (process.env.OPENWEATHERMAP) {
         promises.push(
           getWeatherForecast(city, 7)
-            .then(weather => cache.set(`weather:${city}`, weather))  // Uses optimized TTL
+            .then((weather: any[]) => cache.set(`weather:${city}`, weather))  // Uses optimized TTL
             .catch(() => logger.debug('AI', `Weather pre-warm skipped: ${city}`))
         );
       }
@@ -1227,7 +1368,7 @@ export async function prewarmCache(priority: 'startup' | 'background' = 'startup
         for (const type of essentialVenues) {
           promises.push(
             searchGooglePlaces(type, city, type)
-              .then(venues => {
+              .then((venues: any[]) => {
                 cache.set(`venues:${city}:${type}`, venues);  // Uses optimized TTL
                 // Also cache with alternate key format
                 cache.set(`${city}:${type}`, venues);
@@ -1248,14 +1389,14 @@ export async function prewarmCache(priority: 'startup' | 'background' = 'startup
             `${city} ${days} days`
           ];
           
-          for (const prompt of variations) {
+          for (const p of variations) {
             const extraction = {
               origin: 'Unknown',
               destinations: [{ city, days }],
               totalDays: days,
               returnTo: 'Unknown'
             };
-            cache.set(`extract:${prompt.substring(0, 100)}`, extraction);
+            cache.set(`extract:${p.substring(0, 100)}`, extraction);
           }
         }
       }
