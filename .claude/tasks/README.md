@@ -9,7 +9,8 @@ This directory contains all active development tasks organized by category for b
 ├── main-tasks.md           # Master roadmap and overview
 ├── ai/                     # AI system improvements
 │   ├── ai-route-optimization.md
-│   └── simplify-ai-generators.md
+│   ├── simplify-ai-generators.md
+│   └── ai-improvements-plan.md  # NEW: Plan for AI/ML enhancements
 ├── ui/                     # User interface enhancements
 │   ├── animation-implementation-plan.md
 │   ├── three-column-layout.md
@@ -34,6 +35,7 @@ This directory contains all active development tasks organized by category for b
 ### 🤖 AI System (`/ai`)
 - **ai-route-optimization.md**: Improve routing logic and timeline efficiency
 - **simplify-ai-generators.md**: Consolidate multiple generator implementations
+- **ai-improvements-plan.md**: Outlines the next steps for making the AI smarter with learning loops, NLP, and streaming.
 
 ### 🎨 User Interface (`/ui`) 
 - **animation-implementation-plan.md**: Add smooth animations and transitions
