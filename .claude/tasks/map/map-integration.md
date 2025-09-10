@@ -17,7 +17,19 @@ Add interactive map visualization to show itinerary locations, routes, and enabl
 - Different colors for each day
 - Walking/driving route options
 
-### 3. Location Discovery
+### 3. Location Issues (PRIORITY FIX)
+**Current Problems:**
+- Wrong addresses displayed for activities
+- Wrong map markers for addresses  
+- Both address AND map location incorrect
+
+**Debug Steps:**
+- Trace data flow from AI generation → display
+- Check if real venue lookup is working (Foursquare/Google)
+- Verify geocoding process and API keys
+- Add logging for address → coordinate conversion
+
+### 4. Location Discovery
 - Search for nearby attractions
 - Add new activities from map
 - Filter by category (food, attractions, etc.)

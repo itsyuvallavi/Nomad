@@ -3,12 +3,12 @@
  * Optimized for maximum speed through parallelization and caching
  */
 
-import { openai } from './openai-config';
+import { openai } from '../openai-config';
 import { searchGooglePlaces } from '@/lib/api/google-places';
 import { getWeatherForecast } from '@/lib/api/weather';
 import { estimateTripCost as estimateTripCostOpenAI, estimateFlightCost, estimateHotelCost } from '@/ai/utils/openai-travel-costs';
 import { logger } from '@/lib/logger';
-import type { GeneratePersonalizedItineraryOutput } from './flows/generate-personalized-itinerary';
+import type { GeneratePersonalizedItineraryOutput } from '../flows/generate-personalized-itinerary';
 
 // Enhanced cache with optimized TTLs and smart invalidation
 interface CacheEntry<T> {

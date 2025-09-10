@@ -15,10 +15,10 @@ import { parseDestinations } from '@/ai/utils/destination-parser';
 import { EnhancedDestinationParser } from '@/ai/utils/enhanced-destination-parser';
 import { MasterTravelParser } from '@/lib/utils/master-parser';
 import { logger } from '@/lib/logger';
-import { generateUnifiedItinerary, getUnifiedGenerator } from '@/ai/unified-generator';
-import { validateTripComplexity } from '@/ai/enhanced-generator';
+import { generateUnifiedItinerary, getUnifiedGenerator } from '@/ai/utils/unified-generator';
+import { validateTripComplexity } from '@/ai/utils/enhanced-generator';
 // Keep ultra-fast for now as primary until fully tested
-import { generateUltraFastItinerary } from '@/ai/enhanced-generator-ultra-fast';
+import { generateUltraFastItinerary } from '@/ai/utils/enhanced-generator-ultra-fast';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z

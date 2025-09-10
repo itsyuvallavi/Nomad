@@ -9,7 +9,11 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test:ai": "tsx ai-testing-monitor.ts"
+    "test:ai": "tsx tests/ai/ai-testing-monitor.ts",
+    "test:integration": "tsx tests/integration/test-full-app.ts",
+    "genkit:dev": "genkit start --dev",
+    "genkit:watch": "genkit start --dev --watch",
+    "dev:both": "npm-run-all --parallel dev genkit:dev"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
