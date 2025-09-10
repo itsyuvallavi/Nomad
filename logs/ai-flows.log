@@ -326,3 +326,63 @@
 {"service":"nomad-navigator","flowId":"masterParser_1757465494871_ra2x4q1nh","flowName":"masterParser","inputLength":76,"category":"AI","timestamp":"2025-09-10 00:51:34","level":"info","message":"AI Flow Started"}
 
 {"service":"nomad-navigator","flowId":"masterParser_1757465494871_ra2x4q1nh","flowName":"masterParser","duration":235,"success":true,"metrics":{"confidence":"medium","destinationCount":1,"processingTime":231},"category":"AI","timestamp":"2025-09-10 00:51:35","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757470513381_vr8y32kei","flowName":"masterParser","inputLength":53,"category":"AI","timestamp":"2025-09-10 02:15:13","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757470513381_vr8y32kei","flowName":"masterParser","duration":102,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":101},"category":"AI","timestamp":"2025-09-10 02:15:13","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757470522192_tdpts0fwe","flowName":"masterParser","inputLength":50,"category":"AI","timestamp":"2025-09-10 02:15:22","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757470522192_tdpts0fwe","flowName":"masterParser","duration":45,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":44},"category":"AI","timestamp":"2025-09-10 02:15:22","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757470529997_5g9yv8vqk","flowName":"masterParser","inputLength":82,"category":"AI","timestamp":"2025-09-10 02:15:29","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757470529997_5g9yv8vqk","flowName":"masterParser","duration":43,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":42},"category":"AI","timestamp":"2025-09-10 02:15:30","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757470549407_tylfmjkp2","flowName":"masterParser","inputLength":86,"category":"AI","timestamp":"2025-09-10 02:15:49","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757470549407_tylfmjkp2","flowName":"masterParser","duration":57,"success":true,"metrics":{"confidence":"medium","destinationCount":5,"processingTime":56},"category":"AI","timestamp":"2025-09-10 02:15:49","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757470549498_ry6dbvlx2","flowName":"masterParser","inputLength":99,"category":"AI","timestamp":"2025-09-10 02:15:49","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757470549498_ry6dbvlx2","flowName":"masterParser","duration":65,"success":true,"metrics":{"confidence":"high","destinationCount":7,"processingTime":63},"category":"AI","timestamp":"2025-09-10 02:15:49","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483340142_ebioak2i4","flowName":"masterParser","inputLength":53,"category":"AI","timestamp":"2025-09-10 05:49:00","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483340142_ebioak2i4","flowName":"masterParser","duration":98,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":97},"category":"AI","timestamp":"2025-09-10 05:49:00","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483353520_w9rh00to2","flowName":"masterParser","inputLength":50,"category":"AI","timestamp":"2025-09-10 05:49:13","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483353520_w9rh00to2","flowName":"masterParser","duration":31,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":30},"category":"AI","timestamp":"2025-09-10 05:49:13","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483368374_maf834xsn","flowName":"masterParser","inputLength":82,"category":"AI","timestamp":"2025-09-10 05:49:28","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483368374_maf834xsn","flowName":"masterParser","duration":50,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":46},"category":"AI","timestamp":"2025-09-10 05:49:28","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483393081_gztjkee1f","flowName":"masterParser","inputLength":86,"category":"AI","timestamp":"2025-09-10 05:49:53","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483393081_gztjkee1f","flowName":"masterParser","duration":60,"success":true,"metrics":{"confidence":"medium","destinationCount":5,"processingTime":60},"category":"AI","timestamp":"2025-09-10 05:49:53","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483393181_p9bfk0pp5","flowName":"masterParser","inputLength":99,"category":"AI","timestamp":"2025-09-10 05:49:53","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483393181_p9bfk0pp5","flowName":"masterParser","duration":58,"success":true,"metrics":{"confidence":"high","destinationCount":7,"processingTime":57},"category":"AI","timestamp":"2025-09-10 05:49:53","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483662582_4i0md1hlq","flowName":"masterParser","inputLength":53,"category":"AI","timestamp":"2025-09-10 05:54:22","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483662582_4i0md1hlq","flowName":"masterParser","duration":122,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":119},"category":"AI","timestamp":"2025-09-10 05:54:22","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483671263_95dw59i6v","flowName":"masterParser","inputLength":50,"category":"AI","timestamp":"2025-09-10 05:54:31","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483671263_95dw59i6v","flowName":"masterParser","duration":63,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":59},"category":"AI","timestamp":"2025-09-10 05:54:31","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483678642_p2hedk4nx","flowName":"masterParser","inputLength":82,"category":"AI","timestamp":"2025-09-10 05:54:38","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483678642_p2hedk4nx","flowName":"masterParser","duration":53,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":52},"category":"AI","timestamp":"2025-09-10 05:54:38","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483696479_gvjxv78mz","flowName":"masterParser","inputLength":86,"category":"AI","timestamp":"2025-09-10 05:54:56","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483696479_gvjxv78mz","flowName":"masterParser","duration":38,"success":true,"metrics":{"confidence":"medium","destinationCount":5,"processingTime":35},"category":"AI","timestamp":"2025-09-10 05:54:56","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483727770_ao5c9w25v","flowName":"masterParser","inputLength":99,"category":"AI","timestamp":"2025-09-10 05:55:27","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483727770_ao5c9w25v","flowName":"masterParser","duration":53,"success":true,"metrics":{"confidence":"high","destinationCount":7,"processingTime":52},"category":"AI","timestamp":"2025-09-10 05:55:27","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483847260_qcopn8gss","flowName":"masterParser","inputLength":53,"category":"AI","timestamp":"2025-09-10 05:57:27","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483847260_qcopn8gss","flowName":"masterParser","duration":410,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":401},"category":"AI","timestamp":"2025-09-10 05:57:27","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483855820_pvxi0j9ir","flowName":"masterParser","inputLength":50,"category":"AI","timestamp":"2025-09-10 05:57:35","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483855820_pvxi0j9ir","flowName":"masterParser","duration":60,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":55},"category":"AI","timestamp":"2025-09-10 05:57:35","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483864955_mixc09tkg","flowName":"masterParser","inputLength":82,"category":"AI","timestamp":"2025-09-10 05:57:44","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483864955_mixc09tkg","flowName":"masterParser","duration":71,"success":true,"metrics":{"confidence":"high","destinationCount":3,"processingTime":70},"category":"AI","timestamp":"2025-09-10 05:57:45","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483881721_mcrcf4o7w","flowName":"masterParser","inputLength":86,"category":"AI","timestamp":"2025-09-10 05:58:01","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483881721_mcrcf4o7w","flowName":"masterParser","duration":59,"success":true,"metrics":{"confidence":"medium","destinationCount":5,"processingTime":58},"category":"AI","timestamp":"2025-09-10 05:58:01","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757483903089_uyryb2e3w","flowName":"masterParser","inputLength":99,"category":"AI","timestamp":"2025-09-10 05:58:23","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757483903089_uyryb2e3w","flowName":"masterParser","duration":60,"success":true,"metrics":{"confidence":"high","destinationCount":7,"processingTime":61},"category":"AI","timestamp":"2025-09-10 05:58:23","level":"info","message":"AI Flow Completed"}

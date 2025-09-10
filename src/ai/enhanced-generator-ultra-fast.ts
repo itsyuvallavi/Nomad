@@ -10,21 +10,45 @@ import { estimateTripCost as estimateTripCostOpenAI, estimateFlightCost, estimat
 import { logger } from '@/lib/logger';
 import type { GeneratePersonalizedItineraryOutput } from './flows/generate-personalized-itinerary';
 
-// In-memory cache with TTL
+// Enhanced cache with optimized TTLs and smart invalidation
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
   ttl: number;
+  hitCount: number;
+  category: 'extraction' | 'venue' | 'weather' | 'flight' | 'itinerary' | 'hotel';
 }
 
 class SmartCache {
   private cache = new Map<string, CacheEntry<any>>();
+  private readonly MAX_CACHE_SIZE = 1000;
   
-  set<T>(key: string, data: T, ttlSeconds: number = 300): void {
+  // Optimized TTLs by category (in seconds)
+  private readonly TTL_CONFIG = {
+    extraction: 1800,     // 30 min - user queries
+    venue: 86400,        // 24 hours - stable data
+    weather: 3600,       // 1 hour - changes hourly
+    flight: 7200,        // 2 hours - price changes
+    itinerary: 3600,     // 1 hour - generated content
+    hotel: 86400         // 24 hours - stable data
+  };
+  
+  set<T>(key: string, data: T, ttlSeconds?: number): void {
+    // Determine category from key
+    const cat = this.getCategoryFromKey(key);
+    const ttl = ttlSeconds || this.TTL_CONFIG[cat] || 300;
+    
+    // LRU eviction if cache is full
+    if (this.cache.size >= this.MAX_CACHE_SIZE) {
+      this.evictLeastUsed();
+    }
+    
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttlSeconds * 1000
+      ttl: ttl * 1000,
+      hitCount: 0,
+      category: cat
     });
   }
   
@@ -37,7 +61,42 @@ class SmartCache {
       return null;
     }
     
+    // Increment hit count for LRU tracking
+    entry.hitCount++;
     return entry.data;
+  }
+  
+  private getCategoryFromKey(key: string): CacheEntry<any>['category'] {
+    if (key.startsWith('extract:')) return 'extraction';
+    if (key.startsWith('venues:') || key.includes(':restaurant') || key.includes(':cafe')) return 'venue';
+    if (key.startsWith('weather:')) return 'weather';
+    if (key.startsWith('flight:')) return 'flight';
+    if (key.startsWith('hotel:')) return 'hotel';
+    if (key.startsWith('chunk:')) return 'itinerary';
+    return 'extraction';
+  }
+  
+  private evictLeastUsed(): void {
+    let minHits = Infinity;
+    let keyToEvict = '';
+    
+    for (const [key, entry] of this.cache.entries()) {
+      // Prefer evicting expired entries first
+      if (Date.now() - entry.timestamp > entry.ttl) {
+        this.cache.delete(key);
+        return;
+      }
+      
+      // Track least used entry
+      if (entry.hitCount < minHits) {
+        minHits = entry.hitCount;
+        keyToEvict = key;
+      }
+    }
+    
+    if (keyToEvict) {
+      this.cache.delete(keyToEvict);
+    }
   }
   
   clear(): void {
@@ -47,19 +106,28 @@ class SmartCache {
   size(): number {
     return this.cache.size;
   }
+  
+  getStats(): { size: number; categories: Record<string, number> } {
+    const categories: Record<string, number> = {};
+    for (const entry of this.cache.values()) {
+      categories[entry.category] = (categories[entry.category] || 0) + 1;
+    }
+    return { size: this.cache.size, categories };
+  }
 }
 
 const cache = new SmartCache();
 
-// Popular destinations to pre-cache
+// Popular destinations to pre-cache (expanded list)
 const POPULAR_DESTINATIONS = [
   'London', 'Paris', 'Tokyo', 'New York', 'Dubai', 'Singapore', 
   'Rome', 'Barcelona', 'Amsterdam', 'Bangkok', 'Los Angeles',
-  'San Francisco', 'Sydney', 'Melbourne', 'Berlin', 'Madrid'
+  'San Francisco', 'Sydney', 'Melbourne', 'Berlin', 'Madrid',
+  'Istanbul', 'Prague', 'Vienna', 'Lisbon', 'Athens'
 ];
 
 // Common trip durations for pre-caching
-const COMMON_DURATIONS = [3, 5, 7];
+const COMMON_DURATIONS = [3, 5, 7, 10, 14];
 
 /**
  * Fast extraction using GPT-3.5-turbo with optimized prompt
@@ -80,10 +148,13 @@ async function extractTripInfoFast(prompt: string): Promise<any> {
     return quickExtract(prompt);
   }
   
-  // Minimal, focused prompt for faster processing
-  const systemPrompt = `Extract trip as JSON. Rules: week=7, weekend=3, fortnight=14.
-IMPORTANT: Include ALL mentioned cities as destinations, including first city if it's a destination (e.g., "visiting Athens, Santorini" means Athens is also a destination).
-Output: {"origin":"city","destinations":[{"city":"name","days":N}],"totalDays":N}`;
+  // Clear extraction prompt with explicit rules
+  const systemPrompt = `Extract trip as JSON. Rules:
+- "weekend" = 3 days
+- "week" or "7 days" = 7 days  
+- "fortnight" or "2 weeks" = 14 days
+- Count actual days, not nights
+Output: {"origin":"city","destinations":[{"city":"name","days":number}],"totalDays":number}`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -114,15 +185,32 @@ Output: {"origin":"city","destinations":[{"city":"name","days":N}],"totalDays":N
  */
 function quickExtract(prompt: string): any {
   const destinations: any[] = [];
-  const matches = prompt.matchAll(/(\d+)\s*(?:days?|weeks?)\s+in\s+([A-Z][a-z]+)/gi);
+  const lowerPrompt = prompt.toLowerCase();
   
-  for (const match of matches) {
-    const days = match[1].includes('week') ? 7 : parseInt(match[1]);
-    destinations.push({ city: match[2], days });
+  // Handle weekend specially
+  if (lowerPrompt.includes('weekend')) {
+    const weekendMatch = prompt.match(/weekend\s+(?:trip\s+)?(?:from\s+\w+\s+)?(?:to\s+|in\s+)?([A-Z][a-z]+)/i);
+    if (weekendMatch) {
+      destinations.push({ city: weekendMatch[1], days: 3 });
+    }
+  } else {
+    // Regular extraction for numbered days/weeks
+    const matches = prompt.matchAll(/(\d+)\s*(?:days?|weeks?)\s+in\s+([A-Z][a-z]+)/gi);
+    
+    for (const match of matches) {
+      const numStr = match[1];
+      const isWeek = match[0].toLowerCase().includes('week');
+      const days = isWeek ? parseInt(numStr) * 7 : parseInt(numStr);
+      destinations.push({ city: match[2], days });
+    }
   }
   
+  // Extract origin
+  const originMatch = prompt.match(/from\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+  const origin = originMatch ? originMatch[1] : 'Unknown';
+  
   return {
-    origin: prompt.match(/from\s+([A-Z][a-z]+)/i)?.[1] || 'Unknown',
+    origin,
     destinations,
     totalDays: destinations.reduce((sum, d) => sum + d.days, 0)
   };
@@ -149,32 +237,19 @@ async function generateDestinationChunk(
     throw new Error('OpenAI API key not configured');
   }
   
-  // Clear prompt that ensures proper JSON generation
-  const prompt = `Create a ${days}-day itinerary for ${destination}.
-Return a JSON array with ${days} objects. Each day must have this exact structure:
-{
-  "day": ${dayOffset + 1} (incrementing),
-  "destination_city": "${destination}",
-  "title": "Descriptive day title",
-  "theme": "Day's theme",
-  "activities": [
-    {
-      "time": "9:00 AM",
-      "description": "Specific activity description",
-      "category": "Food|Museum|Park|Attraction|Shopping",
-      "duration": "2 hours",
-      "tips": "Helpful tips"
-    }
-  ]
-}
-Include exactly 5 activities per day with varied times and categories.`;
+  // Explicit prompt ensuring correct day count
+  const prompt = `Generate EXACTLY ${days} days for ${destination}.
+Return a JSON array with EXACTLY ${days} objects.
+Each object: {"day":${dayOffset+1} to ${dayOffset+days},"destination_city":"${destination}","title":"Day X: Title","theme":"Theme","activities":[5 activities]}
+Each activity: {"time":"HH:MM AM/PM","description":"Activity","category":"Food|Museum|Park|Attraction|Shopping","duration":"X hours","tips":"Tips"}
+CRITICAL: Must return exactly ${days} day objects, no more, no less.`;
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [
       { 
         role: 'system', 
-        content: 'You are a travel planner. Always return valid JSON arrays with the exact structure requested.' 
+        content: 'Return JSON array only. No text.' 
       },
       { role: 'user', content: prompt }
     ],
@@ -189,7 +264,27 @@ Include exactly 5 activities per day with varied times and categories.`;
     const parsed = JSON.parse(responseContent);
     const result = Array.isArray(parsed) ? parsed : (parsed.days || parsed.itinerary || []);
     
-    if (Array.isArray(result) && result.length > 0) {
+    if (Array.isArray(result)) {
+      // Ensure we have exactly the right number of days
+      if (result.length !== days) {
+        logger.warn('AI', `Day count mismatch for ${destination}: got ${result.length}, expected ${days}`);
+        
+        // Trim or pad to match expected days
+        if (result.length > days) {
+          // Too many days - trim to exact count
+          result.splice(days);
+        } else if (result.length < days) {
+          // Too few days - use fallback for missing days
+          const fallbackDays = createFallbackDays(destination, days - result.length, dayOffset + result.length);
+          result.push(...fallbackDays);
+        }
+      }
+      
+      // Fix day numbering to be sequential
+      result.forEach((day: any, index: number) => {
+        day.day = dayOffset + index + 1;
+      });
+      
       cache.set(cacheKey, result, 1800); // Cache 30 minutes
       return result;
     }
@@ -657,7 +752,26 @@ async function batchFetchHotels(
 }
 
 /**
- * Main ultra-fast generation function
+ * Generate request hash for deduplication
+ */
+function generateRequestHash(prompt: string): string {
+  // Normalize prompt for consistent hashing
+  const normalized = prompt.toLowerCase().trim()
+    .replace(/\s+/g, ' ')  // Normalize whitespace
+    .replace(/[^\w\s]/g, '');  // Remove punctuation
+  
+  // Simple hash function
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    const char = normalized.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return `req_${Math.abs(hash)}`;
+}
+
+/**
+ * Main ultra-fast generation function with request deduplication
  */
 export async function generateUltraFastItinerary(
   prompt: string,
@@ -665,6 +779,17 @@ export async function generateUltraFastItinerary(
   _conversationHistory?: string
 ): Promise<GeneratePersonalizedItineraryOutput> {
   const startTime = Date.now();
+  
+  // Check for duplicate request
+  const requestHash = generateRequestHash(prompt);
+  const dedupKey = `dedup:${requestHash}`;
+  const cachedResult = cache.get<GeneratePersonalizedItineraryOutput>(dedupKey);
+  
+  if (cachedResult) {
+    logger.info('AI', `🎯 Request deduplication hit - returning cached result [${Date.now() - startTime}ms]`);
+    return cachedResult;
+  }
+  
   logger.info('AI', '🚀 Starting ULTRA-FAST itinerary generation');
   
   try {
@@ -750,210 +875,32 @@ export async function generateUltraFastItinerary(
     
     logger.info('AI', `Parallel operations completed in ${Date.now() - parallelStart}ms`);
     
-    // Step 3: Combine all chunks into single itinerary with transportation
+    // Step 3: Combine all chunks into single itinerary WITHOUT adding extra travel days
     let allDays: any[] = [];
     
-    // Add initial transportation day from origin if specified
-    if (extracted.origin && extracted.origin !== 'Unknown' && destinations.length > 0) {
-      const originCity = extracted.origin;
-      const firstDestination = destinations[0].city;
-      
-      // Only add if origin is different from first destination
-      if (originCity.toLowerCase() !== firstDestination.toLowerCase()) {
-        const transport = getTransportMethod(originCity, firstDestination);
-        
-        // Get flight data if available
-        const route = `${originCity}-${firstDestination}`;
-        const flights = flightData.get(route) || [];
-        const cheapestFlight = flights.length > 0 
-          ? flights.reduce((min: any, f: any) => f.price.total < min.price.total ? f : min, flights[0])
-          : null;
-        
-        const originTransportDay = {
-          day: 1,
-          destination_city: `Travel Day`,
-          title: `${originCity} → ${firstDestination}`,
-          theme: 'Transportation',
-          _flightPrice: cheapestFlight?.price?.total || null,
-          _flightCurrency: cheapestFlight?.price?.currency || 'USD',
-          activities: [
-            {
-              time: '8:00 AM',
-              description: `Departure from ${originCity}`,
-              category: 'Travel',
-              duration: '1 hour',
-              tips: `Head to ${transport.method.includes('Train') ? 'train station' : 'airport'}`
-            },
-            {
-              time: '10:00 AM',
-              description: `${transport.method} to ${firstDestination}`,
-              category: 'Travel',
-              duration: transport.duration,
-              tips: transport.method.includes('Flight') ? 'Check in online 24h before' : 'Book seats in advance'
-            },
-            {
-              time: '3:00 PM',
-              description: `Arrival in ${firstDestination}`,
-              category: 'Travel',
-              duration: '1 hour',
-              tips: 'Transfer to accommodation'
-            },
-            {
-              time: '5:00 PM',
-              description: `Hotel check-in`,
-              category: 'Accommodation',
-              duration: '1 hour',
-              tips: 'Get settled and oriented'
-            },
-            {
-              time: '7:00 PM',
-              description: `Welcome dinner`,
-              category: 'Food',
-              duration: '2 hours',
-              tips: `First meal in ${firstDestination}`
-            }
-          ]
-        };
-        allDays.push(originTransportDay);
-      }
-    }
+    // DO NOT add separate travel days - they should be included in the destination days
+    // Travel should be the first activity of day 1 and last activity of the final day
     
-    // Add transportation between cities for multi-city trips
+    // Combine chunks without adding extra travel days
     if (destinations.length > 1) {
-      itineraryChunks.forEach((chunk, chunkIndex) => {
-        // Adjust day numbers if we added an origin transport day
-        const dayOffset = allDays.length;
+      // Multi-city trips - combine all chunks
+      let currentDayNum = 1;
+      itineraryChunks.forEach((chunk) => {
         const adjustedChunk = chunk.map((day: any) => ({
           ...day,
-          day: day.day + dayOffset
+          day: currentDayNum++
         }));
-        
-        // Add the destination's days
         allDays = allDays.concat(adjustedChunk);
-        
-        // Add transportation day between cities (except after last city)
-        if (chunkIndex < itineraryChunks.length - 1) {
-          const currentCity = destinations[chunkIndex].city;
-          const nextCity = destinations[chunkIndex + 1].city;
-          const travelDay = allDays.length + 1;
-          
-          // Determine transportation method
-          const transport = getTransportMethod(currentCity, nextCity);
-          
-          // Create transportation day with clear, non-redundant activities
-          const transportDay = {
-            day: travelDay,
-            destination_city: `Travel Day`,
-            title: `${currentCity} → ${nextCity}`,
-            theme: 'Transportation',
-            activities: [
-              {
-                time: '8:00 AM',
-                description: `Check out and pack`,
-                category: 'Accommodation',
-                duration: '1 hour',
-                tips: `Leave ${currentCity} accommodation`
-              },
-              {
-                time: '10:00 AM',
-                description: `Depart for ${transport.method.includes('Train') ? 'train station' : 'airport'}`,
-                category: 'Travel',
-                duration: '1 hour',
-                tips: 'Account for traffic and check-in time'
-              },
-              {
-                time: '12:00 PM',
-                description: `${transport.method}`,
-                category: 'Travel',
-                duration: transport.duration,
-                tips: `${currentCity} to ${nextCity} - ${transport.method.includes('Flight') ? 'Remember to check in online' : 'Seat reservations recommended'}`
-              },
-              {
-                time: '4:00 PM',
-                description: `Arrival and transfer`,
-                category: 'Travel',
-                duration: '1 hour',
-                tips: `Arrive in ${nextCity}, head to accommodation`
-              },
-              {
-                time: '6:00 PM',
-                description: `Hotel check-in`,
-                category: 'Accommodation',
-                duration: '1 hour',
-                tips: 'Get settled and oriented with the area'
-              },
-              {
-                time: '7:30 PM',
-                description: `Welcome dinner`,
-                category: 'Food',
-                duration: '2 hours',
-                tips: `First meal in ${nextCity} - try something local`
-              }
-            ]
-          };
-          
-          allDays.push(transportDay);
-          
-          // No need to adjust - will renumber all days at the end
-        }
       });
     } else {
-      // Single destination - just add the days (origin transport already handled above)
-      const dayOffset = allDays.length;
-      const adjustedChunk = itineraryChunks.flat().map((day: any) => ({
-        ...day,
-        day: day.day + dayOffset
-      }));
-      allDays = allDays.concat(adjustedChunk);
-      
-      // Add return flight day for single-destination trips
-      if (extracted.origin && extracted.origin !== 'Unknown' && destinations.length === 1) {
-        const returnDay = allDays.length + 1;
-        const destinationCity = destinations[0].city;
-        
-        const returnFlightDay = {
-          day: returnDay,
-          destination_city: `Travel Day`,
-          title: `${destinationCity} → ${extracted.origin}`,
-          theme: 'Transportation',
-          activities: [
-            {
-              time: '8:00 AM',
-              description: `Check out and pack`,
-              category: 'Accommodation',
-              duration: '1 hour',
-              tips: `Leave ${destinationCity} accommodation`
-            },
-            {
-              time: '10:00 AM',
-              description: `Depart for airport`,
-              category: 'Travel',
-              duration: '1 hour',
-              tips: `Head to ${destinationCity} airport`
-            },
-            {
-              time: '12:00 PM',
-              description: `Return flight to ${extracted.origin}`,
-              category: 'Travel',
-              duration: '10 hours',
-              tips: `${destinationCity} to ${extracted.origin}`
-            },
-            {
-              time: '10:00 PM',
-              description: `Arrival back home`,
-              category: 'Travel',
-              duration: '30 minutes',
-              tips: `Arrive in ${extracted.origin}`
-            }
-          ]
-        };
-        allDays.push(returnFlightDay);
-      }
+      // Single destination - just use the days as-is
+      allDays = itineraryChunks.flat();
     }
     
     // Step 4: Enhance with real data (already fetched)
-    // Track used venues to ensure diversity
-    const usedVenues = new Map<string, Set<string>>();
+    // Enhanced venue diversity tracking with category-specific usage
+    const usedVenues = new Map<string, Map<string, Set<string>>>();  // city -> category -> Set of venue IDs
+    const venueUsageCount = new Map<string, number>();  // Track global usage count per venue
     
     allDays.forEach((day: any) => {
       // For Travel Days, extract the actual destination city from the title
@@ -982,11 +929,11 @@ export async function generateUltraFastItinerary(
         };
       }
       
-      // Initialize city's used venues set if not exists
+      // Initialize city's category-specific venue tracking if not exists
       if (!usedVenues.has(city)) {
-        usedVenues.set(city, new Set<string>());
+        usedVenues.set(city, new Map<string, Set<string>>());
       }
-      const cityUsedVenues = usedVenues.get(city)!;
+      const cityVenuesByCategory = usedVenues.get(city)!;
       
       // Add venues to activities with diversity
       day.activities?.forEach((activity: any, activityIndex: number) => {
@@ -1050,26 +997,68 @@ export async function generateUltraFastItinerary(
         if (venueType && city !== 'Travel Day' && city !== 'LA' && city !== 'Los Angeles') {
           const venues = venueMap.get(`${city}:${venueType}`) || [];
           if (venues.length > 0) {
-            // Try to find an unused venue
-            let selectedVenue = null;
+            // Initialize category tracking if needed
+            if (!cityVenuesByCategory.has(venueType)) {
+              cityVenuesByCategory.set(venueType, new Set<string>());
+            }
+            const categoryUsedVenues = cityVenuesByCategory.get(venueType)!;
             
-            // First pass: try to find unused venue
-            for (const venue of venues) {
-              if (!cityUsedVenues.has(venue.place_id)) {
+            // Enhanced selection: prioritize by usage count
+            let selectedVenue = null;
+            let minUsageCount = Infinity;
+            
+            // Sort venues by usage count (least used first)
+            const sortedVenues = [...venues].sort((a, b) => {
+              const aCount = venueUsageCount.get(a.place_id) || 0;
+              const bCount = venueUsageCount.get(b.place_id) || 0;
+              return aCount - bCount;
+            });
+            
+            // First: Try to find completely unused venue
+            for (const venue of sortedVenues) {
+              if (!categoryUsedVenues.has(venue.place_id)) {
                 selectedVenue = venue;
-                cityUsedVenues.add(venue.place_id);
                 break;
               }
             }
             
-            // Second pass: if all venues used, pick the least recently used
-            if (!selectedVenue) {
-              // Use index-based selection to ensure variety even when recycling
-              const venueIndex = (day.day - 1 + activityIndex) % venues.length;
-              selectedVenue = venues[venueIndex];
+            // Second: If all used in this category, pick least globally used
+            if (!selectedVenue && sortedVenues.length > 0) {
+              // For restaurants, ensure we never use the same one twice in a day
+              if (venueType === 'restaurant') {
+                // Check if this restaurant was already used today
+                const todayActivities = day.activities || [];
+                const usedToday = new Set<string>();
+                todayActivities.forEach((act: any) => {
+                  if (act.venue_name) {
+                    usedToday.add(act.venue_name);
+                  }
+                });
+                
+                // Find first restaurant not used today
+                for (const venue of sortedVenues) {
+                  if (!usedToday.has(venue.name)) {
+                    selectedVenue = venue;
+                    break;
+                  }
+                }
+              }
+              
+              // If still no selection or not restaurant, use least globally used
+              if (!selectedVenue) {
+                selectedVenue = sortedVenues[0];
+              }
             }
             
             if (selectedVenue) {
+              // Update tracking
+              categoryUsedVenues.add(selectedVenue.place_id);
+              venueUsageCount.set(
+                selectedVenue.place_id, 
+                (venueUsageCount.get(selectedVenue.place_id) || 0) + 1
+              );
+              
+              // Assign venue details
               activity.venue_name = selectedVenue.name;
               activity.address = selectedVenue.formatted_address;
               activity.rating = selectedVenue.rating;
@@ -1155,6 +1144,10 @@ export async function generateUltraFastItinerary(
     result._hotelOptions = hotelData;
     result._flightOptions = flightData;
     
+    // Cache the successful result for deduplication
+    cache.set(dedupKey, result, 1800); // Cache for 30 minutes
+    logger.info('AI', `Cached successful result for deduplication [hash: ${requestHash}]`);
+    
     return result;
     
   } catch (error: any) {
@@ -1198,57 +1191,101 @@ function generateQuickTips(_destinations: any[]): string[] {
 }
 
 /**
- * Pre-warm cache with popular destinations and common requests
+ * Enhanced cache pre-warming with prioritized strategy
  */
-export async function prewarmCache(): Promise<void> {
-  logger.info('AI', 'Pre-warming cache with popular destinations');
+export async function prewarmCache(priority: 'startup' | 'background' = 'startup'): Promise<void> {
+  const startTime = Date.now();
+  logger.info('AI', `Starting ${priority} cache pre-warming`);
   
   const promises: Promise<void>[] = [];
+  const citiesToWarm = priority === 'startup' 
+    ? POPULAR_DESTINATIONS.slice(0, 5)  // Top 5 for fast startup
+    : POPULAR_DESTINATIONS;              // All for background
   
-  // Pre-warm venue and weather data for popular destinations
-  for (const city of POPULAR_DESTINATIONS.slice(0, 10)) { // Limit to top 10 to avoid rate limits
-    // Pre-fetch weather
-    if (process.env.OPENWEATHERMAP) {
-      promises.push(
-        getWeatherForecast(city, 7)
-          .then(weather => cache.set(`weather:${city}`, weather, 3600))
-          .catch(() => logger.debug('AI', `Weather pre-warm failed for ${city}`))
-      );
-    }
+  // Batch API calls to avoid rate limits
+  const batchSize = priority === 'startup' ? 2 : 5;
+  
+  for (let i = 0; i < citiesToWarm.length; i += batchSize) {
+    const cityBatch = citiesToWarm.slice(i, i + batchSize);
     
-    // Pre-fetch venues for common categories
-    if (process.env.GOOGLE_API_KEY) {
-      const venueTypes = ['restaurant', 'tourist_attraction', 'museum', 'park'];
-      for (const type of venueTypes) {
+    for (const city of cityBatch) {
+      // Weather data - essential for all trips
+      if (process.env.OPENWEATHERMAP) {
         promises.push(
-          searchGooglePlaces(type, city, type)
-            .then(venues => cache.set(`venues:${city}:${type}`, venues, 7200)) // 2 hour cache
-            .catch(() => logger.debug('AI', `Venue pre-warm failed for ${city}:${type}`))
+          getWeatherForecast(city, 7)
+            .then(weather => cache.set(`weather:${city}`, weather))  // Uses optimized TTL
+            .catch(() => logger.debug('AI', `Weather pre-warm skipped: ${city}`))
         );
+      }
+      
+      // Venues - only essential categories initially
+      if (process.env.GOOGLE_API_KEY) {
+        const essentialVenues = priority === 'startup' 
+          ? ['restaurant', 'tourist_attraction']  // Essential only
+          : ['restaurant', 'tourist_attraction', 'museum', 'park', 'cafe', 'shopping_mall'];
+        
+        for (const type of essentialVenues) {
+          promises.push(
+            searchGooglePlaces(type, city, type)
+              .then(venues => {
+                cache.set(`venues:${city}:${type}`, venues);  // Uses optimized TTL
+                // Also cache with alternate key format
+                cache.set(`${city}:${type}`, venues);
+              })
+              .catch(() => logger.debug('AI', `Venue pre-warm skipped: ${city}:${type}`))
+          );
+        }
+      }
+      
+      // Pre-generate common extractions
+      if (priority === 'background') {
+        for (const days of COMMON_DURATIONS) {
+          // Multiple prompt variations
+          const variations = [
+            `${days} days in ${city}`,
+            `I want to visit ${city} for ${days} days`,
+            `Plan a ${days} day trip to ${city}`,
+            `${city} ${days} days`
+          ];
+          
+          for (const prompt of variations) {
+            const extraction = {
+              origin: 'Unknown',
+              destinations: [{ city, days }],
+              totalDays: days,
+              returnTo: 'Unknown'
+            };
+            cache.set(`extract:${prompt.substring(0, 100)}`, extraction);
+          }
+        }
       }
     }
     
-    // Pre-generate common trip extractions
-    for (const days of COMMON_DURATIONS) {
-      const mockPrompt = `${days} days in ${city}`;
-      const extraction = {
-        origin: 'Unknown',
-        destinations: [{ city, days }],
-        totalDays: days,
-        returnTo: 'Unknown'
-      };
-      cache.set(`extract:${mockPrompt.substring(0, 100)}`, extraction, 1800);
+    // Add delay between batches to avoid rate limits
+    if (i + batchSize < citiesToWarm.length) {
+      await new Promise(resolve => setTimeout(resolve, priority === 'startup' ? 100 : 500));
     }
   }
   
-  // Wait for all pre-warming to complete (with timeout)
+  // Wait with appropriate timeout
+  const timeout = priority === 'startup' ? 5000 : 15000;
   await Promise.race([
     Promise.all(promises),
-    new Promise(resolve => setTimeout(resolve, 10000)) // 10 second timeout
+    new Promise(resolve => setTimeout(resolve, timeout))
   ]);
   
-  logger.info('AI', 'Cache pre-warming complete', { 
-    cachedCities: POPULAR_DESTINATIONS.slice(0, 10).length,
-    cacheSize: cache.size() 
+  const stats = cache.getStats();
+  logger.info('AI', `Cache pre-warming complete (${priority})`, { 
+    duration: `${Date.now() - startTime}ms`,
+    stats
   });
+  
+  // Schedule background pre-warming if this was startup
+  if (priority === 'startup') {
+    setTimeout(() => {
+      prewarmCache('background').catch(err => 
+        logger.error('AI', 'Background pre-warming failed', { error: err })
+      );
+    }, 30000); // Run after 30 seconds
+  }
 }

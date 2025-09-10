@@ -138,26 +138,29 @@ export async function generatePersonalizedItinerary(
     }
   }
   
-  if (!origin || origin === '') {
+  // Origin is optional - we can still generate an itinerary without it
+  // Only validate if destinations are missing
+  if (!parsedTrip.destinations || parsedTrip.destinations.length === 0) {
     if (typeof window !== 'undefined') {
-      console.log('ℹ️ Origin location missing - throwing error for UI popup');
+      console.log('ℹ️ No destinations found - throwing error for UI popup');
     }
-    logger.info('AI', 'Origin location not provided - throwing error for UI');
-    
-    // Return a special response for missing origin instead of throwing
-    const destinations = parsedTrip.destinations.length > 0 
-      ? parsedTrip.destinations.map(d => d.name).join(', ')
-      : 'your destination';
+    logger.info('AI', 'No destinations found - throwing error for UI');
     
     return {
       destination: 'Input Validation',
-      title: 'Origin Required',
+      title: 'Destination Required',
       itinerary: [],
       quickTips: [],
       needsMoreInfo: true,
       validationError: true,
-      errorMessage: `I couldn't understand where you're traveling from. Please include your departure city in your search, like "3 days in ${destinations} from New York"`
+      errorMessage: `I couldn't understand your destination. Please specify where you'd like to travel, like "3 days in London" or "Weekend trip to Paris"`
     } as any;
+  }
+  
+  // If origin is missing, just log it but continue
+  if (!origin || origin === '') {
+    logger.info('AI', 'Origin not provided, continuing without flight estimates');
+    origin = 'Unknown'; // Use Unknown as placeholder
   }
   
   // Update parsedTrip with the found origin
