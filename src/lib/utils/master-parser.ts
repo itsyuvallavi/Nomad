@@ -6,8 +6,30 @@
 
 import { TravelDateParser } from './date-parser';
 import { TravelInputValidator } from './input-validator';
-import { AdvancedTravelParser, TravelEntities, TripType, TravelPreferences } from './nlp-parser';
-import { enhancedLogger } from './enhanced-logger';
+// Removed nlp-parser and enhanced-logger imports - files were deleted
+
+// Define types that were from nlp-parser
+export type TripType = 'business' | 'leisure' | 'adventure' | 'relaxation' | 'cultural' | 'mixed';
+
+export interface TravelEntities {
+  cities: Array<{ name: string; confidence: number }>;
+  countries: Array<{ name: string; confidence: number }>;
+  places?: Array<{ name: string; type: string; confidence: number }>;
+  dates: Array<{ text: string; parsed?: Date }>;
+  numbers: Array<{ value: number; context: string }>;
+  keywords: string[];
+  travelers?: number;
+  budget?: { amount: number; currency: string };
+  activities?: string[];
+  durations?: number[];
+}
+
+export interface TravelPreferences {
+  accommodation: 'budget' | 'mid-range' | 'luxury' | 'any';
+  pace: 'slow' | 'moderate' | 'fast';
+  flexibility: 'strict' | 'flexible' | 'very-flexible';
+  interests: string[];
+}
 
 // Cache for parsed results
 const parseCache = new Map<string, ParsedTravelRequest>();
@@ -66,17 +88,16 @@ export class MasterTravelParser {
    */
   static async parseUserInput(input: string): Promise<ParsedTravelRequest> {
     const startTime = Date.now();
-    const flowId = enhancedLogger.aiFlowStart('masterParser', { input });
+    // Removed enhanced logger - using console.log for debugging
+    const flowId = Date.now().toString();
+    console.log('[MasterParser] Starting parse:', { flowId, input: input.substring(0, 100) });
     
     try {
       // Check cache first
       const cacheKey = this.getCacheKey(input);
       const cached = this.getFromCache(cacheKey);
       if (cached) {
-        enhancedLogger.aiFlowEnd(flowId, true, { 
-          source: 'cache', 
-          processingTime: Date.now() - startTime 
-        });
+        console.log('[MasterParser] Cache hit:', { flowId, processingTime: Date.now() - startTime });
         return { ...cached, usedCache: true };
       }
       
@@ -84,7 +105,8 @@ export class MasterTravelParser {
       const validation = TravelInputValidator.validateTravelRequest(input);
       
       // Step 2: Extract entities using NLP
-      const entities = AdvancedTravelParser.extractEntities(validation.sanitized);
+      // Simple entity extraction (replacing AdvancedTravelParser)
+      const entities = this.extractEntities(validation.sanitized);
       
       // Step 3: Parse dates with multiple strategies
       const dateResult = this.parseDatesComprehensive(validation.sanitized, entities);
@@ -98,12 +120,16 @@ export class MasterTravelParser {
       // Step 6: Determine travelers and budget
       const travelers = entities.travelers || validation.extractedInfo.travelerCount || 1;
       const travelerType = this.determineTravelerType(travelers, validation.sanitized);
-      const budget = entities.budget || validation.extractedInfo.budget;
+      const budget = entities.budget 
+        ? { ...entities.budget, perPerson: true }
+        : validation.extractedInfo.budget 
+        ? { ...validation.extractedInfo.budget, perPerson: true }
+        : undefined;
       
       // Step 7: Extract preferences and trip type
-      const tripType = AdvancedTravelParser.identifyTripType(validation.sanitized);
-      const preferences = AdvancedTravelParser.extractTravelPreferences(validation.sanitized);
-      const urgency = AdvancedTravelParser.detectUrgency(validation.sanitized);
+      const tripType = this.identifyTripType(validation.sanitized);
+      const preferences = this.extractTravelPreferences(validation.sanitized);
+      const urgency = this.detectUrgency(validation.sanitized);
       
       // Step 8: Calculate confidence and generate suggestions
       const confidence = this.calculateOverallConfidence({
@@ -111,7 +137,7 @@ export class MasterTravelParser {
         destinations: destinations,
         dateConfidence: dateResult.confidence,
         validationPassed: validation.isValid,
-        entitiesFound: entities.places.length > 0
+        entitiesFound: (entities.places?.length || 0) > 0
       });
       
       const suggestions = this.generateSuggestions({
@@ -134,7 +160,7 @@ export class MasterTravelParser {
         budget,
         tripType,
         preferences,
-        activities: entities.activities,
+        activities: entities.activities || [],
         urgency,
         isValid: validation.isValid && destinations.length > 0,
         confidence,
@@ -152,13 +178,14 @@ export class MasterTravelParser {
       this.cacheResult(cacheKey, result);
       
       // Log metrics
-      enhancedLogger.logParsingMetrics(
-        result.processingTime,
-        result.isValid,
-        result.confidence
-      );
+      console.log('[MasterParser] Parsing metrics:', {
+        processingTime: result.processingTime,
+        isValid: result.isValid,
+        confidence: result.confidence
+      });
       
-      enhancedLogger.aiFlowEnd(flowId, true, {
+      console.log('[MasterParser] Parse complete:', { 
+        flowId,
         confidence: result.confidence,
         destinationCount: result.destinations.length,
         processingTime: result.processingTime
@@ -167,8 +194,7 @@ export class MasterTravelParser {
       return result;
       
     } catch (error: any) {
-      enhancedLogger.aiFlowEnd(flowId, false, { error: error.message });
-      enhancedLogger.error('PARSING', 'Master parser failed', error);
+      console.error('[MasterParser] Parse failed:', { flowId, error: error.message });
       throw error;
     }
   }
@@ -193,7 +219,7 @@ export class MasterTravelParser {
     if (entities.dates.length > 0) {
       // Try to parse NLP dates
       for (const dateStr of entities.dates) {
-        const parsed = TravelDateParser.parseFlexibleDate(dateStr);
+        const parsed = TravelDateParser.parseFlexibleDate(dateStr.text);
         if (parsed.startDate && parsed.confidence === 'high') {
           nlpConfidence = 'high';
           break;
@@ -203,8 +229,8 @@ export class MasterTravelParser {
     
     // Check duration from NLP
     let duration = dateParserResult.duration;
-    if (!duration && entities.durations.length > 0) {
-      duration = TravelDateParser.extractDuration(entities.durations[0]);
+    if (!duration && entities.durations && entities.durations.length > 0) {
+      duration = TravelDateParser.extractDuration(entities.durations[0].toString()) || undefined;
     }
     
     // Combine results with confidence scoring
@@ -238,8 +264,8 @@ export class MasterTravelParser {
     const destinations = new Map<string, { days: number; confidence: 'high' | 'medium' | 'low' }>();
     
     // Add NLP-detected places
-    entities.places.forEach(place => {
-      const cleaned = TravelInputValidator.sanitizeDestination(place);
+    entities.places?.forEach(place => {
+      const cleaned = TravelInputValidator.sanitizeDestination(place.name);
       if (cleaned && cleaned.length > 2) {
         destinations.set(cleaned.toLowerCase(), {
           days: 7, // Default
@@ -314,8 +340,8 @@ export class MasterTravelParser {
         const origin = TravelInputValidator.sanitizeDestination(match[1].trim());
         if (origin && origin.length > 2) {
           // Verify it's not in destinations
-          const isDestination = entities.places.some(place => 
-            place.toLowerCase() === origin.toLowerCase()
+          const isDestination = entities.places?.some(place => 
+            place.name.toLowerCase() === origin.toLowerCase()
           );
           
           if (!isDestination) {
@@ -407,10 +433,10 @@ export class MasterTravelParser {
     entities: TravelEntities,
     destinations: any[]
   ): 'nlp' | 'pattern' | 'hybrid' {
-    if (entities.places.length > 0 && destinations.length > 0) {
+    if ((entities.places?.length || 0) > 0 && destinations.length > 0) {
       return 'hybrid';
     }
-    if (entities.places.length > 0) {
+    if ((entities.places?.length || 0) > 0) {
       return 'nlp';
     }
     return 'pattern';
@@ -439,7 +465,7 @@ export class MasterTravelParser {
     // Limit cache size
     if (parseCache.size > 100) {
       const firstKey = parseCache.keys().next().value;
-      parseCache.delete(firstKey);
+      if (firstKey) parseCache.delete(firstKey);
     }
     parseCache.set(key, result);
   }
@@ -452,6 +478,87 @@ export class MasterTravelParser {
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  }
+  
+  /**
+   * Simple entity extraction (replacing AdvancedTravelParser)
+   */
+  private static extractEntities(text: string): TravelEntities {
+    const cityRegex = /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g;
+    const numberRegex = /\b\d+\b/g;
+    
+    const cities = [];
+    const matches = text.match(cityRegex) || [];
+    for (const match of matches) {
+      // Simple city detection - could be enhanced with a city database
+      if (match.length > 2 && !['The', 'And', 'For', 'From', 'To'].includes(match)) {
+        cities.push({ name: match, confidence: 0.7 });
+      }
+    }
+    
+    const numbers = [];
+    const numMatches = text.match(numberRegex) || [];
+    for (const num of numMatches) {
+      numbers.push({ value: parseInt(num), context: 'general' });
+    }
+    
+    return {
+      cities,
+      countries: [],
+      dates: [],
+      numbers,
+      keywords: text.toLowerCase().split(/\s+/).filter(w => w.length > 3)
+    };
+  }
+  
+  /**
+   * Identify trip type from text
+   */
+  private static identifyTripType(text: string): TripType {
+    const lower = text.toLowerCase();
+    if (lower.includes('business') || lower.includes('work')) return 'business';
+    if (lower.includes('adventure') || lower.includes('hiking')) return 'adventure';
+    if (lower.includes('relax') || lower.includes('beach')) return 'relaxation';
+    if (lower.includes('culture') || lower.includes('museum')) return 'cultural';
+    return 'leisure';
+  }
+  
+  /**
+   * Extract travel preferences
+   */
+  private static extractTravelPreferences(text: string): TravelPreferences {
+    const lower = text.toLowerCase();
+    
+    let accommodation: 'budget' | 'mid-range' | 'luxury' | 'any' = 'mid-range';
+    if (lower.includes('budget') || lower.includes('cheap')) accommodation = 'budget';
+    if (lower.includes('luxury') || lower.includes('premium')) accommodation = 'luxury';
+    
+    let pace: 'slow' | 'moderate' | 'fast' = 'moderate';
+    if (lower.includes('relax') || lower.includes('slow')) pace = 'slow';
+    if (lower.includes('packed') || lower.includes('busy')) pace = 'fast';
+    
+    const interests = [];
+    if (lower.includes('food')) interests.push('food');
+    if (lower.includes('history')) interests.push('history');
+    if (lower.includes('art')) interests.push('art');
+    if (lower.includes('nature')) interests.push('nature');
+    
+    return {
+      accommodation,
+      pace,
+      flexibility: 'flexible',
+      interests
+    };
+  }
+  
+  /**
+   * Detect urgency level
+   */
+  private static detectUrgency(text: string): 'immediate' | 'planning' | 'exploring' {
+    const lower = text.toLowerCase();
+    if (lower.includes('tomorrow') || lower.includes('today')) return 'immediate';
+    if (lower.includes('next week') || lower.includes('next month')) return 'planning';
+    return 'exploring';
   }
   
   /**
