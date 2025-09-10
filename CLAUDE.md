@@ -1,249 +1,220 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with the Nomad Navigator codebase.
 
 ## Project Overview
-Nomad Navigator - AI-powered travel planning application for digital nomads using Next.js 15, Firebase Genkit, and Google Gemini AI.
+Nomad Navigator - AI-powered travel planning application for digital nomads using Next.js 15, OpenAI APIs, and modern web technologies.
 
-## Plan & Review
-
-### Before starting work
-•⁠  ⁠Always in plan mode to make a plan
-•⁠  ⁠After get the plan, make sure you Write the plan to .claude/tasks/TASK_NAME.md.
-•⁠  ⁠The plan should be a detailed implementation plan and the reasoning behind them, as well as tasks broken down.
-•⁠  ⁠If the task require external knowledge or certain package, also research to get latest knowledge (Use Task tool for research)
-•⁠  ⁠Don't over plan it, always think MVP.
-•⁠  ⁠Once you write the plan, firstly ask me to review it. Do not continue until I approve the plan.
-
-### While implementing
-•⁠  ⁠You should update the plan as you work.
-•⁠  ⁠After you complete tasks in the plan, you should update and append detailed descriptions of the changes you made, so following tasks can be easily hand over to other engineers.
-•⁠  ⁠After you complete the task, you should update the plan to mark the task as completed.
-
-## AI Testing & Consistency Guidelines
-
-### CRITICAL: Always Test Before Deploying
-
-**Before making any changes to AI prompts or logic, you MUST:**
-
-1. **Run baseline test**: `npm run test:ai --baseline`
-2. **If baseline fails**: DO NOT proceed with complex changes
-3. **After any prompt changes**: Run full test suite with `npm run test:ai`
-
-### Testing Strategy
-
-#### Regression Prevention
-- The "3 days in London" test is our **golden standard**
-- If this simple request breaks, something is fundamentally wrong
-- Never deploy if baseline test fails
-
-#### Test Cases Priority
-1. **Simple requests** (London, Paris weekend) - must ALWAYS work
-2. **Medium complexity** (multi-city trips) - should work consistently  
-3. **Complex requests** (multi-week, constrained) - can have occasional issues
-
-#### When Making Changes to AI Flows
-
-**WORKFLOW:**
-```bash
-# 1. Before any changes
-npm run test:ai --baseline
-
-# 2. Make your prompt/logic changes in src/ai/flows/
-
-# 3. Test immediately after changes
-npm run test:ai --baseline
-
-# 4. If baseline passes, run full suite
-npm run test:ai
-
-# 5. Only deploy if all simple tests pass
-```
-
-### Monitoring Rules
-
-#### Daily Checks
-- Run `npm run test:ai` at least once per day during active development
-- Check `ai-test-results.json` for trends and regressions
-
-#### Red Flags 🚨
-- Simple tests failing after working previously
-- Response times increasing dramatically
-- Missing required fields in responses
-- Inconsistent destination/day counts
-- Genkit flows returning malformed schemas
-
-#### Response Quality Metrics
-- **Response Time**: Should be < 10 seconds for simple requests
-- **Structure Validation**: All required fields present (see `src/ai/schemas.ts`)
-- **Logical Consistency**: Days/destinations match request
-- **Activity Count**: Reasonable number of activities per day
-
-### Debugging Failed Tests
-
-When tests fail:
-
-1. **Check the last working version** - what changed in AI flows?
-2. **Isolate the issue** - test with fresh conversation context
-3. **Validate your test case** - is the expected structure correct?
-4. **Check for prompt pollution** - are complex prompts affecting simple ones?
-5. **Use Genkit UI** - `npm run genkit:dev` to debug individual flows
-
-### Integration with Development
-
-#### Before Code Reviews
-- Include test results in your PR description
-- Show baseline test passes
-- Document any test changes and why
-
-#### Before Deployments
-- Full test suite must pass
-- No regressions in simple test cases
-- Response times within acceptable range
-
-### MCP Integration
-
-When adding new MCPs:
-1. Run baseline test before adding MCP
-2. Add MCP and test again
-3. Ensure MCP doesn't break existing functionality
-4. Update test cases if MCP changes expected behavior
-
-#### Quick Commands Reference
-
-```bash
-# Run just the critical baseline test
-npm run test:ai --baseline
-
-# Run all tests
-npm run test:ai
-
-# View test history
-cat ai-test-results.json | jq '.[-5:]'  # Last 5 results
-```
-
-**Remember**: AI development is like traditional software development - test early, test often, and never deploy broken code!
+## Current Technology Stack
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS, shadcn/ui
+- **AI**: OpenAI GPT-4, custom prompt engineering
+- **APIs**: Amadeus (flights/hotels), Google Places/Maps, Weather, Foursquare
+- **Deployment**: Firebase Hosting
+- **Development**: MCP integration (filesystem, puppeteer)
 
 ## Development Workflow
 
-### Planning Requirements
-- Always use plan mode before starting implementation work
-- Write detailed plans to `.claude/tasks/TASK_NAME.md` including reasoning and task breakdown
-- Research external knowledge/packages if needed (use Task tool)
-- Focus on MVP approach - don't over-plan
-- Get user approval before implementation
+### Before Starting Any Task
+1. **Plan First**: Always create a plan in `.claude/tasks/[component]/task-name.md`
+2. **Test Baseline**: Run `npm run test:ai --baseline` before making AI changes
+3. **Get Approval**: Ask for plan review before implementation
+4. **Think MVP**: Focus on minimal viable solutions
 
 ### During Implementation
-- Update the plan file as you work
-- Document changes with detailed descriptions for handover
-- Mark tasks as completed in the plan
+1. **Update Plans**: Document progress and changes
+2. **Test Frequently**: Run baseline tests after AI modifications
+3. **Use MCPs**: Leverage file system MCP for efficient file access
+4. **Document Changes**: Explain modifications for future handoffs
+
+## AI Testing - CRITICAL
+
+### Golden Rule: "3 days in London" Must Always Work
+This simple test is our canary. If it fails, stop and fix before proceeding.
+
+```bash
+# Before any AI changes
+npm run test:ai --baseline
+
+# After AI changes
+npm run test:ai --baseline
+
+# Full test suite
+npm run test:ai
+```
+
+### Test Priority Levels
+1. **Must Pass**: Simple requests (London weekend, Paris 3-day)
+2. **Should Pass**: Medium complexity (multi-city, week-long trips)
+3. **Can Occasionally Fail**: Complex requests (multi-week, heavy constraints)
+
+### Red Flags - Stop Immediately
+- Baseline test failing after previously passing
+- Response times > 15 seconds for simple requests
+- Missing required fields in AI responses
+- Inconsistent destination/day counts
 
 ## Development Commands
 
 ```bash
-# Development servers
-npm run dev                # Next.js dev server with Turbopack (default port 9002)
-npm run dev:both          # Run both Next.js and Genkit servers in parallel
-npm run genkit:dev        # Firebase Genkit UI for testing AI flows
-npm run genkit:watch      # Genkit with hot reload
+# Core Development
+npm run dev                 # Next.js dev server (port 9002)
+npm run genkit:dev         # AI flow debugging UI
+npm run typecheck          # TypeScript validation
 
-# Code quality
-npm run typecheck         # TypeScript type checking
-npm run lint              # ESLint code linting
+# AI Testing
+npm run test:ai --baseline # Critical baseline test
+npm run test:ai            # Full test suite
 
-# AI Testing (NEW)
-npm run test:ai           # Run full AI consistency test suite
-npm run test:ai --baseline # Run just the baseline London test
-
-# Production
-npm run build             # Production build
-npm run start             # Start production server
+# Quality Assurance
+npm run lint               # Code linting
+npm run build              # Production build test
 ```
 
-## Architecture Overview
+## Architecture Quick Reference
 
-### AI Flow System
-The application uses Firebase Genkit with Google Gemini for all AI processing:
+### Key Directories
+```
+src/
+├── ai/flows/              # AI processing logic
+├── components/            # React components
+│   ├── chat/             # Chat interface
+│   ├── itinerary/        # Trip display
+│   └── ui/               # Reusable components
+├── lib/api/              # External API integrations
+└── lib/utils/            # Utility functions
+```
 
-**Core Files:**
-- `src/ai/genkit.ts`: Genkit configuration with Gemini model setup
-- `src/ai/schemas.ts`: Zod schemas for structured AI outputs
-- `src/ai/flows/`: AI processing flows (server actions)
-  - `analyze-initial-prompt.ts`: Analyzes user input to identify missing trip information
-  - `generate-personalized-itinerary.ts`: Creates detailed day-by-day itineraries
-  - `refine-itinerary-based-on-feedback.ts`: Modifies itineraries based on user feedback
+### AI Flows (Primary Logic)
+- `analyze-initial-prompt.ts`: Parses user input
+- `generate-personalized-itinerary.ts`: Creates trip plans
+- `refine-itinerary-based-on-feedback.ts`: Handles modifications
 
-**AI Flow Implementation Pattern:**
-Each flow follows this structure:
-1. Input/Output schemas using Zod
-2. Flow definition with `ai.defineFlow()`
-3. Prompt template with tool usage
-4. Export as Next.js server action
+### External APIs
+- **Amadeus**: Flights, hotels, car rentals
+- **Google Places**: Attractions, restaurants, venues
+- **Weather API**: Current conditions and forecasts
+- **Foursquare**: Venue details and recommendations
 
-**Tool Usage in AI Flows:**
-The AI uses three custom tools defined in `generate-personalized-itinerary.ts`:
-- `estimateFlightTime`: Calculates flight durations between cities
-- `getWeatherForecast`: Fetches real weather data (requires OPENWEATHERMAP API key)
-- `findRealPlaces`: Searches for real venues via Foursquare API (requires FOURSQUARE_API_KEY)
+## Current Challenges & Focus Areas
 
-### Application State Flow
-The main app (`src/app/page.tsx`) manages state transitions between views:
-- **StartItinerary** → **ChatDisplay** → **ItineraryDisplay**
-- State passed via props, not global state management
-- Recent searches stored in localStorage
+### Token Usage Optimization
+- Use MCP file system for efficient file access
+- Be specific about which files to examine
+- Avoid loading entire codebase into context
 
-### External API Integration
-Located in `src/lib/api/`:
-- **Foursquare API** (`foursquare.ts`): Real venue search
-- **OpenWeatherMap API** (`weather.ts`): Weather forecasts
-- **API Validation** (`api-validation.ts`): Key validation utilities
+### API Integration Reliability
+- Amadeus is in sandbox mode (mock data)
+- Google APIs require proper key configuration
+- Handle API failures gracefully with fallbacks
 
-### Component Structure
-- `src/components/ui/`: shadcn/ui components (auto-generated, don't modify)
-- `src/components/`: Feature components
-  - `start-itinerary.tsx`: Initial form and recent searches
-  - `chat-display.tsx`: AI conversation interface
-  - `itinerary-display.tsx`: Generated itinerary view
-  - `itinerary-form.tsx`: Trip details input form
+### Testing Strategy
+- Maintain simple test cases that always work
+- Complex scenarios can have occasional failures
+- Prioritize consistency over feature complexity
 
 ## Environment Variables
-Required in `.env` file:
+```bash
+# Required
+OPENAI_API_KEY=            # Primary AI processing
+GOOGLE_API_KEY=            # Maps, Places, Geocoding
+AMADEUS_API_KEY=           # Flights and hotels (sandbox)
+AMADEUS_API_SECRET=        # Amadeus authentication
+
+# Optional
+FOURSQUARE_API_KEY=        # Enhanced venue data
+OPENWEATHERMAP=            # Weather forecasts
 ```
-GEMINI_API_KEY=           # Google AI API key (required)
-FOURSQUARE_API_KEY=       # Foursquare Places API (optional, for real venues)
-OPENWEATHERMAP=           # OpenWeatherMap API key (optional, for weather)
+
+## Task Organization
+
+### Component-Based Task Structure
+```
+.claude/tasks/
+├── ui/                    # Frontend tasks
+├── ai/                    # AI flow improvements
+├── api/                   # External integrations
+├── map/                   # Map components
+├── testing/               # Test improvements
+└── architecture/          # System design
 ```
 
-## Key Technical Patterns
+### Task Naming Convention
+- `YYYY-MM-DD-descriptive-name.md`
+- Include component area in path
+- Mark status: TODO, IN_PROGRESS, DONE
 
-### Date Handling
-AI flows use current year by default. Date extraction logic in `generate-personalized-itinerary.ts:289-299` ensures correct date formatting.
+## MCP Integration
 
-### Error Handling
-AI flows include fallback responses when APIs fail. See `generate-personalized-itinerary.ts:403-437` for error recovery pattern.
+### Available MCPs
+- **Filesystem**: Efficient file access (reduces tokens)
+- **Puppeteer**: Web scraping capabilities
 
-### Information Gathering Strategy
-Defined in `analyze-initial-prompt.ts:49-86`:
+### Usage Guidelines
+- Let filesystem MCP handle file reading
+- Don't paste large files into conversations
+- Use specific file paths when requesting analysis
 
-**Essential Information (AI will ask if missing):**
-- Trip duration/length (e.g., "5 days", "2 weeks")
-- Travel dates (specific or flexible like "mid-January")
-- Destination(s)
-- Origin/departure location
-- Number of travelers
+## Common Patterns
 
-**Smart Defaults (AI won't ask - applies automatically):**
-- Budget: Moderate ($150-200/day per person)
-- Activities: Mix of highlights, culture, food, sights
-- Travel style: Balanced comfort/adventure
-- Accommodation: Mid-range hotels/Airbnbs
+### AI Flow Development
+1. Update schemas in `src/ai/schemas.ts`
+2. Modify flow logic in `src/ai/flows/`
+3. Test with Genkit UI (`npm run genkit:dev`)
+4. Run baseline tests
+5. Deploy only after tests pass
 
-When modifying AI functionality:
-1. Update relevant flow in `src/ai/flows/`
-2. Ensure schema compliance in `src/ai/schemas.ts`
-3. Test using `npm run genkit:dev` to access the Genkit UI
-4. **RUN AI TESTS**: `npm run test:ai --baseline` before and after changes
-5. Keep questions minimal - only ask for essential missing info
+### Component Development
+1. Use existing shadcn/ui components when possible
+2. Follow Tailwind utility-first approach
+3. Implement proper TypeScript types
+4. Test responsive design
 
-### File Attachments
-Files converted to base64 data URIs before AI processing. See `itinerary-form.tsx` for implementation.
+### API Integration
+1. Add new APIs to `src/lib/api/`
+2. Include proper error handling
+3. Implement fallback strategies
+4. Add environment variable validation
+
+## Performance Optimization Strategy
+
+### Implemented Optimizations
+1. **Streaming**: Show results as they generate
+2. **Edge Deployment**: Run at edge locations
+3. **Database Caching**: Persist popular destinations
+4. **Pre-warm Cache**: Load London/Paris/Tokyo on startup
+
+### Monitoring
+- Track AI response times
+- Monitor API usage and costs
+- Log user interaction patterns
+- Measure conversion rates
+
+## Troubleshooting
+
+### AI Tests Failing
+1. Check recent changes to AI flows
+2. Validate environment variables
+3. Test individual flows in Genkit UI
+4. Compare with last working version
+
+### API Issues
+1. Verify API keys in environment
+2. Check API rate limits and quotas
+3. Test API endpoints directly
+4. Review error logs in `logs/` directory
+
+### MCP Not Working
+1. Restart Claude Code
+2. Check MCP configuration with `claude mcp list`
+3. Verify packages are installed
+4. Re-add MCPs if necessary
+
+---
+
+## Quick Reference Links
+- **Genkit UI**: `npm run genkit:dev` → http://localhost:4000
+- **App Dev Server**: `npm run dev` → http://localhost:9002
+- **Task Templates**: `.claude/tasks/templates/`
+- **Test Results**: `ai-test-results.json`
+
+Remember: When in doubt, run the baseline test. If London works, everything else is solvable.

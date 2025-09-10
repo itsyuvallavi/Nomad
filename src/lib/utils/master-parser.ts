@@ -450,12 +450,11 @@ export class MasterTravelParser {
   }
   
   private static getFromCache(key: string): ParsedTravelRequest | null {
-    const cached = parseCache.get(key);
+    const cached = parseCache.get(key) as (ParsedTravelRequest & { cachedAt?: number }) | undefined;
+    if (cached?.cachedAt && Date.now() - cached.cachedAt < CACHE_TTL) {
+      return cached;
+    }
     if (cached) {
-      const age = Date.now() - cached.processingTime;
-      if (age < CACHE_TTL) {
-        return cached;
-      }
       parseCache.delete(key);
     }
     return null;
@@ -467,7 +466,9 @@ export class MasterTravelParser {
       const firstKey = parseCache.keys().next().value;
       if (firstKey) parseCache.delete(firstKey);
     }
-    parseCache.set(key, result);
+    // When caching, add cachedAt timestamp for TTL calculation
+    const resultToCache = { ...result, cachedAt: Date.now() };
+    parseCache.set(key, resultToCache);
   }
   
   /**

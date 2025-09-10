@@ -28,6 +28,11 @@ export interface ParsedTrip {
 function parseDuration(durationText: string): number {
   const text = durationText.toLowerCase().trim();
   
+  // Handle "weekend" specifically as 2 days
+  if (text === 'weekend' || text === 'a weekend' || text === 'the weekend') {
+    return 2;
+  }
+  
   // Handle "a week" or "one week" or "two weeks"
   if (text.includes('week')) {
     const weekMatch = text.match(/(\d+|a|one|two|three|four)\s*weeks?/);
@@ -164,6 +169,8 @@ export function parseDestinations(input: string): ParsedTrip {
     /((?:a|an|one|two|three|four)\s+weeks?)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
     // "weekend in Paris" - stop at "from"
     /(weekend)\s+in\s+([A-Z][a-zA-Z\s,]+?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
+    // "weekend trip to Paris" - common pattern
+    /(weekend)\s+trip\s+to\s+([A-Z][a-zA-Z\s,]+?)(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
     // "visit Zimbabwe for a week" - more specific to avoid false matches
     /(?:visit|explore)\s+([A-Z][a-zA-Z\s,]+?)\s+for\s+((?:\d+\s*)?(?:days?|weeks?))(?=\s*(?:from|,|then|after|and|before|\.|$))/gi,
     // "spend a week in Madagascar"
@@ -456,10 +463,11 @@ export function parseDestinations(input: string): ParsedTrip {
       let durationText = '';
       
       // Check pattern type based on structure
-      // Patterns with duration first (e.g., "3 days in London", "weekend in Paris")
+      // Patterns with duration first (e.g., "3 days in London", "weekend in Paris", "weekend trip to Paris")
       // Check for patterns that have duration in first group and destination in second
       if (pattern.source.includes(')\\s+in\\s+') || 
           pattern.source.includes('weekend)\\s+in') ||
+          pattern.source.includes('weekend)\\s+trip\\s+to') ||
           pattern.source.includes('spend')) {
         durationText = match[1];
         destination = match[2];

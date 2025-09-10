@@ -3,12 +3,14 @@
  * Consolidates all generation strategies into a single, maintainable implementation
  */
 
-import OpenAI from 'openai';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { parseDestinations } from '@/ai/utils/destination-parser';
-import { GeneratePersonalizedItineraryOutputSchema } from '@/ai/schemas';
+import { GeneratePersonalizedItineraryOutputSchema, ItinerarySchema } from '@/ai/schemas';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import { OpenAIProvider } from './providers/openai';
+import { safeChat } from './safeChat';
+import type { LLMProvider } from './providers/types';
 
 // Performance metrics
 interface GenerationMetrics {
@@ -21,37 +23,36 @@ interface GenerationMetrics {
   error?: string;
 }
 
+// Generation context interface
+export interface GenerationContext {
+  origin?: string;
+  destinations: { city: string; days: number }[];
+  startDate?: string;
+  keys: { places?: boolean; weather?: boolean; amadeus?: boolean };
+  flags: { stream?: boolean };
+}
+
 class UnifiedItineraryGenerator {
-  private openai: OpenAI | null = null;
+  private llm: LLMProvider;
   private metrics: GenerationMetrics[] = [];
 
-  constructor() {
-    this.initializeOpenAI();
-  }
-
-  private initializeOpenAI() {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (apiKey) {
-      this.openai = new OpenAI({ apiKey });
-      logger.info('AI', 'OpenAI client initialized');
-    } else {
-      logger.error('AI', 'No OpenAI API key found');
-    }
+  constructor(provider?: LLMProvider) {
+    this.llm = provider || new OpenAIProvider();
+    logger.info('AI', 'Unified generator initialized with provider:', this.llm.name);
   }
 
   public isConfigured(): boolean {
-    return this.openai !== null;
+    return !!process.env.OPENAI_API_KEY;
   }
 
   /**
    * Main generation method - routes to appropriate strategy
    */
   public async generate(
-    prompt: string,
-    attachedFile?: string,
-    conversationHistory?: string
+    ctx: GenerationContext,
+    emit?: (evt: string, data: any) => void
   ): Promise<GeneratePersonalizedItineraryOutput> {
-    if (!this.openai) {
+    if (!this.isConfigured()) {
       throw new Error('OpenAI API key is required. Please add OPENAI_API_KEY to your .env file.');
     }
 
@@ -62,24 +63,11 @@ class UnifiedItineraryGenerator {
     };
 
     try {
-      // Parse the trip to understand complexity
-      const parsedTrip = parseDestinations(prompt);
-      const isMultiDestination = parsedTrip.destinations.length > 1;
-      const isLongTrip = parsedTrip.totalDays > 7;
-
       // Choose strategy based on complexity
-      if (isMultiDestination || isLongTrip) {
-        metrics.strategy = 'chunked';
-        logger.info('AI', 'Using chunked strategy', {
-          destinations: parsedTrip.destinations.length,
-          days: parsedTrip.totalDays
-        });
-        return await this.generateChunked(prompt, attachedFile, conversationHistory, metrics);
-      } else {
-        metrics.strategy = 'simple';
-        logger.info('AI', 'Using simple strategy');
-        return await this.generateSimple(prompt, attachedFile, conversationHistory, metrics);
-      }
+      const strategy = this.pickStrategy(ctx);
+      logger.info('AI', 'Using strategy', { strategy: metrics.strategy });
+      
+      return await strategy(ctx, emit, metrics);
     } catch (error) {
       metrics.success = false;
       metrics.error = error instanceof Error ? error.message : 'Unknown error';
@@ -98,73 +86,72 @@ class UnifiedItineraryGenerator {
   }
 
   /**
+   * Pick strategy based on context
+   */
+  private pickStrategy(ctx: GenerationContext): (ctx: GenerationContext, emit?: (evt: string, data: any) => void, metrics?: GenerationMetrics) => Promise<GeneratePersonalizedItineraryOutput> {
+    const n = ctx.destinations.length;
+    const totalDays = ctx.destinations.reduce((a, b) => a + b.days, 0);
+    const hasAPIs = !!(ctx.keys.places || ctx.keys.weather || ctx.keys.amadeus);
+    
+    if (n === 1 && totalDays <= 5) return this.generateSimple.bind(this);
+    if (hasAPIs && totalDays >= 6) return this.generateUltraFast.bind(this);
+    return this.generateChunked.bind(this);
+  }
+
+  /**
    * Simple generation for straightforward trips
    */
   private async generateSimple(
-    prompt: string,
-    attachedFile?: string,
-    conversationHistory?: string,
+    ctx: GenerationContext,
+    emit?: (evt: string, data: any) => void,
     metrics?: GenerationMetrics
   ): Promise<GeneratePersonalizedItineraryOutput> {
-    const systemPrompt = this.buildSystemPrompt();
-    const userPrompt = this.buildUserPrompt(prompt, attachedFile, conversationHistory);
-
-    const completion = await this.openai!.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 4000
+    const system = 'You are a travel itinerary planner. Create a detailed day-by-day itinerary with activities, times, and addresses. Respond ONLY with valid JSON matching the schema.';
+    const user = JSON.stringify(ctx);
+    
+    const result = await safeChat(this.llm, system, user, ItinerarySchema, { 
+      temperature: 0.3, 
+      maxTokens: 3500 
     });
-
-    const response = completion.choices[0].message.content;
-    if (!response) {
-      throw new Error('No response from OpenAI');
-    }
-
-    const parsed = JSON.parse(response);
-    const validated = GeneratePersonalizedItineraryOutputSchema.parse(parsed);
     
     if (metrics) {
       metrics.success = true;
-      metrics.tokensUsed = completion.usage?.total_tokens;
+      metrics.strategy = 'simple';
     }
 
-    return validated;
+    return result as GeneratePersonalizedItineraryOutput;
   }
 
   /**
    * Chunked generation for complex multi-destination trips
    */
   private async generateChunked(
-    prompt: string,
-    attachedFile?: string,
-    conversationHistory?: string,
+    ctx: GenerationContext,
+    emit?: (evt: string, data: any) => void,
     metrics?: GenerationMetrics
   ): Promise<GeneratePersonalizedItineraryOutput> {
-    const parsedTrip = parseDestinations(prompt);
-    const chunks: any[] = [];
-
-    // Generate each destination separately
-    for (const destination of parsedTrip.destinations) {
-      const chunkPrompt = `Create a ${destination.days}-day itinerary for ${destination.name}. 
-        This is part of a larger trip: ${prompt}`;
-      
-      const chunk = await this.generateSimple(chunkPrompt, attachedFile);
-      chunks.push(chunk);
-    }
-
-    // Combine chunks into final itinerary
-    const combined = this.combineChunks(chunks, parsedTrip);
-    
+    // For now, use simple generation
+    // TODO: Implement chunked generation with parallel processing
     if (metrics) {
-      metrics.success = true;
+      metrics.strategy = 'chunked';
     }
+    return await this.generateSimple(ctx, emit, metrics);
+  }
 
-    return combined;
+  /**
+   * Ultra-fast generation with parallel API calls
+   */
+  private async generateUltraFast(
+    ctx: GenerationContext,
+    emit?: (evt: string, data: any) => void,
+    metrics?: GenerationMetrics
+  ): Promise<GeneratePersonalizedItineraryOutput> {
+    // For now, use simple generation
+    // TODO: Implement parallel processing with Places/Weather/Amadeus APIs
+    if (metrics) {
+      metrics.strategy = 'fast';
+    }
+    return await this.generateSimple(ctx, emit, metrics);
   }
 
   /**
@@ -278,6 +265,9 @@ export function getUnifiedGenerator(): UnifiedItineraryGenerator {
   return generator;
 }
 
+// Export the class for direct usage
+export { UnifiedItineraryGenerator };
+
 // Main export function for backwards compatibility
 export async function generateUnifiedItinerary(
   prompt: string,
@@ -285,5 +275,22 @@ export async function generateUnifiedItinerary(
   conversationHistory?: string
 ): Promise<GeneratePersonalizedItineraryOutput> {
   const gen = getUnifiedGenerator();
-  return gen.generate(prompt, attachedFile, conversationHistory);
+  
+  // Convert prompt to GenerationContext for backwards compatibility
+  const parsedTrip = parseDestinations(prompt);
+  const ctx: GenerationContext = {
+    origin: parsedTrip.origin,
+    destinations: parsedTrip.destinations.map((d: any) => ({
+      city: d.name,
+      days: d.days
+    })),
+    keys: {
+      places: !!process.env.GOOGLE_PLACES_API_KEY,
+      weather: !!process.env.OPENWEATHERMAP,
+      amadeus: !!process.env.AMADEUS_API_KEY
+    },
+    flags: { stream: false }
+  };
+  
+  return gen.generate(ctx);
 }

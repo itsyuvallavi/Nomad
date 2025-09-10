@@ -40,3 +40,13 @@ export const MODEL_CONFIG = {
   response_format: { type: 'json_object' as const },
 };
 
+// Temperature defaults for different use cases
+export const TEMPERATURE_DEFAULTS = {
+  extraction: 0.2,     // Low temperature for structured data extraction
+  creative: 0.7,       // Higher temperature for creative day text generation
+  repair: 0.1,         // Very low temperature for JSON repair
+};
+
+// Default model for all operations
+export const DEFAULT_MODEL = 'gpt-4o-mini';
+

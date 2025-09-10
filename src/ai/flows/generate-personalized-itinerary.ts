@@ -19,6 +19,7 @@ import { generateUnifiedItinerary, getUnifiedGenerator } from '@/ai/utils/unifie
 import { validateTripComplexity } from '@/ai/utils/enhanced-generator';
 // Keep ultra-fast for now as primary until fully tested
 import { generateUltraFastItinerary } from '@/ai/utils/enhanced-generator-ultra-fast';
+import { logAIRequest, logAIResponse, logAIError } from '@/lib/utils/ai-logger';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -42,6 +43,12 @@ export { type GeneratePersonalizedItineraryOutput };
 export async function generatePersonalizedItinerary(
   input: GeneratePersonalizedItineraryInput
 ): Promise<GeneratePersonalizedItineraryOutput> {
+  // Log the incoming request
+  const requestId = await logAIRequest(input.prompt, {
+    model: 'gpt-4o-mini',
+    strategy: 'ultra-fast'
+  });
+  
   // Extract the actual prompt from conversation history if available
   let actualPrompt = input.prompt;
   if (input.conversationHistory) {
@@ -205,12 +212,28 @@ export async function generatePersonalizedItinerary(
         console.log('⚡ Ultra-fast generation successful');
       }
       logger.info('AI', 'Ultra-fast generation successful');
+      
+      // Log successful response
+      await logAIResponse(requestId, result, {
+        model: 'gpt-4o-mini',
+        strategy: 'ultra-fast',
+        destinations: [result.destination],
+        totalDays: result.itinerary?.length || 0
+      });
+      
       return result;
     } catch (error: any) {
       if (typeof window !== 'undefined') {
         console.warn('⚠️ Enhanced generation failed, falling back:', error.message);
       }
       logger.error('AI', 'Enhanced generation failed, falling back to standard', { error: error.message });
+      
+      // Log the error
+      await logAIError(requestId, error, {
+        model: 'gpt-4o-mini',
+        strategy: 'ultra-fast'
+      });
+      
       // Fall through to standard generation
     }
   }
@@ -234,9 +257,24 @@ export async function generatePersonalizedItinerary(
     const metrics = generator.getMetrics();
     logger.info('AI', 'Generation metrics', metrics);
     
+    // Log successful response from unified generator
+    await logAIResponse(requestId, result, {
+      model: 'gpt-4o-mini',
+      strategy: 'unified',
+      destinations: [result.destination],
+      totalDays: result.itinerary?.length || 0
+    });
+    
     return result;
   } catch (error: any) {
     logger.error('AI', 'Unified generation failed', { error: error.message, stack: error.stack });
+    
+    // Log the final error
+    await logAIError(requestId, error, {
+      model: 'gpt-4o-mini',
+      strategy: 'unified'
+    });
+    
     throw new Error(`OpenAI generation failed: ${error.message}`);
   }
 }

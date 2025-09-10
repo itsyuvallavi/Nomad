@@ -10,6 +10,9 @@ import { searchFlights, searchHotels, getCityCode } from '@/lib/api/amadeus';
 import { estimateTripCost as estimateTripCostOpenAI, estimateFlightCost, estimateHotelCost } from '@/ai/utils/openai-travel-costs';
 import { logger } from '@/lib/logger';
 import type { GeneratePersonalizedItineraryOutput } from '../flows/generate-personalized-itinerary';
+import { shouldUseStaticData } from '@/lib/config/api-config';
+import { getRandomStaticActivities, hasStaticData } from '@/lib/api/static-places';
+import { EnhancedDestinationParser } from './enhanced-destination-parser';
 
 // Enhanced cache with optimized TTLs and smart invalidation
 interface CacheEntry<T> {
@@ -131,7 +134,97 @@ const POPULAR_DESTINATIONS = [
 const COMMON_DURATIONS = [3, 5, 7, 10, 14];
 
 /**
- * Fast extraction using GPT-3.5-turbo with optimized prompt
+ * Extract travel date from natural language
+ */
+function extractTravelDate(prompt: string): Date {
+  const lowerPrompt = prompt.toLowerCase();
+  const now = new Date();
+  
+  // Handle "next [day of week]" pattern
+  const nextDayMatch = lowerPrompt.match(/next\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i);
+  if (nextDayMatch) {
+    const targetDay = nextDayMatch[1];
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const targetDayIndex = daysOfWeek.indexOf(targetDay.toLowerCase());
+    
+    const currentDay = now.getDay();
+    let daysToAdd = targetDayIndex - currentDay;
+    
+    // If the day has already passed this week, go to next week
+    if (daysToAdd <= 0) {
+      daysToAdd += 7;
+    }
+    
+    const targetDate = new Date(now);
+    targetDate.setDate(now.getDate() + daysToAdd);
+    targetDate.setHours(0, 0, 0, 0); // Set to start of day
+    
+    logger.info('AI', `Extracted travel date: next ${targetDay} = ${targetDate.toISOString().split('T')[0]}`);
+    return targetDate;
+  }
+  
+  // Handle "tomorrow"
+  if (lowerPrompt.includes('tomorrow')) {
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    logger.info('AI', `Extracted travel date: tomorrow = ${tomorrow.toISOString().split('T')[0]}`);
+    return tomorrow;
+  }
+  
+  // Handle "next week"
+  if (lowerPrompt.includes('next week')) {
+    const nextWeek = new Date(now);
+    nextWeek.setDate(now.getDate() + 7);
+    nextWeek.setHours(0, 0, 0, 0);
+    logger.info('AI', `Extracted travel date: next week = ${nextWeek.toISOString().split('T')[0]}`);
+    return nextWeek;
+  }
+  
+  // Handle "in X days"
+  const inDaysMatch = lowerPrompt.match(/in\s+(\d+)\s+days?/i);
+  if (inDaysMatch) {
+    const daysToAdd = parseInt(inDaysMatch[1]);
+    const futureDate = new Date(now);
+    futureDate.setDate(now.getDate() + daysToAdd);
+    futureDate.setHours(0, 0, 0, 0);
+    logger.info('AI', `Extracted travel date: in ${daysToAdd} days = ${futureDate.toISOString().split('T')[0]}`);
+    return futureDate;
+  }
+  
+  // Handle specific dates like "September 15" or "Sep 15"
+  const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
+                      'july', 'august', 'september', 'october', 'november', 'december'];
+  const monthAbbr = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+                     'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  
+  for (let i = 0; i < monthNames.length; i++) {
+    const monthPattern = new RegExp(`(${monthNames[i]}|${monthAbbr[i]})\\s+(\\d{1,2})`, 'i');
+    const match = lowerPrompt.match(monthPattern);
+    if (match) {
+      const day = parseInt(match[2]);
+      const targetDate = new Date(now.getFullYear(), i, day);
+      
+      // If the date has passed this year, assume next year
+      if (targetDate < now) {
+        targetDate.setFullYear(now.getFullYear() + 1);
+      }
+      
+      targetDate.setHours(0, 0, 0, 0);
+      logger.info('AI', `Extracted travel date: ${match[1]} ${day} = ${targetDate.toISOString().split('T')[0]}`);
+      return targetDate;
+    }
+  }
+  
+  // Default to today if no date found
+  logger.info('AI', 'No specific travel date found, defaulting to today');
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+/**
+ * Fast extraction using improved regex patterns for accurate day counting
  */
 async function extractTripInfoFast(prompt: string): Promise<any> {
   const cacheKey = `extract:${prompt.substring(0, 100)}`;
@@ -143,78 +236,346 @@ async function extractTripInfoFast(prompt: string): Promise<any> {
   
   const startTime = Date.now();
   
-  // Check if OpenAI is available
-  if (!openai) {
-    logger.warn('AI', 'OpenAI client not available, using regex extraction');
-    return quickExtract(prompt);
+  // Use improved regex extraction for reliable parsing
+  logger.info('AI', 'Using improved regex extraction for precise day counting');
+  const result = quickExtract(prompt);
+  
+  // Extract travel date from prompt
+  result.startDate = extractTravelDate(prompt);
+  
+  if (!result.destinations || result.destinations.length === 0) {
+    logger.warn('AI', 'Regex extraction failed, trying Enhanced Destination Parser');
+    const parseResult = EnhancedDestinationParser.parse(prompt);
+    
+    if (parseResult.isValid && parseResult.destinations.length > 0) {
+      const enhancedResult = {
+        origin: parseResult.origin || '',
+        destinations: parseResult.destinations,
+        totalDays: parseResult.totalDays
+      };
+      
+      cache.set(cacheKey, enhancedResult, 600);
+      logger.info('AI', `Enhanced parser fallback successful in ${Date.now() - startTime}ms`);
+      return enhancedResult;
+    }
+    
+    // Final fallback - return empty result
+    logger.error('AI', 'All extraction methods failed');
+    return {
+      origin: '',
+      destinations: [],
+      totalDays: 0
+    };
   }
   
-  // Clear extraction prompt with explicit rules
-  const systemPrompt = `Extract trip as JSON. Rules:
-- "weekend" = 3 days
-- "week" or "7 days" = 7 days  
-- "fortnight" or "2 weeks" = 14 days
-- Count actual days, not nights
-Output: {"origin":"city","destinations":[{"city":"name","days":number}],"totalDays":number}`;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // Faster model
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.1, // Lower = faster and more deterministic
-      max_tokens: 500
-    });
-    
-    const result = JSON.parse(completion.choices[0].message.content || '{}');
-    cache.set(cacheKey, result, 600); // Cache for 10 minutes
-    
-    logger.info('AI', `Fast extraction completed in ${Date.now() - startTime}ms`);
-    return result;
-  } catch (error) {
-    logger.error('AI', 'Fast extraction failed', { error });
-    // Fallback to regex extraction
-    return quickExtract(prompt);
-  }
+  cache.set(cacheKey, result, 600); // Cache for 10 minutes
+  
+  logger.info('AI', `Regex extraction completed in ${Date.now() - startTime}ms`, {
+    destinations: result.destinations.length,
+    totalDays: result.totalDays,
+    origin: result.origin
+  });
+  
+  return result;
 }
 
 /**
- * Quick regex extraction as fallback
+ * Quick regex extraction as fallback with improved handling
  */
 function quickExtract(prompt: string): any {
   const destinations: any[] = [];
   const lowerPrompt = prompt.toLowerCase();
   
+  // First check for sequential trip pattern: "to NYC for X days, then London for Y days"
+  // This pattern is more specific and should be checked first
+  const sequentialPattern = /(?:to|visit)\s+([A-Z][a-zA-Z]+)(?:\s+from\s+[A-Z][a-zA-Z\s]+?)?\s+(?:next\s+\w+\s+)?for\s+(\d+)\s*days?(?:\s*,?\s*then\s+([A-Z][a-zA-Z]+)\s+for\s+(\d+)\s*days?)?(?:\s*,?\s*then\s+([A-Z][a-zA-Z]+)\s+for\s+(\d+)\s*days?)?/i;
+  const seqMatch = prompt.match(sequentialPattern);
+  
+  // Also try the "then X for Y days" pattern throughout the text
+  const thenPattern = /(?:^|then\s+|,\s*)([A-Z][a-zA-Z]+)\s+for\s+(\d+)\s*days?/gi;
+  const thenMatches = [...prompt.matchAll(thenPattern)];
+  
+  if (thenMatches.length > 0) {
+    // Extract all cities with "X for Y days" pattern
+    for (const match of thenMatches) {
+      const city = match[1].trim();
+      const days = parseInt(match[2]);
+      // Filter out non-city words like "Tuesday", "Monday", etc.
+      const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      if (!daysOfWeek.includes(city.toLowerCase()) && city.length > 2) {
+        // Check if city already added (avoid duplicates)
+        if (!destinations.find(d => d.city.toLowerCase() === city.toLowerCase())) {
+          destinations.push({ city: city.charAt(0).toUpperCase() + city.slice(1).toLowerCase(), days });
+        }
+      }
+    }
+    
+    // Extract origin - look for "from LA" or "for LA" pattern
+    const originPatterns = [
+      /from\s+([A-Z][a-zA-Z\s]+?)(?:\s+to|\s+next|\s+for|$)/i,
+      /fly\s+back\s+to\s+([A-Z][a-zA-Z]+)/i,
+      /return\s+to\s+([A-Z][a-zA-Z]+)/i,
+      /for\s+([A-Z]{2,3})(?:\s+next|$)/i  // for LA next...
+    ];
+    
+    let origin = 'Unknown';
+    for (const pattern of originPatterns) {
+      const match = prompt.match(pattern);
+      if (match) {
+        const extracted = match[1].trim();
+        // Check if it's likely a city (not "5 days" etc)
+        if (extracted.length >= 2 && extracted.length <= 20 && !extracted.match(/^\d/)) {
+          origin = extracted;
+          break;
+        }
+      }
+    }
+    
+    // Special case: if prompt mentions "fly back to X", that's likely the origin
+    const flyBackMatch = prompt.match(/fly\s+back\s+to\s+([A-Z][a-zA-Z]+)/i);
+    if (flyBackMatch) {
+      origin = flyBackMatch[1];
+    }
+    
+    // Also check if NYC is mentioned differently
+    const nycPattern = /(?:to|visit)\s+(NYC|nyc|New York)/i;
+    const nycMatch = prompt.match(nycPattern);
+    if (nycMatch && !destinations.find(d => d.city.toLowerCase() === 'nyc' || d.city.toLowerCase() === 'new york')) {
+      // Find the days for NYC
+      const nycDaysMatch = prompt.match(/NYC[^,]*?(\d+)\s*days?/i) || prompt.match(/New York[^,]*?(\d+)\s*days?/i);
+      if (nycDaysMatch) {
+        destinations.unshift({ city: 'NYC', days: parseInt(nycDaysMatch[1]) });
+      }
+    }
+    
+    const totalDays = destinations.reduce((sum, d) => sum + d.days, 0);
+    
+    if (destinations.length > 0) {
+      return {
+        origin,
+        destinations,
+        totalDays
+      };
+    }
+  }
+  
+  // Fallback to simple pattern if no sequential trip found
+  const simplePattern = /(?:from\s+[A-Z][a-zA-Z\s]+?\s+)?to\s+([A-Z][a-zA-Z]+)\s+for\s+(\d+)\s*days?/i;
+  const simpleMatch = prompt.match(simplePattern);
+  if (simpleMatch) {
+    const city = simpleMatch[1].trim();
+    const days = parseInt(simpleMatch[2]);
+    destinations.push({ city, days });
+    
+    const originMatch = prompt.match(/from\s+([A-Z][a-zA-Z\s]+?)(?:\s+to|\s+for)/i);
+    const origin = originMatch ? originMatch[1].trim() : 'Unknown';
+    
+    return {
+      origin,
+      destinations,
+      totalDays: days
+    };
+  }
+  
   // Handle weekend specially
   if (lowerPrompt.includes('weekend')) {
-    const weekendMatch = prompt.match(/weekend\s+(?:trip\s+)?(?:from\s+\w+\s+)?(?:to\s+|in\s+)?([A-Z][a-z]+)/i);
+    const weekendMatch = prompt.match(/weekend\s+trip\s+from\s+[A-Z][a-zA-Z\s]+?\s+to\s+([A-Z][a-zA-Z\s]+)/i);
     if (weekendMatch) {
-      destinations.push({ city: weekendMatch[1], days: 3 });
+      destinations.push({ city: weekendMatch[1].trim(), days: 3 });
+      const originMatch = prompt.match(/from\s+([A-Z][a-zA-Z\s]+?)(?:\s+to|\s+for)/i);
+      const origin = originMatch ? originMatch[1].trim() : 'Unknown';
+      
+      return {
+        origin,
+        destinations,
+        totalDays: 3
+      };
     }
-  } else {
-    // Regular extraction for numbered days/weeks
-    const matches = prompt.matchAll(/(\d+)\s*(?:days?|weeks?)\s+in\s+([A-Z][a-z]+)/gi);
-    
-    for (const match of matches) {
-      const numStr = match[1];
+  }
+  
+  // Extract total duration for multi-city trips
+  let totalDays = 0;
+  const totalDurationPatterns = [
+    /(?:for|over|during)\s+(\d+)\s*days?\s+(?:across|visiting|in|to)/i,
+    /(\d+)\s*days?\s+(?:across|visiting|in)\s+/i,
+    /(?:for|over|during)\s+(\d+)\s*weeks?\s+(?:across|visiting|in|to)/i,
+    /(\d+)\s*weeks?\s+(?:across|visiting|in)\s+/i
+  ];
+  
+  for (const pattern of totalDurationPatterns) {
+    const match = prompt.match(pattern);
+    if (match) {
       const isWeek = match[0].toLowerCase().includes('week');
-      const days = isWeek ? parseInt(numStr) * 7 : parseInt(numStr);
-      destinations.push({ city: match[2], days });
+      totalDays = isWeek ? parseInt(match[1]) * 7 : parseInt(match[1]);
+      break;
+    }
+  }
+  
+  // Extract individual city patterns including "one week" and "a week"
+  // Pattern for "one week in Tokyo" - capture until "and" or comma
+  const oneWeekPattern = /(?:one|a)\s+week\s+in\s+([A-Z][a-zA-Z]+)(?:\s+and|\s*,|$)/gi;
+  const oneWeekMatches = prompt.matchAll(oneWeekPattern);
+  for (const match of oneWeekMatches) {
+    destinations.push({ city: match[1].trim(), days: 7 });
+  }
+  
+  // Pattern for numbered days/weeks
+  const numberedPattern = /(\d+)\s*(?:days?|weeks?)\s+in\s+([A-Z][a-zA-Z]+)(?:\s+and|\s*,|$)/gi;
+  const cityMatches = prompt.matchAll(numberedPattern);
+  for (const match of cityMatches) {
+    const numStr = match[1];
+    const isWeek = match[0].toLowerCase().includes('week');
+    const days = isWeek ? parseInt(numStr) * 7 : parseInt(numStr);
+    destinations.push({ city: match[2].trim(), days });
+  }
+  
+  // If no individual city patterns found, extract cities from multi-city patterns
+  if (destinations.length === 0) {
+    const multiCityPatterns = [
+      /(?:across|visiting|in)\s+([A-Z][a-zA-Z\s]+(?:,\s*[A-Z][a-zA-Z\s]+)*(?:,?\s*and\s+[A-Z][a-zA-Z\s]+)?)/i,
+      /(?:to|in)\s+([A-Z][a-zA-Z\s]+(?:,\s*[A-Z][a-zA-Z\s]+)*(?:,?\s*and\s+[A-Z][a-zA-Z\s]+)?)/i
+    ];
+    
+    for (const pattern of multiCityPatterns) {
+      const match = prompt.match(pattern);
+      if (match) {
+        // Split cities and clean them
+        const cityString = match[1];
+        const cities = cityString.split(/,\s*(?:and\s+)?|\s+and\s+/)
+          .map(city => city.trim())
+          .filter(city => city.length > 0);
+        
+        // Distribute total days across cities if we have a total
+        if (totalDays > 0 && cities.length > 0) {
+          const baseDays = Math.floor(totalDays / cities.length);
+          const extraDays = totalDays % cities.length;
+          
+          cities.forEach((city, index) => {
+            const days = baseDays + (index < extraDays ? 1 : 0);
+            destinations.push({ city, days });
+          });
+        } else {
+          // Default allocation
+          cities.forEach(city => {
+            destinations.push({ city, days: 7 }); // Default 7 days per city
+          });
+        }
+        break;
+      }
     }
   }
   
   // Extract origin
-  const originMatch = prompt.match(/from\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
-  const origin = originMatch ? originMatch[1] : 'Unknown';
+  const originMatch = prompt.match(/from\s+([A-Z][a-zA-Z\s]+?)(?:\s+to|\s+for)/i);
+  const origin = originMatch ? originMatch[1].trim() : 'Unknown';
+  
+  // Use explicit total if found, otherwise sum destinations
+  const finalTotalDays = totalDays > 0 ? totalDays : destinations.reduce((sum: number, d: any) => sum + d.days, 0);
   
   return {
     origin,
     destinations,
-    totalDays: destinations.reduce((sum: number, d: any) => sum + d.days, 0)
+    totalDays: finalTotalDays
   };
+}
+
+/**
+ * Generate fallback activities for cities without static data
+ */
+function generateFallbackActivities(destination: string, days: number) {
+  const foodActivities = [
+    { description: `Local breakfast cafe in ${destination}`, category: 'Food', venue_name: `${destination} Breakfast Spot`, address: `${destination}`, rating: 4.3, tips: 'Try the local specialties' },
+    { description: `Traditional restaurant in ${destination}`, category: 'Food', venue_name: `${destination} Traditional Restaurant`, address: `${destination}`, rating: 4.5, tips: 'Ask for local recommendations' },
+    { description: `Local lunch spot in ${destination}`, category: 'Food', venue_name: `${destination} Lunch Place`, address: `${destination}`, rating: 4.2, tips: 'Great for midday meals' },
+    { description: `Evening dining in ${destination}`, category: 'Food', venue_name: `${destination} Dinner Restaurant`, address: `${destination}`, rating: 4.6, tips: 'Perfect for dinner' },
+    { description: `Coffee and pastries in ${destination}`, category: 'Food', venue_name: `${destination} Cafe`, address: `${destination}`, rating: 4.4, tips: 'Excellent coffee' },
+    { description: `Street food in ${destination}`, category: 'Food', venue_name: `${destination} Street Food Market`, address: `${destination}`, rating: 4.3, tips: 'Authentic local flavors' }
+  ];
+  
+  const attractionActivities = [
+    { description: `Historic city center of ${destination}`, category: 'Attraction', venue_name: `${destination} Historic Center`, address: `${destination}`, rating: 4.7, tips: 'Rich in history and culture' },
+    { description: `Main cathedral in ${destination}`, category: 'Attraction', venue_name: `${destination} Cathedral`, address: `${destination}`, rating: 4.6, tips: 'Beautiful architecture' },
+    { description: `City museum in ${destination}`, category: 'Attraction', venue_name: `${destination} City Museum`, address: `${destination}`, rating: 4.5, tips: 'Learn about local history' },
+    { description: `Scenic viewpoint in ${destination}`, category: 'Attraction', venue_name: `${destination} Viewpoint`, address: `${destination}`, rating: 4.8, tips: 'Best views of the city' },
+    { description: `Local market in ${destination}`, category: 'Attraction', venue_name: `${destination} Market`, address: `${destination}`, rating: 4.4, tips: 'Great for shopping and people watching' },
+    { description: `Art gallery in ${destination}`, category: 'Attraction', venue_name: `${destination} Art Gallery`, address: `${destination}`, rating: 4.5, tips: 'Features local and international art' }
+  ];
+  
+  const leisureActivities = [
+    { description: `Central park in ${destination}`, category: 'Leisure', venue_name: `${destination} Central Park`, address: `${destination}`, rating: 4.6, tips: 'Perfect for relaxing walks' },
+    { description: `Shopping district in ${destination}`, category: 'Leisure', venue_name: `${destination} Shopping District`, address: `${destination}`, rating: 4.3, tips: 'Browse local shops and boutiques' },
+    { description: `Riverside walk in ${destination}`, category: 'Leisure', venue_name: `${destination} Riverside`, address: `${destination}`, rating: 4.7, tips: 'Peaceful stroll along the water' },
+    { description: `Local cultural quarter in ${destination}`, category: 'Leisure', venue_name: `${destination} Cultural Quarter`, address: `${destination}`, rating: 4.5, tips: 'Experience local culture' }
+  ];
+  
+  return {
+    Food: foodActivities,
+    Attraction: attractionActivities,
+    Leisure: leisureActivities
+  };
+}
+
+/**
+ * Generate static itinerary chunk using pre-defined activities
+ */
+function generateStaticChunk(destination: string, days: number, dayOffset: number): any[] {
+  const result: any[] = [];
+  
+  let activities;
+  
+  // Try to use static data first
+  if (hasStaticData(destination)) {
+    activities = {
+      Food: getRandomStaticActivities(destination, 'Food', days * 2),
+      Attraction: getRandomStaticActivities(destination, 'Attraction', days * 2), 
+      Leisure: getRandomStaticActivities(destination, 'Leisure', days)
+    };
+  } else {
+    // Fallback activities for cities without static data
+    activities = generateFallbackActivities(destination, days);
+  }
+  
+  // Generate exactly the requested number of days
+  for (let day = 0; day < days; day++) {
+    const dayNum = dayOffset + day + 1;
+    const dayActivities = [
+      // Morning activity (Attraction or Leisure)
+      activities.Attraction[day % activities.Attraction.length] || activities.Leisure[day % activities.Leisure.length],
+      // Lunch
+      activities.Food[day * 2 % activities.Food.length],
+      // Afternoon activity  
+      activities.Attraction[(day + 1) % activities.Attraction.length] || activities.Leisure[(day + 1) % activities.Leisure.length],
+      // Dinner
+      activities.Food[(day * 2 + 1) % activities.Food.length],
+      // Evening activity (if available)
+      ...(activities.Leisure.length > day ? [activities.Leisure[day % activities.Leisure.length]] : [])
+    ].filter(Boolean).slice(0, 5); // Limit to 5 activities per day
+    
+    // Format activities with times
+    const formattedActivities = dayActivities.map((activity, index) => {
+      const times = ['09:00 AM', '01:00 PM', '03:00 PM', '06:00 PM', '08:00 PM'];
+      return {
+        time: times[index] || '12:00 PM',
+        description: activity.description,
+        category: activity.category,
+        duration: '2 hours',
+        venue_name: activity.venue_name,
+        address: activity.address,
+        rating: activity.rating,
+        tips: activity.tips || 'Enjoy your visit!'
+      };
+    });
+    
+    result.push({
+      day: dayNum,
+      destination_city: destination,
+      title: `Day ${dayNum}: Explore ${destination}`,
+      theme: 'Exploration',
+      activities: formattedActivities
+    });
+  }
+  
+  return result;
 }
 
 /**
@@ -230,6 +591,12 @@ async function generateDestinationChunk(
   if (cached) {
     logger.debug('AI', `Cache hit for ${destination}`);
     return cached;
+  }
+  
+  // Use static data if configured
+  if (shouldUseStaticData()) {
+    logger.info('AI', `Using static data for ${destination} (${days} days)`);
+    return generateStaticChunk(destination, days, dayOffset);
   }
   
   // Check if OpenAI is available
@@ -886,19 +1253,18 @@ export async function generateUltraFastItinerary(
     // Step 1: Extract trip info (2-3s with GPT-3.5)
     const extracted = await extractTripInfoFast(prompt);
     const destinations = extracted.destinations || [];
+    const startDate = extracted.startDate || new Date(); // Use extracted date or fallback to today
     
     if (destinations.length === 0) {
       throw new Error('No destinations found in prompt');
     }
     
-    logger.info('AI', `Extracted ${destinations.length} destinations in ${Date.now() - startTime}ms`);
+    logger.info('AI', `Extracted ${destinations.length} destinations, starting ${startDate.toISOString().split('T')[0]} in ${Date.now() - startTime}ms`);
     
     // Step 2: Start ALL parallel operations
     const parallelStart = Date.now();
     
-    // Calculate trip dates
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() + 30); // Default to 30 days from now
+    // Use the extracted start date for the trip
     const tripStartDate = startDate.toISOString().split('T')[0];
     
     const [
@@ -1205,9 +1571,13 @@ export async function generateUltraFastItinerary(
         }
       }
       
+      // Calculate the actual date based on the start date
+      const dayDate = new Date(startDate);
+      dayDate.setDate(startDate.getDate() + index);
+      
       return {
         day: index + 1, // Always use sequential numbering
-        date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        date: dayDate.toISOString().split('T')[0],
         title: day.title || `Day ${index + 1}`,
         _destination: day.destination_city, // Preserve city metadata for UI grouping
         activities: (day.activities || []).map((activity: any) => ({

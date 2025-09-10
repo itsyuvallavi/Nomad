@@ -36,3 +36,45 @@ export const GeneratePersonalizedItineraryOutputSchema = z.object({
 export type GeneratePersonalizedItineraryOutput = z.infer<
   typeof GeneratePersonalizedItineraryOutputSchema
 >;
+
+// Pure Zod schemas for OpenAI provider (M2)
+import { z as zodZ } from 'zod';
+
+export const Activity = zodZ.object({
+  time: zodZ.string().optional(),
+  description: zodZ.string().min(2),
+  category: zodZ.enum(['Work','Leisure','Food','Travel','Accommodation','Attraction']).optional(),
+  address: zodZ.string().optional(),
+  venue_name: zodZ.string().optional(),
+  rating: zodZ.number().min(0).max(5).optional(),
+  _tips: zodZ.string().optional()
+});
+
+export const Day = zodZ.object({
+  day: zodZ.number().int().min(1),
+  date: zodZ.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  title: zodZ.string().min(2),
+  _destination: zodZ.string().min(2),
+  activities: zodZ.array(Activity).default([])
+});
+
+export const ItinerarySchema = zodZ.object({
+  destination: zodZ.string().min(2),
+  title: zodZ.string().min(2),
+  itinerary: zodZ.array(Day).min(1),
+  quickTips: zodZ.array(zodZ.string()).default([]),
+  _costEstimate: zodZ.object({
+    total: zodZ.number(),
+    flights: zodZ.number(),
+    accommodation: zodZ.number(),
+    dailyExpenses: zodZ.number(),
+    currency: zodZ.string(),
+    breakdown: zodZ.array(zodZ.object({
+      type: zodZ.string(),
+      description: zodZ.string(),
+      amount: zodZ.number()
+    }))
+  }).optional(),
+  _hotelOptions: zodZ.any().optional(),
+  _flightOptions: zodZ.any().optional()
+});

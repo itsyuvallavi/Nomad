@@ -5,7 +5,7 @@
  * Tests real API calls and validates actual output structure
  */
 
-import type { GeneratePersonalizedItineraryOutput } from './src/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '../../src/ai/schemas';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -184,7 +184,7 @@ class AITester {
       }
       
       // Dynamically import the AI generation function to avoid module issues
-      const { generatePersonalizedItinerary } = await import('./src/ai/flows/generate-personalized-itinerary');
+      const { generatePersonalizedItinerary } = await import('@/ai/flows/generate-personalized-itinerary');
       
       console.log(`   Calling AI generation function...`);
       
