@@ -2,10 +2,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import StartItinerary from '@/components/forms/trip-search-form';
 import type { FormValues } from '@/components/forms/trip-details-form';
 import ChatDisplay from '@/components/chat/chat-container';
+import { fadeInScale } from '@/lib/animations';
 // import { AuthForm } from '@/components/auth/login-form'; // Not needed - skipping auth
 
 export interface ChatState {
@@ -65,7 +67,14 @@ export default function Home() {
     switch (currentView) {
       case 'chat':
         return (
-          <div className="h-screen overflow-hidden">
+          <motion.div 
+            key="chat"
+            className="h-screen overflow-hidden"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+          >
             <ChatDisplay
               initialPrompt={initialPrompt!}
               savedChatState={savedChatState}
@@ -73,23 +82,40 @@ export default function Home() {
               onError={handleChatError}
               onReturn={handleReturnToStart}
             />
-          </div>
+          </motion.div>
         );
       case 'start':
         return (
-          <div className="h-screen overflow-hidden flex items-center justify-center bg-background">
+          <motion.div 
+            key="start"
+            className="h-screen overflow-hidden flex items-center justify-center bg-background"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4, ease: [0.4, 0.0, 0.2, 1] }}
+          >
             <StartItinerary onItineraryRequest={handleItineraryRequest}/>
-          </div>
+          </motion.div>
         );
       default:
         // Default to start view if somehow we get here
         return (
-          <div className="h-screen overflow-hidden flex items-center justify-center bg-background">
+          <motion.div 
+            key="default"
+            className="h-screen overflow-hidden flex items-center justify-center bg-background"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
             <StartItinerary onItineraryRequest={handleItineraryRequest}/>
-          </div>
+          </motion.div>
         );
     }
   }
 
-  return renderMainContent();
+  return (
+    <AnimatePresence mode="wait">
+      {renderMainContent()}
+    </AnimatePresence>
+  );
 }

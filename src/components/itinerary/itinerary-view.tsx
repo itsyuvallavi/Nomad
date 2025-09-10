@@ -1,12 +1,12 @@
 import { DayItinerary } from './day-schedule';
-import { DayTimeline } from './day-timeline';
+import { DayTimelineV2 } from './day-timeline-v2';
 import { CoworkingSection } from './coworking-spots';
 import { ExportMenu } from './export-menu';
 import { ItineraryLoadingSkeleton } from './loading-skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 import { MapPin, Map, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
 import Image from 'next/image';
 import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
@@ -14,6 +14,7 @@ import { logger } from '@/lib/logger';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { getIconicImageSearch } from '@/lib/city-landmarks';
+import { fadeInUp, staggerContainer, countAnimation } from '@/lib/animations';
 
 // Dynamically import map to avoid SSR issues
 const ItineraryMap = dynamic(
@@ -532,22 +533,9 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
         )}
 
         {/* Daily Itinerary with Timeline */}
-        <div className="py-3">
-          <div className="px-4 mb-3">
-            <h2 className="text-sm font-medium text-foreground">
-              {locations.length > 1 ? (
-                <>
-                  <span>{selectedLocation}</span>
-                  <span className="text-muted-foreground text-xs ml-1">Itinerary</span>
-                </>
-              ) : (
-                'Daily Itinerary'
-              )}
-            </h2>
-          </div>
-          
-          {/* Horizontal Timeline */}
-          <DayTimeline 
+        <div className="">
+          {/* Horizontal Timeline - Full Width */}
+          <DayTimelineV2 
             totalDays={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).length}
             selectedDay={selectedDayInTimeline}
             onDaySelect={(day) => {
@@ -556,10 +544,11 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
               setSelectedMapDay(day);
             }}
             location={locations.length > 1 ? selectedLocation : undefined}
+            dates={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map(d => d.date)}
           />
           
           {/* Selected Day Activities */}
-          <div className="px-4 mt-8">
+          <div className="px-6 py-6">
             {(() => {
               const days = daysByLocation[selectedLocation]?.days || itinerary.itinerary;
               const selectedDay = days.find(d => d.day === selectedDayInTimeline) || days[0];
@@ -567,42 +556,103 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
               return (
                 <motion.div
                   key={`day-${selectedDay.day}`}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.4, 0.0, 0.2, 1] }}
                 >
-                  <div className="border-l-2 border-orange-500 pl-4 ml-2">
-                    <div className="mb-3">
-                      <h3 className="text-lg font-semibold text-foreground">Day {selectedDay.day}</h3>
-                      <p className="text-sm text-muted-foreground">{selectedDay.date}</p>
+                  {/* Day Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground">
+                        Day {selectedDay.day}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {new Date(selectedDay.date).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          month: 'long', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </p>
                     </div>
-                    
-                    <div className="space-y-2">
-                      {selectedDay.activities.map((activity, index) => (
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Activities</p>
+                      <p className="text-2xl font-bold text-orange-500">{selectedDay.activities.length}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Activities Grid */}
+                  <div className="space-y-3">
+                    {selectedDay.activities.map((activity, index) => (
+                      <motion.div
+                        key={`activity-${index}`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ 
+                          duration: 0.3, 
+                          delay: index * 0.08,
+                          ease: [0.4, 0.0, 0.2, 1]
+                        }}
+                      >
                         <motion.div
-                          key={`activity-${index}`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2, delay: index * 0.05 }}
-                          className="bg-card border border-border rounded-lg p-3 hover:bg-muted/30 transition-colors"
+                          className="group relative bg-background border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+                          whileHover={{ y: -2 }}
                         >
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">
-                              {index + 1}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs text-muted-foreground">{activity.time}</span>
+                          {/* Background Gradient on Hover */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          
+                          <div className="relative flex gap-4">
+                            {/* Time Badge */}
+                            <div className="flex-shrink-0">
+                              <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex flex-col items-center justify-center text-white shadow-md">
+                                <span className="text-xs font-medium opacity-90">
+                                  {activity.time.split(' - ')[0].split(':')[0]}
+                                </span>
+                                <span className="text-lg font-bold">
+                                  :{activity.time.split(' - ')[0].split(':')[1] || '00'}
+                                </span>
                               </div>
-                              <h4 className="text-sm font-medium text-foreground">{activity.description}</h4>
-                              {activity.address && (
-                                <p className="text-xs text-muted-foreground mt-1">{activity.address}</p>
-                              )}
+                            </div>
+                            
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <h4 className="text-base font-semibold text-foreground group-hover:text-orange-600 transition-colors">
+                                    {activity.description}
+                                  </h4>
+                                  {activity.address && (
+                                    <div className="flex items-center gap-1 mt-2">
+                                      <MapPin className="w-3 h-3 text-muted-foreground" />
+                                      <p className="text-sm text-muted-foreground">{activity.address}</p>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center gap-3 mt-2">
+                                    <span className="text-xs text-muted-foreground">
+                                      Duration: {activity.time}
+                                    </span>
+                                    {activity.category && (
+                                      <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
+                                        {activity.category}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Activity Number */}
+                                <div className="flex-shrink-0">
+                                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                                    <span className="text-xs font-bold text-muted-foreground">
+                                      {index + 1}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </motion.div>
-                      ))}
-                    </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </motion.div>
               );
