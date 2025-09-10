@@ -13,8 +13,8 @@ const ItineraryMap = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="h-full bg-slate-800/50 rounded-lg flex items-center justify-center">
-        <Map className="h-8 w-8 text-slate-500 animate-pulse" />
+      <div className="h-full bg-muted/50 rounded-lg flex items-center justify-center">
+        <Map className="h-8 w-8 text-muted-foreground animate-pulse" />
       </div>
     )
   }
@@ -41,19 +41,19 @@ export function MapPanel({
     : itinerary.itinerary;
 
   return (
-    <div className={cn("flex flex-col h-full bg-gradient-to-b from-slate-800 to-slate-900", className)}>
+    <div className={cn("flex flex-col h-full bg-background overflow-hidden", className)}>
       {/* Simplified Map Header */}
-      <div className="p-4 border-b border-slate-700/50 bg-slate-900/50 backdrop-blur">
+      <div className="p-4 border-b border-border bg-background flex-shrink-0">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-medium text-white">Map View</h2>
+          <h2 className="text-base font-medium text-foreground">Map View</h2>
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedDay(undefined)}
               className={cn(
                 "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
                 selectedDay === undefined 
-                  ? "bg-blue-600 text-white shadow-sm" 
-                  : "bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50"
+                  ? "bg-foreground text-background shadow-sm" 
+                  : "bg-muted text-foreground hover:bg-muted/80"
               )}
             >
               All Days
@@ -61,7 +61,7 @@ export function MapPanel({
             <select 
               value={selectedDay || ''} 
               onChange={(e) => setSelectedDay(e.target.value ? Number(e.target.value) : undefined)}
-              className="bg-slate-800/50 text-slate-300 text-xs rounded-md px-3 py-1.5 border border-slate-700/50 hover:bg-slate-700/50 hover:text-white transition-colors"
+              className="bg-muted text-foreground text-xs rounded-md px-3 py-1.5 border border-border hover:bg-muted/80 transition-colors"
             >
               <option value="">Filter by day</option>
               {displayDays.map((day: any) => (
@@ -75,7 +75,7 @@ export function MapPanel({
       </div>
       
       {/* Map Container with proper padding */}
-      <div className="flex-1 p-4 bg-gradient-to-b from-slate-800/50 to-slate-900/50">
+      <div className="flex-1 p-4 bg-background min-h-0 overflow-auto">
         <ItineraryMap
           itinerary={{
             ...itinerary,
@@ -90,7 +90,7 @@ export function MapPanel({
               dayElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
           }}
-          className="h-full rounded-xl shadow-xl border border-slate-700/50"
+          className="h-full min-h-[400px] rounded-xl shadow-sm border border-border"
         />
       </div>
     </div>

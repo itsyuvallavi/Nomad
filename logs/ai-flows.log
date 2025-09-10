@@ -317,3 +317,12 @@
 {"service":"nomad-navigator","flowId":"masterParser_1757450557503_jakpisple","flowName":"masterParser","inputLength":262,"category":"AI","timestamp":"2025-09-09 20:42:37","level":"info","message":"AI Flow Started"}
 
 {"service":"nomad-navigator","flowId":"masterParser_1757450557503_jakpisple","flowName":"masterParser","duration":72,"success":true,"metrics":{"confidence":"high","destinationCount":9,"processingTime":70},"category":"AI","timestamp":"2025-09-09 20:42:37","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757464611360_emv382y3t","flowName":"masterParser","inputLength":76,"category":"AI","timestamp":"2025-09-10 00:36:51","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757464611360_emv382y3t","flowName":"masterParser","duration":702,"success":true,"metrics":{"confidence":"medium","destinationCount":1,"processingTime":691},"category":"AI","timestamp":"2025-09-10 00:36:52","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757465371471_56u0timsc","flowName":"masterParser","inputLength":76,"category":"AI","timestamp":"2025-09-10 00:49:31","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757465371471_56u0timsc","flowName":"masterParser","duration":141,"success":true,"metrics":{"confidence":"medium","destinationCount":1,"processingTime":139},"category":"AI","timestamp":"2025-09-10 00:49:31","level":"info","message":"AI Flow Completed"}
+{"service":"nomad-navigator","flowId":"masterParser_1757465494871_ra2x4q1nh","flowName":"masterParser","inputLength":76,"category":"AI","timestamp":"2025-09-10 00:51:34","level":"info","message":"AI Flow Started"}
+
+{"service":"nomad-navigator","flowId":"masterParser_1757465494871_ra2x4q1nh","flowName":"masterParser","duration":235,"success":true,"metrics":{"confidence":"medium","destinationCount":1,"processingTime":231},"category":"AI","timestamp":"2025-09-10 00:51:35","level":"info","message":"AI Flow Completed"}

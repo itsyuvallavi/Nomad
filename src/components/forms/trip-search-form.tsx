@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, MessageSquare } from 'lucide-react';
+import { Trash2, MessageSquare, Plus, Mic } from 'lucide-react';
+import { AnimatedLogo } from '@/components/ui/animated-logo';
 import { formatDistanceToNow } from 'date-fns';
 import {
   AlertDialog,
@@ -62,15 +63,13 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
   };
 
   return (
-    <main className="w-full h-full flex items-center justify-center p-4 md:p-6">
+    <main className="w-full h-full flex items-center justify-center p-4 md:p-6 bg-background">
       <div className="w-full max-w-4xl flex flex-col items-center justify-center">
         {/* Welcome Section */}
         <div className="flex flex-col items-center text-center max-w-md mb-6 md:mb-8">
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center mb-6 md:mb-8 animate-float">
-            <div className="w-6 h-6 md:w-8 md:h-8 bg-slate-800 rounded-md animate-rotate-and-breathe"></div>
-          </div>
-          <h1 className="text-white text-xl md:text-2xl mb-2">Hi, I'm Nomad Navigator</h1>
-          <h2 className="text-white text-lg md:text-xl mb-4 md:mb-6">Can I help you with anything?</h2>
+          <AnimatedLogo size="lg" className="mb-6 md:mb-8" />
+          <h1 className="text-foreground text-2xl tracking-tight mb-2">Hi, I'm Nomad Navigator</h1>
+          <p className="text-muted-foreground text-base">Can I help you with anything?</p>
         </div>
         
         {/* Input Area */}
@@ -86,7 +85,8 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
             onClick={() => handleInitialPrompt({ 
               prompt: "Plan one week in London from LA for one person in mid next month" 
             })}
-            className="bg-slate-700 hover:bg-slate-600 text-white"
+            variant="outline"
+            className="border-border hover:bg-muted/50 text-sm"
             disabled={isLoading}
           >
             Quick Test: London Trip
@@ -96,23 +96,23 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
         {recentSearches.length > 0 && (
           <div className="max-w-2xl mx-auto mt-6">
             <div className="flex items-center justify-between mb-3 px-1">
-               <h3 className="text-slate-300 text-base font-medium">Recent Chat</h3>
+               <h3 className="text-foreground text-base font-medium">Recent Chats</h3>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500 hover:text-white">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
                       <Trash2 size={16} />
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-slate-800 border-slate-700 text-white">
+                  <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-slate-400">
+                      <AlertDialogDescription>
                         This will permanently delete your recent search history. This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="bg-transparent text-white hover:bg-slate-700 hover:text-white">Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700 text-white">
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleClearHistory} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                         Delete
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -124,19 +124,19 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                 <Card
                   key={search.id}
                   onClick={() => handleRecentSearchClick(search)}
-                  className="bg-slate-800/60 hover:bg-slate-700/80 border-slate-700 cursor-pointer text-left transition-colors"
+                  className="bg-muted/50 hover:bg-muted border-border cursor-pointer text-left transition-colors"
                 >
                   <CardContent className="p-4 flex flex-col h-full">
-                     <MessageSquare size={20} className="text-slate-400 mb-3" />
-                     <p className="font-medium text-white text-sm flex-1 leading-snug line-clamp-3">{search.title || search.prompt || 'New chat'}</p>
-                     <p className="text-slate-500 text-xs mt-3">{formatDistanceToNow(new Date(search.lastUpdated || search.id), { addSuffix: true })}</p>
+                     <MessageSquare size={20} className="text-muted-foreground mb-3" />
+                     <p className="font-medium text-foreground text-sm flex-1 leading-snug line-clamp-3">{search.title || search.prompt || 'New chat'}</p>
+                     <p className="text-muted-foreground text-xs mt-3">{formatDistanceToNow(new Date(search.lastUpdated || search.id), { addSuffix: true })}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
           </div>
         )}
-        <p className="text-slate-500 text-xs text-center mt-4">
+        <p className="text-muted-foreground text-xs text-center mt-8">
           Nomad Navigator may contain errors. We recommend checking important information.
         </p>
         </div>

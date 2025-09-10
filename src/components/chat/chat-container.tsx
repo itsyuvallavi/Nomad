@@ -511,57 +511,78 @@ export default function ChatDisplay({
                     "Weekend getaway to Amsterdam from Berlin"
                 ]}
             />
-            <main className="flex-1 flex flex-col min-h-0">
-                {/* Header Bar */}
-                <div className="flex items-center justify-between px-6 py-3 bg-slate-900/50 border-b border-slate-800">
-                    <Button 
-                        variant="ghost" 
-                        onClick={onReturn} 
-                        size="sm"
-                        className="text-slate-400 hover:text-white"
-                    >
-                        <ArrowLeft className="mr-2 h-4 w-4" /> New Search
-                    </Button>
+            <main className="h-screen flex flex-col">
+                {/* Top Navigation Bar */}
+                <div className="flex items-center justify-between px-6 py-4 bg-background border-b-2 border-border">
+                    <div className="flex items-center gap-4">
+                        <Button 
+                            variant="ghost" 
+                            onClick={onReturn} 
+                            size="sm"
+                            className="text-foreground hover:bg-muted"
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4" /> 
+                            <span className="font-medium">New Search</span>
+                        </Button>
+                        
+                        {currentItinerary && (
+                            <div className="h-6 w-px bg-border" />
+                        )}
+                        
+                        {currentItinerary && (
+                            <span className="text-sm text-muted-foreground">
+                                {currentItinerary.title || 'Your Itinerary'}
+                            </span>
+                        )}
+                    </div>
                     
-                    {/* Map Toggle and Shortcuts for desktop - moved here from absolute position */}
-                    {currentItinerary && (
-                        <div className="hidden xl:flex gap-2">
-                            <Button
-                                onClick={() => setShowShortcuts(true)}
-                                variant="ghost"
-                                size="sm"
-                                className="gap-2 text-slate-400 hover:text-white"
-                            >
-                                <Info className="h-4 w-4" />
-                                <span className="text-xs">Shortcuts</span>
-                            </Button>
-                            <Button
-                                onClick={() => setShowMapPanel(!showMapPanel)}
-                                variant={showMapPanel ? "secondary" : "default"}
-                                size="sm"
-                                className="gap-2"
-                            >
-                                <MapIcon className="h-4 w-4" />
-                                {showMapPanel ? 'Hide Map' : 'Show Map'}
-                            </Button>
-                        </div>
-                    )}
+                    {/* Action Buttons - Always visible when there's an itinerary */}
+                    <div className="flex items-center gap-2">
+                        {currentItinerary && (
+                            <>
+                                <Button
+                                    onClick={() => setShowShortcuts(true)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="gap-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+                                >
+                                    <Info className="h-4 w-4" />
+                                    <span className="hidden lg:inline text-sm">Shortcuts</span>
+                                </Button>
+                                
+                                <Button
+                                    onClick={() => setShowMapPanel(!showMapPanel)}
+                                    variant={showMapPanel ? "default" : "outline"}
+                                    size="sm"
+                                    className={cn(
+                                        "gap-2 font-medium",
+                                        showMapPanel 
+                                            ? "bg-orange-500 hover:bg-orange-600 text-white border-orange-500" 
+                                            : "bg-background hover:bg-muted text-foreground border-border"
+                                    )}
+                                >
+                                    <MapIcon className="h-4 w-4" />
+                                    <span className="text-sm">{showMapPanel ? 'Hide Map' : 'Show Map'}</span>
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </div>
                 
                 {/* Mobile Tab Navigation */}
-                <div className="md:hidden flex border-b border-slate-700 px-4">
+                <div className="md:hidden flex border-b border-border px-4">
                     <button
                         onClick={() => setMobileActiveTab('chat')}
                         className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] transition-colors ${
                             mobileActiveTab === 'chat'
                                 ? 'text-white border-b-2 border-blue-500'
-                                : 'text-slate-400 hover:text-slate-200'
+                                : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
                         <MessageSquare className="h-4 w-4" />
                         <span className="font-medium">Chat</span>
                         {messages.length > 0 && (
-                            <span className="ml-1 text-xs bg-slate-700 px-2 py-0.5 rounded-full">
+                            <span className="ml-1 text-xs bg-muted px-2 py-0.5 rounded-full">
                                 {messages.length}
                             </span>
                         )}
@@ -571,7 +592,7 @@ export default function ChatDisplay({
                         className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 min-h-[44px] transition-colors ${
                             mobileActiveTab === 'itinerary'
                                 ? 'text-white border-b-2 border-blue-500'
-                                : 'text-slate-400 hover:text-slate-200'
+                                : 'text-muted-foreground hover:text-foreground'
                         }`}
                     >
                         <MapIcon className="h-4 w-4" />
@@ -582,15 +603,10 @@ export default function ChatDisplay({
                     </button>
                 </div>
                 
-                {/* Desktop Layout - 2 or 3 columns based on map visibility */}
-                <div className={cn(
-                    "hidden md:grid gap-6 p-6 flex-1 min-h-0 items-center justify-center",
-                    showMapPanel && currentItinerary
-                        ? "xl:grid-cols-3 md:grid-cols-2" // 3 equal columns on XL, 2 on MD
-                        : "md:grid-cols-2" // 2 columns when map is hidden
-                )}>
-                    {/* Desktop Chat Panel */}
-                    <div className="rounded-xl overflow-hidden h-[90vh] max-h-[800px]">
+                {/* Desktop Layout - Proportional panels */}
+                <div className="hidden md:flex gap-0 flex-1 min-h-0 overflow-hidden">
+                    {/* Desktop Chat Panel - 20% width */}
+                    <div className="w-[20%] min-w-[280px] border-r border-border flex flex-col overflow-hidden">
                         <ChatPanel
                             messages={messages}
                             inputValue={userInput}
@@ -606,11 +622,8 @@ export default function ChatDisplay({
                         />
                     </div>
                     
-                    {/* Desktop Itinerary Panel */}
-                    <div className={cn(
-                        "rounded-xl overflow-hidden h-[90vh] max-h-[800px]",
-                        showMapPanel && currentItinerary ? "xl:col-span-1 md:col-span-2" : ""
-                    )}>
+                    {/* Desktop Itinerary Panel - Flexible width */}
+                    <div className="flex-1 flex flex-col overflow-hidden">
                         {currentItinerary ? (
                             <ItineraryPanel 
                                 itinerary={currentItinerary}
@@ -620,27 +633,25 @@ export default function ChatDisplay({
                             />
                         ) : (
                             isGenerating ? <EnhancedThinkingPanel progress={generationProgress} /> : (
-                                <div className="h-full flex items-center justify-center bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
+                                <div className="h-full flex items-center justify-center bg-background">
                                     <div className="text-center p-8">
-                                        <svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-16 h-16 mx-auto mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                        <p className="text-slate-400 text-sm">Your itinerary will appear here</p>
-                                        <p className="text-slate-500 text-xs mt-2">Start chatting to create your travel plan</p>
+                                        <p className="text-muted-foreground text-sm">Your itinerary will appear here</p>
+                                        <p className="text-muted-foreground text-xs mt-2">Start chatting to create your travel plan</p>
                                     </div>
                                 </div>
                             )
                         )}
                     </div>
                     
-                    {/* Desktop Map Panel - Only shown on XL screens when enabled */}
+                    {/* Desktop Map Panel - 30% width */}
                     {showMapPanel && currentItinerary && (
-                        <div className="hidden xl:block h-[90vh] max-h-[800px]">
-                            <div className="h-full rounded-xl overflow-hidden">
-                                <MapPanel 
-                                    itinerary={currentItinerary}
-                                />
-                            </div>
+                        <div className="w-[30%] min-w-[400px] border-l border-border overflow-hidden">
+                            <MapPanel 
+                                itinerary={currentItinerary}
+                            />
                         </div>
                     )}
                 </div>
@@ -673,13 +684,13 @@ export default function ChatDisplay({
                                 />
                             ) : (
                                 isGenerating ? <EnhancedThinkingPanel progress={generationProgress} /> : (
-                                    <div className="h-full flex items-center justify-center bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
+                                    <div className="h-full flex items-center justify-center bg-background">
                                         <div className="text-center p-8">
-                                            <svg className="w-16 h-16 mx-auto mb-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-16 h-16 mx-auto mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
-                                            <p className="text-slate-400 text-sm">Your itinerary will appear here</p>
-                                            <p className="text-slate-500 text-xs mt-2">Start chatting to create your travel plan</p>
+                                            <p className="text-muted-foreground text-sm">Your itinerary will appear here</p>
+                                            <p className="text-muted-foreground text-xs mt-2">Start chatting to create your travel plan</p>
                                         </div>
                                     </div>
                                 )
@@ -702,7 +713,7 @@ export default function ChatDisplay({
                                 initial={{ scale: 0.9, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 exit={{ scale: 0.9, opacity: 0 }}
-                                className="bg-slate-800 rounded-xl p-6 max-w-md w-full shadow-2xl border border-slate-700"
+                                className="bg-card rounded-xl p-6 max-w-md w-full shadow-2xl border border-border"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <h2 className="text-xl font-semibold text-white mb-4">Keyboard Shortcuts</h2>

@@ -17,8 +17,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Satoshi', 'sans-serif'],
+        body: ['Space Mono', 'monospace'],
+        headline: ['Space Mono', 'monospace'],
+        mono: ['Space Mono', 'monospace'],
+        sans: ['Space Mono', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -53,6 +55,7 @@ export default {
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
+        'input-background': 'hsl(var(--input-background))',
         ring: 'hsl(var(--ring))',
       },
       borderRadius: {

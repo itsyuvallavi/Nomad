@@ -77,14 +77,14 @@ export default function Home() {
         );
       case 'start':
         return (
-          <div className="h-screen overflow-hidden flex items-center justify-center">
+          <div className="h-screen overflow-hidden flex items-center justify-center bg-background">
             <StartItinerary onItineraryRequest={handleItineraryRequest}/>
           </div>
         );
       default:
         // Default to start view if somehow we get here
         return (
-          <div className="h-screen overflow-hidden flex items-center justify-center">
+          <div className="h-screen overflow-hidden flex items-center justify-center bg-background">
             <StartItinerary onItineraryRequest={handleItineraryRequest}/>
           </div>
         );

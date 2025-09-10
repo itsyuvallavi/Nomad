@@ -4,7 +4,7 @@
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Mic, ArrowUp, Plus, Paperclip, X } from 'lucide-react';
+import { Mic, Send, Plus, Paperclip, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -112,7 +112,7 @@ export default function ItineraryForm({
     <div className="relative max-w-2xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-          <div className="bg-slate-700/80 backdrop-blur-sm rounded-2xl px-3 py-2 md:px-4 md:py-3 flex items-center gap-2 md:gap-3">
+          <div className="bg-muted/50 rounded-xl px-4 py-3 flex items-center gap-3 border border-border">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -120,13 +120,13 @@ export default function ItineraryForm({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="min-w-[44px] min-h-[44px] text-slate-400 hover:text-white transition-colors flex-shrink-0 rounded-full hover:bg-slate-600 flex items-center justify-center"
+                    className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Plus size={18} />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-slate-800 border-slate-700 text-white">
+                <TooltipContent>
                   <p>Attach documents or photos</p>
                 </TooltipContent>
               </Tooltip>
@@ -140,7 +140,7 @@ export default function ItineraryForm({
                   <FormControl>
                     <div className="flex items-center gap-2">
                       {attachedFile && (
-                        <div className="flex items-center gap-2 bg-slate-600/50 rounded-full pl-3 pr-2 py-1 text-xs text-white">
+                        <div className="flex items-center gap-2 bg-muted rounded-full pl-3 pr-2 py-1 text-xs text-foreground">
                           <Paperclip size={12} />
                           <span className="truncate max-w-[120px]">
                             {attachedFile.name}
@@ -153,7 +153,7 @@ export default function ItineraryForm({
                                 fileInputRef.current.value = '';
                               }
                             }}
-                            className="text-slate-400 hover:text-white"
+                            className="text-muted-foreground hover:text-foreground"
                           >
                             <X size={14} />
                           </button>
@@ -161,7 +161,7 @@ export default function ItineraryForm({
                       )}
                       <Input
                         placeholder={placeholder}
-                        className="bg-transparent border-0 text-white placeholder-slate-400 outline-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base md:text-sm"
+                        className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         autoComplete="off"
                         {...field}
                       />
@@ -192,17 +192,17 @@ export default function ItineraryForm({
                   type="submit"
                   variant="ghost"
                   size="icon"
-                  className="min-w-[44px] min-h-[44px] text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600 flex items-center justify-center"
+                  className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
                   disabled={isSubmitting}
                 >
-                  <ArrowUp size={18} />
+                  <Send size={16} />
                 </Button>
               ) : (
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="min-w-[44px] min-h-[44px] text-slate-400 hover:text-white transition-colors rounded-full hover:bg-slate-600 flex items-center justify-center"
+                  className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
                 >
                   <Mic size={16} />
                 </Button>

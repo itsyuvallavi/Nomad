@@ -1,18 +1,19 @@
 import { DayItinerary } from './day-schedule';
+import { DayTimeline } from './day-timeline';
 import { CoworkingSection } from './coworking-spots';
-import { TripActions } from './trip-tips';
 import { ExportMenu } from './export-menu';
 import { ItineraryLoadingSkeleton } from './loading-skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { MapPin, Map } from 'lucide-react';
+import { MapPin, Map, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
 import Image from 'next/image';
 import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
 import { logger } from '@/lib/logger';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
+import { getIconicImageSearch } from '@/lib/city-landmarks';
 
 // Dynamically import map to avoid SSR issues
 const ItineraryMap = dynamic(
@@ -20,8 +21,8 @@ const ItineraryMap = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="h-[400px] bg-slate-800/50 rounded-lg flex items-center justify-center">
-        <Map className="h-8 w-8 text-slate-500 animate-pulse" />
+      <div className="h-[400px] bg-muted/50 rounded-lg flex items-center justify-center">
+        <Map className="h-8 w-8 text-muted-foreground animate-pulse" />
       </div>
     )
   }
@@ -53,7 +54,7 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
   // Show loading skeleton while refining
   if (isRefining) {
     return (
-      <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
+      <div className="h-full overflow-y-auto bg-background">
         <ItineraryLoadingSkeleton />
       </div>
     );
@@ -62,7 +63,7 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
   // Show empty state if no itinerary
   if (!itinerary || !itinerary.itinerary || itinerary.itinerary.length === 0) {
     return (
-      <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
+      <div className="h-full overflow-y-auto bg-background">
         <EmptyState 
           type="no-itinerary"
           title="Your Journey Awaits"
@@ -74,6 +75,7 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
   const [destinationImages, setDestinationImages] = useState<Record<string, PexelsImage[]>>({});
   const [showMap, setShowMap] = useState(false);
   const [selectedMapDay, setSelectedMapDay] = useState<number | undefined>(undefined);
+  const [selectedDayInTimeline, setSelectedDayInTimeline] = useState(1);
   
   // Extract all activities for coworking section
   const allActivities = itinerary.itinerary.flatMap(day => day.activities);
@@ -255,167 +257,168 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
   const destinationName = selectedLocation || itinerary.destination.split(',')[0].trim();
 
   return (
-    <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900">
-      {/* Trip Overview */}
-      <div className="p-4 md:p-6 border-b border-slate-600/50">
+    <div className="h-full overflow-y-auto bg-background">
+      {/* Trip Overview - Compact Header */}
+      <div className="p-4 border-b border-border">
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-3">
-            <div>
-              <h1 className="text-xl md:text-2xl font-medium mb-2 text-white">{itinerary.title}</h1>
-              <p className="text-slate-400 text-sm md:text-base">{tripDuration}</p>
+          {/* Header Section - Compact */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="space-y-1">
+              <h1 className="text-xl tracking-tight text-foreground font-medium">{itinerary.title}</h1>
+              <p className="text-xs text-muted-foreground">{tripDuration}</p>
             </div>
             <div className="flex gap-2">
               {showMapToggle && (
                 <Button
                   onClick={() => setShowMap(!showMap)}
-                  variant={showMap ? "default" : "secondary"}
+                  variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="h-7 text-xs"
                 >
-                  <Map className="h-4 w-4" />
-                  {showMap ? 'Hide Map' : 'Show Map'}
+                  <Map className="h-3 w-3 mr-1" />
+                  {showMap ? 'Hide' : 'Map'}
                 </Button>
               )}
               <ExportMenu itinerary={itinerary} className="self-start" />
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
-            <span className="px-2 py-1 md:px-3 bg-slate-700/50 rounded-full text-xs md:text-sm text-slate-300">
-              {itinerary.destination}
-            </span>
-            <span className="px-2 py-1 md:px-3 bg-slate-700/50 rounded-full text-xs md:text-sm text-slate-300">
-              {itinerary.itinerary.length} days
-            </span>
-            <span className="px-2 py-1 md:px-3 bg-slate-700/50 rounded-full text-xs md:text-sm text-slate-300">
-              {budgetLevel}
-            </span>
-            {itinerary._costEstimate && (
-              <span className="px-3 py-1 bg-blue-600/30 border border-blue-500/50 rounded-full text-sm text-blue-300 font-medium">
-                Est. ${itinerary._costEstimate.total.toLocaleString()} {itinerary._costEstimate.currency}
-              </span>
-            )}
-          </div>
-          
-          {/* Cost Breakdown if available */}
-          {itinerary._costEstimate && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700"
-            >
-              <h3 className="text-white font-medium mb-3 flex items-center gap-2">
-                💰 Estimated Trip Cost
-                <span className="text-xs text-slate-400">(per person)</span>
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Flights:</span>
-                  <span className="text-white font-medium">
-                    ${itinerary._costEstimate.flights.toLocaleString()}
-                  </span>
+          {/* Layout with Cost on Left and Image on Right - 50/50 split */}
+          <div className="flex gap-4 mb-4">
+            {/* Left Side - Trip Meta and Cost Breakdown */}
+            <div className="w-1/2">
+              {/* Trip Meta - Ultra Compact Grid */}
+              <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Calendar className="w-3 h-3" />
+                    <span>Duration</span>
+                  </div>
+                  <p className="text-foreground font-medium">{itinerary.itinerary.length} days</p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Hotels:</span>
-                  <span className="text-white font-medium">
-                    ${itinerary._costEstimate.accommodation.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Daily Expenses:</span>
-                  <span className="text-white font-medium">
-                    ${itinerary._costEstimate.dailyExpenses.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between border-t border-slate-700 pt-2">
-                  <span className="text-slate-300 font-medium">Total:</span>
-                  <span className="text-blue-400 font-bold text-base">
-                    ${itinerary._costEstimate.total.toLocaleString()}
-                  </span>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="w-3 h-3" />
+                    <span>Location</span>
+                  </div>
+                  <p className="text-foreground font-medium truncate">{itinerary.destination}</p>
                 </div>
               </div>
               
-              {/* Expandable breakdown */}
-              <details className="mt-3">
-                <summary className="text-xs text-slate-500 cursor-pointer hover:text-slate-400">
-                  View detailed breakdown
-                </summary>
-                <div className="mt-2 space-y-1">
-                  {itinerary._costEstimate.breakdown.map((item, idx) => (
-                    <div key={idx} className="flex justify-between text-xs">
-                      <span className="text-slate-500">
-                        {item.type === 'flight' ? '✈️' : item.type === 'accommodation' ? '🏨' : '💵'} {item.description}
+              {/* Cost Breakdown - Compact */}
+              {itinerary._costEstimate && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-foreground">Cost breakdown</h3>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between py-0.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
+                          <Plane className="w-3 h-3 text-muted-foreground" />
+                        </div>
+                        <span className="text-xs text-foreground">Flights</span>
+                      </div>
+                      <span className="text-xs text-foreground font-medium">
+                        ${itinerary._costEstimate.flights.toLocaleString()}
                       </span>
-                      <span className="text-slate-400">${item.amount.toLocaleString()}</span>
                     </div>
-                  ))}
+                    <div className="flex items-center justify-between py-0.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
+                          <Home className="w-3 h-3 text-muted-foreground" />
+                        </div>
+                        <span className="text-xs text-foreground">Stay</span>
+                      </div>
+                      <span className="text-xs text-foreground font-medium">
+                        ${itinerary._costEstimate.accommodation.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-0.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
+                          <Utensils className="w-3 h-3 text-muted-foreground" />
+                        </div>
+                        <span className="text-xs text-foreground">Food & Daily</span>
+                      </div>
+                      <span className="text-xs text-foreground font-medium">
+                        ${itinerary._costEstimate.dailyExpenses.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pt-1.5 border-t border-border">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-foreground">Total estimated</span>
+                      <span className="text-sm text-foreground font-bold">
+                        ${itinerary._costEstimate.total.toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Per person • {itinerary.itinerary.length} days</p>
+                  </div>
                 </div>
-              </details>
-            </motion.div>
-          )}
+              )}
+            </div>
 
-          {/* Destination Images - Using Unsplash API with city-specific searches */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {[1, 2, 3].map((num, index) => {
-              // More specific search terms for better results
-              const searchTerms = [
-                `${destinationName} city`,
-                `${destinationName} landmark tourist`,  
-                `${destinationName} street view`
-              ];
-              
-              // Use Pexels images if available
-              const pexelsImages = destinationImages[destinationName] || [];
-              const pexelsImage = pexelsImages[index];
-              const imageUrl = pexelsImage?.src?.large || 
-                `https://source.unsplash.com/400x300/?${encodeURIComponent(searchTerms[index])}&sig=${Date.now()}-${index}`;
-              const photographer = pexelsImage?.photographer;
-              const photographerUrl = pexelsImage?.photographer_url;
-              
-              return (
-                <div key={index} className="relative aspect-video bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl overflow-hidden">
-                  {/* Emoji fallback always rendered behind image */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-4xl">
-                      {['🏛️', '🌆', '🎭', '🏰', '🌉'][index] || '🏛️'}
-                    </span>
+            {/* Right Side - Single Destination Image - 50% width */}
+            <div className="w-1/2">
+              {(() => {
+                // Get iconic landmark search for this destination
+                const { searchTerm, fallbackEmoji } = getIconicImageSearch(destinationName);
+                
+                // Use first Pexels image if available
+                const pexelsImages = destinationImages[destinationName] || [];
+                const pexelsImage = pexelsImages[0];
+                
+                // Use iconic landmark search term for better results
+                const imageUrl = pexelsImage?.src?.large || 
+                  `https://source.unsplash.com/1200x800/?${encodeURIComponent(searchTerm)}&sig=${Date.now()}-iconic`;
+                
+                return (
+                  <div className="relative w-full h-[200px] bg-muted rounded-xl overflow-hidden group shadow-lg">
+                    {/* Emoji fallback with city-specific icon */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/80">
+                      <span className="text-6xl opacity-30">{fallbackEmoji}</span>
+                    </div>
+                    
+                    {/* Actual image on top */}
+                    <Image 
+                      src={imageUrl}
+                      alt={`${destinationName} - Iconic view`}
+                      fill
+                      sizes="50vw"
+                      className="object-cover opacity-0 transition-all duration-700"
+                      priority
+                      quality={90}
+                      unoptimized
+                      onLoad={(e) => {
+                        const imgElement = e.target as HTMLImageElement;
+                        imgElement.classList.remove('opacity-0');
+                        imgElement.classList.add('opacity-100');
+                      }}
+                      onError={(e) => {
+                        // Try fallback to generic search if iconic fails
+                        const imgElement = e.target as HTMLImageElement;
+                        if (!imgElement.src.includes('fallback')) {
+                          imgElement.src = `https://source.unsplash.com/1200x800/?${encodeURIComponent(destinationName + ' city tourism')}&sig=${Date.now()}-fallback`;
+                        }
+                      }}
+                    />
+                    
+                    {/* Subtle hover effect */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Location label on hover */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <p className="text-white text-sm font-medium">{destinationName}</p>
+                      <p className="text-white/80 text-xs">Iconic landmark</p>
+                    </div>
                   </div>
-                  
-                  {/* Actual image on top */}
-                  <Image 
-                    src={imageUrl}
-                    alt={`${destinationName} - ${searchTerms[index].split(' ').slice(1).join(' ')}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 400px"
-                    className="object-cover opacity-0"
-                    priority
-                    unoptimized // Use unoptimized for dynamic Unsplash images
-                    onLoad={(e) => {
-                      const imgElement = e.target as HTMLImageElement;
-                      imgElement.classList.remove('opacity-0');
-                      imgElement.classList.add('opacity-100');
-                    }}
-                    onError={() => {
-                      // Silently fail - emoji fallback is visible
-                    }}
-                  />
-                  
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 z-10">
-                    <p className="text-white text-xs truncate">{destinationName}</p>
-                    {photographer && (
-                      <p className="text-white/70 text-[10px] truncate">
-                        Photo: <a href={photographerUrl} target="_blank" rel="noopener noreferrer" className="underline">{photographer}</a>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })()}
+            </div>
           </div>
 
           {/* Interactive Map View - Only show if map toggle is enabled */}
@@ -478,9 +481,6 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
 
       {/* Main Content */}
       <div className="p-6 pb-12">
-        {/* Trip Actions - Tips specific to selected location */}
-        <TripActions itinerary={itinerary} selectedLocation={selectedLocation} />
-
         {/* Coworking Spaces (if any) */}
         <CoworkingSection activities={allActivities} />
 
@@ -492,8 +492,10 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
               <h2 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Trip Destinations</h2>
               <span className="text-xs text-slate-500">({locations.length} locations)</span>
             </div>
-            <div className="relative">
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+            {/* Destinations - Horizontal Compact */}
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-foreground mb-2">Destinations</h3>
+              <div className="flex gap-2 overflow-x-auto pb-1">
                 {locations.map((location, index) => {
                   const locationData = daysByLocation[location];
                   const isSelected = selectedLocation === location;
@@ -502,22 +504,22 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                     <button
                       key={location}
                       onClick={() => setSelectedLocation(location)}
-                      className={`flex-shrink-0 px-4 py-2.5 rounded-lg transition-all border ${
+                      className={`flex-shrink-0 px-3 py-1.5 rounded-md transition-all border text-xs ${
                         isSelected
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white border-blue-500 shadow-lg shadow-blue-500/20'
-                          : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/70 border-slate-600/50 hover:border-slate-500'
+                          ? 'bg-foreground text-background border-foreground'
+                          : 'bg-muted/50 text-foreground hover:bg-muted border-border'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className={`flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold ${
-                          isSelected ? 'bg-white/20' : 'bg-slate-600/50'
+                      <div className="flex items-center gap-1.5">
+                        <span className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                          isSelected ? 'bg-background/20' : 'bg-muted'
                         }`}>
                           {index + 1}
-                        </div>
+                        </span>
                         <div className="text-left">
                           <div className="font-medium">{location}</div>
-                          <div className="text-[10px] opacity-75">
-                            Day {locationData.startDay}-{locationData.endDay} • {locationData.days.length} {locationData.days.length === 1 ? 'day' : 'days'}
+                          <div className="text-[9px] opacity-70">
+                            {locationData.days.length} {locationData.days.length === 1 ? 'day' : 'days'}
                           </div>
                         </div>
                       </div>
@@ -525,45 +527,87 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                   );
                 })}
               </div>
-              
-              {/* Scroll indicators */}
-              {locations.length > 4 && (
-                <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-900 to-transparent pointer-events-none" />
-              )}
             </div>
           </div>
         )}
 
-        {/* Daily Itinerary */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-white">
-            {locations.length > 1 ? (
-              <>
-                <span className="text-blue-400">{selectedLocation}</span>
-                <span className="text-slate-400 text-sm ml-2">Itinerary</span>
-              </>
-            ) : (
-              'Daily Itinerary'
-            )}
-          </h2>
-          {locations.length > 1 && (
-            <div className="text-xs text-slate-400">
-              Location {locations.indexOf(selectedLocation) + 1} of {locations.length}
-            </div>
-          )}
-        </div>
-        
-        <div className="space-y-6">
-          {(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map((day, index) => (
-            <div key={`${selectedLocation}-day-${day.day}-${index}`} id={`day-${day.day}`}>
-              <DayItinerary
-                day={day.day}
-                date={day.date}
-                activities={day.activities}
-                dayIndex={index}
-              />
-            </div>
-          ))}
+        {/* Daily Itinerary with Timeline */}
+        <div className="py-3">
+          <div className="px-4 mb-3">
+            <h2 className="text-sm font-medium text-foreground">
+              {locations.length > 1 ? (
+                <>
+                  <span>{selectedLocation}</span>
+                  <span className="text-muted-foreground text-xs ml-1">Itinerary</span>
+                </>
+              ) : (
+                'Daily Itinerary'
+              )}
+            </h2>
+          </div>
+          
+          {/* Horizontal Timeline */}
+          <DayTimeline 
+            totalDays={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).length}
+            selectedDay={selectedDayInTimeline}
+            onDaySelect={(day) => {
+              setSelectedDayInTimeline(day);
+              // Also update map day selection if needed
+              setSelectedMapDay(day);
+            }}
+            location={locations.length > 1 ? selectedLocation : undefined}
+          />
+          
+          {/* Selected Day Activities */}
+          <div className="px-4 mt-8">
+            {(() => {
+              const days = daysByLocation[selectedLocation]?.days || itinerary.itinerary;
+              const selectedDay = days.find(d => d.day === selectedDayInTimeline) || days[0];
+              
+              return (
+                <motion.div
+                  key={`day-${selectedDay.day}`}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="border-l-2 border-orange-500 pl-4 ml-2">
+                    <div className="mb-3">
+                      <h3 className="text-lg font-semibold text-foreground">Day {selectedDay.day}</h3>
+                      <p className="text-sm text-muted-foreground">{selectedDay.date}</p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {selectedDay.activities.map((activity, index) => (
+                        <motion.div
+                          key={`activity-${index}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2, delay: index * 0.05 }}
+                          className="bg-card border border-border rounded-lg p-3 hover:bg-muted/30 transition-colors"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                              {index + 1}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs text-muted-foreground">{activity.time}</span>
+                              </div>
+                              <h4 className="text-sm font-medium text-foreground">{activity.description}</h4>
+                              {activity.address && (
+                                <p className="text-xs text-muted-foreground mt-1">{activity.address}</p>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </div>
         </div>
 
       </div>

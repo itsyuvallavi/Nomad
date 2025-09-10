@@ -37,28 +37,28 @@ export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryPr
 
   return (
     <motion.div
-      className="mb-6"
-      initial={{ opacity: 0, y: 20 }}
+      className="mb-3"
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: dayIndex * 0.1, ease: "easeOut" }}
+      transition={{ duration: 0.3, delay: dayIndex * 0.05 }}
     >
       <div 
-        className="flex items-center gap-2 mb-3 cursor-pointer group"
+        className="flex items-center gap-2 mb-2 cursor-pointer group py-1"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg flex items-center justify-center">
-          <span className="text-white font-medium text-sm">{day}</span>
+        <div className="w-7 h-7 bg-muted rounded-md flex items-center justify-center">
+          <span className="text-foreground font-medium text-xs">{day}</span>
         </div>
         <div className="flex-1">
-          <h2 className="text-white font-medium text-sm">Day {day}</h2>
-          <p className="text-slate-400 text-xs">{date}</p>
+          <h2 className="text-foreground font-medium text-sm">Day {day}</h2>
+          <p className="text-muted-foreground text-[10px]">{date}</p>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-slate-400 group-hover:text-white transition-colors"
+          className="text-muted-foreground group-hover:text-foreground transition-colors"
         >
-          <ChevronDown className="w-5 h-5" />
+          <ChevronDown className="w-4 h-4" />
         </motion.div>
       </div>
       
@@ -68,10 +68,10 @@ export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryPr
           height: isExpanded ? 'auto' : 0,
           opacity: isExpanded ? 1 : 0
         }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.2 }}
         className="overflow-hidden"
       >
-        <div className="space-y-2 ml-2 md:ml-4 border-l-2 border-slate-600 pl-3 md:pl-4">
+        <div className="space-y-1.5 ml-2 border-l border-border pl-3">
           {activities.map((activity, index) => (
             <EventCard
               key={`${day}-${index}`}

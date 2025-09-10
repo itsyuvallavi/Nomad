@@ -69,7 +69,7 @@ function MapControls({
         size="sm"
         variant="secondary"
         onClick={onFitBounds}
-        className="bg-slate-900/95 backdrop-blur-sm shadow-lg hover:bg-slate-800 text-slate-200 text-xs border border-slate-700/50"
+        className="bg-background/95 backdrop-blur-sm shadow-sm hover:bg-muted text-foreground text-xs border border-border"
         title="Reset view"
       >
         <Maximize2 className="h-3 w-3" />
@@ -80,10 +80,10 @@ function MapControls({
         variant={showRoutes ? "default" : "secondary"}
         onClick={onToggleRoutes}
         className={cn(
-          "shadow-lg text-xs border backdrop-blur-sm",
+          "shadow-sm text-xs border backdrop-blur-sm",
           showRoutes 
-            ? "bg-blue-600/95 hover:bg-blue-700 text-white border-blue-500/50" 
-            : "bg-slate-900/95 hover:bg-slate-800 text-slate-200 border-slate-700/50"
+            ? "bg-orange-500/95 hover:bg-orange-600 text-white border-orange-500/50" 
+            : "bg-background/95 hover:bg-muted text-foreground border-border"
         )}
         title="Toggle routes"
       >
@@ -292,10 +292,18 @@ export function ItineraryMap({
 
   if (isLoading) {
     return (
-      <div className={cn("relative h-[400px] bg-gradient-to-b from-slate-800 to-slate-900 rounded-xl flex items-center justify-center border border-slate-700/50", className)}>
-        <div className="text-slate-400">
-          <MapPin className="h-8 w-8 mx-auto mb-2 animate-pulse" />
-          <p className="text-sm">Loading map...</p>
+      <div className={cn("relative h-[400px] bg-background rounded-xl flex items-center justify-center border border-border", className)}>
+        <div className="text-center">
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            {/* Animated circles */}
+            <div className="absolute inset-0 rounded-full border-2 border-orange-200 animate-ping" />
+            <div className="absolute inset-0 rounded-full border-2 border-orange-300 animate-ping" style={{ animationDelay: '0.5s' }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <MapPin className="h-8 w-8 text-orange-500 animate-bounce" />
+            </div>
+          </div>
+          <p className="text-sm text-foreground font-medium">Loading map...</p>
+          <p className="text-xs text-muted-foreground mt-1">Plotting your journey</p>
         </div>
       </div>
     );
@@ -311,7 +319,7 @@ export function ItineraryMap({
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/positron/{z}/{x}/{y}{r}.png"
         />
         
         <MapUpdater 
