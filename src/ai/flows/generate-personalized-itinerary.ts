@@ -18,6 +18,7 @@ import { generateUnifiedItinerary, getUnifiedGenerator } from '@/ai/utils/unifie
 import { validateTripComplexity } from '@/ai/utils/enhanced-generator';
 // Keep ultra-fast for now as primary until fully tested
 import { generateUltraFastItinerary } from '@/ai/utils/enhanced-generator-ultra-fast';
+import { enrichItineraryWithRealPlaces } from '@/ai/services/location-enrichment';
 import { logAIRequest, logAIResponse, logAIError } from '@/lib/utils/ai-logger';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
@@ -210,15 +211,46 @@ export async function generatePersonalizedItinerary(
       }
       logger.info('AI', 'Ultra-fast generation successful');
       
-      // Log successful response
-      await logAIResponse(requestId, result, {
-        model: 'gpt-4o-mini',
-        strategy: 'ultra-fast',
-        destinations: [result.destination],
-        totalDays: result.itinerary?.length || 0
-      });
-      
-      return result;
+      // Enrich with Radar Places data if available
+      const hasRadarAPI = !!process.env.RADAR_API_SECRET_KEY;
+      if (hasRadarAPI) {
+        logger.info('AI', 'Enriching ultra-fast itinerary with Radar Places data');
+        try {
+          const enrichedResult = await enrichItineraryWithRealPlaces(result, { useRadar: true });
+          logger.info('AI', 'Radar enrichment successful for ultra-fast');
+          
+          // Log successful response with enrichment
+          await logAIResponse(requestId, enrichedResult, {
+            model: 'gpt-4o-mini',
+            strategy: 'ultra-fast-enriched',
+            destinations: [enrichedResult.destination],
+            totalDays: enrichedResult.itinerary?.length || 0
+          });
+          
+          return enrichedResult;
+        } catch (enrichError: any) {
+          logger.warn('AI', 'Radar enrichment failed for ultra-fast, using non-enriched result', { error: enrichError.message });
+          // Fall back to non-enriched result
+          await logAIResponse(requestId, result, {
+            model: 'gpt-4o-mini',
+            strategy: 'ultra-fast',
+            destinations: [result.destination],
+            totalDays: result.itinerary?.length || 0
+          });
+          
+          return result;
+        }
+      } else {
+        // Log successful response
+        await logAIResponse(requestId, result, {
+          model: 'gpt-4o-mini',
+          strategy: 'ultra-fast',
+          destinations: [result.destination],
+          totalDays: result.itinerary?.length || 0
+        });
+        
+        return result;
+      }
     } catch (error: any) {
       if (typeof window !== 'undefined') {
         console.warn('⚠️ Enhanced generation failed, falling back:', error.message);
@@ -254,15 +286,46 @@ export async function generatePersonalizedItinerary(
     const metrics = generator.getMetrics();
     logger.info('AI', 'Generation metrics', metrics);
     
-    // Log successful response from unified generator
-    await logAIResponse(requestId, result, {
-      model: 'gpt-4o-mini',
-      strategy: 'unified',
-      destinations: [result.destination],
-      totalDays: result.itinerary?.length || 0
-    });
-    
-    return result;
+    // Enrich with Radar Places data if available
+    const hasRadarAPI = !!process.env.RADAR_API_SECRET_KEY;
+    if (hasRadarAPI) {
+      logger.info('AI', 'Enriching itinerary with Radar Places data');
+      try {
+        const enrichedResult = await enrichItineraryWithRealPlaces(result, { useRadar: true });
+        logger.info('AI', 'Radar enrichment successful');
+        
+        // Log successful response from unified generator with enrichment
+        await logAIResponse(requestId, enrichedResult, {
+          model: 'gpt-4o-mini',
+          strategy: 'unified-enriched',
+          destinations: [enrichedResult.destination],
+          totalDays: enrichedResult.itinerary?.length || 0
+        });
+        
+        return enrichedResult;
+      } catch (enrichError: any) {
+        logger.warn('AI', 'Radar enrichment failed, using non-enriched result', { error: enrichError.message });
+        // Fall back to non-enriched result
+        await logAIResponse(requestId, result, {
+          model: 'gpt-4o-mini',
+          strategy: 'unified',
+          destinations: [result.destination],
+          totalDays: result.itinerary?.length || 0
+        });
+        
+        return result;
+      }
+    } else {
+      // Log successful response from unified generator
+      await logAIResponse(requestId, result, {
+        model: 'gpt-4o-mini',
+        strategy: 'unified',
+        destinations: [result.destination],
+        totalDays: result.itinerary?.length || 0
+      });
+      
+      return result;
+    }
   } catch (error: any) {
     logger.error('AI', 'Unified generation failed', { error: error.message, stack: error.stack });
     

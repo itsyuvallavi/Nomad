@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { EventCard } from './activity-card';
 import { z } from 'genkit';
 import { ActivitySchema } from '@/ai/schemas';
@@ -15,7 +14,8 @@ interface DayItineraryProps {
 }
 
 export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(dayIndex === 0); // First day expanded by default
+  
   const getCategoryFromActivity = (activity: Activity): 'work' | 'activity' | 'food' | 'transport' => {
     const lowerDesc = activity.description.toLowerCase();
     const category = activity.category.toLowerCase();
@@ -37,28 +37,30 @@ export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryPr
 
   return (
     <motion.div
-      className="mb-3"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      className="mb-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.3, delay: dayIndex * 0.05 }}
     >
       <div 
-        className="flex items-center gap-2 mb-2 cursor-pointer group py-1"
+        className="flex items-center gap-3 mb-3 cursor-pointer group py-2"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="w-7 h-7 bg-muted rounded-md flex items-center justify-center">
-          <span className="text-foreground font-medium text-xs">{day}</span>
+        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+          <span className="text-gray-900 font-semibold text-sm">{day}</span>
         </div>
         <div className="flex-1">
-          <h2 className="text-foreground font-medium text-sm">Day {day}</h2>
-          <p className="text-muted-foreground text-[10px]">{date}</p>
+          <h2 className="text-gray-900 font-semibold text-base">Day {day}</h2>
+          <p className="text-gray-500 text-xs">{date}</p>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-muted-foreground group-hover:text-foreground transition-colors"
+          className="text-gray-400 group-hover:text-gray-600 transition-colors"
         >
-          <ChevronDown className="w-4 h-4" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </motion.div>
       </div>
       
@@ -71,7 +73,7 @@ export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryPr
         transition={{ duration: 0.2 }}
         className="overflow-hidden"
       >
-        <div className="space-y-1.5 ml-2 border-l border-border pl-3">
+        <div className="space-y-2 ml-6 border-l border-gray-200 pl-6">
           {activities.map((activity, index) => (
             <EventCard
               key={`${day}-${index}`}

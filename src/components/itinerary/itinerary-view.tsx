@@ -577,7 +577,7 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">Activities</p>
-                      <p className="text-2xl font-bold text-orange-500">{selectedDay.activities.length}</p>
+                      <p className="text-lg font-medium text-gray-900">{selectedDay.activities.length}</p>
                     </div>
                   </div>
                   
@@ -598,27 +598,22 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                           className="group relative bg-background border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
                           whileHover={{ y: -2 }}
                         >
-                          {/* Background Gradient on Hover */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          {/* Subtle hover background */}
+                          <div className="absolute inset-0 bg-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                           
-                          <div className="relative flex gap-4">
-                            {/* Time Badge */}
-                            <div className="flex-shrink-0">
-                              <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex flex-col items-center justify-center text-white shadow-md">
-                                <span className="text-xs font-medium opacity-90">
-                                  {activity.time.split(' - ')[0].split(':')[0]}
-                                </span>
-                                <span className="text-lg font-bold">
-                                  :{activity.time.split(' - ')[0].split(':')[1] || '00'}
-                                </span>
-                              </div>
+                          <div className="relative flex gap-3">
+                            {/* Minimal time display */}
+                            <div className="flex-shrink-0 w-12 text-right">
+                              <span className="text-sm font-medium text-gray-900">
+                                {activity.time.split(' - ')[0]}
+                              </span>
                             </div>
                             
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1">
-                                  <h4 className="text-base font-semibold text-foreground group-hover:text-orange-600 transition-colors">
+                                  <h4 className="text-sm font-medium text-gray-900">
                                     {activity.description}
                                   </h4>
                                   {activity.address && (

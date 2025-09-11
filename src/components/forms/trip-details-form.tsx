@@ -5,7 +5,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Mic, Send, Plus, Paperclip, X } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, ChangeEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
@@ -112,7 +112,7 @@ export default function ItineraryForm({
     <div className="relative max-w-2xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-          <div className="bg-muted/50 rounded-xl px-4 py-3 flex items-center gap-3 border border-border">
+          <div className="bg-muted/50 rounded-xl px-4 py-3 flex items-start gap-3 border border-border">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -120,7 +120,7 @@ export default function ItineraryForm({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
+                    className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center mt-1"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Plus size={18} />
@@ -159,11 +159,25 @@ export default function ItineraryForm({
                           </button>
                         </div>
                       )}
-                      <Input
+                      <textarea
                         placeholder={placeholder}
-                        className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[24px] max-h-[120px] overflow-y-auto"
                         autoComplete="off"
+                        rows={1}
                         {...field}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+                          field.onChange(e);
+                          // Auto-resize textarea
+                          e.target.style.height = 'auto';
+                          e.target.style.height = e.target.scrollHeight + 'px';
+                        }}
+                        onKeyDown={(e) => {
+                          // Submit on Enter (without Shift)
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            form.handleSubmit(handleFormSubmit)();
+                          }
+                        }}
                       />
                     </div>
                   </FormControl>
@@ -186,7 +200,7 @@ export default function ItineraryForm({
                     </FormItem>
                 )}
             />
-            <div className="flex items-center">
+            <div className="flex items-center mt-1">
               {currentPromptValue && currentPromptValue.length > 0 ? (
                 <Button
                   type="submit"

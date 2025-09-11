@@ -1,17 +1,3 @@
-import { 
-  MapPin, 
-  Clock, 
-  ExternalLink, 
-  Laptop,
-  Camera,
-  Utensils,
-  Plane,
-  Train,
-  Building,
-  Mountain,
-  ShoppingBag,
-  Coffee
-} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 
@@ -26,72 +12,53 @@ interface EventCardProps {
   index: number;
 }
 
-const categoryColors = {
-  work: 'bg-blue-100 text-blue-700',
-  activity: 'bg-green-100 text-green-700', 
-  food: 'bg-orange-100 text-orange-700',
-  transport: 'bg-purple-100 text-purple-700'
-};
-
-// Using Lucide React icons instead of emojis
-const getCategoryIcon = (category: string) => {
-  switch(category) {
-    case 'work':
-      return <Laptop className="w-3 h-3" />;
-    case 'activity':
-      return <Camera className="w-3 h-3" />;
-    case 'food':
-      return <Utensils className="w-3 h-3" />;
-    case 'transport':
-      return <Plane className="w-3 h-3" />;
-    default:
-      return <Mountain className="w-3 h-3" />;
-  }
-};
-
 export function EventCard({ title, time, description, address, venue_name, rating, category, index }: EventCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
+  // Minimal category indicator - just a subtle left border
+  const categoryAccents = {
+    work: 'border-l-blue-600',
+    activity: 'border-l-gray-600', 
+    food: 'border-l-green-600',
+    transport: 'border-l-purple-600'
+  };
+
   return (
     <motion.div
-      className="relative bg-card border border-border rounded-md p-2 cursor-pointer hover:bg-muted/30 transition-all duration-200 group"
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
+      className={`relative bg-white border border-gray-200 rounded-sm pl-3 pr-3 py-3 cursor-pointer hover:bg-gray-50 transition-all duration-200 group ${categoryAccents[category]} border-l-2`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ 
         duration: 0.2, 
-        delay: index * 0.03
+        delay: index * 0.02
       }}
       onClick={() => setIsExpanded(!isExpanded)}
     >
-      <div className="flex items-start gap-2">
-        <div className={`w-6 h-6 ${categoryColors[category]} rounded flex items-center justify-center flex-shrink-0`}>
-          {getCategoryIcon(category)}
+      <div className="flex items-start gap-4">
+        {/* Time - more prominent and readable */}
+        <div className="flex-shrink-0 w-12 text-right">
+          <span className="text-sm font-medium text-gray-900">{time.split(' - ')[0]}</span>
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <h3 className="text-foreground font-medium text-xs truncate">{title}</h3>
-            <div className="flex items-center gap-0.5 text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              <span className="text-[10px]">{time}</span>
-            </div>
-          </div>
+          {/* Title - clear hierarchy */}
+          <h3 className="text-sm font-medium text-gray-900 leading-tight">{title}</h3>
           
+          {/* Description - only if different from title */}
           {description && description !== title && (
-            <p className="text-muted-foreground text-[10px] mt-0.5 line-clamp-1">{description}</p>
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed line-clamp-2">{description}</p>
           )}
           
-          {/* Compact address and venue */}
-          {(address || venue_name) && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-              <span className="text-[10px] text-muted-foreground truncate flex-1">
-                {venue_name || address}
-              </span>
-              {rating && (
-                <span className="text-[10px] text-yellow-600">★{rating.toFixed(1)}</span>
+          {/* Location - simplified */}
+          {(venue_name || address) && (
+            <p className="text-xs text-gray-400 mt-1.5">
+              {venue_name || address}
+              {rating && rating > 0 && (
+                <span className="ml-2 text-gray-500">
+                  {rating.toFixed(1)}
+                </span>
               )}
-            </div>
+            </p>
           )}
         </div>
       </div>
