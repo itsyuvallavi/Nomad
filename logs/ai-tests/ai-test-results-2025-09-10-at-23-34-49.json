@@ -1,0 +1,976 @@
+{
+  "timestamp": "2025-09-11T06:34:49.284Z",
+  "totalTests": 3,
+  "passed": 2,
+  "failed": 1,
+  "avgDuration": 7620,
+  "results": [
+    {
+      "testId": "london_3_days",
+      "suite": "basic",
+      "input": "I want to visit London for 3 days, flying from New York",
+      "passed": true,
+      "errors": [],
+      "warnings": [
+        "Missing expected content: Big Ben, British Museum, Westminster"
+      ],
+      "duration": 7319,
+      "timestamp": "2025-09-11T06:34:23.415Z",
+      "metrics": {
+        "destinations": [
+          "London for"
+        ],
+        "totalDays": 3,
+        "totalActivities": 15,
+        "hasAllRequiredFields": true
+      },
+      "response": {
+        "destination": "London for",
+        "title": "3 Days in London for",
+        "itinerary": [
+          {
+            "day": 1,
+            "date": "2025-09-11",
+            "title": "Day 1: Explore London for",
+            "_destination": "London for",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Historic city center of London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Historic Center",
+                "rating": 4.7,
+                "_tips": "Rich in history and culture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local breakfast cafe in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Breakfast Spot",
+                "rating": 4.3,
+                "_tips": "Try the local specialties"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Main cathedral in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Traditional restaurant in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Traditional Restaurant",
+                "rating": 4.5,
+                "_tips": "Ask for local recommendations"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Central park in London for",
+                "category": "Leisure",
+                "address": "London for",
+                "venue_name": "London for Central Park",
+                "rating": 4.6,
+                "_tips": "Perfect for relaxing walks"
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "date": "2025-09-12",
+            "title": "Day 2: Explore London for",
+            "_destination": "London for",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Main cathedral in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local lunch spot in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Lunch Place",
+                "rating": 4.2,
+                "_tips": "Great for midday meals"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "City museum in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Evening dining in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Dinner Restaurant",
+                "rating": 4.6,
+                "_tips": "Perfect for dinner"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Shopping district in London for",
+                "category": "Leisure",
+                "address": "London for",
+                "venue_name": "London for Shopping District",
+                "rating": 4.3,
+                "_tips": "Browse local shops and boutiques"
+              }
+            ]
+          },
+          {
+            "day": 3,
+            "date": "2025-09-13",
+            "title": "Day 3: Explore London for",
+            "_destination": "London for",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "City museum in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Coffee and pastries in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Cafe",
+                "rating": 4.4,
+                "_tips": "Excellent coffee"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Scenic viewpoint in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Viewpoint",
+                "rating": 4.8,
+                "_tips": "Best views of the city"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Street food in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Street Food Market",
+                "rating": 4.3,
+                "_tips": "Authentic local flavors"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Riverside walk in London for",
+                "category": "Leisure",
+                "address": "London for",
+                "venue_name": "London for Riverside",
+                "rating": 4.7,
+                "_tips": "Peaceful stroll along the water"
+              }
+            ]
+          }
+        ],
+        "quickTips": [
+          "Book accommodations in advance",
+          "Check visa requirements",
+          "Get travel insurance",
+          "Download offline maps",
+          "Keep digital copies of documents"
+        ],
+        "_costEstimate": {
+          "total": 2200,
+          "flights": 1300,
+          "accommodation": 600,
+          "dailyExpenses": 300,
+          "currency": "USD",
+          "breakdown": [
+            {
+              "type": "flight",
+              "description": "New York → London",
+              "amount": 700
+            },
+            {
+              "type": "flight",
+              "description": "London for → New York",
+              "amount": 600
+            },
+            {
+              "type": "accommodation",
+              "description": "London for (3 nights)",
+              "amount": 600
+            }
+          ]
+        },
+        "_hotelOptions": {},
+        "_flightOptions": {}
+      }
+    },
+    {
+      "testId": "paris_weekend",
+      "suite": "basic",
+      "input": "Weekend trip to Paris from Los Angeles",
+      "passed": true,
+      "errors": [],
+      "warnings": [
+        "Missing expected content: Eiffel Tower"
+      ],
+      "duration": 6007,
+      "timestamp": "2025-09-11T06:34:31.735Z",
+      "metrics": {
+        "destinations": [
+          "Paris"
+        ],
+        "totalDays": 2,
+        "totalActivities": 10,
+        "hasAllRequiredFields": true
+      },
+      "response": {
+        "destination": "Paris",
+        "title": "2 Days in Paris",
+        "itinerary": [
+          {
+            "day": 1,
+            "date": "2025-09-11",
+            "title": "Day 1: Explore Paris",
+            "_destination": "Paris",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Evening walk at Champs-Élysées",
+                "category": "Attraction",
+                "address": "75008 Paris",
+                "venue_name": "Pinky Tour - Paris",
+                "rating": 5,
+                "_tips": "Experience the vibrant nightlife"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Lunch at a local bistro",
+                "category": "Food",
+                "address": "31 Av. George V, 75008 Paris",
+                "venue_name": "Le Cinq",
+                "rating": 4.7,
+                "_tips": "Try the traditional French dishes"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Explore Montmartre neighborhood",
+                "category": "Attraction",
+                "address": "24 Rue de l'Echaudé, 75006 Paris",
+                "venue_name": "A2Z Art Gallery",
+                "rating": 4.6,
+                "_tips": "Visit Sacré-Cœur for a panoramic view of the city"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Dinner at a charming café",
+                "category": "Food",
+                "address": "18 Rue La Boétie, 75008 Paris",
+                "venue_name": "Sphère",
+                "rating": 4.8,
+                "_tips": "Try the French pastries for dessert"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Stroll along the Seine River",
+                "category": "Leisure",
+                "address": "75001 Paris",
+                "venue_name": "Tuileries Garden",
+                "rating": 4.6,
+                "_tips": "Enjoy the evening lights of the city"
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "date": "2025-09-12",
+            "title": "Day 2: Explore Paris",
+            "_destination": "Paris",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Explore Montmartre neighborhood",
+                "category": "Attraction",
+                "address": "24 Rue de l'Echaudé, 75006 Paris",
+                "venue_name": "A2Z Art Gallery",
+                "rating": 4.6,
+                "_tips": "Visit Sacré-Cœur for a panoramic view of the city"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Lunch at a cozy brasserie",
+                "category": "Food",
+                "address": "47 R. de Turbigo, 75003 Paris",
+                "venue_name": "Le Marais Restaurant Paris",
+                "rating": 4.6,
+                "_tips": "Try the French onion soup"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Visit the Louvre Museum",
+                "category": "Attraction",
+                "address": "23 Rue de Sévigné, 75003 Paris",
+                "venue_name": "Carnavalet Museum",
+                "rating": 4.7,
+                "_tips": "Get the museum map for easy navigation"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Dinner at a Michelin-starred restaurant",
+                "category": "Food",
+                "address": "1 Rue du Pré aux Clercs, 75007 Paris",
+                "venue_name": "Les Parisiens",
+                "rating": 4.7,
+                "_tips": "Indulge in a gourmet French meal"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Picnic at Luxembourg Gardens",
+                "category": "Leisure",
+                "address": "75019 Paris",
+                "venue_name": "Parc des Buttes-Chaumont",
+                "rating": 4.6,
+                "_tips": "Relax and enjoy the beautiful surroundings"
+              }
+            ]
+          }
+        ],
+        "quickTips": [
+          "Book accommodations in advance",
+          "Check visa requirements",
+          "Get travel insurance",
+          "Download offline maps",
+          "Keep digital copies of documents"
+        ],
+        "_costEstimate": {
+          "total": 2350,
+          "flights": 1650,
+          "accommodation": 500,
+          "dailyExpenses": 200,
+          "currency": "USD",
+          "breakdown": [
+            {
+              "type": "flight",
+              "description": "Los Angeles → Paris",
+              "amount": 900
+            },
+            {
+              "type": "flight",
+              "description": "Paris → Los Angeles",
+              "amount": 750
+            },
+            {
+              "type": "accommodation",
+              "description": "Paris (2 nights)",
+              "amount": 500
+            }
+          ]
+        },
+        "_hotelOptions": {},
+        "_flightOptions": {}
+      }
+    },
+    {
+      "testId": "tokyo_5_days",
+      "suite": "basic",
+      "input": "Planning a 5-day trip to Tokyo from San Francisco",
+      "passed": false,
+      "errors": [
+        "Missing destinations. Expected: Tokyo, Got: 5day, 5day",
+        "Day count mismatch. Expected: 5, Got: 10"
+      ],
+      "warnings": [
+        "Missing expected content: Shibuya, Senso-ji, Tsukiji"
+      ],
+      "duration": 9535,
+      "timestamp": "2025-09-11T06:34:38.745Z",
+      "metrics": {
+        "destinations": [
+          "5day, 5day"
+        ],
+        "totalDays": 10,
+        "totalActivities": 48,
+        "hasAllRequiredFields": true
+      },
+      "response": {
+        "destination": "5day, 5day",
+        "title": "10-Day Multi-City Adventure",
+        "itinerary": [
+          {
+            "day": 1,
+            "date": "2025-09-11",
+            "title": "Day 1: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Historic city center of 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Historic Center",
+                "rating": 4.7,
+                "_tips": "Rich in history and culture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local breakfast cafe in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Breakfast Spot",
+                "rating": 4.3,
+                "_tips": "Try the local specialties"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Main cathedral in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Traditional restaurant in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Traditional Restaurant",
+                "rating": 4.5,
+                "_tips": "Ask for local recommendations"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Central park in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Central Park",
+                "rating": 4.6,
+                "_tips": "Perfect for relaxing walks"
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "date": "2025-09-12",
+            "title": "Day 2: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Main cathedral in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local lunch spot in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Lunch Place",
+                "rating": 4.2,
+                "_tips": "Great for midday meals"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "City museum in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Evening dining in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Dinner Restaurant",
+                "rating": 4.6,
+                "_tips": "Perfect for dinner"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Shopping district in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Shopping District",
+                "rating": 4.3,
+                "_tips": "Browse local shops and boutiques"
+              }
+            ]
+          },
+          {
+            "day": 3,
+            "date": "2025-09-13",
+            "title": "Day 3: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "City museum in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Coffee and pastries in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Cafe",
+                "rating": 4.4,
+                "_tips": "Excellent coffee"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Scenic viewpoint in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Viewpoint",
+                "rating": 4.8,
+                "_tips": "Best views of the city"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Street food in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Street Food Market",
+                "rating": 4.3,
+                "_tips": "Authentic local flavors"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Riverside walk in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Riverside",
+                "rating": 4.7,
+                "_tips": "Peaceful stroll along the water"
+              }
+            ]
+          },
+          {
+            "day": 4,
+            "date": "2025-09-14",
+            "title": "Day 4: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Scenic viewpoint in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Viewpoint",
+                "rating": 4.8,
+                "_tips": "Best views of the city"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local breakfast cafe in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Breakfast Spot",
+                "rating": 4.3,
+                "_tips": "Try the local specialties"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Local market in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Market",
+                "rating": 4.4,
+                "_tips": "Great for shopping and people watching"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Traditional restaurant in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Traditional Restaurant",
+                "rating": 4.5,
+                "_tips": "Ask for local recommendations"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Local cultural quarter in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Cultural Quarter",
+                "rating": 4.5,
+                "_tips": "Experience local culture"
+              }
+            ]
+          },
+          {
+            "day": 5,
+            "date": "2025-09-15",
+            "title": "Day 5: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Local market in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Market",
+                "rating": 4.4,
+                "_tips": "Great for shopping and people watching"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local lunch spot in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Lunch Place",
+                "rating": 4.2,
+                "_tips": "Great for midday meals"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Art gallery in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Art Gallery",
+                "rating": 4.5,
+                "_tips": "Features local and international art"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Evening dining in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Dinner Restaurant",
+                "rating": 4.6,
+                "_tips": "Perfect for dinner"
+              }
+            ]
+          },
+          {
+            "day": 6,
+            "date": "2025-09-16",
+            "title": "Day 6: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Historic city center of 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Historic Center",
+                "rating": 4.7,
+                "_tips": "Rich in history and culture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local breakfast cafe in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Breakfast Spot",
+                "rating": 4.3,
+                "_tips": "Try the local specialties"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Main cathedral in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Traditional restaurant in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Traditional Restaurant",
+                "rating": 4.5,
+                "_tips": "Ask for local recommendations"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Central park in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Central Park",
+                "rating": 4.6,
+                "_tips": "Perfect for relaxing walks"
+              }
+            ]
+          },
+          {
+            "day": 7,
+            "date": "2025-09-17",
+            "title": "Day 7: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Main cathedral in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local lunch spot in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Lunch Place",
+                "rating": 4.2,
+                "_tips": "Great for midday meals"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "City museum in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Evening dining in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Dinner Restaurant",
+                "rating": 4.6,
+                "_tips": "Perfect for dinner"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Shopping district in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Shopping District",
+                "rating": 4.3,
+                "_tips": "Browse local shops and boutiques"
+              }
+            ]
+          },
+          {
+            "day": 8,
+            "date": "2025-09-18",
+            "title": "Day 8: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "City museum in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Coffee and pastries in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Cafe",
+                "rating": 4.4,
+                "_tips": "Excellent coffee"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Scenic viewpoint in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Viewpoint",
+                "rating": 4.8,
+                "_tips": "Best views of the city"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Street food in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Street Food Market",
+                "rating": 4.3,
+                "_tips": "Authentic local flavors"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Riverside walk in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Riverside",
+                "rating": 4.7,
+                "_tips": "Peaceful stroll along the water"
+              }
+            ]
+          },
+          {
+            "day": 9,
+            "date": "2025-09-19",
+            "title": "Day 9: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Scenic viewpoint in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Viewpoint",
+                "rating": 4.8,
+                "_tips": "Best views of the city"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local breakfast cafe in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Breakfast Spot",
+                "rating": 4.3,
+                "_tips": "Try the local specialties"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Local market in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Market",
+                "rating": 4.4,
+                "_tips": "Great for shopping and people watching"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Traditional restaurant in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Traditional Restaurant",
+                "rating": 4.5,
+                "_tips": "Ask for local recommendations"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Local cultural quarter in 5day",
+                "category": "Leisure",
+                "address": "5day",
+                "venue_name": "5day Cultural Quarter",
+                "rating": 4.5,
+                "_tips": "Experience local culture"
+              }
+            ]
+          },
+          {
+            "day": 10,
+            "date": "2025-09-20",
+            "title": "Day 10: Explore 5day",
+            "_destination": "5day",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Local market in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Market",
+                "rating": 4.4,
+                "_tips": "Great for shopping and people watching"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local lunch spot in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Lunch Place",
+                "rating": 4.2,
+                "_tips": "Great for midday meals"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Art gallery in 5day",
+                "category": "Attraction",
+                "address": "5day",
+                "venue_name": "5day Art Gallery",
+                "rating": 4.5,
+                "_tips": "Features local and international art"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Evening dining in 5day",
+                "category": "Food",
+                "address": "5day",
+                "venue_name": "5day Dinner Restaurant",
+                "rating": 4.6,
+                "_tips": "Perfect for dinner"
+              }
+            ]
+          }
+        ],
+        "quickTips": [
+          "Book accommodations in advance",
+          "Check visa requirements",
+          "Get travel insurance",
+          "Download offline maps",
+          "Keep digital copies of documents"
+        ],
+        "_costEstimate": {
+          "total": 3900,
+          "flights": 1400,
+          "accommodation": 1500,
+          "dailyExpenses": 1000,
+          "currency": "USD",
+          "breakdown": [
+            {
+              "type": "flight",
+              "description": "San Francisco → 5day",
+              "amount": 350
+            },
+            {
+              "type": "flight",
+              "description": "New York City (JFK) → London (LHR)",
+              "amount": 700
+            },
+            {
+              "type": "flight",
+              "description": "5day → San Francisco",
+              "amount": 350
+            },
+            {
+              "type": "accommodation",
+              "description": "5day (5 nights)",
+              "amount": 750
+            },
+            {
+              "type": "accommodation",
+              "description": "5day (5 nights)",
+              "amount": 750
+            }
+          ]
+        },
+        "_hotelOptions": {},
+        "_flightOptions": {}
+      }
+    }
+  ]
+}

@@ -89,17 +89,12 @@ export function validateTripComplexity(prompt: string): { valid: boolean; error?
   if (parsed.destinations.length === 0) {
     return {
       valid: false,
-      error: 'Please tell me where you\'d like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"'
+      error: 'Please tell me where you\'d like to go! For example: "3 days in Paris" or "One week in Tokyo"'
     };
   }
   
-  // Check for missing origin
-  if (!parsed.origin || parsed.origin === '') {
-    return {
-      valid: false,
-      error: 'Please tell me where you\'ll be departing from. For example: "From New York to London for 5 days"'
-    };
-  }
+  // Origin is now optional - removed the check
+  // Users can plan trips without specifying departure location
   
   return { valid: true };
 }

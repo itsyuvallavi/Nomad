@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 import type { GeneratePersonalizedItineraryOutput } from '../flows/generate-personalized-itinerary';
 import { shouldUseStaticData } from '@/lib/config/api-config';
 import { getRandomStaticActivities, hasStaticData } from '@/lib/api/static-places';
-import { EnhancedDestinationParser } from './enhanced-destination-parser';
+import { parseDestinationsWithAI } from './ai-destination-parser';
 
 // Enhanced cache with optimized TTLs and smart invalidation
 interface CacheEntry<T> {
@@ -198,6 +198,7 @@ function extractTravelDate(prompt: string): Date {
   const monthAbbr = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
                      'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
   
+  // First try patterns with specific days: "January 15", "Jan 15"
   for (let i = 0; i < monthNames.length; i++) {
     const monthPattern = new RegExp(`(${monthNames[i]}|${monthAbbr[i]})\\s+(\\d{1,2})`, 'i');
     const match = lowerPrompt.match(monthPattern);
@@ -212,6 +213,33 @@ function extractTravelDate(prompt: string): Date {
       
       targetDate.setHours(0, 0, 0, 0);
       logger.info('AI', `Extracted travel date: ${match[1]} ${day} = ${targetDate.toISOString().split('T')[0]}`);
+      return targetDate;
+    }
+  }
+  
+  // Try "next month" pattern
+  if (lowerPrompt.includes('next month')) {
+    const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    targetDate.setHours(0, 0, 0, 0);
+    logger.info('AI', `Extracted travel date: next month = ${targetDate.toISOString().split('T')[0]} (first of next month)`);
+    return targetDate;
+  }
+  
+  // Then try month-only patterns: "In January", "during March", "next February"
+  for (let i = 0; i < monthNames.length; i++) {
+    const monthOnlyPattern = new RegExp(`(?:in|during|next)\\s+(${monthNames[i]}|${monthAbbr[i]})`, 'i');
+    const match = lowerPrompt.match(monthOnlyPattern);
+    if (match) {
+      // Default to first day of the month
+      const targetDate = new Date(now.getFullYear(), i, 1);
+      
+      // If the month has passed this year, assume next year
+      if (targetDate < now) {
+        targetDate.setFullYear(now.getFullYear() + 1);
+      }
+      
+      targetDate.setHours(0, 0, 0, 0);
+      logger.info('AI', `Extracted travel date: ${match[0]} = ${targetDate.toISOString().split('T')[0]} (first of month)`);
       return targetDate;
     }
   }
@@ -236,31 +264,18 @@ async function extractTripInfoFast(prompt: string): Promise<any> {
   
   const startTime = Date.now();
   
-  // Use improved regex extraction for reliable parsing
-  logger.info('AI', 'Using improved regex extraction for precise day counting');
-  const result = quickExtract(prompt);
-  
-  // Extract travel date from prompt
-  result.startDate = extractTravelDate(prompt);
+  // Use AI-powered parser for reliable parsing
+  logger.info('AI', '🤖 Using AI parser for precise destination extraction');
+  const parsedTrip = await parseDestinationsWithAI(prompt);
+  const result = {
+    origin: parsedTrip.origin,
+    destinations: parsedTrip.destinations.map(dest => ({ city: dest.name, days: dest.days })),
+    totalDays: parsedTrip.totalDays,
+    startDate: parsedTrip.startDate || extractTravelDate(prompt)
+  };
   
   if (!result.destinations || result.destinations.length === 0) {
-    logger.warn('AI', 'Regex extraction failed, trying Enhanced Destination Parser');
-    const parseResult = EnhancedDestinationParser.parse(prompt);
-    
-    if (parseResult.isValid && parseResult.destinations.length > 0) {
-      const enhancedResult = {
-        origin: parseResult.origin || '',
-        destinations: parseResult.destinations,
-        totalDays: parseResult.totalDays
-      };
-      
-      cache.set(cacheKey, enhancedResult, 600);
-      logger.info('AI', `Enhanced parser fallback successful in ${Date.now() - startTime}ms`);
-      return enhancedResult;
-    }
-    
-    // Final fallback - return empty result
-    logger.error('AI', 'All extraction methods failed');
+    logger.error('AI', 'AI parser returned no destinations');
     return {
       origin: '',
       destinations: [],

@@ -1,0 +1,714 @@
+{
+  "timestamp": "2025-09-11T06:38:02.184Z",
+  "totalTests": 3,
+  "passed": 3,
+  "failed": 0,
+  "avgDuration": 6280,
+  "results": [
+    {
+      "testId": "london_3_days",
+      "suite": "basic",
+      "input": "I want to visit London for 3 days, flying from New York",
+      "passed": true,
+      "errors": [],
+      "warnings": [
+        "Missing expected content: Big Ben, British Museum, Westminster"
+      ],
+      "duration": 6946,
+      "timestamp": "2025-09-11T06:37:40.338Z",
+      "metrics": {
+        "destinations": [
+          "London for"
+        ],
+        "totalDays": 3,
+        "totalActivities": 15,
+        "hasAllRequiredFields": true
+      },
+      "response": {
+        "destination": "London for",
+        "title": "3 Days in London for",
+        "itinerary": [
+          {
+            "day": 1,
+            "date": "2025-09-11",
+            "title": "Day 1: Explore London for",
+            "_destination": "London for",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Historic city center of London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Historic Center",
+                "rating": 4.7,
+                "_tips": "Rich in history and culture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local breakfast cafe in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Breakfast Spot",
+                "rating": 4.3,
+                "_tips": "Try the local specialties"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Main cathedral in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Traditional restaurant in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Traditional Restaurant",
+                "rating": 4.5,
+                "_tips": "Ask for local recommendations"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Central park in London for",
+                "category": "Leisure",
+                "address": "London for",
+                "venue_name": "London for Central Park",
+                "rating": 4.6,
+                "_tips": "Perfect for relaxing walks"
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "date": "2025-09-12",
+            "title": "Day 2: Explore London for",
+            "_destination": "London for",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Main cathedral in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Cathedral",
+                "rating": 4.6,
+                "_tips": "Beautiful architecture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Local lunch spot in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Lunch Place",
+                "rating": 4.2,
+                "_tips": "Great for midday meals"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "City museum in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Evening dining in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Dinner Restaurant",
+                "rating": 4.6,
+                "_tips": "Perfect for dinner"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Shopping district in London for",
+                "category": "Leisure",
+                "address": "London for",
+                "venue_name": "London for Shopping District",
+                "rating": 4.3,
+                "_tips": "Browse local shops and boutiques"
+              }
+            ]
+          },
+          {
+            "day": 3,
+            "date": "2025-09-13",
+            "title": "Day 3: Explore London for",
+            "_destination": "London for",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "City museum in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for City Museum",
+                "rating": 4.5,
+                "_tips": "Learn about local history"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Coffee and pastries in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Cafe",
+                "rating": 4.4,
+                "_tips": "Excellent coffee"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Scenic viewpoint in London for",
+                "category": "Attraction",
+                "address": "London for",
+                "venue_name": "London for Viewpoint",
+                "rating": 4.8,
+                "_tips": "Best views of the city"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Street food in London for",
+                "category": "Food",
+                "address": "London for",
+                "venue_name": "London for Street Food Market",
+                "rating": 4.3,
+                "_tips": "Authentic local flavors"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Riverside walk in London for",
+                "category": "Leisure",
+                "address": "London for",
+                "venue_name": "London for Riverside",
+                "rating": 4.7,
+                "_tips": "Peaceful stroll along the water"
+              }
+            ]
+          }
+        ],
+        "quickTips": [
+          "Book accommodations in advance",
+          "Check visa requirements",
+          "Get travel insurance",
+          "Download offline maps",
+          "Keep digital copies of documents"
+        ],
+        "_costEstimate": {
+          "total": 2300,
+          "flights": 1400,
+          "accommodation": 600,
+          "dailyExpenses": 300,
+          "currency": "USD",
+          "breakdown": [
+            {
+              "type": "flight",
+              "description": "New York → London",
+              "amount": 700
+            },
+            {
+              "type": "flight",
+              "description": "London for → New York",
+              "amount": 700
+            },
+            {
+              "type": "accommodation",
+              "description": "London for (3 nights)",
+              "amount": 600
+            }
+          ]
+        },
+        "_hotelOptions": {},
+        "_flightOptions": {}
+      }
+    },
+    {
+      "testId": "paris_weekend",
+      "suite": "basic",
+      "input": "Weekend trip to Paris from Los Angeles",
+      "passed": true,
+      "errors": [],
+      "warnings": [
+        "Missing expected content: Eiffel Tower, Louvre"
+      ],
+      "duration": 6247,
+      "timestamp": "2025-09-11T06:37:48.285Z",
+      "metrics": {
+        "destinations": [
+          "Paris"
+        ],
+        "totalDays": 2,
+        "totalActivities": 10,
+        "hasAllRequiredFields": true
+      },
+      "response": {
+        "destination": "Paris",
+        "title": "2 Days in Paris",
+        "itinerary": [
+          {
+            "day": 1,
+            "date": "2025-09-11",
+            "title": "Day 1: Explore Paris",
+            "_destination": "Paris",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Evening walk at Champs-Élysées",
+                "category": "Attraction",
+                "address": "75008 Paris",
+                "venue_name": "Pinky Tour - Paris",
+                "rating": 5,
+                "_tips": "Experience the vibrant nightlife"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Dinner at a Michelin-starred restaurant",
+                "category": "Food",
+                "address": "1 Rue du Pré aux Clercs, 75007 Paris",
+                "venue_name": "Les Parisiens",
+                "rating": 4.7,
+                "_tips": "Indulge in a gourmet French meal"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Explore Musée d'Orsay",
+                "category": "Attraction",
+                "address": "15 Av. Winston Churchill, 75008 Paris",
+                "venue_name": "Paris TUKTUK",
+                "rating": 4.8,
+                "_tips": "Discover Impressionist masterpieces"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Lunch at a local bistro",
+                "category": "Food",
+                "address": "31 Av. George V, 75008 Paris",
+                "venue_name": "Le Cinq",
+                "rating": 4.7,
+                "_tips": "Try the traditional French dishes"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Shopping at Galeries Lafayette",
+                "category": "Leisure",
+                "address": "12 Rue Linois, 75015 Paris",
+                "venue_name": "Centre Commercial Beaugrenelle",
+                "rating": 4.2,
+                "_tips": "Find designer items and souvenirs"
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "date": "2025-09-12",
+            "title": "Day 2: Explore Paris",
+            "_destination": "Paris",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Explore Musée d'Orsay",
+                "category": "Attraction",
+                "address": "15 Av. Winston Churchill, 75008 Paris",
+                "venue_name": "Paris TUKTUK",
+                "rating": 4.8,
+                "_tips": "Discover Impressionist masterpieces"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Dinner at a charming café",
+                "category": "Food",
+                "address": "18 Rue La Boétie, 75008 Paris",
+                "venue_name": "Sphère",
+                "rating": 4.8,
+                "_tips": "Try the French pastries for dessert"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Explore the Palace of Versailles",
+                "category": "Attraction",
+                "address": "Pont de Bir-Hakeim, 75015 Paris",
+                "venue_name": "Promenade Jean-Paul Belmondo",
+                "rating": 4.8,
+                "_tips": "Visit the Hall of Mirrors for a grand experience"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Lunch at a cozy brasserie",
+                "category": "Food",
+                "address": "47 R. de Turbigo, 75003 Paris",
+                "venue_name": "Le Marais Restaurant Paris",
+                "rating": 4.6,
+                "_tips": "Try the French onion soup"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Picnic at Luxembourg Gardens",
+                "category": "Leisure",
+                "address": "75019 Paris",
+                "venue_name": "Parc des Buttes-Chaumont",
+                "rating": 4.6,
+                "_tips": "Relax and enjoy the beautiful surroundings"
+              }
+            ]
+          }
+        ],
+        "quickTips": [
+          "Book accommodations in advance",
+          "Check visa requirements",
+          "Get travel insurance",
+          "Download offline maps",
+          "Keep digital copies of documents"
+        ],
+        "_costEstimate": {
+          "total": 2350,
+          "flights": 1650,
+          "accommodation": 500,
+          "dailyExpenses": 200,
+          "currency": "USD",
+          "breakdown": [
+            {
+              "type": "flight",
+              "description": "Los Angeles → Paris",
+              "amount": 900
+            },
+            {
+              "type": "flight",
+              "description": "Paris → Los Angeles",
+              "amount": 750
+            },
+            {
+              "type": "accommodation",
+              "description": "Paris (2 nights)",
+              "amount": 500
+            }
+          ]
+        },
+        "_hotelOptions": {},
+        "_flightOptions": {}
+      }
+    },
+    {
+      "testId": "tokyo_5_days",
+      "suite": "basic",
+      "input": "Planning a 5-day trip to Tokyo from San Francisco",
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "duration": 5646,
+      "timestamp": "2025-09-11T06:37:55.533Z",
+      "metrics": {
+        "destinations": [
+          "Tokyo"
+        ],
+        "totalDays": 5,
+        "totalActivities": 25,
+        "hasAllRequiredFields": true
+      },
+      "response": {
+        "destination": "Tokyo",
+        "title": "5 Days in Tokyo",
+        "itinerary": [
+          {
+            "day": 1,
+            "date": "2025-09-11",
+            "title": "Day 1: Explore Tokyo",
+            "_destination": "Tokyo",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Visit teamLab Borderless",
+                "category": "Attraction",
+                "address": "〒100-0005 Tokyo, Chiyoda City, Marunouchi, 2 Chome−6−2 三菱一号館美術館 1F",
+                "venue_name": "Café 1894",
+                "rating": 3.9,
+                "_tips": "Interactive digital art experience"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Dinner at Robot Restaurant",
+                "category": "Food",
+                "address": "〒105-0001 Tokyo, Minato City, Toranomon, 4 Chome−1−28 １Ｆ",
+                "venue_name": "NOBU Tokyo",
+                "rating": 4.3,
+                "_tips": "Unique entertainment while dining"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Visit Senso-ji Temple",
+                "category": "Attraction",
+                "address": "4 Chome-2-8 Shibakoen, Minato City, Tokyo 105-0011",
+                "venue_name": "Tokyo Tower",
+                "rating": 4.5,
+                "_tips": "Arrive early to avoid crowds"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Lunch at Omoide Yokocho",
+                "category": "Food",
+                "address": "〒150-0001 Tokyo, Shibuya, Jingumae, 2 Chome−3−18 建築家会館ＪＩＡ館",
+                "venue_name": "Den",
+                "rating": 4.4,
+                "_tips": "Try the yakitori skewers"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Shopping in Ginza",
+                "category": "Leisure",
+                "address": "1 Chome-1-2 Oshiage, Sumida City, Tokyo 131-0045",
+                "venue_name": "Tokyo Solamachi",
+                "rating": 4.2,
+                "_tips": "Luxury brands and department stores"
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "date": "2025-09-12",
+            "title": "Day 2: Explore Tokyo",
+            "_destination": "Tokyo",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Visit Senso-ji Temple",
+                "category": "Attraction",
+                "address": "4 Chome-2-8 Shibakoen, Minato City, Tokyo 105-0011",
+                "venue_name": "Tokyo Tower",
+                "rating": 4.5,
+                "_tips": "Arrive early to avoid crowds"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Lunch at Kawaii Monster Cafe",
+                "category": "Food",
+                "address": "1 Chome-23-28 Jingumae, Shibuya, Tokyo 150-0001",
+                "venue_name": "ANAKUMA CAFE Harajuku",
+                "rating": 4.8,
+                "_tips": "Colorful and fun dining experience"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Visit Meiji Shrine",
+                "category": "Attraction",
+                "address": "1 Chome Aomi, Koto City, Tokyo 135-0064",
+                "venue_name": "TOKYO Word Mark Monument",
+                "rating": 3.9,
+                "_tips": "Experience traditional Japanese culture"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Lunch at Gonpachi Nishi-Azabu",
+                "category": "Food",
+                "address": "〒105-7108 Tokyo, Minato City, Higashishinbashi, 1 Chome−5−2 汐留シティセンタ ４１F",
+                "venue_name": "Fish Bank TOKYO",
+                "rating": 4.5,
+                "_tips": "Inspiration for Kill Bill restaurant"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Visit Shinjuku Gyoen National Garden",
+                "category": "Leisure",
+                "address": "Uenokoen, Taito City, Tokyo 110-0007",
+                "venue_name": "Ueno Park",
+                "rating": 4.3,
+                "_tips": "Beautiful landscapes and wide lawns"
+              }
+            ]
+          },
+          {
+            "day": 3,
+            "date": "2025-09-13",
+            "title": "Day 3: Explore Tokyo",
+            "_destination": "Tokyo",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Visit Meiji Shrine",
+                "category": "Attraction",
+                "address": "1 Chome Aomi, Koto City, Tokyo 135-0064",
+                "venue_name": "TOKYO Word Mark Monument",
+                "rating": 3.9,
+                "_tips": "Experience traditional Japanese culture"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Lunch at Sushi Dai",
+                "category": "Food",
+                "address": "4 Chome-4-13 Shibakoen, Minato City, Tokyo 105-0011",
+                "venue_name": "Tofu Ukai",
+                "rating": 4.5,
+                "_tips": "Queues can be long, but worth it"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Night stroll in Shinjuku",
+                "category": "Attraction",
+                "address": "4 Chome-3-25 Shibakoen, Minato City, Tokyo 105-0011",
+                "venue_name": "Momiji Waterfall",
+                "rating": 4.1,
+                "_tips": "Enjoy the neon lights"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Dinner at Ramen Street",
+                "category": "Food",
+                "address": "〒107-0062 Tokyo, Minato City, Minamiaoyama, 2 Chome−6−15 南青山ガーデンコート",
+                "venue_name": "Narisawa",
+                "rating": 4.6,
+                "_tips": "Try different ramen shops"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Explore Yoyogi Park",
+                "category": "Leisure",
+                "address": "11 Naitomachi, Shinjuku City, Tokyo 160-0014",
+                "venue_name": "Shinjuku Gyoen National Garden",
+                "rating": 4.6,
+                "_tips": "Great for picnics and people-watching"
+              }
+            ]
+          },
+          {
+            "day": 4,
+            "date": "2025-09-14",
+            "title": "Day 4: Explore Tokyo",
+            "_destination": "Tokyo",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Night stroll in Shinjuku",
+                "category": "Attraction",
+                "address": "4 Chome-3-25 Shibakoen, Minato City, Tokyo 105-0011",
+                "venue_name": "Momiji Waterfall",
+                "rating": 4.1,
+                "_tips": "Enjoy the neon lights"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Lunch at Tsukiji Fish Market",
+                "category": "Food",
+                "address": "2 Chome-26-4 Nishiazabu, Minato City, Tokyo 106-0031",
+                "venue_name": "L’Effervescence",
+                "rating": 4.6,
+                "_tips": "Try the fresh sushi"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Explore Edo-Tokyo Museum",
+                "category": "Attraction",
+                "address": "13-9 Uenokoen, Taito City, Tokyo 110-8712",
+                "venue_name": "Tokyo National Museum",
+                "rating": 4.5,
+                "_tips": "Learn about Tokyo's history"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Dinner at Kagari Ramen",
+                "category": "Food",
+                "address": "〒150-0002 Tokyo, Shibuya, 3 Chome−6−18 第４矢木ビル 1F",
+                "venue_name": "Yamamoto no Hamburg Shibuya Shokudo",
+                "rating": 4.3,
+                "_tips": "Famous for its rich chicken broth"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Shopping in Harajuku",
+                "category": "Leisure",
+                "address": "9 Chome-7-1 Akasaka, Minato City, Tokyo 107-0052",
+                "venue_name": "Tokyo Midtown",
+                "rating": 4.1,
+                "_tips": "Visit Takeshita Street"
+              }
+            ]
+          },
+          {
+            "day": 5,
+            "date": "2025-09-15",
+            "title": "Day 5: Explore Tokyo",
+            "_destination": "Tokyo",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "description": "Explore Edo-Tokyo Museum",
+                "category": "Attraction",
+                "address": "13-9 Uenokoen, Taito City, Tokyo 110-8712",
+                "venue_name": "Tokyo National Museum",
+                "rating": 4.5,
+                "_tips": "Learn about Tokyo's history"
+              },
+              {
+                "time": "01:00 PM",
+                "description": "Dinner at Tsuta Ramen",
+                "category": "Food",
+                "address": "2 Chome-12-9 Jingumae, Shibuya, Tokyo 150-0001",
+                "venue_name": "CENSU TOKYO",
+                "rating": 4.7,
+                "_tips": "Michelin-starred ramen"
+              },
+              {
+                "time": "03:00 PM",
+                "description": "Night at Tokyo Tower",
+                "category": "Attraction",
+                "address": "3 Chome-5-1 Marunouchi, Chiyoda City, Tokyo 100-0005",
+                "venue_name": "Remains of Tokyo Prefectural Office",
+                "rating": 3.8,
+                "_tips": "Stunning night views of the city"
+              },
+              {
+                "time": "06:00 PM",
+                "description": "Dinner at Yakatabune Cruise",
+                "category": "Food",
+                "address": "2 Chome-1-1 Nihonbashimuromachi, Chuo City, Tokyo 103-8328",
+                "venue_name": "Tapas Molecular Bar",
+                "rating": 4.6,
+                "_tips": "Enjoy dining on a traditional boat"
+              },
+              {
+                "time": "08:00 PM",
+                "description": "Explore Ueno Park",
+                "category": "Leisure",
+                "address": "1 Chome-18-31 Gotenyama, Musashino, Tokyo 180-0005",
+                "venue_name": "Inokashira Park",
+                "rating": 4.4,
+                "_tips": "Don't miss the zoo"
+              }
+            ]
+          }
+        ],
+        "quickTips": [
+          "Book accommodations in advance",
+          "Check visa requirements",
+          "Get travel insurance",
+          "Download offline maps",
+          "Keep digital copies of documents"
+        ],
+        "_costEstimate": {
+          "total": 3200,
+          "flights": 1800,
+          "accommodation": 900,
+          "dailyExpenses": 500,
+          "currency": "USD",
+          "breakdown": [
+            {
+              "type": "flight",
+              "description": "San Francisco → Tokyo",
+              "amount": 900
+            },
+            {
+              "type": "flight",
+              "description": "Tokyo → San Francisco",
+              "amount": 900
+            },
+            {
+              "type": "accommodation",
+              "description": "Tokyo (5 nights)",
+              "amount": 900
+            }
+          ]
+        },
+        "_hotelOptions": {},
+        "_flightOptions": {}
+      }
+    }
+  ]
+}

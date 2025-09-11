@@ -15,13 +15,25 @@ export class OpenAIProvider {
   }): Promise<T> {
     const { system, user, temperature = 0.2, maxTokens = 2000, schema, seed } = args;
 
+    // Convert Zod schema to JSON Schema and extract the root definition
+    let jsonSchema = null;
+    if (schema) {
+      const fullSchema = zodToJsonSchema(schema, 'root') as any;
+      // OpenAI expects the schema to be directly of type "object", not with $ref
+      jsonSchema = fullSchema.definitions?.root || fullSchema;
+      // Ensure it has type: "object" at the root
+      if (!jsonSchema.type) {
+        jsonSchema.type = 'object';
+      }
+    }
+
     const req: any = {
       model: 'gpt-4o-mini',
       messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
       temperature,
       max_tokens: maxTokens,
       response_format: schema
-        ? { type: 'json_schema', json_schema: { name: 'schema', schema: zodToJsonSchema(schema, 'root') } }
+        ? { type: 'json_schema', json_schema: { name: 'schema', schema: jsonSchema, strict: false } }
         : { type: 'json_object' },
       ...(seed ? { seed } : {})
     };
@@ -43,7 +55,7 @@ export class OpenAIProvider {
         temperature: 0.1,
         max_tokens: maxTokens,
         response_format: schema
-          ? { type: 'json_schema', json_schema: { name: 'schema', schema: zodToJsonSchema(schema, 'root') } }
+          ? { type: 'json_schema', json_schema: { name: 'schema', schema: jsonSchema, strict: false } }
           : { type: 'json_object' }
       });
       parsed = JSON.parse(repair.choices?.[0]?.message?.content ?? '{}');

@@ -1,21 +1,45 @@
-import { Settings, Mic, Send } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Settings, Mic, Send, MessageCircle, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AnimatedLogo } from '@/components/ui/animated-logo';
+import { Badge } from '@/components/ui/badge';
+import { ConversationState, DialogResponse } from '@/ai/flows/generate-dialog-response';
+import { ClassificationResult, ParseResult } from '@/ai/utils/hybrid-parser';
 
+// Enhanced message interface with metadata from Phase 3
+interface EnhancedMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  metadata?: {
+    classification?: ClassificationResult;
+    parseResult?: ParseResult;
+    confidence?: number;
+    responseType?: string;
+    processingTime?: number;
+    requiresFollowUp?: boolean;
+  };
+}
+
+// Legacy message for backward compatibility
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
 interface ChatPanelProps {
-  messages: Message[];
+  messages: Message[] | EnhancedMessage[];
   inputValue: string;
   onInputChange: (value: string) => void;
   onSendMessage: () => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
   isGenerating: boolean;
   onSettings?: () => void;
+  // Phase 3 enhancements
+  conversationState?: ConversationState;
+  showMetadata?: boolean;
+  onQuickAction?: (action: string, data?: any) => void;
+  suggestions?: string[];
 }
 
 export function ChatPanel({
@@ -25,7 +49,11 @@ export function ChatPanel({
   onSendMessage,
   onKeyPress,
   isGenerating,
-  onSettings
+  onSettings,
+  conversationState,
+  showMetadata = false,
+  onQuickAction,
+  suggestions = []
 }: ChatPanelProps) {
   return (
     <div className="h-full flex flex-col bg-background">
@@ -35,7 +63,14 @@ export function ChatPanel({
           <AnimatedLogo size="sm" />
           <div>
             <h2 className="text-foreground font-medium">Nomad Navigator</h2>
-            <p className="text-xs text-muted-foreground">AI Assistant</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-muted-foreground">AI Assistant</p>
+              {conversationState && (
+                <Badge variant="outline" className="text-xs px-1.5 py-0">
+                  {conversationState.metadata.messageCount} messages
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
         {onSettings && (
@@ -79,6 +114,37 @@ export function ChatPanel({
                   : 'bg-muted text-foreground rounded-lg rounded-bl-sm'
               } px-3 py-2`}>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                
+                {/* Enhanced metadata display for Phase 3 */}
+                {'metadata' in message && message.metadata && showMetadata && (
+                  <div className="mt-2 pt-2 border-t border-border/30 space-y-1">
+                    {message.metadata.classification && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <MessageCircle size={10} />
+                        <span className="text-muted-foreground">
+                          Type: {message.metadata.classification.type}
+                        </span>
+                        {message.metadata.confidence && (
+                          <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                            {Math.round(message.metadata.confidence * 100)}% confidence
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                    {message.metadata.processingTime && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Clock size={10} />
+                        <span>{message.metadata.processingTime}ms</span>
+                      </div>
+                    )}
+                    {message.metadata.requiresFollowUp && (
+                      <div className="flex items-center gap-2 text-xs text-amber-600">
+                        <AlertCircle size={10} />
+                        <span>Awaiting response</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -164,7 +230,47 @@ export function ChatPanel({
             </div>
           </motion.div>
         )}
+        
+        {/* Quick suggestions from Phase 3 dialog system */}
+        {suggestions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-wrap gap-2 px-2"
+          >
+            {suggestions.map((suggestion, index) => (
+              <motion.button
+                key={index}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => onQuickAction?.('suggestion', suggestion)}
+                className="text-xs px-3 py-1.5 bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full border border-border hover:border-foreground/20 transition-colors"
+              >
+                {suggestion}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
       </div>
+
+      {/* Conversation Context Indicator */}
+      {conversationState && conversationState.context.destinations.length > 0 && (
+        <div className="px-6 py-2 border-t border-border bg-muted/20">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <CheckCircle size={12} className="text-green-600" />
+            <span>
+              Planning: {conversationState.context.destinations.join(', ')}
+              {conversationState.context.origin && ` from ${conversationState.context.origin}`}
+            </span>
+            {conversationState.currentItinerary && (
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 ml-2">
+                {conversationState.currentItinerary.totalDays} days
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Input Area */}
       <div className="p-6 pt-4 border-t border-border">

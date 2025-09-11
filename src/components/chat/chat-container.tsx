@@ -267,9 +267,14 @@ export default function ChatDisplay({
                 console.log('ℹ️ Input validation:', (itinerary as any).errorMessage);
                 logger.info('AI', 'Input validation needed', { message: (itinerary as any).errorMessage });
                 
-                // Show the error dialog for validation issues
-                setErrorMessage((itinerary as any).errorMessage);
-                setErrorDialogOpen(true);
+                // Add validation message to conversation instead of showing error dialog
+                const validationMessage = (itinerary as any).errorMessage;
+                setMessages(prev => [...prev, { 
+                    role: 'assistant', 
+                    content: `I'd love to help you plan that trip! ${validationMessage}`
+                }]);
+                
+                // Don't set itinerary, just return - waiting for user response
                 return;
             }
             
@@ -459,10 +464,10 @@ export default function ChatDisplay({
             setMessages(prev => [...prev, { role: 'assistant', content: "✅ Itinerary updated!" }]);
         } catch (error) {
             logger.apiResponse(timerId, 'refineItineraryBasedOnFeedback', { success: false });
-            logger.error('AI', 'Refinement failed', { error });
+            logger.error('AI', 'Refinement failed', error);
             const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
             onError(`I'm sorry, there was an error refining your itinerary. ${errorMessage}`);
-            setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't refine the itinerary. Please try again." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: `Sorry, I couldn't refine the itinerary. ${errorMessage}` }]);
         } finally {
             setIsGenerating(false);
         }

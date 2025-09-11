@@ -11,9 +11,8 @@
  */
 import {z} from 'genkit';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import { parseDestinations } from '@/ai/utils/destination-parser';
-import { EnhancedDestinationParser } from '@/ai/utils/enhanced-destination-parser';
-import { MasterTravelParser } from '@/lib/utils/master-parser';
+// Only using AI parser now - no regex fallbacks
+import { parseDestinationsWithAI } from '@/ai/utils/ai-destination-parser';
 import { logger } from '@/lib/logger';
 import { generateUnifiedItinerary, getUnifiedGenerator } from '@/ai/utils/unified-generator';
 import { validateTripComplexity } from '@/ai/utils/enhanced-generator';
@@ -49,15 +48,11 @@ export async function generatePersonalizedItinerary(
     strategy: 'ultra-fast'
   });
   
-  // Extract the actual prompt from conversation history if available
+  // Combine prompt with conversation history for better context
   let actualPrompt = input.prompt;
   if (input.conversationHistory) {
-    // Parse conversation history to get the last user message
-    const lines = input.conversationHistory.split('\n');
-    const lastUserLine = lines.filter(line => line.startsWith('user:')).pop();
-    if (lastUserLine) {
-      actualPrompt = lastUserLine.replace('user:', '').trim();
-    }
+    // Include full conversation history for AI parser to understand context
+    actualPrompt = input.conversationHistory + '\n' + input.prompt;
   }
   
   // Log to browser console if in client-side environment
@@ -121,61 +116,33 @@ export async function generatePersonalizedItinerary(
     } as any;
   }
   
-  // Use master parser for Phase 2 improvements
-  const masterResult = await MasterTravelParser.parseUserInput(actualPrompt);
-  
-  // Try enhanced parser if master parser might have missed destinations
+  // ONLY use AI-powered parsing - no fallbacks to regex
   let parsedTrip;
-  if (masterResult.destinations.length > 0) {
-    // Check if we might have missed destinations (e.g., "Lisbon and Granada")
-    const enhancedCheck = EnhancedDestinationParser.parse(actualPrompt);
-    if (enhancedCheck.destinations.length > masterResult.destinations.length) {
-      // Enhanced parser found more destinations, use it instead
-      parsedTrip = {
-        origin: enhancedCheck.origin || masterResult.origin || '',
-        destinations: enhancedCheck.destinations.map(d => ({
-          name: d.city,
-          days: d.days
-        })),
-        totalDays: enhancedCheck.totalDays,
-        returnToOrigin: false
-      };
-      logger.info('AI', 'Using enhanced parser (found more destinations)', {
-        master: masterResult.destinations.length,
-        enhanced: enhancedCheck.destinations.length
-      });
-    } else {
-      // Use master parser results
-      parsedTrip = {
-        origin: masterResult.origin || '',
-        destinations: masterResult.destinations.map(d => ({
-          name: d.city,
-          days: d.days
-        })),
-        totalDays: masterResult.duration,
-        returnToOrigin: false
-      };
-    }
-  } else {
-    // Fall back to basic parser
-    parsedTrip = parseDestinations(actualPrompt);
+  
+  try {
+    parsedTrip = await parseDestinationsWithAI(actualPrompt);
+    logger.info('AI', '🤖 AI parser results', {
+      origin: parsedTrip.origin,
+      destinations: parsedTrip.destinations.length,
+      totalDays: parsedTrip.totalDays
+    });
+  } catch (error: any) {
+    logger.error('AI', 'AI parser failed', error);
+    // Return error to user instead of falling back
+    return {
+      destination: 'Parser Error',
+      title: 'Unable to Parse Trip',
+      itinerary: [],
+      quickTips: [],
+      needsMoreInfo: true,
+      validationError: true,
+      errorMessage: `I couldn't understand your trip request. Please try rephrasing it. Error: ${error.message}`
+    } as any;
   }
   
-  // Also check conversation history for origin if not in current prompt
-  let origin = parsedTrip.origin;
-  if ((!origin || origin === '') && input.conversationHistory) {
-    // Try enhanced parser on history
-    const historyEnhanced = EnhancedDestinationParser.parse(input.conversationHistory);
-    origin = historyEnhanced.origin || '';
-    
-    // Fall back to old parser if needed
-    if (!origin) {
-      const historyParsed = parseDestinations(input.conversationHistory);
-      origin = historyParsed.origin || '';
-    }
-  }
+  // Origin is completely optional now - we don't need it for trip planning
+  let origin = parsedTrip.origin || '';
   
-  // Origin is optional - we can still generate an itinerary without it
   // Only validate if destinations are missing
   if (!parsedTrip.destinations || parsedTrip.destinations.length === 0) {
     if (typeof window !== 'undefined') {
@@ -194,10 +161,10 @@ export async function generatePersonalizedItinerary(
     } as any;
   }
   
-  // If origin is missing, just log it but continue
+  // If origin is missing, just log it but continue - it's not required
   if (!origin || origin === '') {
-    logger.info('AI', 'Origin not provided, continuing without flight estimates');
-    origin = 'Unknown'; // Use Unknown as placeholder
+    logger.info('AI', 'Origin not provided - this is fine, we can plan without it');
+    origin = ''; // Keep it empty, no placeholder needed
   }
   
   // Update parsedTrip with the found origin
