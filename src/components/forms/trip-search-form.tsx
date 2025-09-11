@@ -89,20 +89,20 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
             <AnimatedLogo size="lg" className="mb-6 md:mb-8" />
           </motion.div>
           <motion.h1 
-            className="text-foreground text-2xl tracking-tight mb-2"
+            className="text-foreground text-3xl font-light tracking-tight mb-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            Hi, I'm Nomad Navigator
+            Where to next?
           </motion.h1>
           <motion.p 
-            className="text-muted-foreground text-base"
+            className="text-muted-foreground text-sm"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            Can I help you with anything?
+            AI-powered travel planning
           </motion.p>
         </motion.div>
         
@@ -116,30 +116,6 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
             isSubmitting={isLoading}
             onSubmit={handleInitialPrompt}
           />
-        
-          {/* Quick Test Button */}
-          <motion.div 
-            className="max-w-2xl mx-auto mt-4 text-center"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.4 }}
-          >
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                onClick={() => handleInitialPrompt({ 
-                  prompt: "Plan one week in London from LA for one person in mid next month" 
-                })}
-                variant="outline"
-                className="border-border hover:bg-muted/50 text-sm transition-all hover:shadow-md"
-                disabled={isLoading}
-              >
-                Quick Test: London Trip
-              </Button>
-            </motion.div>
-          </motion.div>
           
           {recentSearches.length > 0 && (
             <motion.div 
@@ -181,7 +157,7 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                 animate="animate"
               >
                 <AnimatePresence>
-                  {recentSearches.map((search, index) => (
+                  {recentSearches.slice(0, 3).map((search, index) => (
                     <motion.div
                       key={search.id}
                       variants={fadeInUp}
@@ -217,10 +193,10 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
           <motion.p 
             className="text-muted-foreground text-xs text-center mt-8"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: 0.5 }}
             transition={{ delay: 1, duration: 0.5 }}
           >
-            Nomad Navigator may contain errors. We recommend checking important information.
+            AI-generated content. Verify important details.
           </motion.p>
         </motion.div>
       </motion.div>
