@@ -134,6 +134,27 @@ const POPULAR_DESTINATIONS = [
 const COMMON_DURATIONS = [3, 5, 7, 10, 14];
 
 /**
+ * Ensure date is not in the past - adjust to tomorrow if needed
+ */
+function ensureFutureDate(date: Date): Date {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Reset to start of today
+  
+  const inputDate = new Date(date);
+  inputDate.setHours(0, 0, 0, 0); // Reset to start of input date
+  
+  // If the date is today or in the past, move it to tomorrow
+  if (inputDate <= now) {
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    logger.info('AI', `Date ${inputDate.toISOString().split('T')[0]} is in the past, moving to tomorrow: ${tomorrow.toISOString().split('T')[0]}`);
+    return tomorrow;
+  }
+  
+  return inputDate;
+}
+
+/**
  * Extract travel date from natural language
  */
 function extractTravelDate(prompt: string): Date {
@@ -160,7 +181,7 @@ function extractTravelDate(prompt: string): Date {
     targetDate.setHours(0, 0, 0, 0); // Set to start of day
     
     logger.info('AI', `Extracted travel date: next ${targetDay} = ${targetDate.toISOString().split('T')[0]}`);
-    return targetDate;
+    return ensureFutureDate(targetDate);
   }
   
   // Handle "tomorrow"
@@ -189,7 +210,7 @@ function extractTravelDate(prompt: string): Date {
     futureDate.setDate(now.getDate() + daysToAdd);
     futureDate.setHours(0, 0, 0, 0);
     logger.info('AI', `Extracted travel date: in ${daysToAdd} days = ${futureDate.toISOString().split('T')[0]}`);
-    return futureDate;
+    return ensureFutureDate(futureDate);
   }
   
   // Handle specific dates like "September 15" or "Sep 15"
@@ -213,7 +234,7 @@ function extractTravelDate(prompt: string): Date {
       
       targetDate.setHours(0, 0, 0, 0);
       logger.info('AI', `Extracted travel date: ${match[1]} ${day} = ${targetDate.toISOString().split('T')[0]}`);
-      return targetDate;
+      return ensureFutureDate(targetDate);
     }
   }
   
@@ -222,7 +243,7 @@ function extractTravelDate(prompt: string): Date {
     const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     targetDate.setHours(0, 0, 0, 0);
     logger.info('AI', `Extracted travel date: next month = ${targetDate.toISOString().split('T')[0]} (first of next month)`);
-    return targetDate;
+    return ensureFutureDate(targetDate);
   }
   
   // Then try month-only patterns: "In January", "during March", "next February"
@@ -240,15 +261,16 @@ function extractTravelDate(prompt: string): Date {
       
       targetDate.setHours(0, 0, 0, 0);
       logger.info('AI', `Extracted travel date: ${match[0]} = ${targetDate.toISOString().split('T')[0]} (first of month)`);
-      return targetDate;
+      return ensureFutureDate(targetDate);
     }
   }
   
-  // Default to today if no date found
-  logger.info('AI', 'No specific travel date found, defaulting to today');
-  const today = new Date(now);
-  today.setHours(0, 0, 0, 0);
-  return today;
+  // Default to tomorrow if no date found (never start trips in the past or today)
+  logger.info('AI', 'No specific travel date found, defaulting to tomorrow');
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  return ensureFutureDate(tomorrow);
 }
 
 /**
@@ -271,7 +293,7 @@ async function extractTripInfoFast(prompt: string): Promise<any> {
     origin: parsedTrip.origin,
     destinations: parsedTrip.destinations.map(dest => ({ city: dest.name, days: dest.days })),
     totalDays: parsedTrip.totalDays,
-    startDate: parsedTrip.startDate || extractTravelDate(prompt)
+    startDate: parsedTrip.startDate ? ensureFutureDate(new Date(parsedTrip.startDate)) : extractTravelDate(prompt)
   };
   
   if (!result.destinations || result.destinations.length === 0) {
@@ -1268,7 +1290,7 @@ export async function generateUltraFastItinerary(
     // Step 1: Extract trip info (2-3s with GPT-3.5)
     const extracted = await extractTripInfoFast(prompt);
     const destinations = extracted.destinations || [];
-    const startDate = extracted.startDate || new Date(); // Use extracted date or fallback to today
+    const startDate = extracted.startDate || extractTravelDate(prompt); // Use extracted date or fallback to tomorrow
     
     if (destinations.length === 0) {
       throw new Error('No destinations found in prompt');

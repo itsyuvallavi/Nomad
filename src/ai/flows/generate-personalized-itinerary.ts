@@ -20,6 +20,7 @@ import { validateTripComplexity } from '@/ai/utils/enhanced-generator';
 import { generateUltraFastItinerary } from '@/ai/utils/enhanced-generator-ultra-fast';
 import { enrichItineraryWithRealPlaces } from '@/ai/services/location-enrichment';
 import { logAIRequest, logAIResponse, logAIError } from '@/lib/utils/ai-logger';
+import { logItinerary, logUserAction, logPerformance, logError } from '@/lib/production-logger';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z
@@ -43,6 +44,15 @@ export { type GeneratePersonalizedItineraryOutput };
 export async function generatePersonalizedItinerary(
   input: GeneratePersonalizedItineraryInput
 ): Promise<GeneratePersonalizedItineraryOutput> {
+  const startTime = Date.now();
+  
+  // Log user action for production monitoring
+  logUserAction('itinerary_generation_start', {
+    prompt_length: input.prompt.length,
+    has_conversation_history: !!input.conversationHistory,
+    has_attachment: !!input.attachedFile
+  });
+
   // Log the incoming request
   const requestId = await logAIRequest(input.prompt, {
     model: 'gpt-4o-mini',
@@ -227,6 +237,37 @@ export async function generatePersonalizedItinerary(
             totalDays: enrichedResult.itinerary?.length || 0
           });
           
+          // Log production metrics for successful generation
+          const duration = Date.now() - startTime;
+          logItinerary({
+            id: requestId,
+            input: {
+              prompt: input.prompt,
+              model: 'gpt-4o-mini',
+              strategy: 'ultra-fast-enriched'
+            },
+            output: {
+              destinations: enrichedResult.destination,
+              days: enrichedResult.itinerary?.length || 0,
+              activities: enrichedResult.itinerary?.reduce((sum, day) => sum + (day.activities?.length || 0), 0) || 0,
+              title: enrichedResult.title || enrichedResult.destination,
+              duration: `${duration}ms`,
+              success: true
+            },
+            performance: {
+              totalDuration: duration,
+              apiCalls: 1,
+              cacheHit: false
+            }
+          });
+          
+          logUserAction('itinerary_generation_success', {
+            duration_ms: duration,
+            destinations: enrichedResult.destination,
+            days: enrichedResult.itinerary?.length || 0,
+            strategy: 'ultra-fast-enriched'
+          });
+          
           return enrichedResult;
         } catch (enrichError: any) {
           logger.warn('AI', 'Radar enrichment failed for ultra-fast, using non-enriched result', { error: enrichError.message });
@@ -249,6 +290,37 @@ export async function generatePersonalizedItinerary(
           totalDays: result.itinerary?.length || 0
         });
         
+        // Log production metrics for successful generation
+        const duration = Date.now() - startTime;
+        logItinerary({
+          id: requestId,
+          input: {
+            prompt: input.prompt,
+            model: 'gpt-4o-mini',
+            strategy: 'ultra-fast'
+          },
+          output: {
+            destinations: result.destination,
+            days: result.itinerary?.length || 0,
+            activities: result.itinerary?.reduce((sum, day) => sum + (day.activities?.length || 0), 0) || 0,
+            title: result.title || result.destination,
+            duration: `${duration}ms`,
+            success: true
+          },
+          performance: {
+            totalDuration: duration,
+            apiCalls: 1,
+            cacheHit: false
+          }
+        });
+        
+        logUserAction('itinerary_generation_success', {
+          duration_ms: duration,
+          destinations: result.destination,
+          days: result.itinerary?.length || 0,
+          strategy: 'ultra-fast'
+        });
+        
         return result;
       }
     } catch (error: any) {
@@ -260,6 +332,33 @@ export async function generatePersonalizedItinerary(
       // Log the error
       await logAIError(requestId, error, {
         model: 'gpt-4o-mini',
+        strategy: 'ultra-fast'
+      });
+      
+      // Log production metrics for failed generation
+      const duration = Date.now() - startTime;
+      logItinerary({
+        id: requestId,
+        input: {
+          prompt: input.prompt,
+          model: 'gpt-4o-mini',
+          strategy: 'ultra-fast'
+        },
+        error: {
+          message: error.message,
+          stack: error.stack,
+          code: error.code
+        },
+        performance: {
+          totalDuration: duration,
+          apiCalls: 1,
+          cacheHit: false
+        }
+      });
+      
+      logUserAction('itinerary_generation_error', {
+        duration_ms: duration,
+        error_message: error.message,
         strategy: 'ultra-fast'
       });
       
