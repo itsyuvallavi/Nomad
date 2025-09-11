@@ -1,0 +1,845 @@
+{
+  "iceland": {
+    "reykjavik": {
+      "attractions": [
+        {
+          "name": "Hallgrímskirkja",
+          "address": "Hallgrímstorg 101, 101 Reykjavík",
+          "type": "landmark",
+          "rating": 4.6,
+          "description": "Iconic Lutheran church with stunning city views from the tower",
+          "hours": "09:00-17:00",
+          "price": "Tower: ISK 1200"
+        },
+        {
+          "name": "Harpa Concert Hall",
+          "address": "Austurbakki 2, 101 Reykjavík",
+          "type": "cultural",
+          "rating": 4.5,
+          "description": "Stunning glass facade concert hall and cultural center",
+          "hours": "10:00-18:00",
+          "price": "Tours: ISK 2000"
+        },
+        {
+          "name": "Sun Voyager Sculpture",
+          "address": "Sæbraut, 101 Reykjavík",
+          "type": "landmark",
+          "rating": 4.4,
+          "description": "Viking ship sculpture with beautiful harbor views",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Perlan Museum",
+          "address": "Varmahlíð 1, 105 Reykjavík",
+          "type": "museum",
+          "rating": 4.5,
+          "description": "Nature museum with planetarium and observation deck",
+          "hours": "09:00-19:00",
+          "price": "ISK 4900"
+        },
+        {
+          "name": "National Museum of Iceland",
+          "address": "Suðurgata 41, 102 Reykjavík",
+          "type": "museum",
+          "rating": 4.4,
+          "description": "Iceland's history from settlement to present",
+          "hours": "10:00-17:00",
+          "price": "ISK 2500"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "Dill Restaurant",
+          "address": "Hverfisgata 12, 101 Reykjavík",
+          "type": "fine_dining",
+          "rating": 4.7,
+          "description": "Michelin-starred Nordic cuisine",
+          "hours": "18:00-22:00",
+          "price": "$$$$"
+        },
+        {
+          "name": "Grillmarkaðurinn",
+          "address": "Lækjargata 2a, 101 Reykjavík",
+          "type": "restaurant",
+          "rating": 4.5,
+          "description": "Grill restaurant focusing on local ingredients",
+          "hours": "17:30-22:30",
+          "price": "$$$"
+        },
+        {
+          "name": "Bæjarins Beztu Pylsur",
+          "address": "Tryggvagata 1, 101 Reykjavík",
+          "type": "street_food",
+          "rating": 4.2,
+          "description": "Famous hot dog stand since 1937",
+          "hours": "10:00-01:00",
+          "price": "$"
+        },
+        {
+          "name": "Messinn",
+          "address": "Lækjargata 6b, 101 Reykjavík",
+          "type": "seafood",
+          "rating": 4.5,
+          "description": "Fresh seafood served in skillets",
+          "hours": "11:30-22:00",
+          "price": "$$"
+        },
+        {
+          "name": "Cafe Loki",
+          "address": "Lokastígur 28, 101 Reykjavík",
+          "type": "traditional",
+          "rating": 4.3,
+          "description": "Traditional Icelandic dishes near Hallgrímskirkja",
+          "hours": "09:00-21:00",
+          "price": "$$"
+        }
+      ],
+      "activities": [
+        {
+          "name": "Blue Lagoon",
+          "address": "Norðurljósavegur 9, 240 Grindavík",
+          "type": "spa",
+          "rating": 4.3,
+          "description": "Geothermal spa in a lava field",
+          "hours": "08:00-22:00",
+          "price": "From ISK 9990"
+        },
+        {
+          "name": "Golden Circle Tour",
+          "address": "Various locations",
+          "type": "tour",
+          "rating": 4.6,
+          "description": "Þingvellir, Geysir, and Gullfoss in one day",
+          "hours": "Full day tour",
+          "price": "From ISK 8000"
+        },
+        {
+          "name": "Whale Watching Tour",
+          "address": "Old Harbor, Reykjavík",
+          "type": "tour",
+          "rating": 4.4,
+          "description": "See whales and dolphins in Faxaflói Bay",
+          "hours": "Multiple departures daily",
+          "price": "From ISK 11000"
+        },
+        {
+          "name": "Sky Lagoon",
+          "address": "Vesturvör 44, 200 Kópavogur",
+          "type": "spa",
+          "rating": 4.5,
+          "description": "Ocean-side geothermal lagoon with infinity edge",
+          "hours": "11:00-22:00",
+          "price": "From ISK 8990"
+        },
+        {
+          "name": "Northern Lights Tour",
+          "address": "Various pickup points",
+          "type": "tour",
+          "rating": 4.3,
+          "description": "Hunt for Aurora Borealis (Sept-April)",
+          "hours": "Evening tours",
+          "price": "From ISK 6000"
+        }
+      ]
+    },
+    "south_coast": {
+      "attractions": [
+        {
+          "name": "Seljalandsfoss Waterfall",
+          "address": "Þórsmerkurvegur, Iceland",
+          "type": "natural",
+          "rating": 4.7,
+          "description": "Walk behind this 60m waterfall",
+          "hours": "24/7",
+          "price": "Parking: ISK 800"
+        },
+        {
+          "name": "Skógafoss Waterfall",
+          "address": "Skógafoss, Iceland",
+          "type": "natural",
+          "rating": 4.8,
+          "description": "Powerful 60m waterfall with rainbow views",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Black Sand Beach Reynisfjara",
+          "address": "Reynisfjara Beach, Vík",
+          "type": "natural",
+          "rating": 4.6,
+          "description": "Dramatic black sand beach with basalt columns",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Jökulsárlón Glacier Lagoon",
+          "address": "Jökulsárlón, Iceland",
+          "type": "natural",
+          "rating": 4.8,
+          "description": "Glacial lagoon with floating icebergs",
+          "hours": "24/7",
+          "price": "Free viewing, boat tours available"
+        },
+        {
+          "name": "Diamond Beach",
+          "address": "Near Jökulsárlón",
+          "type": "natural",
+          "rating": 4.7,
+          "description": "Black sand beach with ice chunks",
+          "hours": "24/7",
+          "price": "Free"
+        }
+      ]
+    },
+    "north": {
+      "attractions": [
+        {
+          "name": "Goðafoss Waterfall",
+          "address": "Þjóðvegur, Fosshóll",
+          "type": "natural",
+          "rating": 4.6,
+          "description": "Waterfall of the Gods, 12m high and 30m wide",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Lake Mývatn",
+          "address": "Mývatn, Iceland",
+          "type": "natural",
+          "rating": 4.5,
+          "description": "Volcanic lake with pseudo-craters and birdlife",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Dettifoss Waterfall",
+          "address": "Vatnajökull National Park",
+          "type": "natural",
+          "rating": 4.7,
+          "description": "Europe's most powerful waterfall",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Húsavík Whale Museum",
+          "address": "Hafnarstétt 1, 640 Húsavík",
+          "type": "museum",
+          "rating": 4.4,
+          "description": "Learn about whales before whale watching",
+          "hours": "10:00-17:00",
+          "price": "ISK 2200"
+        },
+        {
+          "name": "Mývatn Nature Baths",
+          "address": "Jarðbaðshólar, 660 Mývatn",
+          "type": "spa",
+          "rating": 4.5,
+          "description": "Northern alternative to Blue Lagoon",
+          "hours": "12:00-22:00",
+          "price": "ISK 6000"
+        }
+      ]
+    },
+    "westfjords": {
+      "attractions": [
+        {
+          "name": "Dynjandi Waterfall",
+          "address": "Arnarfjörður, Westfjords",
+          "type": "natural",
+          "rating": 4.8,
+          "description": "100m cascade shaped like a bridal veil",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Látrabjarg Cliffs",
+          "address": "Látrabjarg, Westfjords",
+          "type": "natural",
+          "rating": 4.7,
+          "description": "Europe's largest bird cliff with puffins",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Rauðasandur Beach",
+          "address": "Rauðasandur, Westfjords",
+          "type": "natural",
+          "rating": 4.6,
+          "description": "Unique red sand beach",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Hornstrandir Nature Reserve",
+          "address": "Hornstrandir, Westfjords",
+          "type": "natural",
+          "rating": 4.8,
+          "description": "Remote wilderness with Arctic foxes",
+          "hours": "Summer access only",
+          "price": "Free, boat access required"
+        }
+      ]
+    }
+  },
+  "london": {
+    "central": {
+      "attractions": [
+        {
+          "name": "British Museum",
+          "address": "Great Russell St, London WC1B 3DG",
+          "type": "museum",
+          "rating": 4.7,
+          "description": "World history and culture artifacts",
+          "hours": "10:00-17:00",
+          "price": "Free"
+        },
+        {
+          "name": "Tower of London",
+          "address": "Tower of London, London EC3N 4AB",
+          "type": "historic",
+          "rating": 4.5,
+          "description": "Historic castle and crown jewels",
+          "hours": "09:00-17:30",
+          "price": "£29.90"
+        },
+        {
+          "name": "Westminster Abbey",
+          "address": "20 Deans Yd, London SW1P 3PA",
+          "type": "religious",
+          "rating": 4.4,
+          "description": "Gothic abbey and coronation church",
+          "hours": "09:30-15:30",
+          "price": "£24"
+        },
+        {
+          "name": "London Eye",
+          "address": "Lambeth, London SE1 7PB",
+          "type": "attraction",
+          "rating": 4.5,
+          "description": "Giant observation wheel on Thames",
+          "hours": "11:00-18:00",
+          "price": "From £32"
+        },
+        {
+          "name": "Tate Modern",
+          "address": "Bankside, London SE1 9TG",
+          "type": "museum",
+          "rating": 4.5,
+          "description": "Modern and contemporary art",
+          "hours": "10:00-18:00",
+          "price": "Free"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "Dishoom",
+          "address": "12 Upper St Martin's Ln, London WC2H 9FB",
+          "type": "indian",
+          "rating": 4.5,
+          "description": "Bombay-style cafe",
+          "hours": "08:00-23:00",
+          "price": "$$"
+        },
+        {
+          "name": "Sketch",
+          "address": "9 Conduit St, London W1S 2XG",
+          "type": "fine_dining",
+          "rating": 4.4,
+          "description": "Artistic dining experience",
+          "hours": "12:00-14:30, 18:30-22:00",
+          "price": "$$$$"
+        },
+        {
+          "name": "Borough Market",
+          "address": "8 Southwark St, London SE1 1TL",
+          "type": "market",
+          "rating": 4.5,
+          "description": "Historic food market",
+          "hours": "10:00-17:00",
+          "price": "$-$$"
+        }
+      ]
+    }
+  },
+  "paris": {
+    "central": {
+      "attractions": [
+        {
+          "name": "Eiffel Tower",
+          "address": "Champ de Mars, 5 Av. Anatole France, 75007 Paris",
+          "type": "landmark",
+          "rating": 4.5,
+          "description": "Iconic iron lattice tower",
+          "hours": "09:30-23:45",
+          "price": "€26.80"
+        },
+        {
+          "name": "Louvre Museum",
+          "address": "Rue de Rivoli, 75001 Paris",
+          "type": "museum",
+          "rating": 4.7,
+          "description": "World's largest art museum",
+          "hours": "09:00-18:00",
+          "price": "€17"
+        },
+        {
+          "name": "Notre-Dame Cathedral",
+          "address": "6 Parvis Notre-Dame, 75004 Paris",
+          "type": "religious",
+          "rating": 4.7,
+          "description": "Gothic cathedral (viewing from outside)",
+          "hours": "Closed for restoration",
+          "price": "Free to view"
+        },
+        {
+          "name": "Arc de Triomphe",
+          "address": "Place Charles de Gaulle, 75008 Paris",
+          "type": "monument",
+          "rating": 4.6,
+          "description": "Triumphal arch honoring military",
+          "hours": "10:00-22:30",
+          "price": "€13"
+        },
+        {
+          "name": "Musée d'Orsay",
+          "address": "1 Rue de la Légion d'Honneur, 75007 Paris",
+          "type": "museum",
+          "rating": 4.6,
+          "description": "Impressionist art collection",
+          "hours": "09:30-18:00",
+          "price": "€16"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "L'Ami Jean",
+          "address": "27 Rue Malar, 75007 Paris",
+          "type": "bistro",
+          "rating": 4.5,
+          "description": "Basque-inspired bistro",
+          "hours": "12:00-14:00, 19:00-22:30",
+          "price": "$$$"
+        },
+        {
+          "name": "Breizh Café",
+          "address": "109 Rue Vieille du Temple, 75003 Paris",
+          "type": "creperie",
+          "rating": 4.4,
+          "description": "Modern Breton crêperie",
+          "hours": "11:30-23:00",
+          "price": "$$"
+        },
+        {
+          "name": "Du Pain et des Idées",
+          "address": "34 Rue Yves Toudic, 75010 Paris",
+          "type": "bakery",
+          "rating": 4.6,
+          "description": "Artisanal bakery",
+          "hours": "06:45-20:00",
+          "price": "$"
+        }
+      ]
+    }
+  },
+  "tokyo": {
+    "central": {
+      "attractions": [
+        {
+          "name": "Senso-ji Temple",
+          "address": "2-3-1 Asakusa, Taito City, Tokyo",
+          "type": "religious",
+          "rating": 4.5,
+          "description": "Ancient Buddhist temple",
+          "hours": "06:00-17:00",
+          "price": "Free"
+        },
+        {
+          "name": "Tokyo Skytree",
+          "address": "1-1-2 Oshiage, Sumida City, Tokyo",
+          "type": "observation",
+          "rating": 4.4,
+          "description": "634m broadcasting tower",
+          "hours": "10:00-21:00",
+          "price": "¥2100-3100"
+        },
+        {
+          "name": "Meiji Shrine",
+          "address": "1-1 Yoyogikamizonocho, Shibuya City, Tokyo",
+          "type": "religious",
+          "rating": 4.5,
+          "description": "Shinto shrine in forest",
+          "hours": "Sunrise-sunset",
+          "price": "Free"
+        },
+        {
+          "name": "teamLab Borderless",
+          "address": "1-3-8 Ariake, Koto City, Tokyo",
+          "type": "museum",
+          "rating": 4.6,
+          "description": "Digital art museum",
+          "hours": "10:00-19:00",
+          "price": "¥3200"
+        },
+        {
+          "name": "Shibuya Crossing",
+          "address": "Shibuya, Tokyo",
+          "type": "landmark",
+          "rating": 4.3,
+          "description": "World's busiest crossing",
+          "hours": "24/7",
+          "price": "Free"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "Sukiyabashi Jiro",
+          "address": "Tsukamoto Sogyo Building B1F, 4-2-15 Ginza",
+          "type": "sushi",
+          "rating": 4.4,
+          "description": "Legendary sushi restaurant",
+          "hours": "11:30-14:00, 17:30-20:30",
+          "price": "$$$$"
+        },
+        {
+          "name": "Ichiran Ramen",
+          "address": "Multiple locations",
+          "type": "ramen",
+          "rating": 4.3,
+          "description": "Solo dining ramen booths",
+          "hours": "24/7",
+          "price": "$"
+        },
+        {
+          "name": "Tsukiji Outer Market",
+          "address": "4-16-2 Tsukiji, Chuo City, Tokyo",
+          "type": "market",
+          "rating": 4.4,
+          "description": "Fresh seafood and street food",
+          "hours": "05:00-14:00",
+          "price": "$-$$"
+        }
+      ]
+    }
+  },
+  "rome": {
+    "central": {
+      "attractions": [
+        {
+          "name": "Colosseum",
+          "address": "Piazza del Colosseo, 1, 00184 Roma",
+          "type": "historic",
+          "rating": 4.7,
+          "description": "Ancient amphitheater",
+          "hours": "08:30-19:00",
+          "price": "€16"
+        },
+        {
+          "name": "Vatican Museums",
+          "address": "Viale Vaticano, 00165 Roma",
+          "type": "museum",
+          "rating": 4.6,
+          "description": "Papal art collection and Sistine Chapel",
+          "hours": "09:00-18:00",
+          "price": "€17"
+        },
+        {
+          "name": "Trevi Fountain",
+          "address": "Piazza di Trevi, 00187 Roma",
+          "type": "landmark",
+          "rating": 4.5,
+          "description": "Baroque fountain masterpiece",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Pantheon",
+          "address": "Piazza della Rotonda, 00186 Roma",
+          "type": "historic",
+          "rating": 4.7,
+          "description": "Ancient Roman temple",
+          "hours": "09:00-19:00",
+          "price": "Free"
+        },
+        {
+          "name": "Roman Forum",
+          "address": "Via della Salara Vecchia, 5/6, 00186 Roma",
+          "type": "historic",
+          "rating": 4.6,
+          "description": "Ancient city center ruins",
+          "hours": "08:30-19:00",
+          "price": "€16"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "Trattoria da Enzo",
+          "address": "Via dei Vascellari, 29, 00153 Roma",
+          "type": "traditional",
+          "rating": 4.5,
+          "description": "Authentic Roman cuisine",
+          "hours": "12:30-15:00, 19:30-23:00",
+          "price": "$$"
+        },
+        {
+          "name": "Pizzarium",
+          "address": "Via della Meloria, 43, 00136 Roma",
+          "type": "pizza",
+          "rating": 4.4,
+          "description": "Gourmet pizza al taglio",
+          "hours": "11:00-22:00",
+          "price": "$"
+        },
+        {
+          "name": "Giolitti",
+          "address": "Via degli Uffici del Vicario, 40, 00186 Roma",
+          "type": "dessert",
+          "rating": 4.3,
+          "description": "Historic gelateria since 1900",
+          "hours": "07:00-01:00",
+          "price": "$"
+        }
+      ]
+    }
+  },
+  "barcelona": {
+    "central": {
+      "attractions": [
+        {
+          "name": "Sagrada Familia",
+          "address": "C/ de Mallorca, 401, 08013 Barcelona",
+          "type": "religious",
+          "rating": 4.7,
+          "description": "Gaudí's unfinished masterpiece",
+          "hours": "09:00-18:00",
+          "price": "€26"
+        },
+        {
+          "name": "Park Güell",
+          "address": "08024 Barcelona",
+          "type": "park",
+          "rating": 4.4,
+          "description": "Gaudí's mosaic park",
+          "hours": "09:30-19:30",
+          "price": "€10"
+        },
+        {
+          "name": "La Rambla",
+          "address": "La Rambla, Barcelona",
+          "type": "street",
+          "rating": 4.2,
+          "description": "Famous pedestrian boulevard",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Gothic Quarter",
+          "address": "Barri Gòtic, Barcelona",
+          "type": "neighborhood",
+          "rating": 4.5,
+          "description": "Medieval streets and plazas",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Casa Batlló",
+          "address": "Pg. de Gràcia, 43, 08007 Barcelona",
+          "type": "historic",
+          "rating": 4.5,
+          "description": "Gaudí's modernist house",
+          "hours": "09:00-21:00",
+          "price": "€35"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "Tickets",
+          "address": "Av. del Paral·lel, 164, 08015 Barcelona",
+          "type": "tapas",
+          "rating": 4.4,
+          "description": "Molecular tapas bar",
+          "hours": "19:00-23:30",
+          "price": "$$$"
+        },
+        {
+          "name": "Cal Pep",
+          "address": "Plaça de les Olles, 8, 08003 Barcelona",
+          "type": "seafood",
+          "rating": 4.3,
+          "description": "Fresh seafood tapas",
+          "hours": "19:30-23:30",
+          "price": "$$"
+        },
+        {
+          "name": "La Boqueria Market",
+          "address": "La Rambla, 91, 08001 Barcelona",
+          "type": "market",
+          "rating": 4.3,
+          "description": "Historic food market",
+          "hours": "08:00-20:30",
+          "price": "$-$$"
+        }
+      ]
+    }
+  },
+  "amsterdam": {
+    "central": {
+      "attractions": [
+        {
+          "name": "Van Gogh Museum",
+          "address": "Museumplein 6, 1071 DJ Amsterdam",
+          "type": "museum",
+          "rating": 4.6,
+          "description": "Largest Van Gogh collection",
+          "hours": "09:00-18:00",
+          "price": "€20"
+        },
+        {
+          "name": "Anne Frank House",
+          "address": "Westermarkt 20, 1016 GV Amsterdam",
+          "type": "museum",
+          "rating": 4.5,
+          "description": "WWII hiding place museum",
+          "hours": "09:00-22:00",
+          "price": "€14"
+        },
+        {
+          "name": "Rijksmuseum",
+          "address": "Museumstraat 1, 1071 XX Amsterdam",
+          "type": "museum",
+          "rating": 4.7,
+          "description": "Dutch art and history",
+          "hours": "09:00-17:00",
+          "price": "€22.50"
+        },
+        {
+          "name": "Jordaan District",
+          "address": "Jordaan, Amsterdam",
+          "type": "neighborhood",
+          "rating": 4.5,
+          "description": "Charming canal neighborhood",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Canal Cruise",
+          "address": "Multiple departure points",
+          "type": "tour",
+          "rating": 4.4,
+          "description": "UNESCO heritage canal tour",
+          "hours": "10:00-22:00",
+          "price": "€16-20"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "De Kas",
+          "address": "Kamerlingh Onneslaan 3, 1097 DE Amsterdam",
+          "type": "fine_dining",
+          "rating": 4.5,
+          "description": "Greenhouse restaurant",
+          "hours": "12:00-14:00, 18:30-22:00",
+          "price": "$$$"
+        },
+        {
+          "name": "Café de Reiger",
+          "address": "Nieuwe Leliestraat 34, 1015 SN Amsterdam",
+          "type": "traditional",
+          "rating": 4.3,
+          "description": "Brown café with Dutch food",
+          "hours": "11:00-01:00",
+          "price": "$$"
+        },
+        {
+          "name": "Foodhallen",
+          "address": "Bellamyplein 51, 1053 AT Amsterdam",
+          "type": "food_hall",
+          "rating": 4.2,
+          "description": "Indoor food market",
+          "hours": "11:00-23:30",
+          "price": "$-$$"
+        }
+      ]
+    }
+  },
+  "brussels": {
+    "central": {
+      "attractions": [
+        {
+          "name": "Grand Place",
+          "address": "Grote Markt, 1000 Brussels",
+          "type": "landmark",
+          "rating": 4.6,
+          "description": "UNESCO World Heritage square",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Atomium",
+          "address": "Pl. de l'Atomium 1, 1020 Brussels",
+          "type": "landmark",
+          "rating": 4.3,
+          "description": "Iconic atom structure",
+          "hours": "10:00-18:00",
+          "price": "€16"
+        },
+        {
+          "name": "Royal Museums of Fine Arts",
+          "address": "Rue de la Régence 3, 1000 Brussels",
+          "type": "museum",
+          "rating": 4.4,
+          "description": "Belgian and European art",
+          "hours": "10:00-17:00",
+          "price": "€10"
+        },
+        {
+          "name": "Manneken Pis",
+          "address": "1000 Brussels",
+          "type": "landmark",
+          "rating": 3.9,
+          "description": "Famous fountain statue",
+          "hours": "24/7",
+          "price": "Free"
+        },
+        {
+          "name": "Royal Galleries",
+          "address": "Galerie du Roi 5, 1000 Brussels",
+          "type": "shopping",
+          "rating": 4.4,
+          "description": "19th century shopping arcade",
+          "hours": "10:00-22:00",
+          "price": "Free"
+        }
+      ],
+      "restaurants": [
+        {
+          "name": "Chez Leon",
+          "address": "Rue des Bouchers 18, 1000 Brussels",
+          "type": "traditional",
+          "rating": 4.1,
+          "description": "Famous for moules-frites",
+          "hours": "12:00-23:00",
+          "price": "$$"
+        },
+        {
+          "name": "Pierre Marcolini",
+          "address": "Rue des Minimes 1, 1000 Brussels",
+          "type": "chocolate",
+          "rating": 4.6,
+          "description": "Luxury chocolate shop",
+          "hours": "10:00-19:00",
+          "price": "$$"
+        },
+        {
+          "name": "Delirium Café",
+          "address": "Imp. de la Fidélité 4, 1000 Brussels",
+          "type": "bar",
+          "rating": 4.2,
+          "description": "3000+ beer selection",
+          "hours": "10:00-04:00",
+          "price": "$$"
+        }
+      ]
+    }
+  }
+}

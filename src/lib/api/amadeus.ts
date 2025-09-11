@@ -30,7 +30,7 @@ async function getAccessToken(): Promise<string> {
   }
 
   if (!AMADEUS_API_KEY || !AMADEUS_API_SECRET) {
-    logger.warn('API', 'Amadeus credentials not configured');
+    logger.warn('API', 'Amadeus credentials not configured - using fallback pricing');
     throw new Error('Amadeus API credentials not configured');
   }
 
@@ -48,6 +48,8 @@ async function getAccessToken(): Promise<string> {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      logger.warn('API', `Amadeus auth failed: ${response.status} - ${errorText}`);
       throw new Error(`Failed to get access token: ${response.statusText}`);
     }
 

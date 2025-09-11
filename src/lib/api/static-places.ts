@@ -6,6 +6,22 @@
 import staticActivities from '../../../data/static/static-activities.json';
 import { logger } from '@/lib/logger';
 
+// Category mapping for AI requests to static data categories
+const CATEGORY_MAPPING: Record<string, string[]> = {
+  'restaurant': ['Food'],
+  'food': ['Food'],
+  'cafe': ['Food'],
+  'tourist_attraction': ['Attraction'],
+  'attraction': ['Attraction'],
+  'museum': ['Attraction'],
+  'park': ['Leisure', 'Attraction'],
+  'shopping_mall': ['Leisure'],
+  'shopping': ['Leisure'],
+  'art_gallery': ['Attraction'],
+  'leisure': ['Leisure'],
+  'entertainment': ['Leisure', 'Attraction']
+};
+
 export interface StaticActivity {
   description: string;
   category: string;
@@ -29,8 +45,22 @@ export function getStaticActivities(destination: string, category?: string): Sta
   }
 
   if (category) {
-    const categoryData = destinationData[category as keyof typeof destinationData];
-    return Array.isArray(categoryData) ? categoryData : [];
+    // Map AI category requests to our static data categories
+    const mappedCategories = CATEGORY_MAPPING[category.toLowerCase()] || [category];
+    const allCategoryActivities: StaticActivity[] = [];
+    
+    for (const mappedCategory of mappedCategories) {
+      const categoryData = destinationData[mappedCategory as keyof typeof destinationData];
+      if (Array.isArray(categoryData)) {
+        allCategoryActivities.push(...categoryData);
+      }
+    }
+    
+    if (allCategoryActivities.length === 0) {
+      logger.info('Static Places', `No static data found for ${destination} - ${category}, mapped to [${mappedCategories.join(', ')}]`);
+    }
+    
+    return allCategoryActivities;
   }
 
   // Return all activities from all categories

@@ -110,7 +110,11 @@ export async function generatePersonalizedItinerary(
       destination: 'Input Validation',
       title: 'More Information Needed',
       itinerary: [],
-      quickTips: [],
+      quickTips: [
+        "Try planning a trip with fewer destinations (maximum 5 cities)",
+        "Consider shorter trips (maximum 30 days total)",
+        "Focus on one region or continent for better planning"
+      ],
       needsMoreInfo: true,
       validationError: true,
       errorMessage: userFriendlyError || "Please provide more details about your trip"
@@ -120,16 +124,42 @@ export async function generatePersonalizedItinerary(
   // Use master parser for Phase 2 improvements
   const masterResult = await MasterTravelParser.parseUserInput(actualPrompt);
   
-  // Map master parser results to expected format
-  const parsedTrip = masterResult.destinations.length > 0 ? {
-    origin: masterResult.origin || '',
-    destinations: masterResult.destinations.map(d => ({
-      name: d.city,
-      days: d.days
-    })),
-    totalDays: masterResult.duration,
-    returnToOrigin: false
-  } : parseDestinations(actualPrompt);
+  // Try enhanced parser if master parser might have missed destinations
+  let parsedTrip;
+  if (masterResult.destinations.length > 0) {
+    // Check if we might have missed destinations (e.g., "Lisbon and Granada")
+    const enhancedCheck = EnhancedDestinationParser.parse(actualPrompt);
+    if (enhancedCheck.destinations.length > masterResult.destinations.length) {
+      // Enhanced parser found more destinations, use it instead
+      parsedTrip = {
+        origin: enhancedCheck.origin || masterResult.origin || '',
+        destinations: enhancedCheck.destinations.map(d => ({
+          name: d.city,
+          days: d.days
+        })),
+        totalDays: enhancedCheck.totalDays,
+        returnToOrigin: false
+      };
+      logger.info('AI', 'Using enhanced parser (found more destinations)', {
+        master: masterResult.destinations.length,
+        enhanced: enhancedCheck.destinations.length
+      });
+    } else {
+      // Use master parser results
+      parsedTrip = {
+        origin: masterResult.origin || '',
+        destinations: masterResult.destinations.map(d => ({
+          name: d.city,
+          days: d.days
+        })),
+        totalDays: masterResult.duration,
+        returnToOrigin: false
+      };
+    }
+  } else {
+    // Fall back to basic parser
+    parsedTrip = parseDestinations(actualPrompt);
+  }
   
   // Also check conversation history for origin if not in current prompt
   let origin = parsedTrip.origin;

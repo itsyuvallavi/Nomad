@@ -8,7 +8,7 @@
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '@/lib/logger';
-import { searchGooglePlaces } from '@/lib/api/google-places';
+import { getUnifiedActivities } from '@/lib/api/places-unified';
 import { getWeatherForecast } from '@/lib/api/weather';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { parseDestinations } from '@/ai/utils/destination-parser';
@@ -41,11 +41,29 @@ function getGeminiClient(): GoogleGenerativeAI {
 export function validateTripComplexity(prompt: string): { valid: boolean; error?: string } {
   const parsed = parseDestinations(prompt);
   
-  // Check destination count
+  // Check for vague or undefined destinations
+  const vagueTerms = ['exploring', 'traveling', 'visiting', 'touring', 'around', 'across'];
+  const hasVagueDestination = vagueTerms.some(term => 
+    prompt.toLowerCase().includes(term) && 
+    (prompt.toLowerCase().includes('europe') || 
+     prompt.toLowerCase().includes('asia') || 
+     prompt.toLowerCase().includes('africa') || 
+     prompt.toLowerCase().includes('america') ||
+     prompt.toLowerCase().includes('world'))
+  );
+  
+  if (hasVagueDestination && parsed.destinations.length === 0) {
+    return {
+      valid: false,
+      error: 'Please specify which cities you\'d like to visit. For example: "London, Paris, and Rome for 2 weeks" instead of "exploring Europe"'
+    };
+  }
+  
+  // Check destination count (6+ cities will likely timeout)
   if (parsed.destinations.length > 5) {
     return {
       valid: false,
-      error: `Trip too complex: ${parsed.destinations.length} destinations exceeds maximum of 5. Please reduce the number of destinations.`
+      error: `I can plan trips with up to 5 cities. You've requested ${parsed.destinations.length} destinations. Please select your top 5 cities to visit.`
     };
   }
   
@@ -53,7 +71,17 @@ export function validateTripComplexity(prompt: string): { valid: boolean; error?
   if (parsed.totalDays > 30) {
     return {
       valid: false,
-      error: `Trip too long: ${parsed.totalDays} days exceeds maximum of 30 days. Please plan a shorter trip.`
+      error: `I can plan trips up to 30 days. For your ${parsed.totalDays}-day journey, please break it into smaller segments or reduce the duration.`
+    };
+  }
+  
+  // Check for extremely long trips with multiple cities (complexity score)
+  // Allow up to 150 complexity points (e.g., 5 cities * 30 days = 150, or 6 cities * 25 days = 150)
+  const complexityScore = parsed.destinations.length * parsed.totalDays;
+  if (complexityScore > 150) {
+    return {
+      valid: false,
+      error: `This trip is too complex for me to process efficiently. Try reducing either the number of cities (${parsed.destinations.length}) or the duration (${parsed.totalDays} days).`
     };
   }
   
@@ -62,6 +90,14 @@ export function validateTripComplexity(prompt: string): { valid: boolean; error?
     return {
       valid: false,
       error: 'Please tell me where you\'d like to go! For example: "3 days in Paris from New York" or "One week in Tokyo from Los Angeles"'
+    };
+  }
+  
+  // Check for missing origin
+  if (!parsed.origin || parsed.origin === '') {
+    return {
+      valid: false,
+      error: 'Please tell me where you\'ll be departing from. For example: "From New York to London for 5 days"'
     };
   }
   
@@ -183,28 +219,29 @@ async function enhanceWithRealVenues(itinerary: any): Promise<any> {
       }
       
       try {
-        // Search for venues using Google Places
-        const places = await searchGooglePlaces(searchQuery, cityName, placeType);
+        // Search for venues using Unified Places API (Radar/Foursquare/Static)
+        const activities = await getUnifiedActivities(cityName, searchQuery, 5);
         
-        if (places.length > 0) {
-          const place = places[0]; // Take the top result
-          activity.venue_name = place.name;
-          activity.address = place.formatted_address;
+        if (activities.length > 0) {
+          const place = activities[0]; // Take the top result
+          activity.venue_name = place.venue_name;
+          activity.address = place.address;
           activity.rating = place.rating;
-          activity.description = `${activity.description} - Visit ${place.name}`;
+          activity.description = `${activity.description} - Visit ${place.venue_name}`;
           
-          logger.info('AI', `Found Google Places venue: ${place.name}`, { 
+          logger.info('AI', `Found venue via unified API: ${place.venue_name}`, { 
             city: cityName, 
             query: searchQuery,
-            rating: place.rating 
+            rating: place.rating,
+            source: place.source
           });
         } else {
           // Fallback to generic address
           activity.address = `${cityName} city center`;
-          logger.warn('AI', 'No Google Places venue found', { city: cityName, query: searchQuery });
+          logger.warn('AI', 'No venues found via unified API', { city: cityName, query: searchQuery });
         }
       } catch (error) {
-        logger.error('AI', 'Google Places search failed', { error, city: cityName });
+        logger.error('AI', 'Unified places search failed', { error, city: cityName });
         activity.address = `${cityName} city center`;
       }
     }

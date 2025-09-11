@@ -292,13 +292,21 @@ class AITester {
     }
 
     // Validate destination matches expected
-    const actualDestination = response.destination?.toLowerCase() || '';
-    const destinationMatches = expected.destinations.some(dest => 
-      actualDestination.includes(dest.toLowerCase())
-    );
+    // Special handling for validation responses
+    const isValidationResponse = response.destination === 'Input Validation' || response.needsMoreInfo;
+    const expectedValidationFailure = expected.destinations.length === 0 && expected.totalDays === 0;
     
-    if (!destinationMatches) {
-      errors.push(`Destination "${response.destination}" doesn't match expected: ${expected.destinations.join(', ')}`);
+    if (expectedValidationFailure && isValidationResponse) {
+      // This is a validation test that's working correctly - don't check destination match
+    } else {
+      const actualDestination = response.destination?.toLowerCase() || '';
+      const destinationMatches = expected.destinations.some(dest => 
+        actualDestination.includes(dest.toLowerCase())
+      );
+      
+      if (!destinationMatches) {
+        errors.push(`Destination "${response.destination}" doesn't match expected: ${expected.destinations.join(', ')}`);
+      }
     }
 
     // Validate days count

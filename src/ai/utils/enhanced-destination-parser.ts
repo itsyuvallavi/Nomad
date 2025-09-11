@@ -121,12 +121,14 @@ export class EnhancedDestinationParser {
     
     // Common destination patterns
     const patterns = [
-      // "X days in City"
-      /(\d+)\s*days?\s+in\s+([A-Z][a-zA-Z\s]+?)(?:\s|,|\.|\sand\s|\sthen\s|$)/gi,
+      // "i want to be X days in City" or "X days in City"
+      /(?:be\s+)?(\d+)\s*days?\s+in\s+([A-Z][a-zA-Z\s]+?)(?:\s|,|\.|\sand\s|\sthen\s|$)/gi,
       // "City for X days"
       /([A-Z][a-zA-Z\s]+?)\s+for\s+(\d+)\s*days?/gi,
       // "week in City"
       /(?:a\s+)?week\s+in\s+([A-Z][a-zA-Z\s]+?)(?:\s|,|\.|\sand\s|\sthen\s|$)/gi,
+      // "City and City" for multi-city trips
+      /(?:in|to|visit)\s+([A-Z][a-zA-Z\s]+?)\s+and\s+([A-Z][a-zA-Z\s]+?)(?:\s|,|\.|\.|$)/gi,
       // "City, Country"
       /(?:to|in|at|visit)\s+([A-Z][a-zA-Z\s]+?)(?:,\s*[A-Z][a-zA-Z\s]+?)?(?:\s|,|\.|\sand\s|\sthen\s|$)/gi
     ];
@@ -150,6 +152,28 @@ export class EnhancedDestinationParser {
           // Pattern: "week in City"
           city = match[1].trim();
           days = 7;
+        } else if (pattern.source.includes('\\s+and\\s+')) {
+          // Pattern: "City and City" - handle both cities
+          const city1 = match[1].trim();
+          const city2 = match[2].trim();
+          
+          // Add first city if not already added
+          const cleaned1 = TravelInputValidator.sanitizeDestination(city1);
+          if (cleaned1 && cleaned1.length > 2) {
+            const exists1 = destinations.some(d => 
+              d.city.toLowerCase() === cleaned1.toLowerCase()
+            );
+            if (!exists1) {
+              destinations.push({
+                city: this.properCase(cleaned1),
+                days: 7 // Default, will be overridden if specific days found
+              });
+            }
+          }
+          
+          // Set city to second city for normal processing
+          city = city2;
+          days = 7; // Default
         } else {
           // Generic pattern
           city = match[1].trim();

@@ -4,7 +4,7 @@
  */
 
 import { openai } from '../openai-config';
-import { searchGooglePlaces } from '@/lib/api/google-places';
+import { getUnifiedActivities } from '@/lib/api/places-unified';
 import { getWeatherForecast } from '@/lib/api/weather';
 import { searchFlights, searchHotels, getCityCode } from '@/lib/api/amadeus';
 import { estimateTripCost as estimateTripCostOpenAI, estimateFlightCost, estimateHotelCost } from '@/ai/utils/openai-travel-costs';
@@ -928,10 +928,10 @@ async function batchFetchVenues(
         venueMap.set(`${dest}:${cat}`, cached);
       } else {
         fetchPromises.push(
-          searchGooglePlaces(cat, dest, cat)
-            .then((places: any[]) => {
-              venueMap.set(`${dest}:${cat}`, places);
-              cache.set(cacheKey, places, 3600); // Cache 1 hour
+          getUnifiedActivities(dest, cat, 20)
+            .then((activities: any[]) => {
+              venueMap.set(`${dest}:${cat}`, activities);
+              cache.set(cacheKey, activities, 3600); // Cache 1 hour
             })
             .catch(() => {
               venueMap.set(`${dest}:${cat}`, []);
@@ -1737,11 +1737,11 @@ export async function prewarmCache(priority: 'startup' | 'background' = 'startup
         
         for (const type of essentialVenues) {
           promises.push(
-            searchGooglePlaces(type, city, type)
-              .then((venues: any[]) => {
-                cache.set(`venues:${city}:${type}`, venues);  // Uses optimized TTL
+            getUnifiedActivities(city, type, 20)
+              .then((activities: any[]) => {
+                cache.set(`venues:${city}:${type}`, activities);  // Uses optimized TTL
                 // Also cache with alternate key format
-                cache.set(`${city}:${type}`, venues);
+                cache.set(`${city}:${type}`, activities);
               })
               .catch(() => logger.debug('AI', `Venue pre-warm skipped: ${city}:${type}`))
           );
