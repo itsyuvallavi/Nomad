@@ -20,7 +20,7 @@ export function PullToRefresh({
   const controls = useAnimation();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleDragEnd = async (event: any, info: PanInfo) => {
+  const handleDragEnd = async (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset } = info;
     
     // Only trigger refresh if pulled down past threshold
@@ -43,7 +43,7 @@ export function PullToRefresh({
     }
   };
 
-  const handleDrag = (event: any, info: PanInfo) => {
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const { offset } = info;
     const newDistance = Math.max(0, Math.min(offset.y, refreshThreshold * 1.5));
     setPullDistance(newDistance);

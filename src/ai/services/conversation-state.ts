@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput, Itinerary } from '@/ai/schemas';
 import type { InputType, ClassificationResult } from '@/ai/utils/input-classifier';
 
 // Core state interfaces
@@ -71,8 +71,8 @@ export interface ConversationState {
   userId?: string;
   
   // Current itinerary
-  currentItinerary?: GeneratePersonalizedItineraryOutput;
-  itineraryHistory: GeneratePersonalizedItineraryOutput[];
+  currentItinerary?: GeneratePersonalizedItineraryOutput | Itinerary;
+  itineraryHistory: (GeneratePersonalizedItineraryOutput | Itinerary)[];
   
   // Conversation tracking
   messages: ConversationMessage[];
@@ -91,7 +91,7 @@ export interface ConversationState {
 
 export interface StateUpdateOptions {
   message?: ConversationMessage;
-  itinerary?: GeneratePersonalizedItineraryOutput;
+  itinerary?: GeneratePersonalizedItineraryOutput | Itinerary;
   contextUpdates?: Partial<ConversationContext>;
   metadata?: Partial<ConversationState['metadata']>;
 }
@@ -394,7 +394,7 @@ export class ConversationStateManager {
     }
   }
 
-  private static extractContextFromItinerary(state: ConversationState, itinerary: GeneratePersonalizedItineraryOutput): void {
+  private static extractContextFromItinerary(state: ConversationState, itinerary: GeneratePersonalizedItineraryOutput | Itinerary): void {
     // Extract destinations from itinerary
     const destinations: DestinationInfo[] = [];
     
@@ -402,7 +402,9 @@ export class ConversationStateManager {
     const destMap = new Map<string, number>();
     
     for (const day of itinerary.itinerary) {
-      const dest = day._destination || day.title.split(':')[1]?.trim() || itinerary.destination;
+      const dest = ('_destination' in day ? day._destination : undefined) || 
+                   day.title.split(':')[1]?.trim() || 
+                   itinerary.destination;
       if (dest) {
         destMap.set(dest, (destMap.get(dest) || 0) + 1);
       }
@@ -422,7 +424,7 @@ export class ConversationStateManager {
     state.context.totalDays = itinerary.itinerary.length;
     
     // Extract other info if available
-    if (itinerary._costEstimate) {
+    if ('_costEstimate' in itinerary && itinerary._costEstimate) {
       state.context.budget = {
         total: itinerary._costEstimate.total,
         currency: itinerary._costEstimate.currency,

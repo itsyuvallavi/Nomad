@@ -36,6 +36,20 @@ export interface Message {
   };
 }
 
+export interface EnhancedMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  metadata?: {
+    classification?: ClassificationResult;
+    parseResult?: ParseResult;
+    confidence?: number;
+    responseType?: string;
+    processingTime?: number;
+    requiresFollowUp?: boolean;
+  };
+}
+
 export interface Constraint {
   type: 'budget' | 'dates' | 'duration' | 'group_size' | 'accessibility' | 'preferences';
   value: any;
@@ -505,4 +519,3 @@ export function updateConversationState(
 /**
  * Export types and utilities
  */
-export type { DialogResponse, ConversationState, Message, Constraint };

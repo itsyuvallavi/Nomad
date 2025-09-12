@@ -37,6 +37,11 @@ export type GeneratePersonalizedItineraryOutput = z.infer<
   typeof GeneratePersonalizedItineraryOutputSchema
 >;
 
+// Add the complete types from zodZ schemas
+export type Activity = zodZ.infer<typeof Activity>;
+export type Day = zodZ.infer<typeof Day>;
+export type Itinerary = zodZ.infer<typeof ItinerarySchema>;
+
 // Pure Zod schemas for OpenAI provider (M2)
 import { z as zodZ } from 'zod';
 

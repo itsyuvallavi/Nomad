@@ -59,12 +59,12 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
   };
 
   return (
-    <div className="w-full bg-background/50 backdrop-blur-sm border-b border-border">
-      <div className="px-4 py-3">
-        {/* Location Header - simplified */}
+    <div className="w-full">
+      <div className="px-4 py-4">
+        {/* Location Header - show current destination */}
         {location && (
-          <div className="mb-3">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{location}</h3>
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">{location}</span>
           </div>
         )}
 
@@ -79,9 +79,9 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
                 exit={{ opacity: 0 }}
                 whileHover={{ opacity: 1 }}
                 onClick={() => scroll('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-background border border-border rounded-full flex items-center justify-center transition-opacity"
+                className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-background border border-border rounded-full flex items-center justify-center transition-opacity shadow-sm"
               >
-                <ChevronLeft className="w-3 h-3" />
+                <ChevronLeft className="w-4 h-4" />
               </motion.button>
             )}
             {canScrollRight && (
@@ -91,19 +91,25 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
                 exit={{ opacity: 0 }}
                 whileHover={{ opacity: 1 }}
                 onClick={() => scroll('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-6 h-6 bg-background border border-border rounded-full flex items-center justify-center transition-opacity"
+                className="absolute -right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-background border border-border rounded-full flex items-center justify-center transition-opacity shadow-sm"
               >
-                <ChevronRight className="w-3 h-3" />
+                <ChevronRight className="w-4 h-4" />
               </motion.button>
             )}
           </AnimatePresence>
 
-          {/* Days Container - smaller and more minimal */}
+          {/* Days Container - fixed height to prevent vertical scroll, adequate height for content */}
           <div 
             ref={scrollRef}
-            className="flex items-center gap-4 overflow-x-auto scrollbar-hide scroll-smooth"
+            className="flex items-center gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth py-2"
             onScroll={checkScroll}
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none', 
+              WebkitOverflowScrolling: 'touch',
+              minHeight: '90px',
+              maxHeight: '90px'
+            }}
           >
             {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => {
               const isSelected = day === selectedDay;
@@ -115,29 +121,38 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
                   data-day={day}
                   onClick={() => onDaySelect(day)}
                   className="relative flex-shrink-0 group"
-                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   {/* Minimal day indicator */}
                   <div className="flex flex-col items-center gap-2">
-                    {/* Day number circle */}
+                    {/* Day number circle with shadow hover effect */}
                     <motion.div
                       className={`
                         w-12 h-12 rounded-full flex items-center justify-center
-                        text-sm font-medium transition-all duration-200
+                        text-sm font-medium transition-all duration-200 relative
                         ${isSelected 
-                          ? 'bg-gray-900 text-white' 
+                          ? 'bg-gray-900 text-white shadow-lg' 
                           : isPast
-                          ? 'bg-gray-200 text-gray-600'
-                          : 'bg-white border border-gray-300 text-gray-600 hover:border-gray-400'
+                          ? 'bg-gray-200 text-gray-600 hover:shadow-md'
+                          : 'bg-white border border-gray-300 text-gray-600 hover:border-gray-500 hover:shadow-md hover:bg-gray-50'
                         }
                       `}
                       animate={{
                         scale: isSelected ? 1 : 0.9,
                       }}
+                      whileHover={{
+                        y: -2,
+                      }}
                       transition={{ duration: 0.2 }}
                     >
                       {day}
+                      {/* Glow effect on hover for non-selected days */}
+                      {!isSelected && (
+                        <motion.div
+                          className="absolute inset-0 rounded-full bg-gray-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                          style={{ filter: 'blur(8px)' }}
+                        />
+                      )}
                     </motion.div>
                     
                     {/* Date label - only if selected */}

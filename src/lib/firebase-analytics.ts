@@ -36,7 +36,7 @@ export function initFirebaseAnalytics() {
     console.log('🔥 Firebase Analytics initialized');
     return analytics;
   } catch (error) {
-    console.warn('⚠️ Firebase Analytics initialization failed:', error.message);
+    console.warn('⚠️ Firebase Analytics initialization failed:', (error as Error).message);
     return null;
   }
 }
@@ -58,7 +58,7 @@ export function logCustomEvent(eventName: string, parameters?: Record<string, an
     logEvent(analytics, eventName, sanitizedParams);
     console.log(`📈 [Analytics] ${eventName}`, sanitizedParams);
   } catch (error) {
-    console.warn('⚠️ Failed to log analytics event:', error.message);
+    console.warn('⚠️ Failed to log analytics event:', (error as Error).message);
   }
 }
 

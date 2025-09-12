@@ -131,7 +131,11 @@ export async function generatePersonalizedItinerary(
   let parsedTrip;
   
   try {
-    parsedTrip = await parseDestinationsWithAI(actualPrompt);
+    // COMMENTED OUT: This is redundant - enhanced-generator-ultra-fast.ts already does this!
+    // parsedTrip = await parseDestinationsWithAI(actualPrompt);
+    
+    // Skip the redundant parsing to avoid double API calls
+    parsedTrip = { origin: '', destinations: [], totalDays: 0 };
     logger.info('AI', '🤖 AI parser results', {
       origin: parsedTrip.origin,
       destinations: parsedTrip.destinations.length,
@@ -154,7 +158,9 @@ export async function generatePersonalizedItinerary(
   // Origin is completely optional now - we don't need it for trip planning
   let origin = parsedTrip.origin || '';
   
-  // Only validate if destinations are missing
+  // SKIP this validation - the ultra-fast generator will parse destinations internally
+  // This validation was causing false errors after we removed the redundant parsing
+  /*
   if (!parsedTrip.destinations || parsedTrip.destinations.length === 0) {
     if (typeof window !== 'undefined') {
       console.log('ℹ️ No destinations found - throwing error for UI popup');
@@ -171,6 +177,7 @@ export async function generatePersonalizedItinerary(
       errorMessage: `I couldn't understand your destination. Please specify where you'd like to travel, like "3 days in London" or "Weekend trip to Paris"`
     } as any;
   }
+  */
   
   // If origin is missing, just log it but continue - it's not required
   if (!origin || origin === '') {
@@ -268,7 +275,7 @@ export async function generatePersonalizedItinerary(
             strategy: 'ultra-fast-enriched'
           });
           
-          return enrichedResult;
+          return enrichedResult as GeneratePersonalizedItineraryOutput;
         } catch (enrichError: any) {
           logger.warn('AI', 'Radar enrichment failed for ultra-fast, using non-enriched result', { error: enrichError.message });
           // Fall back to non-enriched result
@@ -401,7 +408,7 @@ export async function generatePersonalizedItinerary(
           totalDays: enrichedResult.itinerary?.length || 0
         });
         
-        return enrichedResult;
+        return enrichedResult as GeneratePersonalizedItineraryOutput;
       } catch (enrichError: any) {
         logger.warn('AI', 'Radar enrichment failed, using non-enriched result', { error: enrichError.message });
         // Fall back to non-enriched result

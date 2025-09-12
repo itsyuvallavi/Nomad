@@ -214,7 +214,11 @@ export default function SimpleChatContainer({
                   </motion.div>
                 ))}
                 
-                {isGenerating && <ModernLoadingPanel />}
+                {isGenerating && <ModernLoadingPanel progress={{
+                  stage: 'generating',
+                  percentage: 50,
+                  message: 'Creating your itinerary...'
+                }} />}
               </div>
 
               {/* Input */}

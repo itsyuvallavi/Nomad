@@ -267,7 +267,7 @@ export async function handleChatMessage(request: ChatRequest): Promise<ChatRespo
         confidence: 0.1,
         metadata: {
           processingTime: Date.now() - startTime,
-          responseSource: 'error_template',
+          responseSource: 'template',
           requiresFollowUp: true
         }
       },
@@ -331,7 +331,7 @@ async function generateModificationResponse(
       confidence: modificationResult.confidence,
       metadata: {
         processingTime: modificationResult.metadata.processingTime,
-        responseSource: 'modification_handler',
+        responseSource: 'hybrid',
         requiresFollowUp: true
       }
     };
@@ -343,7 +343,7 @@ async function generateModificationResponse(
     confidence: modificationResult.confidence,
     metadata: {
       processingTime: modificationResult.metadata.processingTime,
-      responseSource: 'modification_handler',
+      responseSource: 'hybrid',
       requiresFollowUp: false
     }
   };
@@ -499,4 +499,3 @@ export async function continueConversation(
 /**
  * Export types and main functions
  */
-export type { ChatRequest, ChatResponse };

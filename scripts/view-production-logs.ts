@@ -32,7 +32,7 @@ class ProductionLogAnalyzer {
       const files = await fs.readdir(this.logDir);
       return files.filter(f => f.endsWith('.json')).sort();
     } catch (error) {
-      console.error('❌ Could not read log directory:', error.message);
+      console.error('❌ Could not read log directory:', (error as Error).message);
       return [];
     }
   }
@@ -55,7 +55,7 @@ class ProductionLogAnalyzer {
         }
       }).filter(Boolean);
     } catch (error) {
-      console.error(`❌ Could not read log file ${filename}:`, error.message);
+      console.error(`❌ Could not read log file ${filename}:`, (error as Error).message);
       return [];
     }
   }
@@ -110,7 +110,7 @@ class ProductionLogAnalyzer {
       }, {} as Record<string, number>);
 
     const topDestinations = Object.entries(destinations)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 10)
       .map(([dest, count]) => ({ destination: dest, count }));
 
@@ -286,7 +286,7 @@ async function main() {
         console.log('Run without arguments to see available commands.');
     }
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('❌ Error:', (error as Error).message);
     process.exit(1);
   }
 }

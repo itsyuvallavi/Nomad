@@ -351,14 +351,14 @@ export function parseDestinations(input: string): ParsedTrip {
     // Split by comma and "and", filtering out standalone "and"
     const cities = citiesText
       .split(/,\s*and\s+|,\s*/)
-      .map(c => c.trim())
-      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+      .map((c: string) => c.trim())
+      .filter((c: string) => c && c.length > 1 && c.toLowerCase() !== 'and');
     
     if (cities.length > 0) {
       const daysPerCity = Math.floor(totalDuration / cities.length);
       const remainder = totalDuration % cities.length;
       
-      cities.forEach((city, index) => {
+      cities.forEach((city: string, index: number) => {
         const cityDays = daysPerCity + (index < remainder ? 1 : 0);
         // Validate destination before adding
         const validation = validateDestination(city, cityDays);
@@ -389,8 +389,8 @@ export function parseDestinations(input: string): ParsedTrip {
     // Split by comma and "and", allowing for multi-word city names
     const cities = citiesText
       .split(/,\s*and\s+|,\s*/)
-      .map(c => c.trim())
-      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+      .map((c: string) => c.trim())
+      .filter((c: string) => c && c.length > 1 && c.toLowerCase() !== 'and');
     
     // Look for duration in the full input
     const durationMatch = input.match(/(\d+)[\s-]*(?:days?|weeks?)/i);
@@ -403,7 +403,7 @@ export function parseDestinations(input: string): ParsedTrip {
       const daysPerCity = Math.floor(totalDuration / cities.length);
       const remainder = totalDuration % cities.length;
       
-      cities.forEach((city, index) => {
+      cities.forEach((city: string, index: number) => {
         const cityDays = daysPerCity + (index < remainder ? 1 : 0);
         // Validate destination before adding
         const validation = validateDestination(city, cityDays);
@@ -433,11 +433,12 @@ export function parseDestinations(input: string): ParsedTrip {
   const visitCitiesMatch = false && input.match(/(?:visit|Visit)\s+([A-Z][a-zA-Z\s]+(?:,\s*[A-Z][a-zA-Z\s]+)*(?:,?\s*and\s+[A-Z][a-zA-Z\s]+)?)(?=\s*(?:for|from|then|after|next|,|\.|$))/i);
   if (visitCitiesMatch && destinations.length === 0) {
     const citiesText = visitCitiesMatch[1];
+    if (!citiesText) return { origin, destinations, returnTo, totalDays: 0 };
     // Split by comma and "and", allowing for multi-word city names
-    const cities = citiesText
+    const cities = (citiesText as string)
       .split(/,\s*and\s+|,\s*/)
-      .map(c => c.trim())
-      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+      .map((c: string) => c.trim())
+      .filter((c: string) => c && c.length > 1 && c.toLowerCase() !== 'and');
     
     // Look for duration in the full input
     const durationMatch = input.match(/(\d+\s*(?:days?|weeks?))/i);
@@ -450,7 +451,7 @@ export function parseDestinations(input: string): ParsedTrip {
       const daysPerCity = Math.floor(totalDuration / cities.length);
       const remainder = totalDuration % cities.length;
       
-      cities.forEach((city, index) => {
+      cities.forEach((city: string, index: number) => {
         const cityDays = daysPerCity + (index < remainder ? 1 : 0);
         // Validate destination before adding
         const validation = validateDestination(city, cityDays);
@@ -490,7 +491,7 @@ export function parseDestinations(input: string): ParsedTrip {
       const daysPerCity = Math.floor(totalDuration / cities.length);
       const remainder = totalDuration % cities.length;
       
-      cities.forEach((city, index) => {
+      cities.forEach((city: string, index: number) => {
         const cityDays = daysPerCity + (index < remainder ? 1 : 0);
         // Validate destination before adding
         const validation = validateDestination(city, cityDays);
@@ -535,7 +536,7 @@ export function parseDestinations(input: string): ParsedTrip {
         const daysPerCity = Math.floor(totalDuration / cities.length);
         const remainder = totalDuration % cities.length;
         
-        cities.forEach((city, index) => {
+        cities.forEach((city: string, index: number) => {
           const cityDays = daysPerCity + (index < remainder ? 1 : 0);
           destinations.push({
             name: city,
@@ -565,7 +566,7 @@ export function parseDestinations(input: string): ParsedTrip {
       const daysPerCity = Math.floor(totalDuration / cities.length);
       const remainder = totalDuration % cities.length;
       
-      cities.forEach((city, index) => {
+      cities.forEach((city: string, index: number) => {
         const cityDays = daysPerCity + (index < remainder ? 1 : 0);
         destinations.push({
           name: city,
@@ -597,14 +598,14 @@ export function parseDestinations(input: string): ParsedTrip {
     
     const cities = citiesText
       .split(/,\s*and\s+|,\s*/)
-      .map(c => c.trim())
-      .filter(c => c && c.length > 1 && c.toLowerCase() !== 'and');
+      .map((c: string) => c.trim())
+      .filter((c: string) => c && c.length > 1 && c.toLowerCase() !== 'and');
     
     if (cities.length > 0) {
       const daysPerCity = Math.floor(totalDuration / cities.length);
       const remainder = totalDuration % cities.length;
       
-      cities.forEach((city, index) => {
+      cities.forEach((city: string, index: number) => {
         const cityDays = daysPerCity + (index < remainder ? 1 : 0);
         // Validate destination before adding
         const validation = validateDestination(city, cityDays);
@@ -727,7 +728,7 @@ export function parseDestinations(input: string): ParsedTrip {
         const daysPerCity = Math.floor(sharedDuration / cities.length);
         const remainder = sharedDuration % cities.length;
         
-        cities.forEach((city, index) => {
+        cities.forEach((city: string, index: number) => {
           const cityDays = daysPerCity + (index < remainder ? 1 : 0);
           if (!foundDestinations.has(city.toLowerCase())) {
             foundDestinations.add(city.toLowerCase());

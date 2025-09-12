@@ -19,7 +19,7 @@ export function shouldUseStaticData(): boolean {
   return API_CONFIG.USE_STATIC_DATA;
 }
 
-export function logDataSource(source: 'static' | 'google' | 'foursquare'): void {
+export function logDataSource(source: 'static' | 'google' | 'foursquare' | 'radar'): void {
   if (API_CONFIG.VERBOSE_LOGGING) {
     console.log(`🔍 Using ${source} data source`);
   }

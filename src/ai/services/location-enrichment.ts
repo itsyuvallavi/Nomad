@@ -4,7 +4,7 @@
  */
 
 import { radarPlaces, enrichActivityWithRadarData } from '@/lib/api/radar-places';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput, Itinerary, Day } from '@/ai/schemas';
 
 interface EnrichmentOptions {
   useRadar?: boolean;
@@ -16,9 +16,9 @@ interface EnrichmentOptions {
  * Enrich an AI-generated itinerary with real place data from Radar
  */
 export async function enrichItineraryWithRealPlaces(
-  itinerary: GeneratePersonalizedItineraryOutput,
+  itinerary: GeneratePersonalizedItineraryOutput | Itinerary,
   options: EnrichmentOptions = { useRadar: true }
-): Promise<GeneratePersonalizedItineraryOutput> {
+): Promise<GeneratePersonalizedItineraryOutput | Itinerary> {
   if (!options.useRadar) {
     return itinerary;
   }
@@ -30,7 +30,7 @@ export async function enrichItineraryWithRealPlaces(
     const enrichedDays = await Promise.all(
       itinerary.itinerary.map(async (day) => {
         // First, try to get coordinates for the destination
-        const destination = day._destination || day.title;
+        const destination = ('_destination' in day ? day._destination : undefined) || day.title;
         let cityCoords: { lat: number; lng: number } | null = null;
 
         // Try to geocode the destination
@@ -53,8 +53,20 @@ export async function enrichItineraryWithRealPlaces(
         const enrichedActivities = await Promise.all(
           day.activities.map(async (activity) => {
             try {
-              const enriched = await enrichActivityWithRadarData(activity, cityCoords!);
-              return enriched;
+              // Convert activity to the format expected by enrichActivityWithRadarData
+              const activityForEnrichment = {
+                description: activity.description,
+                category: activity.category as string,
+                address: activity.address || undefined,
+                time: activity.time || ''
+              };
+              const enriched = await enrichActivityWithRadarData(activityForEnrichment, cityCoords!);
+              // Merge enriched data back with original activity, preserving the correct type
+              return {
+                ...activity,
+                ...enriched,
+                category: activity.category // Preserve the original typed category
+              };
             } catch (error) {
               console.error('Error enriching activity:', error);
               return activity; // Return original if enrichment fails
@@ -66,7 +78,7 @@ export async function enrichItineraryWithRealPlaces(
           ...day,
           activities: enrichedActivities,
           _coordinates: cityCoords, // Add city coordinates to the day
-        };
+        } as Day & { _coordinates: { lat: number; lng: number } };
       })
     );
 
@@ -74,7 +86,7 @@ export async function enrichItineraryWithRealPlaces(
       ...itinerary,
       itinerary: enrichedDays,
       _enrichedWithRadar: true,
-    };
+    } as typeof itinerary & { _enrichedWithRadar: true };
   } catch (error) {
     console.error('Error enriching itinerary:', error);
     return itinerary; // Return original if enrichment fails

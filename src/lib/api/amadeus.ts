@@ -62,7 +62,7 @@ async function getAccessToken(): Promise<string> {
     };
 
     logger.info('API', 'Amadeus token obtained successfully');
-    return cachedToken.access_token;
+    return cachedToken?.access_token || '';
   } catch (error) {
     logger.error('API', 'Failed to get Amadeus access token', error);
     throw error;
@@ -81,6 +81,12 @@ export async function searchFlights(params: {
   adults?: number;
   maxResults?: number;
 }) {
+  // Disabled - Amadeus API causing timeouts
+  if (!AMADEUS_API_KEY || !AMADEUS_API_SECRET) {
+    logger.info('API', 'Amadeus disabled - skipping flight search');
+    return null;
+  }
+  
   try {
     const token = await getAccessToken();
     
@@ -144,6 +150,12 @@ export async function searchHotels(params: {
   adults?: number;
   maxResults?: number;
 }) {
+  // Disabled - Amadeus API causing timeouts
+  if (!AMADEUS_API_KEY || !AMADEUS_API_SECRET) {
+    logger.info('API', 'Amadeus disabled - skipping hotel search');
+    return null;
+  }
+  
   try {
     const token = await getAccessToken();
     
@@ -200,6 +212,12 @@ export async function searchHotels(params: {
  * Uses Amadeus location search
  */
 export async function getCityCode(cityName: string): Promise<string | null> {
+  // Disabled - Amadeus API causing timeouts
+  if (!AMADEUS_API_KEY || !AMADEUS_API_SECRET) {
+    logger.info('API', 'Amadeus disabled - skipping city code lookup');
+    return null;
+  }
+  
   try {
     const token = await getAccessToken();
     
@@ -243,6 +261,12 @@ export async function getPointsOfInterest(params: {
   radius?: number;
   categories?: string[];
 }) {
+  // Disabled - Amadeus API causing timeouts
+  if (!AMADEUS_API_KEY || !AMADEUS_API_SECRET) {
+    logger.info('API', 'Amadeus disabled - skipping POI search');
+    return null;
+  }
+  
   try {
     const token = await getAccessToken();
     
@@ -289,6 +313,12 @@ export async function getPointsOfInterest(params: {
  * Get travel recommendations for a destination
  */
 export async function getTravelRecommendations(cityCode: string) {
+  // Disabled - Amadeus API causing timeouts
+  if (!AMADEUS_API_KEY || !AMADEUS_API_SECRET) {
+    logger.info('API', 'Amadeus disabled - skipping travel recommendations');
+    return null;
+  }
+  
   try {
     const token = await getAccessToken();
     

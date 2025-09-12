@@ -11,10 +11,10 @@ export const animationConfig = {
     superSlow: 1.2
   },
   easing: {
-    smooth: [0.4, 0.0, 0.2, 1],
-    bounce: [0.68, -0.55, 0.265, 1.55],
-    elastic: [0.175, 0.885, 0.32, 1.275],
-    sharp: [0.4, 0.0, 0.6, 1]
+    smooth: [0.4, 0.0, 0.2, 1] as const,
+    bounce: [0.68, -0.55, 0.265, 1.55] as const,
+    elastic: [0.175, 0.885, 0.32, 1.275] as const,
+    sharp: [0.4, 0.0, 0.6, 1] as const
   },
   stagger: {
     fast: 0.05,
@@ -22,9 +22,134 @@ export const animationConfig = {
     slow: 0.15
   },
   spring: {
-    bouncy: { type: "spring", stiffness: 400, damping: 20 },
-    smooth: { type: "spring", stiffness: 300, damping: 30 },
-    slow: { type: "spring", stiffness: 200, damping: 40 }
+    bouncy: { type: "spring" as const, stiffness: 400, damping: 20 },
+    smooth: { type: "spring" as const, stiffness: 300, damping: 30 },
+    slow: { type: "spring" as const, stiffness: 200, damping: 40 }
+  }
+};
+
+// Haptic feedback configurations
+export const HAPTIC = {
+  tap: () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(30);
+    }
+  },
+  light: () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+  },
+  medium: () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(100);
+    }
+  },
+  heavy: () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(200);
+    }
+  },
+  success: () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([50, 50, 100]);
+    }
+  },
+  error: () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([100, 100, 100]);
+    }
+  }
+};
+
+// Gesture threshold configurations
+export const GESTURE_THRESHOLDS = {
+  tap: {
+    maxDistance: 10,
+    maxDuration: 300
+  },
+  swipe: {
+    minDistance: 50,
+    minVelocity: 0.3
+  },
+  pinch: {
+    minScale: 0.1,
+    maxScale: 3
+  },
+  longPress: {
+    duration: 500
+  }
+};
+
+// Haptic button animation variants
+export const HAPTIC_BUTTON_VARIANTS: Variants = {
+  initial: {
+    scale: 1
+  },
+  hover: {
+    scale: 1.05,
+    transition: {
+      duration: animationConfig.duration.fast,
+      ease: animationConfig.easing.smooth
+    }
+  },
+  tap: {
+    scale: 0.95
+  }
+};
+
+// Card animation variants
+export const CARD_VARIANTS: Variants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+    scale: 0.95
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: animationConfig.duration.normal,
+      ease: animationConfig.easing.smooth
+    }
+  },
+  hover: {
+    scale: 1.02,
+    y: -5,
+    transition: {
+      duration: animationConfig.duration.fast,
+      ease: animationConfig.easing.smooth
+    }
+  },
+  tap: {
+    scale: 0.98
+  }
+};
+
+// Stagger animation variants
+export const STAGGER_LIST_VARIANTS: Variants = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: animationConfig.stagger.normal,
+      delayChildren: 0.1
+    }
+  }
+};
+
+export const STAGGER_ITEM_VARIANTS: Variants = {
+  initial: {
+    opacity: 0,
+    x: -20
+  },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: animationConfig.duration.normal,
+      ease: animationConfig.easing.smooth
+    }
   }
 };
 

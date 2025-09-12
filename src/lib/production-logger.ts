@@ -281,7 +281,7 @@ class ProductionLogger {
       });
       
     } catch (error) {
-      console.warn('⚠️ Failed to send analytics:', error.message);
+      console.warn('⚠️ Failed to send analytics:', (error as Error).message);
     }
   }
 
@@ -309,7 +309,7 @@ class ProductionLogger {
 
     } catch (error) {
       // Silently fail if we can't write to file system
-      console.warn('Could not write logs to file:', error.message);
+      console.warn('Could not write logs to file:', (error as Error).message);
     }
   }
 

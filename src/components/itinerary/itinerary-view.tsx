@@ -485,67 +485,70 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
         {/* Coworking Spaces (if any) */}
         <CoworkingSection activities={allActivities} />
 
-        {/* Horizontal Location Tabs for Multi-Destination Trips */}
-        {locations.length > 1 && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="w-4 h-4 text-blue-400" />
-              <h2 className="text-xs font-medium text-slate-400 uppercase tracking-wider">Trip Destinations</h2>
-              <span className="text-xs text-slate-500">({locations.length} locations)</span>
-            </div>
-            {/* Destinations - Horizontal Compact */}
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-foreground mb-2">Destinations</h3>
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {locations.map((location, index) => {
-                  const locationData = daysByLocation[location];
-                  const isSelected = selectedLocation === location;
-                  
-                  return (
-                    <button
-                      key={location}
-                      onClick={() => setSelectedLocation(location)}
-                      className={`flex-shrink-0 px-3 py-1.5 rounded-md transition-all border text-xs ${
-                        isSelected
-                          ? 'bg-foreground text-background border-foreground'
-                          : 'bg-muted/50 text-foreground hover:bg-muted border-border'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                          isSelected ? 'bg-background/20' : 'bg-muted'
-                        }`}>
-                          {index + 1}
-                        </span>
-                        <div className="text-left">
-                          <div className="font-medium">{location}</div>
-                          <div className="text-[9px] opacity-70">
-                            {locationData.days.length} {locationData.days.length === 1 ? 'day' : 'days'}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Daily Itinerary with Timeline */}
         <div className="">
-          {/* Horizontal Timeline - Full Width */}
-          <DayTimelineV2 
-            totalDays={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).length}
-            selectedDay={selectedDayInTimeline}
-            onDaySelect={(day) => {
-              setSelectedDayInTimeline(day);
-              // Also update map day selection if needed
-              setSelectedMapDay(day);
-            }}
-            location={locations.length > 1 ? selectedLocation : undefined}
-            dates={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map(d => d.date)}
-          />
+          {/* Destination Header and Timeline Section */}
+          <div className="bg-background/50 backdrop-blur-sm border-b border-border">
+            {/* Destination Switcher for Multi-Destination Trips */}
+            {locations.length > 1 && (
+              <div className="px-4 pt-4 pb-2">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Trip Destinations</h2>
+                    <span className="text-xs text-muted-foreground">({locations.length} locations)</span>
+                  </div>
+                </div>
+                
+                {/* Destinations - Horizontal Compact */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {locations.map((location, index) => {
+                    const locationData = daysByLocation[location];
+                    const isSelected = selectedLocation === location;
+                    
+                    return (
+                      <button
+                        key={location}
+                        onClick={() => setSelectedLocation(location)}
+                        className={`flex-shrink-0 px-3 py-1.5 rounded-md transition-all border text-xs ${
+                          isSelected
+                            ? 'bg-foreground text-background border-foreground'
+                            : 'bg-muted/50 text-foreground hover:bg-muted border-border'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                            isSelected ? 'bg-background/20' : 'bg-muted'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <div className="text-left">
+                            <div className="font-medium">{location}</div>
+                            <div className="text-[9px] opacity-70">
+                              {locationData.days.length} {locationData.days.length === 1 ? 'day' : 'days'}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {/* Horizontal Timeline - Directly integrated */}
+            <DayTimelineV2 
+              totalDays={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).length}
+              selectedDay={selectedDayInTimeline}
+              onDaySelect={(day) => {
+                setSelectedDayInTimeline(day);
+                // Also update map day selection if needed
+                setSelectedMapDay(day);
+              }}
+              location={locations.length > 1 ? selectedLocation : undefined}
+              dates={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map(d => d.date)}
+            />
+          </div>
           
           {/* Selected Day Activities */}
           <div className="px-6 py-6">

@@ -216,7 +216,7 @@ export class TravelInputValidator {
     // Extract information
     const travelerCount = this.extractTravelerCount(sanitized);
     const budgetMatch = sanitized.match(/(?:budget|cost|spend).*?(\$?\d+[\d,]*(?:\.\d+)?)/i);
-    const budget = budgetMatch ? this.validateBudget(budgetMatch[0]) : undefined;
+    const budget = budgetMatch ? this.validateBudget(budgetMatch[0]) || undefined : undefined;
     
     // Check for destination mentions
     const hasValidDestination = /[A-Z][a-z]+/.test(sanitized) && sanitized.length > 10;

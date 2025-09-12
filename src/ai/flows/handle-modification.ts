@@ -73,7 +73,7 @@ export async function handleModification(
     // Step 2: Validate modification is feasible
     const validation = validateModification(modificationRequest, currentItinerary);
     if (!validation.valid) {
-      return createFailureResult(modificationRequest, currentItinerary, validation.reason, Date.now() - startTime);
+      return createFailureResult(modificationRequest, currentItinerary, validation.reason || 'Validation failed', Date.now() - startTime);
     }
     
     // Step 3: Apply modification and create new itinerary
@@ -543,4 +543,3 @@ function createFailureResult(
 /**
  * Export types and main function
  */
-export type { ModificationRequest, ModificationResult, ModificationDiff };

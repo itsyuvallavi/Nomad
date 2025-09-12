@@ -616,6 +616,100 @@ function generateStaticChunk(destination: string, days: number, dayOffset: numbe
 }
 
 /**
+ * Generate combined itinerary for multiple destinations in a single API call
+ * This reduces API calls and prevents timeout for multi-city trips
+ */
+async function generateCombinedItinerary(
+  destinations: Array<{ city: string; days: number }>,
+  startDate: string
+): Promise<any[]> {
+  const totalDays = destinations.reduce((sum, d) => sum + d.days, 0);
+  const cacheKey = `combined:${destinations.map(d => `${d.city}-${d.days}`).join(':')}`;
+  const cached = cache.get<any[]>(cacheKey);
+  if (cached) {
+    logger.debug('AI', 'Cache hit for combined itinerary');
+    return cached;
+  }
+
+  // Use static data if configured
+  if (shouldUseStaticData()) {
+    logger.info('AI', `Using static data for combined itinerary`);
+    let allDays: any[] = [];
+    let dayOffset = 0;
+    for (const dest of destinations) {
+      allDays = allDays.concat(generateStaticChunk(dest.city, dest.days, dayOffset));
+      dayOffset += dest.days;
+    }
+    return allDays;
+  }
+
+  // Check if OpenAI is available
+  if (!openai) {
+    logger.error('AI', 'OpenAI client not available for combined generation');
+    throw new Error('OpenAI API key not configured');
+  }
+
+  // Create a structured prompt for all destinations
+  const destinationList = destinations.map((d, i) => {
+    const startDay = destinations.slice(0, i).reduce((sum, dest) => sum + dest.days, 1);
+    const endDay = startDay + d.days - 1;
+    return `- Days ${startDay}-${endDay}: ${d.city} (${d.days} days)`;
+  }).join('\n');
+
+  const prompt = `Generate a complete ${totalDays}-day itinerary for this multi-city trip:
+${destinationList}
+
+Return a JSON array with EXACTLY ${totalDays} day objects.
+Each day must include:
+- day: number (1 to ${totalDays})
+- destination_city: current city name
+- title: "Day X: Descriptive Title"
+- theme: day's theme
+- activities: array of 5 activities with time, description, category (Food|Museum|Park|Attraction|Shopping), duration, and tips
+
+CRITICAL: Return exactly ${totalDays} days total, respecting the city breakdown above.`;
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [
+      { 
+        role: 'system', 
+        content: 'Return JSON array only. No text. Generate realistic, detailed itineraries.' 
+      },
+      { role: 'user', content: prompt }
+    ],
+    response_format: { type: 'json_object' },
+    temperature: 0.7,
+    max_tokens: Math.min(4000, 2000 + (totalDays * 100)) // Scale with trip length
+  });
+
+  try {
+    const responseContent = completion.choices[0].message.content || '{"days":[]}';
+    const parsed = JSON.parse(responseContent);
+    const days = Array.isArray(parsed) ? parsed : (parsed.days || parsed.itinerary || []);
+    
+    // Validate we got the right number of days
+    if (days.length !== totalDays) {
+      logger.warn('AI', `Expected ${totalDays} days, got ${days.length} - adjusting`);
+    }
+    
+    cache.set(cacheKey, days, 600);
+    return days;
+  } catch (error) {
+    logger.error('AI', 'Failed to parse combined itinerary', error);
+    // Fallback to generating chunks separately
+    let allDays: any[] = [];
+    let dayOffset = 0;
+    for (const dest of destinations) {
+      const chunk = await generateDestinationChunk(dest.city, dest.days, dayOffset);
+      allDays = allDays.concat(chunk);
+      dayOffset += dest.days;
+    }
+    return allDays;
+  }
+}
+
+/**
  * Parallel generation for each destination with optimized prompt
  */
 async function generateDestinationChunk(
@@ -660,7 +754,7 @@ CRITICAL: Must return exactly ${days} day objects, no more, no less.`;
     ],
     response_format: { type: 'json_object' },
     temperature: 0.7,
-    max_tokens: 3000 // Increased for more activities
+    max_tokens: 2000 // Optimized for better performance
   });
   
   try {
@@ -1298,11 +1392,18 @@ export async function generateUltraFastItinerary(
     
     logger.info('AI', `Extracted ${destinations.length} destinations, starting ${startDate.toISOString().split('T')[0]} in ${Date.now() - startTime}ms`);
     
+    // Calculate total days for the trip
+    const totalDays = destinations.reduce((sum: number, d: any) => sum + d.days, 0);
+    
     // Step 2: Start ALL parallel operations
     const parallelStart = Date.now();
     
     // Use the extracted start date for the trip
     const tripStartDate = startDate.toISOString().split('T')[0];
+    
+    // For multi-destination trips, generate all at once to avoid parallel API calls
+    // This prevents timeout issues with Next.js server actions
+    const shouldBatchGenerate = destinations.length > 1 && totalDays > 7;
     
     const [
       itineraryChunks,
@@ -1312,15 +1413,17 @@ export async function generateUltraFastItinerary(
       hotelData,
       tripCostEstimate
     ] = await Promise.all([
-      // Generate all destination chunks in parallel
-      Promise.all(
-        destinations.map((dest: any, index: number) => {
-          const dayOffset = destinations
-            .slice(0, index)
-            .reduce((sum: number, d: any) => sum + d.days, 0);
-          return generateDestinationChunk(dest.city, dest.days, dayOffset);
-        })
-      ),
+      // Generate destination chunks - batch if multiple cities, parallel if single
+      shouldBatchGenerate
+        ? generateCombinedItinerary(destinations, tripStartDate)
+        : Promise.all(
+            destinations.map((dest: any, index: number) => {
+              const dayOffset = destinations
+                .slice(0, index)
+                .reduce((sum: number, d: any) => sum + d.days, 0);
+              return generateDestinationChunk(dest.city, dest.days, dayOffset);
+            })
+          ),
       
       // Fetch venues in parallel (if API key exists)
       process.env.GOOGLE_API_KEY 
@@ -1394,10 +1497,13 @@ export async function generateUltraFastItinerary(
     // Travel should be the first activity of day 1 and last activity of the final day
     
     // Combine chunks without adding extra travel days
-    if (destinations.length > 1) {
-      // Multi-city trips - combine all chunks
+    if (shouldBatchGenerate) {
+      // Batch generation returns a flat array of days
+      allDays = itineraryChunks as any[];
+    } else if (destinations.length > 1) {
+      // Multi-city trips with parallel generation - combine all chunks
       let currentDayNum = 1;
-      itineraryChunks.forEach((chunk: any[]) => {
+      (itineraryChunks as any[][]).forEach((chunk: any[]) => {
         const adjustedChunk = chunk.map((day: any) => ({
           ...day,
           day: currentDayNum++

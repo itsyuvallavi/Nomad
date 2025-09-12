@@ -4,7 +4,7 @@
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogCategory = 'AI' | 'API' | 'IMAGE' | 'WEATHER' | 'PLACES' | 'SYSTEM' | 'USER' | 'DRAFT' | 'RETRY' | 'ERROR' | 'CIRCUIT' | 'Transport' | 'Amadeus' | 'Polygon';
+export type LogCategory = 'AI' | 'API' | 'IMAGE' | 'WEATHER' | 'PLACES' | 'SYSTEM' | 'USER' | 'DRAFT' | 'RETRY' | 'ERROR' | 'CIRCUIT' | 'Transport' | 'Amadeus' | 'Polygon' | 'Chat Conversation' | 'Dialog Generator' | 'Modification Handler' | 'Foursquare API' | 'Unified Places' | 'Radar API' | 'Static Places' | 'DIAGNOSTICS' | 'ConversationState' | 'AI Parser' | 'Hybrid Parser' | 'Enhanced Chat';
 
 interface LogEntry {
   timestamp: string;
@@ -114,7 +114,19 @@ class Logger {
       CIRCUIT: '🔋',
       Transport: '✈️',
       Amadeus: '✈️',
-      Polygon: '📊'
+      Polygon: '📊',
+      'Chat Conversation': '💬',
+      'Dialog Generator': '🗣️',
+      'Modification Handler': '✏️',
+      'Foursquare API': '🟥',
+      'Unified Places': '🌍',
+      'Radar API': '📡',
+      'Static Places': '📌',
+      DIAGNOSTICS: '🔍',
+      ConversationState: '💭',
+      'AI Parser': '🔍',
+      'Hybrid Parser': '🔄',
+      'Enhanced Chat': '💬'
     };
     return emojis[category] || '📝';
   }
