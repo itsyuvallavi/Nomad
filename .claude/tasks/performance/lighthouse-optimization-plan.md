@@ -336,3 +336,364 @@ npm start
 ```
 
 This alone should improve performance from 35 to ~60!
+
+---
+
+## ADDITIONAL OPTIMIZATIONS (Added based on code analysis)
+
+### 10. COMPONENT-SPECIFIC OPTIMIZATIONS
+
+#### 10.1 Split Large Components
+**Problem**: chat-container.tsx (976 lines), itinerary-view.tsx (654 lines)
+**Solution**:
+```typescript
+// Break chat-container into smaller modules
+components/chat/
+├── ChatContainer.tsx (main orchestrator, <200 lines)
+├── MessageList.tsx (message rendering)
+├── InputHandler.tsx (user input logic)
+├── StateManager.tsx (state management)
+└── ApiHandler.tsx (API calls)
+
+// Use React.memo for expensive components
+export const MessageList = React.memo(({ messages }) => {
+  // Component logic
+}, (prevProps, nextProps) => {
+  return prevProps.messages.length === nextProps.messages.length;
+});
+```
+
+#### 10.2 Virtual Scrolling for Long Lists
+**Problem**: Rendering all itinerary items at once
+**Solution**:
+```typescript
+// Already have react-window installed, use it!
+import { VariableSizeList } from 'react-window';
+
+const VirtualActivityList = ({ activities }) => (
+  <VariableSizeList
+    height={600}
+    itemCount={activities.length}
+    itemSize={getItemSize}
+    width="100%"
+  >
+    {Row}
+  </VariableSizeList>
+);
+```
+
+### 11. FRAMER MOTION OPTIMIZATION
+
+#### 11.1 Remove from Critical Path
+**Problem**: Framer Motion animations on initial render blocking paint
+**Solution**:
+```typescript
+// Replace initial page animations with CSS
+// Before (page.tsx):
+<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+
+// After:
+<div className="animate-fadeIn">
+  
+// Add to globals.css:
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+```
+
+#### 11.2 Lazy Load Framer Motion
+```typescript
+// Only load when needed
+const MotionDiv = dynamic(
+  () => import('framer-motion').then(mod => mod.motion.div),
+  { ssr: false }
+);
+```
+
+### 12. REACT PERFORMANCE PATTERNS
+
+#### 12.1 Use Suspense Boundaries
+```typescript
+// Wrap heavy components
+<Suspense fallback={<LoadingSkeleton />}>
+  <ChatDisplay />
+</Suspense>
+```
+
+#### 12.2 Implement useMemo/useCallback
+```typescript
+// In chat-container.tsx
+const processedMessages = useMemo(
+  () => messages.map(msg => formatMessage(msg)),
+  [messages]
+);
+
+const handleSubmit = useCallback((value) => {
+  // Handle submission
+}, [dependencies]);
+```
+
+#### 12.3 State Colocation
+```typescript
+// Move state closer to where it's used
+// Instead of lifting all state to ChatContainer,
+// keep local state in child components
+```
+
+### 13. REQUEST WATERFALL OPTIMIZATION
+
+#### 13.1 Parallel Data Fetching
+```typescript
+// Load data in parallel, not sequentially
+const [userData, itineraryData, mapData] = await Promise.all([
+  fetchUserData(),
+  fetchItineraryData(),
+  fetchMapData()
+]);
+```
+
+#### 13.2 Prefetch Critical Data
+```typescript
+// In _app.tsx or layout.tsx
+const prefetchCriticalData = () => {
+  // Prefetch popular destinations
+  queryClient.prefetchQuery(['destinations', 'popular'], fetchPopularDestinations);
+};
+```
+
+### 14. MEMORY LEAK PREVENTION
+
+#### 14.1 Cleanup Subscriptions
+```typescript
+useEffect(() => {
+  const subscription = subscribe();
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+#### 14.2 Cancel Ongoing Requests
+```typescript
+useEffect(() => {
+  const controller = new AbortController();
+  
+  fetch(url, { signal: controller.signal })
+    .then(handleResponse)
+    .catch(handleError);
+  
+  return () => controller.abort();
+}, [url]);
+```
+
+### 15. AI FLOW OPTIMIZATION
+
+#### 15.1 Stream Responses
+```typescript
+// Stream AI responses instead of waiting for full completion
+const streamItinerary = async function* () {
+  const stream = await generatePersonalizedItinerary.stream();
+  for await (const chunk of stream) {
+    yield chunk;
+  }
+};
+```
+
+#### 15.2 Cache AI Responses
+```typescript
+// Cache common queries
+const cachedItineraries = new Map();
+const getCachedOrGenerate = async (prompt) => {
+  const key = hashPrompt(prompt);
+  if (cachedItineraries.has(key)) {
+    return cachedItineraries.get(key);
+  }
+  const result = await generateItinerary(prompt);
+  cachedItineraries.set(key, result);
+  return result;
+};
+```
+
+### 16. WEBPACK/BUILD OPTIMIZATIONS
+
+#### 16.1 Add Module Federation
+```javascript
+// next.config.js
+module.exports = {
+  webpack: (config) => {
+    config.optimization.splitChunks = {
+      chunks: 'all',
+      cacheGroups: {
+        default: false,
+        vendors: false,
+        framework: {
+          chunks: 'all',
+          name: 'framework',
+          test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+          priority: 40,
+          enforce: true,
+        },
+        lib: {
+          test(module) {
+            return module.size() > 160000;
+          },
+          name(module) {
+            const hash = crypto.createHash('sha1');
+            hash.update(module.identifier());
+            return hash.digest('hex').substring(0, 8);
+          },
+          priority: 30,
+          minChunks: 1,
+          reuseExistingChunk: true,
+        },
+      },
+    };
+    return config;
+  },
+};
+```
+
+#### 16.2 Tree Shaking Imports
+```typescript
+// Import only what you need
+// Bad:
+import * as Icons from 'lucide-react';
+
+// Good:
+import { ArrowLeft, Map, MessageSquare } from 'lucide-react';
+```
+
+### 17. DATABASE/API OPTIMIZATION
+
+#### 17.1 Implement Request Deduplication
+```typescript
+const requestCache = new Map();
+const dedupedFetch = (url) => {
+  if (requestCache.has(url)) {
+    return requestCache.get(url);
+  }
+  const promise = fetch(url);
+  requestCache.set(url, promise);
+  return promise;
+};
+```
+
+#### 17.2 Background Sync for Offline
+```typescript
+// Use service worker for background sync
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  navigator.serviceWorker.ready.then(reg => {
+    return reg.sync.register('sync-itineraries');
+  });
+}
+```
+
+### 18. MOBILE-SPECIFIC OPTIMIZATIONS
+
+#### 18.1 Reduce Touch Delay
+```css
+/* Eliminate 300ms tap delay */
+* {
+  touch-action: manipulation;
+}
+```
+
+#### 18.2 Optimize for Slow Networks
+```typescript
+// Detect slow connections
+if (navigator.connection?.effectiveType === '2g') {
+  // Load lighter version
+  loadLiteVersion();
+}
+```
+
+### 19. MONITORING IMPROVEMENTS
+
+#### 19.1 Custom Performance Marks
+```typescript
+// Add performance markers
+performance.mark('itinerary-generation-start');
+// ... generate itinerary
+performance.mark('itinerary-generation-end');
+performance.measure(
+  'itinerary-generation',
+  'itinerary-generation-start',
+  'itinerary-generation-end'
+);
+```
+
+#### 19.2 Error Boundary Monitoring
+```typescript
+class PerformanceErrorBoundary extends React.Component {
+  componentDidCatch(error, errorInfo) {
+    // Log performance impact of errors
+    console.error('Performance impact:', {
+      error,
+      renderTime: performance.now(),
+      memory: performance.memory?.usedJSHeapSize
+    });
+  }
+}
+```
+
+### 20. IMMEDIATE QUICK WINS
+
+1. **Remove console.logs in production**:
+```typescript
+// next.config.js
+module.exports = {
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production'
+  }
+}
+```
+
+2. **Add will-change for animations**:
+```css
+.animating-element {
+  will-change: transform, opacity;
+}
+```
+
+3. **Debounce search inputs**:
+```typescript
+const debouncedSearch = useMemo(
+  () => debounce(handleSearch, 300),
+  []
+);
+```
+
+4. **Lazy load below-the-fold content**:
+```typescript
+const BelowFold = dynamic(
+  () => import('./BelowFoldContent'),
+  { 
+    ssr: false,
+    loading: () => null 
+  }
+);
+```
+
+## REVISED PRIORITY ORDER
+
+### IMMEDIATE (Today):
+1. ✅ Switch to production build
+2. ✅ Remove Framer Motion from initial load
+3. ✅ Add debouncing to inputs
+4. ✅ Remove console.logs
+
+### HIGH PRIORITY (Tomorrow):
+1. ⏳ Split chat-container.tsx into smaller files
+2. ⏳ Implement virtual scrolling for activity lists
+3. ⏳ Add React.memo to expensive components
+4. ⏳ Fix request waterfalls
+
+### MEDIUM PRIORITY (This Week):
+1. ⏳ Implement streaming for AI responses
+2. ⏳ Add service worker caching
+3. ⏳ Optimize bundle splitting
+4. ⏳ Add Suspense boundaries
+
+Expected improvement: **35 → 85+ Performance Score**

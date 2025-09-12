@@ -3,6 +3,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PasswordGate } from '@/components/PasswordGate';
 import { OfflineProvider } from '@/components/providers/offline-provider';
+import { MotionProvider } from '@/components/providers/motion-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
@@ -33,7 +35,9 @@ export default function RootLayout({
           <PasswordGate>
             <AuthProvider>
               <OfflineProvider>
-                {children}
+                <MotionProvider>
+                  {children}
+                </MotionProvider>
               </OfflineProvider>
             </AuthProvider>
           </PasswordGate>

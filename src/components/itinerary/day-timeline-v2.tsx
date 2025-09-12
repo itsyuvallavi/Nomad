@@ -118,7 +118,7 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
           <div 
             ref={scrollRef}
             data-scrollable="horizontal"
-            className="flex items-center gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth py-2"
+            className="flex items-center gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide-mobile momentum-scroll py-2"
             onScroll={checkScroll}
             style={{ 
               scrollbarWidth: 'none', 

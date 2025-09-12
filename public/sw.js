@@ -1,11 +1,23 @@
-const CACHE_NAME = 'nomad-navigator-v1';
-const STATIC_CACHE_NAME = 'nomad-navigator-static-v1';
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `nomad-navigator-${CACHE_VERSION}`;
+const STATIC_CACHE_NAME = `nomad-navigator-static-${CACHE_VERSION}`;
+const IMAGE_CACHE_NAME = `nomad-navigator-images-${CACHE_VERSION}`;
+const API_CACHE_NAME = `nomad-navigator-api-${CACHE_VERSION}`;
 
-// Files to cache for offline use
+// Cache expiration times
+const CACHE_EXPIRATION = {
+  static: 30 * 24 * 60 * 60 * 1000, // 30 days
+  images: 7 * 24 * 60 * 60 * 1000,  // 7 days
+  api: 5 * 60 * 1000,                // 5 minutes
+};
+
+// Files to precache for offline use
 const urlsToCache = [
   '/',
   '/manifest.json',
-  // Add critical CSS and JS files as needed
+  '/favicon.svg',
+  // Critical fonts
+  'https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
 ];
 
 // Install event - cache static assets
@@ -26,7 +38,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE_NAME) {
+          if (!cacheName.includes(CACHE_VERSION)) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -38,61 +50,94 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache when offline
+// Helper function to determine cache strategy
+function getCacheStrategy(url) {
+  // Images
+  if (/\.(jpg|jpeg|png|gif|webp|svg|ico)$/i.test(url.pathname)) {
+    return { cacheName: IMAGE_CACHE_NAME, strategy: 'cache-first' };
+  }
+  
+  // API requests
+  if (url.pathname.startsWith('/api/')) {
+    return { cacheName: API_CACHE_NAME, strategy: 'network-first' };
+  }
+  
+  // Static assets (JS, CSS)
+  if (/\.(js|css)$/i.test(url.pathname)) {
+    return { cacheName: STATIC_CACHE_NAME, strategy: 'cache-first' };
+  }
+  
+  // HTML pages
+  if (url.pathname === '/' || /\.html$/i.test(url.pathname)) {
+    return { cacheName: CACHE_NAME, strategy: 'network-first' };
+  }
+  
+  // Default
+  return { cacheName: CACHE_NAME, strategy: 'network-first' };
+}
+
+// Fetch event - optimized caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Skip non-http(s) requests
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
   }
 
-  // For API requests, try network first, then cache
-  if (url.pathname.startsWith('/api/')) {
+  const { cacheName, strategy } = getCacheStrategy(url);
+
+  if (strategy === 'cache-first') {
+    // Try cache first, fallback to network
+    event.respondWith(
+      caches.match(request).then((response) => {
+        if (response) {
+          // Update cache in background
+          fetch(request).then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              caches.open(cacheName).then((cache) => {
+                cache.put(request, networkResponse.clone());
+              });
+            }
+          });
+          return response;
+        }
+        
+        return fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(cacheName).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        });
+      })
+    );
+  } else {
+    // Network first, fallback to cache
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone the response before caching
-          if (response.status === 200) {
+          if (response && response.status === 200) {
             const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
+            caches.open(cacheName).then((cache) => {
               cache.put(request, responseToCache);
             });
           }
           return response;
         })
         .catch(() => {
-          // If network fails, try cache
           return caches.match(request);
         })
     );
-    return;
   }
-
-  // For static assets, try cache first, then network
-  event.respondWith(
-    caches.match(request).then((response) => {
-      if (response) {
-        return response;
-      }
-
-      return fetch(request).then((response) => {
-        // Don't cache non-successful responses
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
-
-        // Clone the response before caching
-        const responseToCache = response.clone();
-        caches.open(STATIC_CACHE_NAME).then((cache) => {
-          cache.put(request, responseToCache);
-        });
-
-        return response;
-      });
-    })
-  );
 });
 
 // Listen for messages from the client

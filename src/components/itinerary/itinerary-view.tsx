@@ -8,14 +8,13 @@ import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { motion, useInView } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Map, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
-import Image from 'next/image';
+import { LazyImage } from '@/components/ui/lazy-image';
 import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
 import { logger } from '@/lib/logger';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { getIconicImageSearch } from '@/lib/city-landmarks';
 import { fadeInUp, staggerContainer, countAnimation } from '@/lib/animations';
-import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 
 // Dynamically import map to avoid SSR issues
 const ItineraryMap = dynamic(
@@ -215,30 +214,6 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
   const locations = Object.keys(daysByLocation);
   const [selectedLocation, setSelectedLocation] = useState(locations[0] || '');
   
-  // Handle pull-to-refresh for mobile
-  const handleRefresh = useCallback(async () => {
-    if (!onRefine) return;
-    
-    try {
-      // Trigger a refresh of the itinerary
-      onRefine('Refresh itinerary with latest information');
-      
-      // Re-fetch images for destinations
-      const newImages: Record<string, PexelsImage[]> = {};
-      for (const location of locations) {
-        try {
-          const images = await searchPexelsImages(location, 3);
-          newImages[location] = images;
-        } catch (error) {
-          logger.error('IMAGE', `Failed to refresh images for ${location}`, { error });
-        }
-      }
-      setDestinationImages(newImages);
-    } catch (error) {
-      logger.error('SYSTEM', 'Failed to refresh itinerary', { error });
-    }
-  }, [onRefine, locations]);
-  
   // Log destination detection for debugging
   useEffect(() => {
     logger.debug('SYSTEM', 'Destination Analysis in ItineraryPanel', {
@@ -282,16 +257,9 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
   // Generate image search terms based on destination
   const destinationName = selectedLocation || itinerary.destination.split(',')[0].trim();
 
-  // Check if on mobile device
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   
   return (
-    <PullToRefresh 
-      onRefresh={handleRefresh} 
-      disabled={!onRefine || !isMobile}
-      className="h-full"
-    >
-      <div className="h-full overflow-y-auto bg-background">
+    <div className="h-full overflow-y-auto bg-background">
         {/* Trip Overview - Mobile Responsive Header */}
         <div className="p-3 sm:p-4 border-b border-border">
         
@@ -417,28 +385,17 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
                       <span className="text-6xl opacity-30">{fallbackEmoji}</span>
                     </div>
                     
-                    {/* Actual image on top */}
-                    <Image 
+                    {/* Actual image on top with lazy loading */}
+                    <LazyImage 
                       src={imageUrl}
                       alt={`${destinationName} - Iconic view`}
                       fill
-                      sizes="50vw"
-                      className="object-cover opacity-0 transition-all duration-700"
-                      priority
+                      sizes="(max-width: 640px) 100vw, 50vw"
+                      className="object-cover"
                       quality={90}
-                      unoptimized
-                      onLoad={(e) => {
-                        const imgElement = e.target as HTMLImageElement;
-                        imgElement.classList.remove('opacity-0');
-                        imgElement.classList.add('opacity-100');
-                      }}
-                      onError={(e) => {
-                        // Try fallback to generic search if iconic fails
-                        const imgElement = e.target as HTMLImageElement;
-                        if (!imgElement.src.includes('fallback')) {
-                          imgElement.src = `https://source.unsplash.com/1200x800/?${encodeURIComponent(destinationName + ' city tourism')}&sig=${Date.now()}-fallback`;
-                        }
-                      }}
+                      fallback={`https://source.unsplash.com/1200x800/?${encodeURIComponent(destinationName + ' city tourism')}&sig=${Date.now()}-fallback`}
+                      threshold={0.1}
+                      rootMargin="100px"
                     />
                     
                     {/* Subtle hover effect */}
@@ -693,6 +650,5 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
 
       </div>
     </div>
-    </PullToRefresh>
   );
 }

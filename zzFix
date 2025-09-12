@@ -1,0 +1,51 @@
+Immediate Fix:
+
+  1. Stop everything
+
+  pkill -f node
+  pkill -f next
+
+  2. Nuclear option - Clear everything
+
+  rm -rf .next
+  rm -rf node_modules/.cache
+
+  3. Restart clean
+
+  npm run dev
+
+  Long-term Prevention:
+
+  Create a cleanup script
+
+  Add this to your package.json scripts:
+  "clean": "rm -rf .next node_modules/.cache",
+  "dev:clean": "npm run clean && npm run dev"
+
+  Then always use npm run dev:clean after major changes.
+
+  When this happens frequently:
+
+  Common triggers:
+  - Switching branches with different dependencies
+  - Installing/updating packages while server is running
+  - Making structural changes (moving/renaming files)
+  - Force-quitting the dev server (Ctrl+C multiple times)
+  - Working in cloud IDEs with auto-save/auto-reload
+
+  Best practices:
+  1. Before big changes: Stop the dev server
+  2. After installing packages: Run npm run clean
+  3. After switching branches: Run npm run clean
+  4. If errors persist: Delete node_modules and run npm install
+
+  For Firebase Studio specifically:
+  - It might be caching aggressively
+  - Try using the manual dev server instead
+  - Or configure Firebase Studio to clear cache on restart
+
+  Quick recovery command (bookmark this):
+  pkill -f node && rm -rf .next && npm run dev
+
+  This issue is especially common in cloud development environments where file watchers and build caches can get confused by network latency or multiple
+  processes accessing the same files.

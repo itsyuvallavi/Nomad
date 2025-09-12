@@ -5,6 +5,65 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance optimizations for mobile */
+@layer utilities {
+  /* Shimmer loading effect */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+    background-size: 1000px 100%;
+  }
+  
+  /* Smooth momentum scrolling on mobile */
+  .momentum-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Hide scrollbars on mobile but keep them on desktop */
+  .scrollbar-hide-mobile {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hide-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @media (min-width: 768px) {
+    .scrollbar-hide-mobile {
+      scrollbar-width: thin;
+      -ms-overflow-style: auto;
+    }
+    
+    .scrollbar-hide-mobile::-webkit-scrollbar {
+      display: block;
+      width: 6px;
+    }
+  }
+  
+  /* Reduced motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
 @layer base {
   /* Ensure proper viewport height handling on mobile */
   html {
