@@ -30,15 +30,29 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
     return () => window.removeEventListener('resize', checkScroll);
   }, [totalDays]);
 
-  // Auto-scroll to selected day
+  // Auto-scroll to selected day (only when day changes, not on mount)
+  const [hasMounted, setHasMounted] = useState(false);
+  const [isUserInteraction, setIsUserInteraction] = useState(false);
+  
   useEffect(() => {
-    if (scrollRef.current) {
+    if (!hasMounted) {
+      setHasMounted(true);
+      return;
+    }
+    
+    // Only scroll if this was triggered by user interaction (clicking a day)
+    if (scrollRef.current && isUserInteraction) {
       const selectedButton = scrollRef.current.querySelector(`[data-day="${selectedDay}"]`);
       if (selectedButton) {
         selectedButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }
-  }, [selectedDay]);
+    
+    // Reset the flag after scrolling
+    if (isUserInteraction) {
+      setIsUserInteraction(false);
+    }
+  }, [selectedDay, hasMounted, isUserInteraction]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -74,6 +88,7 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
           <AnimatePresence>
             {canScrollLeft && (
               <motion.button
+                key="scroll-left"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.5 }}
                 exit={{ opacity: 0 }}
@@ -86,6 +101,7 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
             )}
             {canScrollRight && (
               <motion.button
+                key="scroll-right"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.5 }}
                 exit={{ opacity: 0 }}
@@ -101,6 +117,7 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
           {/* Days Container - fixed height to prevent vertical scroll, adequate height for content */}
           <div 
             ref={scrollRef}
+            data-scrollable="horizontal"
             className="flex items-center gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth py-2"
             onScroll={checkScroll}
             style={{ 

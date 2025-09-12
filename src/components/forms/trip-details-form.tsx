@@ -112,7 +112,7 @@ export default function ItineraryForm({
     <div className="relative max-w-2xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleFormSubmit)}>
-          <div className="bg-muted/50 rounded-xl px-4 py-3 flex items-start gap-3 border border-border">
+          <div className="bg-muted/50 rounded-xl px-3 sm:px-4 py-3 sm:py-3 flex items-start gap-2 sm:gap-3 border border-border">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -120,7 +120,7 @@ export default function ItineraryForm({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center mt-1"
+                    className="min-w-[44px] min-h-[44px] sm:w-6 sm:h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center sm:mt-1"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Plus size={18} />
@@ -161,7 +161,7 @@ export default function ItineraryForm({
                       )}
                       <textarea
                         placeholder={placeholder}
-                        className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[24px] max-h-[120px] overflow-y-auto"
+                        className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-sm sm:text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[44px] sm:min-h-[24px] max-h-[120px] overflow-y-auto py-2 sm:py-0"
                         autoComplete="off"
                         rows={1}
                         {...field}
@@ -206,7 +206,7 @@ export default function ItineraryForm({
                   type="submit"
                   variant="ghost"
                   size="icon"
-                  className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
+                  className="min-w-[44px] min-h-[44px] sm:w-6 sm:h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
                   disabled={isSubmitting}
                 >
                   <Send size={16} />
@@ -216,7 +216,7 @@ export default function ItineraryForm({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
+                  className="min-w-[44px] min-h-[44px] sm:w-6 sm:h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
                 >
                   <Mic size={16} />
                 </Button>

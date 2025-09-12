@@ -57,12 +57,12 @@ export function ChatPanel({
 }: ChatPanelProps) {
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-border">
-        <div className="flex items-center gap-3">
+      {/* Header - Compact on mobile */}
+      <div className="flex items-center justify-between p-3 sm:p-4 md:p-6 border-b border-border">
+        <div className="flex items-center gap-2 sm:gap-3">
           <AnimatedLogo size="sm" />
           <div>
-            <h2 className="text-foreground font-medium">Nomad Navigator</h2>
+            <h2 className="text-sm sm:text-base text-foreground font-medium">Nomad Navigator</h2>
             <div className="flex items-center gap-2">
               <p className="text-xs text-muted-foreground">AI Assistant</p>
               {conversationState && (
@@ -83,8 +83,8 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      {/* Messages - Optimized padding for mobile */}
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
         {messages.length === 0 ? (
           <EmptyState 
             type="no-messages" 
@@ -100,20 +100,20 @@ export function ChatPanel({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.3, delay: index * 0.03, ease: "easeOut" }}
           >
-            <div className={`flex items-end gap-2 max-w-[85%] md:max-w-[80%] ${
+            <div className={`flex items-end gap-1.5 sm:gap-2 max-w-[90%] sm:max-w-[85%] md:max-w-[80%] ${
               message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
             }`}>
               {message.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <span className="text-foreground text-xs font-bold">AI</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                  <span className="text-foreground text-[10px] sm:text-xs font-bold">AI</span>
                 </div>
               )}
-              <div className={`max-w-[85%] ${
+              <div className={`${
                 message.role === 'user' 
                   ? 'bg-foreground text-background rounded-lg rounded-br-sm' 
                   : 'bg-muted text-foreground rounded-lg rounded-bl-sm'
-              } px-3 py-2`}>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              } px-2.5 sm:px-3 py-1.5 sm:py-2`}>
+                <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 
                 {/* Enhanced metadata display for Phase 3 */}
                 {'metadata' in message && message.metadata && showMetadata && (
@@ -272,9 +272,9 @@ export function ChatPanel({
         </div>
       )}
 
-      {/* Input Area */}
-      <div className="p-6 pt-4 border-t border-border">
-        <div className="bg-muted/50 rounded-lg px-4 py-3 flex items-center gap-3 border border-border">
+      {/* Input Area - Mobile optimized */}
+      <div className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 md:pt-4 border-t border-border">
+        <div className="bg-muted/50 rounded-lg px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 border border-border min-h-[44px]">
           <input
             type="text"
             placeholder={isGenerating ? "AI is thinking..." : "Ask about your trip..."}
@@ -282,27 +282,27 @@ export function ChatPanel({
             onChange={(e) => onInputChange(e.target.value)}
             onKeyPress={onKeyPress}
             disabled={isGenerating}
-            className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-sm"
+            className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-xs sm:text-sm"
           />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button 
-              className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
+              className="min-w-[32px] min-h-[32px] sm:w-6 sm:h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
               disabled={isGenerating}
             >
-              <Mic size={16} />
+              <Mic className="w-4 h-4 sm:w-4 sm:h-4" />
             </button>
             <button 
               onClick={onSendMessage}
               disabled={isGenerating || !inputValue.trim()}
-              className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
+              className="min-w-[32px] min-h-[32px] sm:w-6 sm:h-6 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
             >
-              <Send size={16} />
+              <Send className="w-4 h-4 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
         
-        <p className="text-muted-foreground text-xs text-center mt-3">
-          AI responses may contain errors. Please verify important details.
+        <p className="text-muted-foreground text-[10px] sm:text-xs text-center mt-2 sm:mt-3">
+          AI responses may contain errors. Verify important details.
         </p>
       </div>
     </div>

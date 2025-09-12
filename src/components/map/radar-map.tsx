@@ -256,16 +256,30 @@ export function RadarMap({
     if (!map.current || markers.current.length === 0) return;
 
     const bounds = new maplibregl.LngLatBounds();
+    let validBounds = false;
+    
     markers.current.forEach(marker => {
-      bounds.extend(marker.getLngLat());
+      const lngLat = marker.getLngLat();
+      // Validate coordinates before adding to bounds
+      if (lngLat && !isNaN(lngLat.lng) && !isNaN(lngLat.lat)) {
+        bounds.extend(lngLat);
+        validBounds = true;
+      }
     });
 
-    // Add extra padding to show surrounding countries
-    map.current.fitBounds(bounds, {
-      padding: { top: 150, bottom: 150, left: 150, right: 150 },
-      maxZoom: 6, // Don't zoom in too much - keep wide view
-      duration: 1000 // Smooth animation
-    });
+    // Only fit bounds if we have valid coordinates
+    if (validBounds) {
+      // Add extra padding to show surrounding countries
+      map.current.fitBounds(bounds, {
+        padding: { top: 150, bottom: 150, left: 150, right: 150 },
+        maxZoom: 6, // Don't zoom in too much - keep wide view
+        duration: 1000 // Smooth animation
+      });
+    } else {
+      // Fallback to a default view if no valid coordinates
+      map.current.setCenter([0, 20]);
+      map.current.setZoom(2);
+    }
   };
 
   // Helper function to get city coordinates

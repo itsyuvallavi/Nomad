@@ -6,7 +6,7 @@ import { ItineraryLoadingSkeleton } from './loading-skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import { motion, useInView } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Map, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
 import Image from 'next/image';
 import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
@@ -15,6 +15,7 @@ import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { getIconicImageSearch } from '@/lib/city-landmarks';
 import { fadeInUp, staggerContainer, countAnimation } from '@/lib/animations';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 
 // Dynamically import map to avoid SSR issues
 const ItineraryMap = dynamic(
@@ -51,7 +52,7 @@ interface ItineraryPanelProps {
   showMapToggle?: boolean;
 }
 
-export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: ItineraryPanelProps) {
+export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, onRefine }: ItineraryPanelProps) {
   // Show loading skeleton while refining
   if (isRefining) {
     return (
@@ -214,6 +215,30 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
   const locations = Object.keys(daysByLocation);
   const [selectedLocation, setSelectedLocation] = useState(locations[0] || '');
   
+  // Handle pull-to-refresh for mobile
+  const handleRefresh = useCallback(async () => {
+    if (!onRefine) return;
+    
+    try {
+      // Trigger a refresh of the itinerary
+      onRefine('Refresh itinerary with latest information');
+      
+      // Re-fetch images for destinations
+      const newImages: Record<string, PexelsImage[]> = {};
+      for (const location of locations) {
+        try {
+          const images = await searchPexelsImages(location, 3);
+          newImages[location] = images;
+        } catch (error) {
+          logger.error('IMAGE', `Failed to refresh images for ${location}`, { error });
+        }
+      }
+      setDestinationImages(newImages);
+    } catch (error) {
+      logger.error('SYSTEM', 'Failed to refresh itinerary', { error });
+    }
+  }, [onRefine, locations]);
+  
   // Log destination detection for debugging
   useEffect(() => {
     logger.debug('SYSTEM', 'Destination Analysis in ItineraryPanel', {
@@ -257,23 +282,31 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
   // Generate image search terms based on destination
   const destinationName = selectedLocation || itinerary.destination.split(',')[0].trim();
 
+  // Check if on mobile device
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  
   return (
-    <div className="h-full overflow-y-auto bg-background">
-      {/* Trip Overview - Compact Header */}
-      <div className="p-4 border-b border-border">
+    <PullToRefresh 
+      onRefresh={handleRefresh} 
+      disabled={!onRefine || !isMobile}
+      className="h-full"
+    >
+      <div className="h-full overflow-y-auto bg-background">
+        {/* Trip Overview - Mobile Responsive Header */}
+        <div className="p-3 sm:p-4 border-b border-border">
         
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Header Section - Compact */}
-          <div className="flex items-start justify-between mb-4">
+          {/* Header Section - Mobile Responsive */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3 sm:mb-4">
             <div className="space-y-1">
-              <h1 className="text-xl tracking-tight text-foreground font-medium">{itinerary.title}</h1>
+              <h1 className="text-lg sm:text-xl tracking-tight text-foreground font-medium">{itinerary.title}</h1>
               <p className="text-xs text-muted-foreground">{tripDuration}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2">
               {showMapToggle && (
                 <Button
                   onClick={() => setShowMap(!showMap)}
@@ -289,12 +322,12 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
             </div>
           </div>
           
-          {/* Layout with Cost on Left and Image on Right - 50/50 split */}
-          <div className="flex gap-4 mb-4">
+          {/* Layout - Stack on mobile, side-by-side on tablet+ */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-3 sm:mb-4">
             {/* Left Side - Trip Meta and Cost Breakdown */}
-            <div className="w-1/2">
-              {/* Trip Meta - Ultra Compact Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
+            <div className="w-full sm:w-1/2">
+              {/* Trip Meta - Responsive Grid */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4 text-xs">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Calendar className="w-3 h-3" />
@@ -363,8 +396,8 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
               )}
             </div>
 
-            {/* Right Side - Single Destination Image - 50% width */}
-            <div className="w-1/2">
+            {/* Right Side - Single Destination Image - Full width on mobile */}
+            <div className="w-full sm:w-1/2 order-first sm:order-last">
               {(() => {
                 // Get iconic landmark search for this destination
                 const { searchTerm, fallbackEmoji } = getIconicImageSearch(destinationName);
@@ -378,7 +411,7 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                   `https://source.unsplash.com/1200x800/?${encodeURIComponent(searchTerm)}&sig=${Date.now()}-iconic`;
                 
                 return (
-                  <div className="relative w-full h-[200px] bg-muted rounded-xl overflow-hidden group shadow-lg">
+                  <div className="relative w-full h-[150px] sm:h-[200px] bg-muted rounded-lg sm:rounded-xl overflow-hidden group shadow-md sm:shadow-lg">
                     {/* Emoji fallback with city-specific icon */}
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/80">
                       <span className="text-6xl opacity-30">{fallbackEmoji}</span>
@@ -480,8 +513,8 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
         </motion.div>
       </div>
 
-      {/* Main Content */}
-      <div className="p-6 pb-12">
+      {/* Main Content - Responsive padding */}
+      <div className="p-3 sm:p-4 md:p-6 pb-12">
         {/* Coworking Spaces (if any) */}
         <CoworkingSection activities={allActivities} />
 
@@ -489,19 +522,19 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
         <div className="">
           {/* Destination Header and Timeline Section */}
           <div className="bg-background/50 backdrop-blur-sm border-b border-border">
-            {/* Destination Switcher for Multi-Destination Trips */}
+            {/* Destination Switcher for Multi-Destination Trips - Mobile optimized */}
             {locations.length > 1 && (
-              <div className="px-4 pt-4 pb-2">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Trip Destinations</h2>
-                    <span className="text-xs text-muted-foreground">({locations.length} locations)</span>
+              <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-2">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
+                    <h2 className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider">Destinations</h2>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">({locations.length})</span>
                   </div>
                 </div>
                 
-                {/* Destinations - Horizontal Compact */}
-                <div className="flex gap-2 overflow-x-auto pb-2">
+                {/* Destinations - Horizontal scrollable with momentum */}
+                <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-hide" data-scrollable="horizontal" style={{ WebkitOverflowScrolling: 'touch' }}>
                   {locations.map((location, index) => {
                     const locationData = daysByLocation[location];
                     const isSelected = selectedLocation === location;
@@ -510,21 +543,21 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                       <button
                         key={location}
                         onClick={() => setSelectedLocation(location)}
-                        className={`flex-shrink-0 px-3 py-1.5 rounded-md transition-all border text-xs ${
+                        className={`flex-shrink-0 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md transition-all border text-[11px] sm:text-xs min-w-[80px] ${
                           isSelected
                             ? 'bg-foreground text-background border-foreground'
                             : 'bg-muted/50 text-foreground hover:bg-muted border-border'
                         }`}
                       >
-                        <div className="flex items-center gap-1.5">
-                          <span className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                        <div className="flex items-center gap-1 sm:gap-1.5">
+                          <span className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center justify-center ${
                             isSelected ? 'bg-background/20' : 'bg-muted'
                           }`}>
                             {index + 1}
                           </span>
                           <div className="text-left">
-                            <div className="font-medium">{location}</div>
-                            <div className="text-[9px] opacity-70">
+                            <div className="font-medium truncate max-w-[60px] sm:max-w-none">{location}</div>
+                            <div className="text-[8px] sm:text-[9px] opacity-70">
                               {locationData.days.length} {locationData.days.length === 1 ? 'day' : 'days'}
                             </div>
                           </div>
@@ -550,8 +583,8 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
             />
           </div>
           
-          {/* Selected Day Activities */}
-          <div className="px-6 py-6">
+          {/* Selected Day Activities - Responsive padding */}
+          <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
             {(() => {
               const days = daysByLocation[selectedLocation]?.days || itinerary.itinerary;
               const selectedDay = days.find(d => d.day === selectedDayInTimeline) || days[0];
@@ -563,13 +596,13 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, ease: [0.4, 0.0, 0.2, 1] }}
                 >
-                  {/* Day Header */}
-                  <div className="flex items-center justify-between mb-6">
+                  {/* Day Header - Mobile optimized */}
+                  <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6">
                     <div>
-                      <h3 className="text-2xl font-bold text-foreground">
+                      <h3 className="text-xl sm:text-2xl font-bold text-foreground">
                         Day {selectedDay.day}
                       </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
                         {new Date(selectedDay.date).toLocaleDateString('en-US', { 
                           weekday: 'long', 
                           month: 'long', 
@@ -579,13 +612,13 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground">Activities</p>
-                      <p className="text-lg font-medium text-gray-900">{selectedDay.activities.length}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Activities</p>
+                      <p className="text-base sm:text-lg font-medium text-gray-900">{selectedDay.activities.length}</p>
                     </div>
                   </div>
                   
-                  {/* Activities Grid */}
-                  <div className="space-y-3">
+                  {/* Activities Grid - Responsive spacing */}
+                  <div className="space-y-2 sm:space-y-3">
                     {selectedDay.activities.map((activity, index) => (
                       <motion.div
                         key={`activity-${index}`}
@@ -598,16 +631,16 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                         }}
                       >
                         <motion.div
-                          className="group relative bg-background border border-border rounded-xl p-4 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+                          className="group relative bg-background border border-border rounded-lg sm:rounded-xl p-3 sm:p-4 hover:shadow-md sm:hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
                           whileHover={{ y: -2 }}
                         >
                           {/* Subtle hover background */}
                           <div className="absolute inset-0 bg-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                           
-                          <div className="relative flex gap-3">
-                            {/* Minimal time display */}
-                            <div className="flex-shrink-0 w-12 text-right">
-                              <span className="text-sm font-medium text-gray-900">
+                          <div className="relative flex gap-2 sm:gap-3">
+                            {/* Minimal time display - Hidden on very small screens */}
+                            <div className="hidden xs:block flex-shrink-0 w-10 sm:w-12 text-right">
+                              <span className="text-xs sm:text-sm font-medium text-gray-900">
                                 {activity.time.split(' - ')[0]}
                               </span>
                             </div>
@@ -616,31 +649,31 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1">
-                                  <h4 className="text-sm font-medium text-gray-900">
+                                  <h4 className="text-xs sm:text-sm font-medium text-gray-900 line-clamp-2">
                                     {activity.description}
                                   </h4>
                                   {activity.address && (
-                                    <div className="flex items-center gap-1 mt-2">
-                                      <MapPin className="w-3 h-3 text-muted-foreground" />
-                                      <p className="text-sm text-muted-foreground">{activity.address}</p>
+                                    <div className="flex items-center gap-1 mt-1 sm:mt-2">
+                                      <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground flex-shrink-0" />
+                                      <p className="text-[11px] sm:text-sm text-muted-foreground truncate">{activity.address}</p>
                                     </div>
                                   )}
-                                  <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-xs text-muted-foreground">
-                                      Duration: {activity.time}
+                                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 sm:mt-2">
+                                    <span className="text-[10px] sm:text-xs text-muted-foreground">
+                                      {activity.time}
                                     </span>
                                     {activity.category && (
-                                      <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
+                                      <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
                                         {activity.category}
                                       </span>
                                     )}
                                   </div>
                                 </div>
                                 
-                                {/* Activity Number */}
+                                {/* Activity Number - Smaller on mobile */}
                                 <div className="flex-shrink-0">
-                                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                                    <span className="text-xs font-bold text-muted-foreground">
+                                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-muted flex items-center justify-center">
+                                    <span className="text-[10px] sm:text-xs font-bold text-muted-foreground">
                                       {index + 1}
                                     </span>
                                   </div>
@@ -660,5 +693,6 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining }: 
 
       </div>
     </div>
+    </PullToRefresh>
   );
 }

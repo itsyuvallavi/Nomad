@@ -69,7 +69,7 @@ export default function Home() {
         return (
           <motion.div 
             key="chat"
-            className="min-h-screen pt-16 overflow-hidden"
+            className="h-screen md:min-h-screen md:pt-16 overflow-hidden"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -88,7 +88,7 @@ export default function Home() {
         return (
           <motion.div 
             key="start"
-            className="min-h-screen pt-16 overflow-hidden flex items-center justify-center bg-background"
+            className="min-h-screen pt-12 md:pt-16 overflow-hidden flex items-center justify-center bg-background"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
@@ -102,7 +102,7 @@ export default function Home() {
         return (
           <motion.div 
             key="default"
-            className="min-h-screen pt-16 overflow-hidden flex items-center justify-center bg-background"
+            className="min-h-screen pt-12 md:pt-16 overflow-hidden flex items-center justify-center bg-background"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -115,7 +115,14 @@ export default function Home() {
 
   return (
     <>
-      <Header />
+      {/* Only show header on start page, hide on chat/itinerary page on mobile */}
+      {currentView === 'start' && <Header />}
+      {/* On desktop, always show header */}
+      {currentView !== 'start' && (
+        <div className="hidden md:block">
+          <Header />
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {renderMainContent()}
       </AnimatePresence>

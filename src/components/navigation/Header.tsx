@@ -35,9 +35,11 @@ export const Header: React.FC = () => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
-        <div className="w-full h-16 flex items-center justify-between px-4 md:px-6 lg:px-8">
+        {/* Mobile: h-12 (48px), Desktop: h-16 (64px) for better mobile space utilization */}
+        <div className="w-full h-12 md:h-16 flex items-center justify-between px-3 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-900">
+            {/* Mobile: smaller text, Desktop: original size */}
+            <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate">
               Nomad Navigator
             </h1>
           </div>
@@ -46,23 +48,26 @@ export const Header: React.FC = () => {
             {user ? (
               <UserMenu />
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-1 sm:gap-2">
+                {/* Mobile: Icon-only buttons to save space */}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleShowLogin}
-                  className="flex items-center space-x-2"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 min-w-[44px] min-h-[36px] sm:min-h-[32px]"
                 >
                   <LogIn className="h-4 w-4" />
-                  <span>Sign in</span>
+                  {/* Hide text on very small screens */}
+                  <span className="hidden sm:inline">Sign in</span>
                 </Button>
                 <Button
                   size="sm"
                   onClick={handleShowSignup}
-                  className="flex items-center space-x-2"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 min-w-[44px] min-h-[36px] sm:min-h-[32px]"
                 >
                   <UserPlus className="h-4 w-4" />
-                  <span>Sign up</span>
+                  {/* Hide text on very small screens */}
+                  <span className="hidden sm:inline">Sign up</span>
                 </Button>
               </div>
             )}

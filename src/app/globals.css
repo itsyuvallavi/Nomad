@@ -6,6 +6,25 @@
 @tailwind utilities;
 
 @layer base {
+  /* Ensure proper viewport height handling on mobile */
+  html {
+    height: 100%;
+  }
+  
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  /* Prevent iOS bounce and ensure proper viewport */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      /* iOS specific fixes */
+      position: fixed;
+      width: 100%;
+    }
+  }
+  
   :root {
     /* Light mode - Clean, modern palette */
     --background: 0 0% 100%; /* #ffffff */

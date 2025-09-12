@@ -16,6 +16,7 @@ import type { RecentSearch, ChatState } from '@/app/page';
 import { ChatPanel } from './chat-interface';
 import { ItineraryPanel } from '../itinerary/itinerary-view';
 import { MapPanel } from '../map/map-panel';
+import { MobileMapModal } from '../map/mobile-map-modal';
 import { cn } from '@/lib/utils';
 import { ModernLoadingPanel } from './modern-loading-panel';
 import { ErrorDialog } from '../ui/error-dialog';
@@ -23,6 +24,7 @@ import { logger } from '@/lib/logger';
 import { getDraftManager } from '@/lib/draft-manager';
 import { retryApiCall } from '@/lib/retry-utils';
 import { handleError, ErrorCategory } from '@/lib/error-handler';
+import { offlineStorage } from '@/lib/offline-storage';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -60,7 +62,8 @@ export default function ChatDisplay({
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [mobileActiveTab, setMobileActiveTab] = useState<'chat' | 'itinerary'>('chat');
-    const [showMapPanel, setShowMapPanel] = useState(true); // Auto-show map by default
+    const [showMapPanel, setShowMapPanel] = useState(true); // Auto-show map by default on desktop
+    const [showMobileMapModal, setShowMobileMapModal] = useState(false); // Mobile map modal state
     const [showShortcuts, setShowShortcuts] = useState(false);
     const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
         stage: 'understanding',
@@ -71,22 +74,29 @@ export default function ChatDisplay({
     // Swipe gestures for mobile tab switching
     const swipeHandlers = useSwipeGestures({
         onSwipeLeft: () => {
-            if (window.innerWidth < 768) {
-                setMobileActiveTab(mobileActiveTab === 'chat' ? 'itinerary' : 'chat');
+            if (window.innerWidth < 768 && currentItinerary) {
+                setMobileActiveTab('itinerary');
+                // Ensure we start at the top when swiping to itinerary
+                setTimeout(() => {
+                    if (itineraryContainerRef.current) {
+                        itineraryContainerRef.current.scrollTop = 0;
+                    }
+                }, 100);
             }
         },
         onSwipeRight: () => {
             if (window.innerWidth < 768) {
-                setMobileActiveTab(mobileActiveTab === 'itinerary' ? 'chat' : 'itinerary');
+                setMobileActiveTab('chat');
             }
         },
-        threshold: 100
+        threshold: 50
     });
     const currentSearchId = useRef(searchId || new Date().toISOString());
     const generationIdRef = useRef<string | null>(null);
     const generationStartTime = useRef<number>(0);
 
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const itineraryContainerRef = useRef<HTMLDivElement>(null);
 
      useEffect(() => {
         if (chatContainerRef.current) {
@@ -98,6 +108,34 @@ export default function ChatDisplay({
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [messages]);
+    
+    // Scroll to top when switching to itinerary tab
+    useEffect(() => {
+        if (mobileActiveTab === 'itinerary') {
+            // Reset scroll immediately
+            if (itineraryContainerRef.current) {
+                itineraryContainerRef.current.scrollTop = 0;
+            }
+            
+            // Also reset after a short delay to catch any async scrolling
+            const timeouts = [0, 50, 100, 200].map(delay => 
+                setTimeout(() => {
+                    if (itineraryContainerRef.current) {
+                        itineraryContainerRef.current.scrollTop = 0;
+                        // Also scroll any child elements that might have scroll
+                        const scrollableChildren = itineraryContainerRef.current.querySelectorAll('[data-scrollable], .overflow-y-auto, .overflow-auto');
+                        scrollableChildren.forEach(child => {
+                            (child as HTMLElement).scrollTop = 0;
+                        });
+                    }
+                }, delay)
+            );
+            
+            return () => {
+                timeouts.forEach(timeout => clearTimeout(timeout));
+            };
+        }
+    }, [mobileActiveTab]);
     
     const saveChatStateToStorage = (isCompleted = false, itinerary?: GeneratePersonalizedItineraryOutput) => {
         try {
@@ -223,6 +261,38 @@ export default function ChatDisplay({
         const timerId = logger.apiCall('AI', 'generatePersonalizedItinerary');
 
         try {
+            // Check for cached results first
+            const cachedResult = await offlineStorage.getCachedSearch(initialPrompt.prompt);
+            if (cachedResult && !initialPrompt.fileDataUrl) {
+                console.log('💾 Using cached itinerary');
+                logger.info('SYSTEM', 'Using cached itinerary', { prompt: initialPrompt.prompt });
+                
+                // Use cached result
+                const itinerary = cachedResult.response;
+                clearInterval(progressTimer);
+                setGenerationProgress({
+                    stage: 'finalizing',
+                    percentage: 100,
+                    message: 'Loaded from cache!',
+                    estimatedTimeRemaining: 0
+                });
+                
+                setCurrentItinerary(itinerary);
+                saveChatStateToStorage(true, itinerary);
+                draftManager.completeDraft(itinerary);
+                
+                setMessages(prev => [...prev, { 
+                    role: 'assistant', 
+                    content: "✨ Your personalized itinerary is ready! (loaded from cache)" 
+                }]);
+                
+                if (window.innerWidth < 768) {
+                    setMobileActiveTab('itinerary');
+                }
+                
+                return;
+            }
+            
             console.log('🔄 Calling AI generation server action...');
             console.log('📊 Request details:', {
                 promptLength: initialPrompt.prompt.length,
@@ -337,6 +407,10 @@ export default function ChatDisplay({
             
             setCurrentItinerary(itinerary);
             saveChatStateToStorage(true, itinerary);
+            
+            // Cache the itinerary for offline access
+            await offlineStorage.cacheItinerary(itinerary.destination, itinerary);
+            await offlineStorage.cacheSearch(initialPrompt.prompt, itinerary);
             
             // Mark draft as complete
             draftManager.completeDraft(itinerary);
@@ -531,18 +605,18 @@ export default function ChatDisplay({
                     "Weekend getaway to Amsterdam from Berlin"
                 ]}
             />
-            <main className="h-screen flex flex-col">
-                {/* Top Navigation Bar */}
-                <div className="flex items-center justify-between px-6 py-4 bg-background border-b-2 border-border">
-                    <div className="flex items-center gap-4">
+            <main className="h-[100dvh] md:h-screen flex flex-col overflow-hidden">
+                {/* Top Navigation Bar - Show on all screens */}
+                <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-background border-b-2 border-border">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         <Button 
                             variant="ghost" 
                             onClick={onReturn} 
                             size="sm"
-                            className="text-foreground hover:bg-muted"
+                            className="text-foreground hover:bg-muted px-2 sm:px-3"
                         >
-                            <ArrowLeft className="mr-2 h-4 w-4" /> 
-                            <span className="font-medium">New Search</span>
+                            <ArrowLeft className="h-4 w-4" /> 
+                            <span className="font-medium hidden sm:inline ml-2">New Search</span>
                         </Button>
                         
                         {currentItinerary && (
@@ -570,135 +644,140 @@ export default function ChatDisplay({
                                     <span className="hidden lg:inline text-sm">Shortcuts</span>
                                 </Button>
                                 
+                                {/* Desktop map toggle */}
                                 <Button
                                     onClick={() => setShowMapPanel(!showMapPanel)}
                                     variant={showMapPanel ? "default" : "outline"}
                                     size="sm"
                                     className={cn(
-                                        "gap-2 font-medium",
+                                        "hidden md:flex gap-1 sm:gap-2 font-medium px-2 sm:px-3",
                                         showMapPanel 
                                             ? "bg-orange-500 hover:bg-orange-600 text-white border-orange-500" 
                                             : "bg-background hover:bg-muted text-foreground border-border"
                                     )}
                                 >
                                     <MapIcon className="h-4 w-4" />
-                                    <span className="text-sm">{showMapPanel ? 'Hide Map' : 'Show Map'}</span>
+                                    <span className="text-xs sm:text-sm">{showMapPanel ? 'Hide' : 'Show'}</span>
+                                </Button>
+                                
+                                {/* Mobile map button - opens modal */}
+                                <Button
+                                    onClick={() => setShowMobileMapModal(true)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="md:hidden gap-1 font-medium px-2 bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+                                >
+                                    <MapIcon className="h-4 w-4" />
+                                    <span className="text-xs">Map</span>
                                 </Button>
                             </>
                         )}
                     </div>
                 </div>
                 
-                {/* Mobile Tab Navigation */}
+                {/* Mobile Tab Navigation - Optimized height */}
                 <div className="md:hidden bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-10">
-                    <div className="flex px-2 relative">
-                        {/* Animated indicator */}
-                        <motion.div
-                            className="absolute bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
-                            animate={{
-                                x: mobileActiveTab === 'chat' ? '4px' : '50%',
-                                width: mobileActiveTab === 'chat' ? 'calc(50% - 8px)' : 'calc(50% - 8px)'
-                            }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        />
+                    <div className="flex p-2 gap-2">
                         
                         <motion.button
                             onClick={() => setMobileActiveTab('chat')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-4 px-3 min-h-[52px] transition-all duration-200 relative ${
-                                mobileActiveTab === 'chat'
-                                    ? 'text-white'
-                                    : 'text-muted-foreground hover:text-foreground active:scale-95'
-                            }`}
+                            className="flex-1 relative"
                             whileTap={{ scale: 0.98 }}
-                            animate={{
-                                backgroundColor: mobileActiveTab === 'chat' 
-                                    ? 'rgba(59, 130, 246, 0.1)' 
-                                    : 'transparent'
-                            }}
                         >
-                            <motion.div
-                                animate={{ 
-                                    scale: mobileActiveTab === 'chat' ? 1.1 : 1,
-                                    rotate: mobileActiveTab === 'chat' ? [0, 5, 0] : 0
-                                }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <MessageSquare className="h-5 w-5" />
-                            </motion.div>
-                            <span className="font-medium text-sm">Chat</span>
-                            <AnimatePresence>
-                                {messages.length > 0 && (
-                                    <motion.span 
-                                        className="ml-1 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full min-w-[18px] h-[18px] flex items-center justify-center"
-                                        initial={{ scale: 0, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        exit={{ scale: 0, opacity: 0 }}
-                                        transition={{ type: "spring", stiffness: 400 }}
-                                    >
-                                        {messages.length}
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
+                            {mobileActiveTab === 'chat' && (
+                                <motion.div
+                                    layoutId="activePill"
+                                    className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg"
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                />
+                            )}
+                            <div className={`relative flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg transition-colors ${
+                                mobileActiveTab === 'chat'
+                                    ? 'text-foreground font-semibold'
+                                    : 'text-muted-foreground'
+                            }`}>
+                                <MessageSquare className="h-4 w-4" />
+                                <span className="text-xs">Chat</span>
+                                <AnimatePresence>
+                                    {messages.length > 0 && (
+                                        <motion.span 
+                                            className="ml-0.5 text-[10px] bg-blue-500 text-white px-1.5 py-0.5 rounded-full min-w-[16px] h-[16px] flex items-center justify-center"
+                                            initial={{ scale: 0, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            exit={{ scale: 0, opacity: 0 }}
+                                            transition={{ type: "spring", stiffness: 400 }}
+                                        >
+                                            {messages.length}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </motion.button>
                         
                         <motion.button
-                            onClick={() => setMobileActiveTab('itinerary')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-4 px-3 min-h-[52px] transition-all duration-200 relative ${
-                                mobileActiveTab === 'itinerary'
-                                    ? 'text-white'
-                                    : 'text-muted-foreground hover:text-foreground active:scale-95'
-                            }`}
-                            whileTap={{ scale: 0.98 }}
-                            animate={{
-                                backgroundColor: mobileActiveTab === 'itinerary' 
-                                    ? 'rgba(59, 130, 246, 0.1)' 
-                                    : 'transparent'
+                            onClick={() => {
+                                setMobileActiveTab('itinerary');
+                                // Immediately scroll to top when clicking itinerary
+                                setTimeout(() => {
+                                    if (itineraryContainerRef.current) {
+                                        itineraryContainerRef.current.scrollTop = 0;
+                                    }
+                                }, 0);
                             }}
+                            className="flex-1 relative"
+                            whileTap={{ scale: 0.98 }}
                         >
-                            <motion.div
-                                animate={{ 
-                                    scale: mobileActiveTab === 'itinerary' ? 1.1 : 1,
-                                    rotate: mobileActiveTab === 'itinerary' ? [0, 5, 0] : 0
-                                }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <MapIcon className="h-5 w-5" />
-                            </motion.div>
-                            <span className="font-medium text-sm">Itinerary</span>
-                            <AnimatePresence>
-                                {currentItinerary && (
-                                    <motion.div 
-                                        className="ml-1 h-2.5 w-2.5 bg-emerald-500 rounded-full shadow-lg"
-                                        initial={{ scale: 0, opacity: 0 }}
-                                        animate={{ 
-                                            scale: 1, 
-                                            opacity: 1,
-                                            boxShadow: [
-                                                "0 0 0 0 rgba(16, 185, 129, 0.7)",
-                                                "0 0 0 10px rgba(16, 185, 129, 0)",
-                                                "0 0 0 0 rgba(16, 185, 129, 0)"
-                                            ]
-                                        }}
-                                        exit={{ scale: 0, opacity: 0 }}
-                                        transition={{ 
-                                            scale: { type: "spring", stiffness: 400 },
-                                            boxShadow: { duration: 2, repeat: Infinity }
-                                        }}
-                                    />
-                                )}
-                            </AnimatePresence>
+                            {mobileActiveTab === 'itinerary' && (
+                                <motion.div
+                                    layoutId="activePill"
+                                    className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg"
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                />
+                            )}
+                            <div className={`relative flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg transition-colors ${
+                                mobileActiveTab === 'itinerary'
+                                    ? 'text-foreground font-semibold'
+                                    : 'text-muted-foreground'
+                            }`}>
+                                <MapIcon className="h-4 w-4" />
+                                <span className="text-xs">Itinerary</span>
+                                <AnimatePresence>
+                                    {currentItinerary && (
+                                        <motion.div 
+                                            className="ml-0.5 h-2 w-2 bg-emerald-500 rounded-full shadow-lg"
+                                            initial={{ scale: 0, opacity: 0 }}
+                                            animate={{ 
+                                                scale: 1, 
+                                                opacity: 1,
+                                                boxShadow: [
+                                                    "0 0 0 0 rgba(16, 185, 129, 0.7)",
+                                                    "0 0 0 10px rgba(16, 185, 129, 0)",
+                                                    "0 0 0 0 rgba(16, 185, 129, 0)"
+                                                ]
+                                            }}
+                                            exit={{ scale: 0, opacity: 0 }}
+                                            transition={{ 
+                                                scale: { type: "spring", stiffness: 400 },
+                                                boxShadow: { duration: 2, repeat: Infinity }
+                                            }}
+                                        />
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </motion.button>
                     </div>
                     
-                    {/* Swipe hint */}
-                    <motion.div 
-                        className="flex items-center justify-center py-1 text-xs text-muted-foreground"
-                        initial={{ opacity: 1 }}
-                        animate={{ opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                        <span className="text-[10px]">← Swipe to switch tabs →</span>
-                    </motion.div>
+                    {/* Swipe hint - Only show initially */}
+                    {messages.length === 0 && (
+                        <motion.div 
+                            className="flex items-center justify-center py-0.5 text-xs text-muted-foreground"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.5 }}
+                            transition={{ delay: 1 }}
+                        >
+                            <span className="text-[9px]">Swipe to switch • Tap for quick nav</span>
+                        </motion.div>
+                    )}
                 </div>
                 
                 {/* Desktop Layout - Proportional panels */}
@@ -754,31 +833,20 @@ export default function ChatDisplay({
                     )}
                 </div>
                 
-                {/* Mobile Layout - Tab Based with Swipe Support */}
-                <motion.div 
+                {/* Mobile Layout - Fixed height to fit viewport with swipe support */}
+                <div 
                     className="md:hidden flex-1 min-h-0 overflow-hidden relative"
                     {...swipeHandlers}
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.2}
-                    onDragEnd={(e, { offset, velocity }) => {
-                        const swipeThreshold = 50;
-                        if (offset.x > swipeThreshold || velocity.x > 500) {
-                            setMobileActiveTab('chat');
-                        } else if (offset.x < -swipeThreshold || velocity.x < -500) {
-                            setMobileActiveTab('itinerary');
-                        }
-                    }}
                 >
                     <AnimatePresence mode="wait">
                         {mobileActiveTab === 'chat' ? (
                             <motion.div 
                                 key="chat"
-                                className="h-full absolute inset-0"
-                                initial={{ x: -300, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: -300, opacity: 0 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="absolute inset-0 flex flex-col"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.2, ease: "easeInOut" }}
                             >
                                 <ChatPanel
                                     messages={messages}
@@ -797,17 +865,24 @@ export default function ChatDisplay({
                         ) : (
                             <motion.div 
                                 key="itinerary"
-                                className="h-full absolute inset-0 overflow-auto"
-                                initial={{ x: 300, opacity: 0 }}
-                                animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: 300, opacity: 0 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                ref={itineraryContainerRef}
+                                className="absolute inset-0 overflow-y-auto overflow-x-hidden"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.2, ease: "easeInOut" }}
+                                onAnimationComplete={() => {
+                                    if (itineraryContainerRef.current) {
+                                        itineraryContainerRef.current.scrollTop = 0;
+                                    }
+                                }}
                             >
                                 {currentItinerary ? (
                                     <ItineraryPanel 
                                         itinerary={currentItinerary}
                                         onRefine={(feedback) => handleRefine(feedback, messages)}
                                         isRefining={isGenerating}
+                                        showMapToggle={false} // Hide map toggle on mobile since we have it in top nav
                                     />
                                 ) : (
                                     isGenerating ? <ModernLoadingPanel progress={generationProgress} /> : (
@@ -832,7 +907,7 @@ export default function ChatDisplay({
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </motion.div>
+                </div>
 
                 {/* Keyboard Shortcuts Modal */}
                 <AnimatePresence>
@@ -888,6 +963,13 @@ export default function ChatDisplay({
                         </motion.div>
                     )}
                 </AnimatePresence>
+                
+                {/* Mobile Map Modal */}
+                <MobileMapModal
+                    isOpen={showMobileMapModal}
+                    onClose={() => setShowMobileMapModal(false)}
+                    itinerary={currentItinerary!}
+                />
             </main>
         </>
     );

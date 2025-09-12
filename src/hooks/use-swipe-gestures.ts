@@ -24,6 +24,17 @@ export function useSwipeGestures(config: SwipeConfig) {
   const startTime = useRef<number>(0);
 
   const handleTouchStart = (e: TouchEvent) => {
+    // Check if the touch started on a horizontally scrollable element
+    const target = e.target as HTMLElement;
+    const scrollableParent = target.closest('[data-scrollable="horizontal"]');
+    
+    // If we're touching a horizontally scrollable element, don't track swipe
+    if (scrollableParent) {
+      startX.current = 0;
+      startY.current = 0;
+      return;
+    }
+    
     const firstTouch = e.touches[0];
     startX.current = firstTouch.clientX;
     startY.current = firstTouch.clientY;
