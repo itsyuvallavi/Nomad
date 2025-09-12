@@ -1,0 +1,162 @@
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useMotion } from '@/components/providers/motion-provider';
+import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import StartItinerary from '@/components/forms/trip-search-form';
+import type { FormValues } from '@/components/forms/trip-details-form';
+import ChatDisplay from '@/components/chat/chat-container';
+import { Header } from '@/components/navigation/Header';
+import { fadeInScale } from '@/lib/animations';
+
+export interface ChatState {
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  isCompleted: boolean;
+  itinerary?: GeneratePersonalizedItineraryOutput;
+}
+
+export interface RecentSearch {
+  id: string;
+  prompt: string;
+  fileDataUrl?: string;
+  chatState?: ChatState;
+  title?: string;
+  lastUpdated: string;
+}
+
+export type View = 'auth' | 'start' | 'chat';
+
+export default function Home() {
+  const [currentView, setCurrentView] = useState<View>('start'); // Skip auth, go straight to start
+  const [error, setError] = useState<string | null>(null);
+  const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
+  const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
+  const [currentSearchId, setCurrentSearchId] = useState<string | undefined>(undefined);
+
+  // Check if we're viewing a trip from the trips page
+  useEffect(() => {
+    const viewingTrip = localStorage.getItem('viewingTrip');
+    if (viewingTrip) {
+      try {
+        const tripData = JSON.parse(viewingTrip);
+        setInitialPrompt({ prompt: tripData.prompt });
+        setSavedChatState(tripData.chatState);
+        setCurrentSearchId(tripData.id);
+        setCurrentView('chat');
+        localStorage.removeItem('viewingTrip'); // Clean up
+      } catch (error) {
+        console.error('Error loading trip data:', error);
+      }
+    }
+  }, []);
+  
+  // This function now just switches the view to the app
+  const handleLogin = () => {
+    setCurrentView('start');
+  };
+
+  // This function also just switches the view to the app
+  const handleSignUp = () => {
+    setCurrentView('start');
+  };
+
+  const handleItineraryRequest = (values: FormValues, chatState?: ChatState, searchId?: string) => {
+    setInitialPrompt(values);
+    setSavedChatState(chatState);
+    setCurrentSearchId(searchId);
+    setCurrentView('chat');
+  };
+  
+  const handleReturnToStart = () => {
+    setCurrentView('start');
+    setError(null);
+    setInitialPrompt(null);
+    setSavedChatState(undefined);
+    setCurrentSearchId(undefined);
+  };
+  
+  const handleChatError = (errorMessage: string) => {
+    setError(errorMessage);
+  };
+
+  const { motion, AnimatePresence, isLoaded } = useMotion();
+
+  const renderMainContent = () => {
+    const MotionDiv = isLoaded && motion ? motion.div : 'div';
+    
+    switch (currentView) {
+      case 'chat':
+        return (
+          <MotionDiv 
+            key="chat"
+            className="h-screen md:min-h-screen md:pt-16 overflow-hidden"
+            {...(isLoaded ? {
+              initial: { opacity: 0, x: 20 },
+              animate: { opacity: 1, x: 0 },
+              exit: { opacity: 0, x: -20 },
+              transition: { duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }
+            } : {})}
+          >
+            <ChatDisplay
+              initialPrompt={initialPrompt!}
+              savedChatState={savedChatState}
+              searchId={currentSearchId}
+              onError={handleChatError}
+              onReturn={handleReturnToStart}
+            />
+          </MotionDiv>
+        );
+      case 'start':
+        return (
+          <MotionDiv 
+            key="start"
+            className="min-h-screen pt-12 md:pt-16 overflow-hidden flex items-center justify-center bg-background"
+            {...(isLoaded ? {
+              initial: { opacity: 0, scale: 0.95 },
+              animate: { opacity: 1, scale: 1 },
+              exit: { opacity: 0, scale: 1.05 },
+              transition: { duration: 0.4, ease: [0.4, 0.0, 0.2, 1] }
+            } : {})}
+          >
+            <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+          </MotionDiv>
+        );
+      default:
+        // Default to start view if somehow we get here
+        return (
+          <MotionDiv 
+            key="default"
+            className="min-h-screen pt-12 md:pt-16 overflow-hidden flex items-center justify-center bg-background"
+            {...(isLoaded ? {
+              initial: { opacity: 0 },
+              animate: { opacity: 1 },
+              transition: { duration: 0.3 }
+            } : {})}
+          >
+            <StartItinerary onItineraryRequest={handleItineraryRequest}/>
+          </MotionDiv>
+        );
+    }
+  }
+
+  return (
+    <>
+      {/* Only show header on start page, hide on chat/itinerary page on mobile */}
+      {currentView === 'start' && <Header />}
+      {/* On desktop, always show header */}
+      {currentView !== 'start' && (
+        <div className="hidden md:block">
+          <Header />
+        </div>
+      )}
+      {isLoaded && AnimatePresence ? (
+        <AnimatePresence mode="wait">
+          {renderMainContent()}
+        </AnimatePresence>
+      ) : (
+        renderMainContent()
+      )}
+    </>
+  );
+}

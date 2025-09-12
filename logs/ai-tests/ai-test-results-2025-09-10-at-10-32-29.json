@@ -1,0 +1,48 @@
+{
+  "timestamp": "2025-09-10T10:32:29.007Z",
+  "totalTests": 3,
+  "passed": 0,
+  "failed": 3,
+  "avgDuration": 13,
+  "results": [
+    {
+      "testId": "london_3_days",
+      "suite": "basic",
+      "input": "I want to visit London for 3 days, flying from New York",
+      "passed": false,
+      "errors": [
+        "Cannot read properties of undefined (reading 'substring')"
+      ],
+      "warnings": [],
+      "duration": 15,
+      "timestamp": "2025-09-10T10:32:25.966Z",
+      "metrics": {}
+    },
+    {
+      "testId": "paris_weekend",
+      "suite": "basic",
+      "input": "Weekend trip to Paris from Los Angeles",
+      "passed": false,
+      "errors": [
+        "Cannot read properties of undefined (reading 'substring')"
+      ],
+      "warnings": [],
+      "duration": 11,
+      "timestamp": "2025-09-10T10:32:26.983Z",
+      "metrics": {}
+    },
+    {
+      "testId": "tokyo_5_days",
+      "suite": "basic",
+      "input": "Planning a 5-day trip to Tokyo from San Francisco",
+      "passed": false,
+      "errors": [
+        "Cannot read properties of undefined (reading 'substring')"
+      ],
+      "warnings": [],
+      "duration": 12,
+      "timestamp": "2025-09-10T10:32:27.994Z",
+      "metrics": {}
+    }
+  ]
+}

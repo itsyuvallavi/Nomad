@@ -1,0 +1,5 @@
+{"id":"req_1757585185998_jl3a4","timestamp":"2025-09-11T10:06:25.998Z","type":"request","prompt":"Plan a 5 day trip to Tokyo","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
+{"id":"req_1757585186211_wj7x8o","timestamp":"2025-09-11T10:06:26.211Z","type":"request","prompt":"Weekend trip to Paris","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
+{"id":"req_1757585186376_sy7r6","timestamp":"2025-09-11T10:06:26.376Z","type":"request","prompt":"I want to spend 3 days in Rome, then 4 days in Florence","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
+{"id":"req_1757585186574_mmpl94","timestamp":"2025-09-11T10:06:26.574Z","type":"request","prompt":"7 days in Dubai","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
+{"id":"req_1757585186778_3qgscj","timestamp":"2025-09-11T10:06:26.778Z","type":"request","prompt":"2 weeks across Spain: 5 days Madrid, 4 days Barcelona, 5 days Seville","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}

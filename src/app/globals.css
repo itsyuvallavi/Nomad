@@ -1,0 +1,183 @@
+/* Leaflet CSS - must be imported before Tailwind */
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Performance optimizations for mobile */
+@layer utilities {
+  /* Shimmer loading effect */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+    background-size: 1000px 100%;
+  }
+  
+  /* Smooth momentum scrolling on mobile */
+  .momentum-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Hide scrollbars on mobile but keep them on desktop */
+  .scrollbar-hide-mobile {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .scrollbar-hide-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @media (min-width: 768px) {
+    .scrollbar-hide-mobile {
+      scrollbar-width: thin;
+      -ms-overflow-style: auto;
+    }
+    
+    .scrollbar-hide-mobile::-webkit-scrollbar {
+      display: block;
+      width: 6px;
+    }
+  }
+  
+  /* Reduced motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer base {
+  /* Ensure proper viewport height handling on mobile */
+  html {
+    height: 100%;
+  }
+  
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  /* Prevent iOS bounce and ensure proper viewport */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      /* iOS specific fixes */
+      position: fixed;
+      width: 100%;
+    }
+  }
+  
+  :root {
+    /* Light mode - Clean, modern palette */
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 240 84% 3%; /* #030213 - deep navy/black */
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 240 84% 3%; /* #030213 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 84% 3%;
+    --primary: 240 84% 3%; /* #030213 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 96%; /* Light grayish */
+    --secondary-foreground: 240 84% 3%;
+    --muted: 240 7% 94%; /* #ececf0 */
+    --muted-foreground: 240 5% 46%; /* #717182 */
+    --accent: 220 13% 93%; /* #e9ebef */
+    --accent-foreground: 240 84% 3%;
+    --destructive: 347 77% 50%; /* #d4183d */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%; /* Light border */
+    --input: 0 0% 90%;
+    --input-background: 240 7% 96%; /* #f3f3f5 */
+    --ring: 240 5% 65%;
+    --radius: 0.625rem; /* 10px - more rounded */
+  }
+
+  .dark {
+    /* Dark mode - Elegant dark theme */
+    --background: 240 10% 8%; /* Very dark */
+    --foreground: 0 0% 95%; /* Near white */
+    --card: 240 10% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 240 10% 8%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 95%; /* Near white */
+    --primary-foreground: 240 10% 12%;
+    --secondary: 240 4% 16%; /* Dark gray */
+    --secondary-foreground: 0 0% 95%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 64%; /* Medium light gray */
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --input-background: 240 4% 12%;
+    --ring: 240 5% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    font-family: 'Space Mono', monospace;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Space Mono', monospace;
+  }
+}
+
+/* Custom scrollbar styles for horizontal location list */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-slate-600 {
+    scrollbar-color: #475569 transparent;
+  }
+  
+  .scrollbar-track-slate-800 {
+    scrollbar-color: #475569 #1e293b;
+  }
+  
+  /* Webkit browsers */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+}
