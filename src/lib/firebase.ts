@@ -10,12 +10,12 @@ import { getAnalytics, Analytics } from 'firebase/analytics';
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyB9fTTuNleIGli6JRXwvGJhCoGFtRu4FeU",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "nomad-navigator-xej23.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nomad-navigator-xej23",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "nomad-navigator-xej23.firebasestorage.app",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "843370239890",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:843370239890:web:b2e901fda85f270fa3934b",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyD6KQ31WlGyU5BIXBXOrr0URPLzMqlkixg",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "nomad-navigatordup-70195-f4cf9.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "nomad-navigatordup-70195-f4cf9",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "nomad-navigatordup-70195-f4cf9.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "476100182115",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:476100182115:web:a2d01ccb5b82e6ebd6b856",
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
@@ -38,6 +38,8 @@ function validateFirebaseConfig() {
   }
 
   console.log('✅ Firebase configuration validated');
+  console.log('🔥 Using Firebase project:', firebaseConfig.projectId);
+  console.log('🌐 Auth domain:', firebaseConfig.authDomain);
 }
 
 // Initialize Firebase

@@ -2,8 +2,21 @@
 
 This file provides guidance to Claude Code when working with the Nomad Navigator codebase.
 
+## ⚠️ CRITICAL: Firebase IDE Environment
+**NEVER run `npm run dev` in Firebase IDE!** 
+- Firebase automatically runs the app on its own ports
+- Running `npm run dev` will cause port conflicts and issues
+- The app is already accessible through Firebase's preview URLs
+- Only use `npm run build` for production builds
+- For testing: Use Firebase's preview, not local dev server
+
 ## Project Overview
 Nomad Navigator - AI-powered travel planning application for digital nomads using Next.js 15, OpenAI APIs, and modern web technologies.
+
+## Current Firebase Project
+**Project ID**: nomad-navigator-xej23
+**Auth Domain**: nomad-navigator-xej23.firebaseapp.com
+**Project Number**: 843370239890
 
 ## Current Technology Stack
 - **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS, shadcn/ui
@@ -19,6 +32,26 @@ Nomad Navigator - AI-powered travel planning application for digital nomads usin
 2. **Test Baseline**: Run `npm run test:ai --baseline` before making AI changes
 3. **Get Approval**: Ask for plan review before implementation
 4. **Think MVP**: Focus on minimal viable solutions
+
+### File Organization - CRITICAL
+**ALWAYS place files in their correct directories:**
+- **Tasks & Plans**: `.claude/tasks/[component]/task-name.md` - NEVER in root
+- **Documentation**: `.claude/docs/` or `docs/` - NEVER in root
+- **Test Files**: `src/__tests__/` or appropriate test directories
+- **Components**: `src/components/[category]/`
+- **API Routes**: `src/app/api/`
+- **Utilities**: `src/lib/utils/`
+- **Configurations**: Root level only for configs like `.env`, `next.config.ts`
+
+**NEVER create files in root unless they are:**
+- Configuration files (`.env`, `next.config.ts`, `package.json`)
+- Standard project files (`README.md`, `LICENSE`)
+- Git files (`.gitignore`)
+
+**Examples of incorrect placement:**
+- ❌ `/FIREBASE_AUTH_SETUP.md` → ✅ `.claude/docs/firebase-auth-setup.md`
+- ❌ `/optimization-plan.md` → ✅ `.claude/tasks/performance/optimization-plan.md`
+- ❌ `/todo-list.md` → ✅ `.claude/tasks/current-todos.md`
 
 ### During Implementation
 1. **Update Plans**: Document progress and changes

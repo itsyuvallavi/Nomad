@@ -130,13 +130,14 @@ class TripsService {
   /**
    * Get all trips for a user
    */
-  async getUserTrips(userId: string): Promise<Trip[]> {
+  async getUserTrips(userId: string, limitCount: number = 50): Promise<Trip[]> {
     try {
-      // Try with ordering first (requires index)
+      // Optimized query with limit for better performance
       const tripsQuery = query(
         collection(db, this.COLLECTION_NAME),
         where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(limitCount)
       );
 
       const snapshot = await getDocs(tripsQuery);

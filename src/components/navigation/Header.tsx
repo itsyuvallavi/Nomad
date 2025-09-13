@@ -74,7 +74,6 @@ export const Header: React.FC = () => {
               <div className="flex items-center gap-1 sm:gap-2">
                 {/* Mobile: Icon-only buttons to save space */}
                 <Button
-                  variant="ghost"
                   size="sm"
                   onClick={handleShowLogin}
                   className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 min-w-[44px] min-h-[36px] sm:min-h-[32px]"
@@ -84,6 +83,7 @@ export const Header: React.FC = () => {
                   <span className="hidden sm:inline">Sign in</span>
                 </Button>
                 <Button
+                  variant="ghost"
                   size="sm"
                   onClick={handleShowSignup}
                   className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 min-w-[44px] min-h-[36px] sm:min-h-[32px]"

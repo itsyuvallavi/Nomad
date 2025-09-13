@@ -1,13 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/contexts/AuthContext';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Header } from '@/components/navigation/Header';
-import { ScrollablePage } from '@/components/layout/scrollable-page';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
+// Lazy load heavy components
+const ProtectedRoute = dynamic(() => import('@/components/auth/ProtectedRoute').then(mod => ({ default: mod.ProtectedRoute })), {
+  loading: () => <div className="min-h-screen" />,
+});
+
+const Header = dynamic(() => import('@/components/navigation/Header').then(mod => ({ default: mod.Header })), {
+  loading: () => <div className="h-16" />,
+});
+
+const ScrollablePage = dynamic(() => import('@/components/layout/scrollable-page').then(mod => ({ default: mod.ScrollablePage })), {
+  loading: () => <div className="min-h-screen animate-pulse bg-gray-50" />,
+});
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';

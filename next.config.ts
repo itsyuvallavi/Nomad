@@ -1,17 +1,39 @@
 import type {NextConfig} from 'next';
 
+// Bundle analyzer for performance optimization
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'export',
+  // Removed 'output: export' to support API routes and SSR
   trailingSlash: true,
-  images: {
-    unoptimized: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  
+  // Performance optimizations
+  compress: true, // Enable gzip compression
+  productionBrowserSourceMaps: false, // Disable source maps in production
+  poweredByHeader: false, // Remove X-Powered-By header
+  reactStrictMode: true, // Enable React strict mode for better debugging
+  
+  // Optimize package imports
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'react-icons', '@radix-ui/*'],
+    optimizeCss: true, // Enable CSS optimization
+    scrollRestoration: true, // Better scroll restoration
+  },
+  
+  // Compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
   // Allow Firebase Studio environment
   async headers() {
@@ -28,6 +50,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -63,4 +86,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

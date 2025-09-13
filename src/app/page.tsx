@@ -3,15 +3,35 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { useMotion } from '@/components/providers/motion-provider';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
-import StartItinerary from '@/components/forms/trip-search-form';
 import type { FormValues } from '@/components/forms/trip-details-form';
-import ChatDisplay from '@/components/chat/chat-container';
 import { Header } from '@/components/navigation/Header';
 import { fadeInScale } from '@/lib/animations';
 import { tripsService } from '@/lib/trips-service';
 import { useAuth } from '@/contexts/AuthContext';
+
+// Lazy load heavy components
+const StartItinerary = dynamic(() => import('@/components/forms/trip-search-form'), {
+  loading: () => (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  ),
+});
+
+const ChatDisplay = dynamic(() => import('@/components/chat/chat-container'), {
+  loading: () => (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading chat...</p>
+      </div>
+    </div>
+  ),
+  ssr: false, // Disable SSR for chat component since it uses client-side features
+});
 
 export interface ChatState {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;

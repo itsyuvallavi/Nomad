@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, MapPin, Clock, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -146,10 +147,14 @@ export default function PopularDestinationsCarousel({ onDestinationSelect }: Pop
                   transition={{ duration: 0.5 }}
                   className="absolute inset-0"
                 >
-                  <img
+                  <Image
                     src={currentDestination.image}
                     alt={currentDestination.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover"
+                    priority={index === currentIndex}
+                    loading={index === currentIndex ? 'eager' : 'lazy'}
                   />
                   <div className="absolute inset-0 bg-black/40" />
                 </motion.div>
