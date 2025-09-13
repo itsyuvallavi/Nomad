@@ -23,10 +23,12 @@ export const PasswordGate: React.FC<PasswordGateProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user already authenticated
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === 'true') {
-      setIsAuthenticated(true);
+    // Check if user already authenticated (only on client side)
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === 'true') {
+        setIsAuthenticated(true);
+      }
     }
     setIsLoading(false);
   }, []);
@@ -36,7 +38,9 @@ export const PasswordGate: React.FC<PasswordGateProps> = ({ children }) => {
     setError('');
 
     if (password === SITE_PASSWORD) {
-      localStorage.setItem(STORAGE_KEY, 'true');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, 'true');
+      }
       setIsAuthenticated(true);
     } else {
       setError('Incorrect password. Access denied.');

@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useMotion } from '@/components/providers/motion-provider';
 import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
 import StartItinerary from '@/components/forms/trip-search-form';
@@ -9,6 +10,8 @@ import type { FormValues } from '@/components/forms/trip-details-form';
 import ChatDisplay from '@/components/chat/chat-container';
 import { Header } from '@/components/navigation/Header';
 import { fadeInScale } from '@/lib/animations';
+import { tripsService } from '@/lib/trips-service';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface ChatState {
   messages: Array<{ role: 'user' | 'assistant'; content: string }>;
@@ -27,29 +30,78 @@ export interface RecentSearch {
 
 export type View = 'auth' | 'start' | 'chat';
 
+export type TripMode = 'create' | 'view' | 'edit' | 'continue';
+
+export interface TripContext {
+  mode: TripMode;
+  tripId?: string;
+  isModified: boolean;
+}
+
 export default function Home() {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
   const [currentView, setCurrentView] = useState<View>('start'); // Skip auth, go straight to start
   const [error, setError] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState<FormValues | null>(null);
   const [savedChatState, setSavedChatState] = useState<ChatState | undefined>(undefined);
   const [currentSearchId, setCurrentSearchId] = useState<string | undefined>(undefined);
+  const [tripContext, setTripContext] = useState<TripContext | undefined>(undefined);
 
-  // Check if we're viewing a trip from the trips page
+  // Check URL parameters for trip viewing
   useEffect(() => {
-    const viewingTrip = localStorage.getItem('viewingTrip');
-    if (viewingTrip) {
-      try {
-        const tripData = JSON.parse(viewingTrip);
-        setInitialPrompt({ prompt: tripData.prompt });
-        setSavedChatState(tripData.chatState);
-        setCurrentSearchId(tripData.id);
-        setCurrentView('chat');
-        localStorage.removeItem('viewingTrip'); // Clean up
-      } catch (error) {
-        console.error('Error loading trip data:', error);
+    const tripId = searchParams.get('tripId');
+    const mode = searchParams.get('mode') as TripMode;
+    
+    if (tripId && mode) {
+      // Load trip from Firestore
+      loadTripFromFirestore(tripId, mode);
+    } else {
+      // Fallback to old localStorage method for backward compatibility
+      const viewingTrip = localStorage.getItem('viewingTrip');
+      if (viewingTrip) {
+        try {
+          const tripData = JSON.parse(viewingTrip);
+          setInitialPrompt({ prompt: tripData.prompt });
+          setSavedChatState(tripData.chatState);
+          setCurrentSearchId(tripData.id);
+          setTripContext({
+            mode: 'view',
+            tripId: tripData.id,
+            isModified: false
+          });
+          setCurrentView('chat');
+          localStorage.removeItem('viewingTrip'); // Clean up
+        } catch (error) {
+          console.error('Error loading trip data:', error);
+        }
       }
     }
-  }, []);
+  }, [searchParams]);
+
+  const loadTripFromFirestore = async (tripId: string, mode: TripMode) => {
+    if (!user) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    try {
+      const trip = await tripsService.getTrip(tripId);
+      if (trip && trip.chatState) {
+        setInitialPrompt({ prompt: trip.prompt });
+        setSavedChatState(trip.chatState);
+        setCurrentSearchId(tripId);
+        setTripContext({
+          mode,
+          tripId,
+          isModified: false
+        });
+        setCurrentView('chat');
+      }
+    } catch (error) {
+      console.error('Error loading trip from Firestore:', error);
+    }
+  };
   
   // This function now just switches the view to the app
   const handleLogin = () => {
@@ -65,6 +117,12 @@ export default function Home() {
     setInitialPrompt(values);
     setSavedChatState(chatState);
     setCurrentSearchId(searchId);
+    // Set trip context for new trips
+    setTripContext({
+      mode: 'create',
+      tripId: undefined,
+      isModified: false
+    });
     setCurrentView('chat');
   };
   
@@ -74,6 +132,9 @@ export default function Home() {
     setInitialPrompt(null);
     setSavedChatState(undefined);
     setCurrentSearchId(undefined);
+    setTripContext(undefined);
+    // Clear URL parameters
+    window.history.replaceState({}, '', '/');
   };
   
   const handleChatError = (errorMessage: string) => {
@@ -104,6 +165,7 @@ export default function Home() {
               searchId={currentSearchId}
               onError={handleChatError}
               onReturn={handleReturnToStart}
+              tripContext={tripContext}
             />
           </MotionDiv>
         );

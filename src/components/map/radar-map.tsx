@@ -135,16 +135,24 @@ export function RadarMap({
       let coords = null;
       if ((day as any)._coordinates) {
         coords = (day as any)._coordinates;
-        const cityKey = destination;
-        if (!cities.has(cityKey)) {
-          cities.set(cityKey, { ...coords, days: [day.day] });
-        } else {
-          const city = cities.get(cityKey)!;
-          if (!city.days.includes(day.day)) {
-            city.days.push(day.day);
+        // Validate coordinates before using them
+        if (coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
+          const cityKey = destination;
+          if (!cities.has(cityKey)) {
+            cities.set(cityKey, { ...coords, days: [day.day] });
+          } else {
+            const city = cities.get(cityKey)!;
+            if (!city.days.includes(day.day)) {
+              city.days.push(day.day);
+            }
           }
+        } else {
+          console.warn('Invalid coordinates from geocoding:', destination, coords);
+          coords = null; // Reset to null to try fallback
         }
-      } else {
+      }
+      
+      if (!coords) {
         // Try to get coordinates for the destination from our database
         coords = getCityCoordinates(destination);
         if (coords) {
@@ -200,12 +208,26 @@ export function RadarMap({
     // If only one city, don't zoom in too close
     if (cities.size === 1) {
       const [cityData] = cities.values();
-      map.current.setCenter([cityData.lng, cityData.lat]);
-      map.current.setZoom(5); // City-level zoom that shows surrounding area
+      // Validate coordinates before setting center
+      if (cityData && !isNaN(cityData.lng) && !isNaN(cityData.lat)) {
+        map.current.setCenter([cityData.lng, cityData.lat]);
+        map.current.setZoom(5); // City-level zoom that shows surrounding area
+      } else {
+        console.warn('Invalid coordinates for city:', cityData);
+        // Fallback to default view
+        map.current.setCenter([0, 20]);
+        map.current.setZoom(2);
+      }
     }
 
     // Add markers for each city
     cities.forEach((city, name) => {
+      // Skip invalid coordinates
+      if (isNaN(city.lng) || isNaN(city.lat)) {
+        console.warn('Skipping marker for city with invalid coordinates:', name, city);
+        return;
+      }
+      
       const el = document.createElement('div');
       el.className = 'radar-map-marker';
       el.style.width = '32px';

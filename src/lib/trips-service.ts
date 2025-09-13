@@ -53,6 +53,7 @@ export interface CreateTripInput {
   chatState?: ChatState;
   itinerary?: GeneratePersonalizedItineraryOutput;
   fileDataUrl?: string;
+  id?: string; // Optional ID to use instead of generating one
 }
 
 class TripsService {
@@ -63,7 +64,8 @@ class TripsService {
    * Create a new trip in Firestore
    */
   async createTrip(input: CreateTripInput): Promise<Trip> {
-    const tripId = doc(collection(db, this.COLLECTION_NAME)).id;
+    // Use provided ID or generate a new one
+    const tripId = input.id || doc(collection(db, this.COLLECTION_NAME)).id;
     
     // Extract destination and duration from itinerary if available
     const destination = input.itinerary?.destination || 
@@ -238,11 +240,20 @@ class TripsService {
     if (typeof window === 'undefined') return;
 
     try {
+      // Check if we've already synced for this user
+      const syncKey = `trips_synced_${userId}`;
+      const alreadySynced = localStorage.getItem(syncKey);
+      if (alreadySynced) {
+        console.log('Already synced trips for this user');
+        return;
+      }
+
       const localSearches = localStorage.getItem(this.LOCAL_STORAGE_KEY);
       if (!localSearches) return;
 
       const searches = JSON.parse(localSearches);
       const batch = writeBatch(db);
+      let hasNewTrips = false;
 
       for (const search of searches) {
         // Check if trip already exists
@@ -253,7 +264,7 @@ class TripsService {
         );
 
         if (!exists) {
-          const tripId = doc(collection(db, this.COLLECTION_NAME)).id;
+          const tripId = search.id || doc(collection(db, this.COLLECTION_NAME)).id;
           const tripRef = doc(db, this.COLLECTION_NAME, tripId);
           
           const tripData = {
@@ -274,11 +285,19 @@ class TripsService {
           };
 
           batch.set(tripRef, tripData);
+          hasNewTrips = true;
         }
       }
 
-      await batch.commit();
-      console.log('✅ Local searches synced to Firestore');
+      if (hasNewTrips) {
+        await batch.commit();
+        console.log('✅ Local searches synced to Firestore');
+      }
+      
+      // Mark as synced and clear localStorage
+      localStorage.setItem(syncKey, 'true');
+      localStorage.removeItem(this.LOCAL_STORAGE_KEY);
+      console.log('✅ Cleared localStorage after sync');
     } catch (error) {
       console.error('Error syncing localStorage to Firestore:', error);
     }

@@ -161,9 +161,10 @@ export default function ItineraryForm({
                       )}
                       <textarea
                         placeholder={placeholder}
-                        className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-sm sm:text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[44px] sm:min-h-[24px] max-h-[120px] overflow-y-auto py-2 sm:py-0"
+                        className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-base sm:text-sm border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[80px] sm:min-h-[24px] max-h-[120px] overflow-y-auto py-2 sm:py-0"
                         autoComplete="off"
-                        rows={1}
+                        rows={2}
+                        style={{ fontSize: '16px' }}
                         {...field}
                         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
                           field.onChange(e);

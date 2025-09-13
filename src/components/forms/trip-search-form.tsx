@@ -23,6 +23,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import ItineraryForm from './trip-details-form';
 import type { FormValues } from './trip-details-form';
 import type { RecentSearch, ChatState } from '@/app/page';
+import { useAuth } from '@/contexts/AuthContext';
+import { tripsService } from '@/lib/trips-service';
 
 type StartItineraryProps = {
     onItineraryRequest: (values: FormValues, chatState?: ChatState, searchId?: string) => void;
@@ -30,19 +32,63 @@ type StartItineraryProps = {
 
 
 export default function StartItinerary({ onItineraryRequest }: StartItineraryProps) {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check for mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
-    try {
-      const storedSearches = localStorage.getItem('recentSearches');
-      if (storedSearches) {
-        setRecentSearches(JSON.parse(storedSearches));
+    const loadRecentSearches = async () => {
+      try {
+        if (user) {
+          // Load from Firestore for logged-in users
+          const trips = await tripsService.getUserTrips(user.uid);
+          
+          // Convert Firestore trips to RecentSearch format
+          const recentFromFirestore: RecentSearch[] = trips
+            .slice(0, 5) // Only show 5 most recent
+            .map(trip => ({
+              id: trip.id,
+              prompt: trip.prompt,
+              title: trip.title,
+              chatState: trip.chatState,
+              lastUpdated: trip.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+            }));
+          
+          setRecentSearches(recentFromFirestore);
+        } else {
+          // Fall back to localStorage for non-authenticated users
+          const storedSearches = localStorage.getItem('recentSearches');
+          if (storedSearches) {
+            setRecentSearches(JSON.parse(storedSearches));
+          }
+        }
+      } catch (e) {
+        console.error("Could not load recent searches", e);
       }
-    } catch (e) {
-      console.error("Could not parse recent searches from localStorage", e);
-    }
-  }, []);
+    };
+    
+    loadRecentSearches();
+    
+    // Reload when component becomes visible (e.g., returning from trips page)
+    const handleFocus = () => {
+      loadRecentSearches();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user]);
 
   const handleInitialPrompt = async (values: FormValues) => {
     setIsLoading(true);
@@ -60,8 +106,15 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
   }
 
   const handleClearHistory = () => {
-    setRecentSearches([]);
-    localStorage.removeItem('recentSearches');
+    if (user) {
+      // For logged-in users, just clear the view temporarily
+      // The trips remain in Firestore and will reload on page refresh
+      setRecentSearches([]);
+    } else {
+      // For non-logged-in users, clear localStorage
+      setRecentSearches([]);
+      localStorage.removeItem('recentSearches');
+    }
   };
 
   return (
@@ -136,28 +189,30 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogTitle>Clear Recent Chats?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently delete your recent search history. This action cannot be undone.
+                          {user 
+                            ? "This will hide recent chats from this view. Your trips are still saved and accessible in the History page."
+                            : "This will permanently delete your recent search history. This action cannot be undone."}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleClearHistory} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                          Delete
+                          {user ? "Clear View" : "Delete"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
               </div>
               <motion.div 
-                className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+                className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
                 variants={staggerContainer}
                 initial="initial"
                 animate="animate"
               >
                 <AnimatePresence>
-                  {recentSearches.slice(0, 3).map((search, index) => (
+                  {recentSearches.slice(0, isMobile ? 4 : 3).map((search, index) => (
                     <motion.div
                       key={search.id}
                       variants={fadeInUp}
@@ -170,18 +225,18 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                     >
                       <Card
                         onClick={() => handleRecentSearchClick(search)}
-                        className="bg-muted/50 hover:bg-muted border-border cursor-pointer text-left transition-all hover:shadow-lg h-full"
+                        className="bg-muted/70 hover:bg-muted/90 border-border/50 cursor-pointer text-left transition-all hover:shadow-lg h-full"
                       >
-                        <CardContent className="p-4 flex flex-col h-full">
+                        <CardContent className="p-3 sm:p-4 flex flex-col h-full">
                            <motion.div
                              initial={{ rotate: -10 }}
                              animate={{ rotate: 0 }}
                              transition={{ delay: 0.8 + index * 0.1 }}
                            >
-                             <MessageSquare size={20} className="text-muted-foreground mb-3" />
+                             <MessageSquare size={16} className="text-muted-foreground mb-2 sm:mb-3" />
                            </motion.div>
-                           <p className="font-medium text-foreground text-sm flex-1 leading-snug line-clamp-3">{search.title || search.prompt || 'New chat'}</p>
-                           <p className="text-muted-foreground text-xs mt-3">{formatDistanceToNow(new Date(search.lastUpdated || search.id), { addSuffix: true })}</p>
+                           <p className="font-medium text-foreground text-xs sm:text-sm flex-1 leading-snug line-clamp-2 sm:line-clamp-3">{search.title || search.prompt || 'New chat'}</p>
+                           <p className="text-muted-foreground text-[10px] sm:text-xs mt-2 sm:mt-3">{formatDistanceToNow(new Date(search.lastUpdated || search.id), { addSuffix: true })}</p>
                         </CardContent>
                       </Card>
                     </motion.div>

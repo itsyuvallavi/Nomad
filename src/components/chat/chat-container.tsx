@@ -33,12 +33,15 @@ type Message = {
   content: string;
 };
 
+import type { TripContext } from '@/app/page';
+
 type ChatDisplayProps = {
     initialPrompt: FormValues;
     savedChatState?: ChatState;
     searchId?: string;
     onError: (error: string) => void;
     onReturn: () => void;
+    tripContext?: TripContext;
 };
 
 type ProgressStage = 'understanding' | 'planning' | 'generating' | 'finalizing';
@@ -56,13 +59,14 @@ export default function ChatDisplay({
     searchId,
     onError,
     onReturn,
+    tripContext,
 }: ChatDisplayProps) {
     const { user } = useAuth();
     const [messages, setMessages] = useState<Message[]>(savedChatState?.messages || []);
     const [userInput, setUserInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentItinerary, setCurrentItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(savedChatState?.itinerary || null);
-    const [firestoreTripId, setFirestoreTripId] = useState<string | null>(null);
+    const [firestoreTripId, setFirestoreTripId] = useState<string | null>(tripContext?.tripId || null);
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [mobileActiveTab, setMobileActiveTab] = useState<'chat' | 'itinerary'>('chat');
@@ -95,7 +99,10 @@ export default function ChatDisplay({
         },
         threshold: 50
     });
-    const currentSearchId = useRef(searchId || new Date().toISOString());
+    // Use tripId from context if viewing/editing, otherwise generate new ID
+    const currentSearchId = useRef(
+        tripContext?.tripId || searchId || `trip-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    );
     const generationIdRef = useRef<string | null>(null);
     const generationStartTime = useRef<number>(0);
 
@@ -142,6 +149,32 @@ export default function ChatDisplay({
     }, [mobileActiveTab]);
     
     const saveChatStateToStorage = async (isCompleted = false, itinerary?: GeneratePersonalizedItineraryOutput) => {
+        console.log('📝 saveChatStateToStorage called - isCompleted:', isCompleted, 'hasItinerary:', !!itinerary, 'user:', !!user);
+        
+        // Check if we should save based on trip context
+        const shouldSave = () => {
+            if (!tripContext) return true; // Default behavior for backward compatibility
+            
+            switch (tripContext.mode) {
+                case 'view':
+                    return false; // Never save when just viewing
+                case 'edit':
+                case 'continue':
+                    return tripContext.isModified; // Only save if modified
+                case 'create':
+                default:
+                    return true; // Always save new trips
+            }
+        };
+
+        const canSave = shouldSave();
+        console.log('📝 Should save?', canSave, 'TripContext:', tripContext);
+        
+        if (!canSave) {
+            console.log('Skipping save - viewing existing trip without modifications');
+            return;
+        }
+
         try {
             const storedSearches = localStorage.getItem('recentSearches');
             const recentSearches: RecentSearch[] = storedSearches ? JSON.parse(storedSearches) : [];
@@ -173,27 +206,39 @@ export default function ChatDisplay({
             
             // Save to Firestore if user is authenticated
             if (user) {
+                console.log('🔍 Saving to Firestore - User:', user.uid, 'TripContext:', tripContext, 'FirestoreTripId:', firestoreTripId);
                 try {
                     if (!firestoreTripId) {
-                        // Create new trip in Firestore
-                        const trip = await tripsService.createTrip({
-                            userId: user.uid,
-                            prompt: initialPrompt.prompt,
-                            title: itinerary?.title || currentItinerary?.title,
-                            chatState,
-                            itinerary: itinerary || currentItinerary,
-                            fileDataUrl: initialPrompt.fileDataUrl
-                        });
-                        setFirestoreTripId(trip.id);
-                        console.log('✅ Trip saved to Firestore:', trip.id);
+                        // Create new trip if:
+                        // 1. No trip context (new trip from main page)
+                        // 2. In create mode
+                        // 3. NOT in view mode
+                        const shouldCreateTrip = !tripContext || tripContext.mode === 'create' || tripContext.mode !== 'view';
+                        console.log('🔍 Should create trip?', shouldCreateTrip, 'Context mode:', tripContext?.mode);
+                        
+                        if (shouldCreateTrip) {
+                            const trip = await tripsService.createTrip({
+                                userId: user.uid,
+                                prompt: initialPrompt.prompt,
+                                title: itinerary?.title || currentItinerary?.title,
+                                chatState,
+                                itinerary: itinerary || currentItinerary,
+                                fileDataUrl: initialPrompt.fileDataUrl,
+                                id: currentSearchId.current // Use the same ID for consistency
+                            });
+                            setFirestoreTripId(trip.id);
+                            console.log('✅ New trip created in Firestore with ID:', trip.id);
+                        }
                     } else {
-                        // Update existing trip
-                        await tripsService.updateTrip(firestoreTripId, {
-                            chatState,
-                            itinerary: itinerary || currentItinerary,
-                            status: isCompleted ? 'confirmed' : 'draft'
-                        });
-                        console.log('✅ Trip updated in Firestore:', firestoreTripId);
+                        // Update existing trip only if modified or no context (new trip)
+                        if (!tripContext || tripContext.isModified || tripContext.mode === 'create') {
+                            await tripsService.updateTrip(firestoreTripId, {
+                                chatState,
+                                itinerary: itinerary || currentItinerary,
+                                status: isCompleted ? 'confirmed' : 'draft'
+                            });
+                            console.log('✅ Trip updated in Firestore:', firestoreTripId);
+                        }
                     }
                 } catch (error) {
                     console.error('Error saving to Firestore:', error);

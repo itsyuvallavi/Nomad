@@ -1,448 +1,5 @@
 [
   {
-    "id": "req_1757620993875_86223j",
-    "timestamp": "2025-09-11T20:03:13.875Z",
-    "type": "request",
-    "prompt": "Flying from New York to London for 3 days",
-    "metadata": {
-      "model": "gpt-4o-mini",
-      "strategy": "ultra-fast"
-    }
-  },
-  {
-    "id": "req_1757620993875_86223j",
-    "timestamp": "2025-09-11T20:03:24.233Z",
-    "type": "response",
-    "response": {
-      "destination": "London",
-      "title": "3 Days in London",
-      "itinerary": [
-        {
-          "day": 1,
-          "date": "2025-09-12",
-          "title": "Day 1: Explore London",
-          "_destination": "London",
-          "activities": [
-            {
-              "time": "09:00 AM",
-              "description": "Visit main attraction",
-              "category": "Attraction",
-              "address": "London EC3N 4AB",
-              "venue_name": "Tower of London",
-              "rating": 4.7,
-              "_tips": "Book tickets in advance"
-            },
-            {
-              "time": "01:00 PM",
-              "description": "Lunch at recommended restaurant",
-              "category": "Food",
-              "address": "28 Rupert St, London W1D 6DJ",
-              "venue_name": "Evelyn's Table",
-              "rating": 4.8,
-              "_tips": "Make reservations"
-            },
-            {
-              "time": "03:00 PM",
-              "description": "Visit main attraction",
-              "category": "Attraction",
-              "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
-              "venue_name": "London Eye",
-              "rating": 4.5,
-              "_tips": "Book tickets in advance"
-            },
-            {
-              "time": "06:00 PM",
-              "description": "Breakfast at local cafe",
-              "category": "Food",
-              "address": "Forecourt, Maida Vale Station, Randolph Ave., London W9 1JS",
-              "venue_name": "SO Café London",
-              "rating": 4.9,
-              "_tips": "Try local specialties"
-            }
-          ],
-          "_coordinates": {
-            "lat": 51.50853,
-            "lng": -0.12574
-          }
-        },
-        {
-          "day": 2,
-          "date": "2025-09-13",
-          "title": "Day 2: Explore London",
-          "_destination": "London",
-          "activities": [
-            {
-              "time": "09:00 AM",
-              "description": "Visit main attraction",
-              "category": "Attraction",
-              "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
-              "venue_name": "London Eye",
-              "rating": 4.5,
-              "_tips": "Book tickets in advance"
-            },
-            {
-              "time": "01:00 PM",
-              "description": "Breakfast at local cafe",
-              "category": "Food",
-              "address": "383 Kennington Ln, London SE11 5QY",
-              "venue_name": "Kennington Lane Cafe",
-              "rating": 4.9,
-              "_tips": "Try local specialties"
-            },
-            {
-              "time": "03:00 PM",
-              "description": "Explore local area",
-              "category": "Attraction",
-              "address": "32 London Bridge St, London SE1 9SG",
-              "venue_name": "The View from The Shard",
-              "rating": 4.6,
-              "_tips": "Wear comfortable shoes"
-            },
-            {
-              "time": "06:00 PM",
-              "description": "Lunch at recommended restaurant",
-              "category": "Food",
-              "address": "52 Haymarket, London SW1Y 4RP",
-              "venue_name": "Fallow",
-              "rating": 4.7,
-              "_tips": "Make reservations"
-            }
-          ],
-          "_coordinates": {
-            "lat": 51.50853,
-            "lng": -0.12574
-          }
-        },
-        {
-          "day": 3,
-          "date": "2025-09-14",
-          "title": "Day 3: Explore London",
-          "_destination": "London",
-          "activities": [
-            {
-              "time": "09:00 AM",
-              "description": "Explore local area",
-              "category": "Attraction",
-              "address": "32 London Bridge St, London SE1 9SG",
-              "venue_name": "The View from The Shard",
-              "rating": 4.6,
-              "_tips": "Wear comfortable shoes"
-            },
-            {
-              "time": "01:00 PM",
-              "description": "Dinner and evening activities",
-              "category": "Food",
-              "address": "The Now Building Rooftop, Outernet, Denmark St, London WC2H 0LA",
-              "venue_name": "Tattu London",
-              "rating": 4.7,
-              "_tips": "Enjoy local cuisine"
-            },
-            {
-              "time": "03:00 PM",
-              "description": "Visit main attraction",
-              "category": "Attraction",
-              "address": "St. Paul's Churchyard, London EC4M 8AD",
-              "venue_name": "St. Paul's Cathedral",
-              "rating": 4.7,
-              "_tips": "Book tickets in advance"
-            },
-            {
-              "time": "06:00 PM",
-              "description": "Breakfast at local cafe",
-              "category": "Food",
-              "address": "17-19 Regency St, London SW1P 4BY",
-              "venue_name": "Regency Cafe",
-              "rating": 4.7,
-              "_tips": "Try local specialties"
-            }
-          ],
-          "_coordinates": {
-            "lat": 51.50853,
-            "lng": -0.12574
-          }
-        }
-      ],
-      "quickTips": [
-        "Book accommodations in advance",
-        "Check visa requirements",
-        "Get travel insurance",
-        "Download offline maps",
-        "Keep digital copies of documents"
-      ],
-      "_costEstimate": {
-        "total": 2300,
-        "flights": 1400,
-        "accommodation": 600,
-        "dailyExpenses": 300,
-        "currency": "USD",
-        "breakdown": [
-          {
-            "type": "flight",
-            "description": "New York → London",
-            "amount": 700
-          },
-          {
-            "type": "flight",
-            "description": "London → New York",
-            "amount": 700
-          },
-          {
-            "type": "accommodation",
-            "description": "London (3 nights)",
-            "amount": 600
-          }
-        ]
-      },
-      "_hotelOptions": {},
-      "_flightOptions": {},
-      "_enrichedWithRadar": true
-    },
-    "duration": 10358,
-    "metadata": {
-      "model": "gpt-4o-mini",
-      "strategy": "ultra-fast-enriched",
-      "destinations": [
-        "London"
-      ],
-      "totalDays": 3
-    }
-  },
-  {
-    "id": "req_1757621004339_0sked",
-    "timestamp": "2025-09-11T20:03:24.339Z",
-    "type": "request",
-    "prompt": "Weekend trip from Los Angeles to Paris",
-    "metadata": {
-      "model": "gpt-4o-mini",
-      "strategy": "ultra-fast"
-    }
-  },
-  {
-    "id": "req_1757621004339_0sked",
-    "timestamp": "2025-09-11T20:03:33.596Z",
-    "type": "response",
-    "response": {
-      "destination": "Paris",
-      "title": "3 Days in Paris",
-      "itinerary": [
-        {
-          "day": 1,
-          "date": "2025-09-12",
-          "title": "Day 1: Explore Paris",
-          "_destination": "Paris",
-          "activities": [
-            {
-              "time": "09:00 AM",
-              "description": "Explore Montmartre neighborhood",
-              "category": "Attraction",
-              "address": "24 Rue de l'Echaudé, 75006 Paris",
-              "venue_name": "A2Z Art Gallery",
-              "rating": 4.6,
-              "_tips": "Visit Sacré-Cœur for a panoramic view of the city"
-            },
-            {
-              "time": "01:00 PM",
-              "description": "Dinner at a charming café",
-              "category": "Food",
-              "address": "18 Rue La Boétie, 75008 Paris",
-              "venue_name": "Sphère",
-              "rating": 4.8,
-              "_tips": "Try the French pastries for dessert"
-            },
-            {
-              "time": "03:00 PM",
-              "description": "Visit Notre Dame Cathedral",
-              "category": "Attraction",
-              "address": "Bois de Boulogne, Rte de la Prte Dauphine à la Prte des Sablons, 75116 Paris",
-              "venue_name": "Jardin d'Acclimatation",
-              "rating": 4.3,
-              "_tips": "Learn about the cathedral's architecture"
-            },
-            {
-              "time": "06:00 PM",
-              "description": "Lunch at a local bistro",
-              "category": "Food",
-              "address": "31 Av. George V, 75008 Paris",
-              "venue_name": "Le Cinq",
-              "rating": 4.7,
-              "_tips": "Try the traditional French dishes"
-            },
-            {
-              "time": "08:00 PM",
-              "description": "Stroll along the Seine River",
-              "category": "Leisure",
-              "address": "75001 Paris",
-              "venue_name": "Tuileries Garden",
-              "rating": 4.6,
-              "_tips": "Enjoy the evening lights of the city"
-            }
-          ],
-          "_coordinates": {
-            "lat": 48.85341,
-            "lng": 2.3488
-          }
-        },
-        {
-          "day": 2,
-          "date": "2025-09-13",
-          "title": "Day 2: Explore Paris",
-          "_destination": "Paris",
-          "activities": [
-            {
-              "time": "09:00 AM",
-              "description": "Visit Notre Dame Cathedral",
-              "category": "Attraction",
-              "address": "Bois de Boulogne, Rte de la Prte Dauphine à la Prte des Sablons, 75116 Paris",
-              "venue_name": "Jardin d'Acclimatation",
-              "rating": 4.3,
-              "_tips": "Learn about the cathedral's architecture"
-            },
-            {
-              "time": "01:00 PM",
-              "description": "Farewell dinner with a view of Eiffel Tower",
-              "category": "Food",
-              "address": "31 Av. George V, 75008 Paris",
-              "venue_name": "L'Orangerie",
-              "rating": 4.8,
-              "_tips": "Book a table in advance for the best view"
-            },
-            {
-              "time": "03:00 PM",
-              "description": "Explore the Palace of Versailles",
-              "category": "Attraction",
-              "address": "Pont de Bir-Hakeim, 75015 Paris",
-              "venue_name": "Promenade Jean-Paul Belmondo",
-              "rating": 4.8,
-              "_tips": "Visit the Hall of Mirrors for a grand experience"
-            },
-            {
-              "time": "06:00 PM",
-              "description": "Dinner at a Michelin-starred restaurant",
-              "category": "Food",
-              "address": "1 Rue du Pré aux Clercs, 75007 Paris",
-              "venue_name": "Les Parisiens",
-              "rating": 4.7,
-              "_tips": "Indulge in a gourmet French meal"
-            },
-            {
-              "time": "08:00 PM",
-              "description": "Picnic at Luxembourg Gardens",
-              "category": "Leisure",
-              "address": "75019 Paris",
-              "venue_name": "Parc des Buttes-Chaumont",
-              "rating": 4.6,
-              "_tips": "Relax and enjoy the beautiful surroundings"
-            }
-          ],
-          "_coordinates": {
-            "lat": 48.85341,
-            "lng": 2.3488
-          }
-        },
-        {
-          "day": 3,
-          "date": "2025-09-14",
-          "title": "Day 3: Explore Paris",
-          "_destination": "Paris",
-          "activities": [
-            {
-              "time": "09:00 AM",
-              "description": "Explore the Palace of Versailles",
-              "category": "Attraction",
-              "address": "Pont de Bir-Hakeim, 75015 Paris",
-              "venue_name": "Promenade Jean-Paul Belmondo",
-              "rating": 4.8,
-              "_tips": "Visit the Hall of Mirrors for a grand experience"
-            },
-            {
-              "time": "01:00 PM",
-              "description": "Lunch at a cozy brasserie",
-              "category": "Food",
-              "address": "47 R. de Turbigo, 75003 Paris",
-              "venue_name": "Le Marais Restaurant Paris",
-              "rating": 4.6,
-              "_tips": "Try the French onion soup"
-            },
-            {
-              "time": "03:00 PM",
-              "description": "Evening walk at Champs-Élysées",
-              "category": "Attraction",
-              "address": "75008 Paris",
-              "venue_name": "Pinky Tour - Paris",
-              "rating": 5,
-              "_tips": "Experience the vibrant nightlife"
-            },
-            {
-              "time": "06:00 PM",
-              "description": "Dinner at a charming café",
-              "category": "Food",
-              "address": "18 Rue La Boétie, 75008 Paris",
-              "venue_name": "Sphère",
-              "rating": 4.8,
-              "_tips": "Try the French pastries for dessert"
-            },
-            {
-              "time": "08:00 PM",
-              "description": "Shopping at Galeries Lafayette",
-              "category": "Leisure",
-              "address": "12 Rue Linois, 75015 Paris",
-              "venue_name": "Centre Commercial Beaugrenelle",
-              "rating": 4.2,
-              "_tips": "Find designer items and souvenirs"
-            }
-          ],
-          "_coordinates": {
-            "lat": 48.85341,
-            "lng": 2.3488
-          }
-        }
-      ],
-      "quickTips": [
-        "Book accommodations in advance",
-        "Check visa requirements",
-        "Get travel insurance",
-        "Download offline maps",
-        "Keep digital copies of documents"
-      ],
-      "_costEstimate": {
-        "total": 2500,
-        "flights": 1450,
-        "accommodation": 750,
-        "dailyExpenses": 300,
-        "currency": "USD",
-        "breakdown": [
-          {
-            "type": "flight",
-            "description": "Los Angeles → Paris",
-            "amount": 750
-          },
-          {
-            "type": "flight",
-            "description": "Paris → Los Angeles",
-            "amount": 700
-          },
-          {
-            "type": "accommodation",
-            "description": "Paris (3 nights)",
-            "amount": 750
-          }
-        ]
-      },
-      "_hotelOptions": {},
-      "_flightOptions": {},
-      "_enrichedWithRadar": true
-    },
-    "duration": 9257,
-    "metadata": {
-      "model": "gpt-4o-mini",
-      "strategy": "ultra-fast-enriched",
-      "destinations": [
-        "Paris"
-      ],
-      "totalDays": 3
-    }
-  },
-  {
     "id": "req_1757621013722_ydgh3",
     "timestamp": "2025-09-11T20:03:33.722Z",
     "type": "request",
@@ -30100,6 +29657,1198 @@
       "strategy": "ultra-fast-enriched",
       "destinations": [
         "Venice"
+      ],
+      "totalDays": 7
+    }
+  },
+  {
+    "id": "req_1757717674494_h1yzs9",
+    "timestamp": "2025-09-12T22:54:34.494Z",
+    "type": "request",
+    "prompt": "Plan a trip to Bali for 2 weeks",
+    "metadata": {
+      "model": "gpt-4o-mini",
+      "strategy": "ultra-fast"
+    }
+  },
+  {
+    "id": "req_1757717674494_h1yzs9",
+    "timestamp": "2025-09-12T22:54:46.124Z",
+    "type": "response",
+    "response": {
+      "destination": "Bali",
+      "title": "14 Days in Bali",
+      "itinerary": [
+        {
+          "day": 1,
+          "date": "2025-09-13",
+          "title": "Day 1: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Historic city center of Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Historic Center",
+              "rating": 4.7,
+              "_tips": "Rich in history and culture"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local breakfast cafe in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Breakfast Spot",
+              "rating": 4.3,
+              "_tips": "Try the local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Main cathedral in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Cathedral",
+              "rating": 4.6,
+              "_tips": "Beautiful architecture"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Traditional restaurant in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Traditional Restaurant",
+              "rating": 4.5,
+              "_tips": "Ask for local recommendations"
+            },
+            {
+              "time": "08:00 PM",
+              "description": "Central park in Bali",
+              "category": "Leisure",
+              "address": "Bali",
+              "venue_name": "Bali Central Park",
+              "rating": 4.6,
+              "_tips": "Perfect for relaxing walks"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 2,
+          "date": "2025-09-14",
+          "title": "Day 2: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Main cathedral in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Cathedral",
+              "rating": 4.6,
+              "_tips": "Beautiful architecture"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local lunch spot in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Lunch Place",
+              "rating": 4.2,
+              "_tips": "Great for midday meals"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "City museum in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali City Museum",
+              "rating": 4.5,
+              "_tips": "Learn about local history"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Evening dining in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Dinner Restaurant",
+              "rating": 4.6,
+              "_tips": "Perfect for dinner"
+            },
+            {
+              "time": "08:00 PM",
+              "description": "Shopping district in Bali",
+              "category": "Leisure",
+              "address": "Bali",
+              "venue_name": "Bali Shopping District",
+              "rating": 4.3,
+              "_tips": "Browse local shops and boutiques"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 3,
+          "date": "2025-09-15",
+          "title": "Day 3: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "City museum in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali City Museum",
+              "rating": 4.5,
+              "_tips": "Learn about local history"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Coffee and pastries in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Cafe",
+              "rating": 4.4,
+              "_tips": "Excellent coffee"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Scenic viewpoint in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Viewpoint",
+              "rating": 4.8,
+              "_tips": "Best views of the city"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Street food in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Street Food Market",
+              "rating": 4.3,
+              "_tips": "Authentic local flavors"
+            },
+            {
+              "time": "08:00 PM",
+              "description": "Riverside walk in Bali",
+              "category": "Leisure",
+              "address": "Bali",
+              "venue_name": "Bali Riverside",
+              "rating": 4.7,
+              "_tips": "Peaceful stroll along the water"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 4,
+          "date": "2025-09-16",
+          "title": "Day 4: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Scenic viewpoint in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Viewpoint",
+              "rating": 4.8,
+              "_tips": "Best views of the city"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local breakfast cafe in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Breakfast Spot",
+              "rating": 4.3,
+              "_tips": "Try the local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Local market in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Market",
+              "rating": 4.4,
+              "_tips": "Great for shopping and people watching"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Traditional restaurant in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Traditional Restaurant",
+              "rating": 4.5,
+              "_tips": "Ask for local recommendations"
+            },
+            {
+              "time": "08:00 PM",
+              "description": "Local cultural quarter in Bali",
+              "category": "Leisure",
+              "address": "Bali",
+              "venue_name": "Bali Cultural Quarter",
+              "rating": 4.5,
+              "_tips": "Experience local culture"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 5,
+          "date": "2025-09-17",
+          "title": "Day 5: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Local market in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Market",
+              "rating": 4.4,
+              "_tips": "Great for shopping and people watching"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local lunch spot in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Lunch Place",
+              "rating": 4.2,
+              "_tips": "Great for midday meals"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Art gallery in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Art Gallery",
+              "rating": 4.5,
+              "_tips": "Features local and international art"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Evening dining in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Dinner Restaurant",
+              "rating": 4.6,
+              "_tips": "Perfect for dinner"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 6,
+          "date": "2025-09-18",
+          "title": "Day 6: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Art gallery in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Art Gallery",
+              "rating": 4.5,
+              "_tips": "Features local and international art"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Coffee and pastries in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Cafe",
+              "rating": 4.4,
+              "_tips": "Excellent coffee"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Historic city center of Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Historic Center",
+              "rating": 4.7,
+              "_tips": "Rich in history and culture"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Street food in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Street Food Market",
+              "rating": 4.3,
+              "_tips": "Authentic local flavors"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 7,
+          "date": "2025-09-19",
+          "title": "Day 7: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Historic city center of Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Historic Center",
+              "rating": 4.7,
+              "_tips": "Rich in history and culture"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local breakfast cafe in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Breakfast Spot",
+              "rating": 4.3,
+              "_tips": "Try the local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Main cathedral in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Cathedral",
+              "rating": 4.6,
+              "_tips": "Beautiful architecture"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Traditional restaurant in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Traditional Restaurant",
+              "rating": 4.5,
+              "_tips": "Ask for local recommendations"
+            }
+          ],
+          "_coordinates": {
+            "lat": -8.3405,
+            "lng": 115.092
+          }
+        },
+        {
+          "day": 8,
+          "date": "2025-09-20",
+          "title": "Day 8: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Main cathedral in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Cathedral",
+              "rating": 4.6,
+              "_tips": "Beautiful architecture"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local lunch spot in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Lunch Place",
+              "rating": 4.2,
+              "_tips": "Great for midday meals"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "City museum in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali City Museum",
+              "rating": 4.5,
+              "_tips": "Learn about local history"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Evening dining in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Dinner Restaurant",
+              "rating": 4.6,
+              "_tips": "Perfect for dinner"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 9,
+          "date": "2025-09-21",
+          "title": "Day 9: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "City museum in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali City Museum",
+              "rating": 4.5,
+              "_tips": "Learn about local history"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Coffee and pastries in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Cafe",
+              "rating": 4.4,
+              "_tips": "Excellent coffee"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Scenic viewpoint in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Viewpoint",
+              "rating": 4.8,
+              "_tips": "Best views of the city"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Street food in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Street Food Market",
+              "rating": 4.3,
+              "_tips": "Authentic local flavors"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 10,
+          "date": "2025-09-22",
+          "title": "Day 10: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Scenic viewpoint in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Viewpoint",
+              "rating": 4.8,
+              "_tips": "Best views of the city"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local breakfast cafe in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Breakfast Spot",
+              "rating": 4.3,
+              "_tips": "Try the local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Local market in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Market",
+              "rating": 4.4,
+              "_tips": "Great for shopping and people watching"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Traditional restaurant in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Traditional Restaurant",
+              "rating": 4.5,
+              "_tips": "Ask for local recommendations"
+            }
+          ],
+          "_coordinates": {
+            "lat": -8.3405,
+            "lng": 115.092
+          }
+        },
+        {
+          "day": 11,
+          "date": "2025-09-23",
+          "title": "Day 11: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Local market in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Market",
+              "rating": 4.4,
+              "_tips": "Great for shopping and people watching"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local lunch spot in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Lunch Place",
+              "rating": 4.2,
+              "_tips": "Great for midday meals"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Art gallery in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Art Gallery",
+              "rating": 4.5,
+              "_tips": "Features local and international art"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Evening dining in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Dinner Restaurant",
+              "rating": 4.6,
+              "_tips": "Perfect for dinner"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 12,
+          "date": "2025-09-24",
+          "title": "Day 12: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Art gallery in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Art Gallery",
+              "rating": 4.5,
+              "_tips": "Features local and international art"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Coffee and pastries in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Cafe",
+              "rating": 4.4,
+              "_tips": "Excellent coffee"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Historic city center of Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Historic Center",
+              "rating": 4.7,
+              "_tips": "Rich in history and culture"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Street food in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Street Food Market",
+              "rating": 4.3,
+              "_tips": "Authentic local flavors"
+            }
+          ],
+          "_coordinates": {
+            "lat": -8.3405,
+            "lng": 115.092
+          }
+        },
+        {
+          "day": 13,
+          "date": "2025-09-25",
+          "title": "Day 13: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Historic city center of Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Historic Center",
+              "rating": 4.7,
+              "_tips": "Rich in history and culture"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local breakfast cafe in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Breakfast Spot",
+              "rating": 4.3,
+              "_tips": "Try the local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Main cathedral in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Cathedral",
+              "rating": 4.6,
+              "_tips": "Beautiful architecture"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Traditional restaurant in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Traditional Restaurant",
+              "rating": 4.5,
+              "_tips": "Ask for local recommendations"
+            }
+          ],
+          "_coordinates": {
+            "lat": 22.64859,
+            "lng": 88.34115
+          }
+        },
+        {
+          "day": 14,
+          "date": "2025-09-26",
+          "title": "Day 14: Explore Bali",
+          "_destination": "Bali",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Main cathedral in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali Cathedral",
+              "rating": 4.6,
+              "_tips": "Beautiful architecture"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Local lunch spot in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Lunch Place",
+              "rating": 4.2,
+              "_tips": "Great for midday meals"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "City museum in Bali",
+              "category": "Attraction",
+              "address": "Bali",
+              "venue_name": "Bali City Museum",
+              "rating": 4.5,
+              "_tips": "Learn about local history"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Evening dining in Bali",
+              "category": "Food",
+              "address": "Bali",
+              "venue_name": "Bali Dinner Restaurant",
+              "rating": 4.6,
+              "_tips": "Perfect for dinner"
+            }
+          ],
+          "_coordinates": {
+            "lat": -8.3405,
+            "lng": 115.092
+          }
+        }
+      ],
+      "quickTips": [
+        "Book accommodations in advance",
+        "Check visa requirements",
+        "Get travel insurance",
+        "Download offline maps",
+        "Keep digital copies of documents"
+      ],
+      "_costEstimate": {
+        "total": 4200,
+        "flights": 1400,
+        "accommodation": 1400,
+        "dailyExpenses": 1400,
+        "currency": "USD",
+        "breakdown": [
+          {
+            "type": "flight",
+            "description": "Unknown → Bali",
+            "amount": 800
+          },
+          {
+            "type": "flight",
+            "description": "Bali → Unknown",
+            "amount": 600
+          },
+          {
+            "type": "accommodation",
+            "description": "Bali (14 nights)",
+            "amount": 1400
+          }
+        ]
+      },
+      "_hotelOptions": {},
+      "_flightOptions": {},
+      "_enrichedWithRadar": true
+    },
+    "duration": 11630,
+    "metadata": {
+      "model": "gpt-4o-mini",
+      "strategy": "ultra-fast-enriched",
+      "destinations": [
+        "Bali"
+      ],
+      "totalDays": 14
+    }
+  },
+  {
+    "id": "req_1757718686024_1yptgg",
+    "timestamp": "2025-09-12T23:11:26.024Z",
+    "type": "request",
+    "prompt": "Plan a trip to London for a week",
+    "metadata": {
+      "model": "gpt-4o-mini",
+      "strategy": "ultra-fast"
+    }
+  },
+  {
+    "id": "req_1757718686024_1yptgg",
+    "timestamp": "2025-09-12T23:11:35.818Z",
+    "type": "response",
+    "response": {
+      "destination": "London",
+      "title": "7 Days in London",
+      "itinerary": [
+        {
+          "day": 1,
+          "date": "2025-09-13",
+          "title": "Day 1: Explore London",
+          "_destination": "London",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Visit main attraction",
+              "category": "Attraction",
+              "address": "St. Paul's Churchyard, London EC4M 8AD",
+              "venue_name": "British Optical Association Museum",
+              "rating": 4.7,
+              "_tips": "Book tickets in advance",
+              "coordinates": {
+                "lat": 51.5078919,
+                "lng": -0.1253919
+              },
+              "radar_place_id": "607f21a75368e10ed4d11563"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Breakfast at local cafe",
+              "category": "Food",
+              "address": "Forecourt, Maida Vale Station, Randolph Ave., London W9 1JS",
+              "venue_name": "SO Café London",
+              "rating": 4.9,
+              "_tips": "Try local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Explore local area",
+              "category": "Attraction",
+              "address": "32 London Bridge St, London SE1 9SG",
+              "venue_name": "The View from The Shard",
+              "rating": 4.6,
+              "_tips": "Wear comfortable shoes"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Lunch at recommended restaurant",
+              "category": "Food",
+              "address": "23 St James's St, London SW1A 1HA",
+              "venue_name": "Riviera",
+              "rating": 4.8,
+              "_tips": "Make reservations"
+            }
+          ],
+          "_coordinates": {
+            "lat": 51.50853,
+            "lng": -0.12574
+          }
+        },
+        {
+          "day": 2,
+          "date": "2025-09-14",
+          "title": "Day 2: Explore London",
+          "_destination": "London",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Explore local area",
+              "category": "Attraction",
+              "address": "32 London Bridge St, London SE1 9SG",
+              "venue_name": "The View from The Shard",
+              "rating": 4.6,
+              "_tips": "Wear comfortable shoes"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dinner and evening activities",
+              "category": "Food",
+              "address": "85 Piccadilly, London W1J 7NB",
+              "venue_name": "HIDE",
+              "rating": 4.5,
+              "_tips": "Enjoy local cuisine"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Explore local area",
+              "category": "Attraction",
+              "address": "London SW1A 1AA",
+              "venue_name": "Buckingham Palace",
+              "rating": 4.5,
+              "_tips": "Wear comfortable shoes"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Breakfast at local cafe",
+              "category": "Food",
+              "address": "17-19 Regency St, London SW1P 4BY",
+              "venue_name": "Regency Cafe",
+              "rating": 4.7,
+              "_tips": "Try local specialties"
+            }
+          ],
+          "_coordinates": {
+            "lat": 51.5074,
+            "lng": -0.1278
+          }
+        },
+        {
+          "day": 3,
+          "date": "2025-09-15",
+          "title": "Day 3: Explore London",
+          "_destination": "London",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Explore local area",
+              "category": "Attraction",
+              "address": "London SW1A 1AA",
+              "venue_name": "Buckingham Palace",
+              "rating": 4.5,
+              "_tips": "Wear comfortable shoes"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dinner and evening activities",
+              "category": "Food",
+              "address": "First Floor, 41-43 Mount St, London W1K 2RX",
+              "venue_name": "Mount St. Restaurant",
+              "rating": 4.7,
+              "_tips": "Enjoy local cuisine"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Visit main attraction",
+              "category": "Attraction",
+              "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
+              "venue_name": "London Eye",
+              "rating": 4.5,
+              "_tips": "Book tickets in advance"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dinner and evening activities",
+              "category": "Food",
+              "address": "The Now Building Rooftop, Outernet, Denmark St, London WC2H 0LA",
+              "venue_name": "Tattu London",
+              "rating": 4.7,
+              "_tips": "Enjoy local cuisine"
+            }
+          ],
+          "_coordinates": {
+            "lat": 51.50853,
+            "lng": -0.12574
+          }
+        },
+        {
+          "day": 4,
+          "date": "2025-09-16",
+          "title": "Day 4: Explore London",
+          "_destination": "London",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Visit main attraction",
+              "category": "Attraction",
+              "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
+              "venue_name": "London Eye",
+              "rating": 4.5,
+              "_tips": "Book tickets in advance"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Lunch at recommended restaurant",
+              "category": "Food",
+              "address": "52 Haymarket, London SW1Y 4RP",
+              "venue_name": "Fallow",
+              "rating": 4.7,
+              "_tips": "Make reservations"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Explore local area",
+              "category": "Attraction",
+              "address": "London",
+              "venue_name": "Hyde Park",
+              "rating": 4.7,
+              "_tips": "Wear comfortable shoes"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Lunch at recommended restaurant",
+              "category": "Food",
+              "address": "28 Rupert St, London W1D 6DJ",
+              "venue_name": "Evelyn's Table",
+              "rating": 4.8,
+              "_tips": "Make reservations"
+            }
+          ],
+          "_coordinates": {
+            "lat": 51.50853,
+            "lng": -0.12574
+          }
+        },
+        {
+          "day": 5,
+          "date": "2025-09-17",
+          "title": "Day 5: Explore London",
+          "_destination": "London",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Explore local area",
+              "category": "Attraction",
+              "address": "London",
+              "venue_name": "British Optical Association Museum",
+              "rating": 4.7,
+              "_tips": "Wear comfortable shoes",
+              "coordinates": {
+                "lat": 51.5078919,
+                "lng": -0.1253919
+              },
+              "radar_place_id": "607f21a75368e10ed4d11563"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Breakfast at local cafe",
+              "category": "Food",
+              "address": "383 Kennington Ln, London SE11 5QY",
+              "venue_name": "Kennington Lane Cafe",
+              "rating": 4.9,
+              "_tips": "Try local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Visit main attraction",
+              "category": "Attraction",
+              "address": "London EC3N 4AB",
+              "venue_name": "Tower of London",
+              "rating": 4.7,
+              "_tips": "Book tickets in advance"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Breakfast at local cafe",
+              "category": "Food",
+              "address": "Forecourt, Maida Vale Station, Randolph Ave., London W9 1JS",
+              "venue_name": "SO Café London",
+              "rating": 4.9,
+              "_tips": "Try local specialties"
+            }
+          ],
+          "_coordinates": {
+            "lat": 51.50853,
+            "lng": -0.12574
+          }
+        },
+        {
+          "day": 6,
+          "date": "2025-09-18",
+          "title": "Day 6: Explore London",
+          "_destination": "London",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Visit main attraction",
+              "category": "Attraction",
+              "address": "London EC3N 4AB",
+              "venue_name": "British Optical Association Museum",
+              "rating": 4.7,
+              "_tips": "Book tickets in advance",
+              "coordinates": {
+                "lat": 51.5078919,
+                "lng": -0.1253919
+              },
+              "radar_place_id": "607f21a75368e10ed4d11563"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Lunch at recommended restaurant",
+              "category": "Food",
+              "address": "23 St James's St, London SW1A 1HA",
+              "venue_name": "Starbucks",
+              "rating": 4.8,
+              "_tips": "Make reservations",
+              "coordinates": {
+                "lat": 51.5088581,
+                "lng": -0.1252964
+              },
+              "radar_place_id": "607f21a75368e10ed4cece88"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Visit main attraction",
+              "category": "Attraction",
+              "address": "St. Paul's Churchyard, London EC4M 8AD",
+              "venue_name": "St. Paul's Cathedral",
+              "rating": 4.7,
+              "_tips": "Book tickets in advance"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dinner and evening activities",
+              "category": "Food",
+              "address": "85 Piccadilly, London W1J 7NB",
+              "venue_name": "HIDE",
+              "rating": 4.5,
+              "_tips": "Enjoy local cuisine"
+            }
+          ],
+          "_coordinates": {
+            "lat": 51.50853,
+            "lng": -0.12574
+          }
+        },
+        {
+          "day": 7,
+          "date": "2025-09-19",
+          "title": "Day 7: Explore London",
+          "_destination": "London",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Visit main attraction",
+              "category": "Attraction",
+              "address": "St. Paul's Churchyard, London EC4M 8AD",
+              "venue_name": "St. Paul's Cathedral",
+              "rating": 4.7,
+              "_tips": "Book tickets in advance"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Breakfast at local cafe",
+              "category": "Food",
+              "address": "17-19 Regency St, London SW1P 4BY",
+              "venue_name": "Regency Cafe",
+              "rating": 4.7,
+              "_tips": "Try local specialties"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Explore local area",
+              "category": "Attraction",
+              "address": "32 London Bridge St, London SE1 9SG",
+              "venue_name": "The View from The Shard",
+              "rating": 4.6,
+              "_tips": "Wear comfortable shoes"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dinner and evening activities",
+              "category": "Food",
+              "address": "First Floor, 41-43 Mount St, London W1K 2RX",
+              "venue_name": "Mount St. Restaurant",
+              "rating": 4.7,
+              "_tips": "Enjoy local cuisine"
+            }
+          ],
+          "_coordinates": {
+            "lat": 51.50853,
+            "lng": -0.12574
+          }
+        }
+      ],
+      "quickTips": [
+        "Book accommodations in advance",
+        "Check visa requirements",
+        "Get travel insurance",
+        "Download offline maps",
+        "Keep digital copies of documents"
+      ],
+      "_costEstimate": {
+        "total": 3550,
+        "flights": 1450,
+        "accommodation": 1400,
+        "dailyExpenses": 700,
+        "currency": "USD",
+        "breakdown": [
+          {
+            "type": "flight",
+            "description": "Unknown → London",
+            "amount": 700
+          },
+          {
+            "type": "flight",
+            "description": "London → Unknown",
+            "amount": 750
+          },
+          {
+            "type": "accommodation",
+            "description": "London (7 nights)",
+            "amount": 1400
+          }
+        ]
+      },
+      "_hotelOptions": {},
+      "_flightOptions": {},
+      "_enrichedWithRadar": true
+    },
+    "duration": 9794,
+    "metadata": {
+      "model": "gpt-4o-mini",
+      "strategy": "ultra-fast-enriched",
+      "destinations": [
+        "London"
       ],
       "totalDays": 7
     }

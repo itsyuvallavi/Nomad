@@ -36,6 +36,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { tripsService, type Trip as FirestoreTrip } from '@/lib/trips-service';
+import { clearAllTrips } from '@/utils/clear-all-trips';
 
 // Use Trip type from trips service
 type Trip = Omit<FirestoreTrip, 'userId' | 'createdAt' | 'updatedAt'> & {
@@ -64,10 +65,7 @@ export default function TripsPage() {
       try {
         setLoading(true);
         
-        // First sync localStorage to Firestore
-        await tripsService.syncLocalStorageToFirestore(user.uid);
-        
-        // Then load all trips
+        // Load all trips from Firestore
         const firestoreTrips = await tripsService.getUserTrips(user.uid);
         
         // Convert Firestore timestamps to Date objects
@@ -190,13 +188,8 @@ export default function TripsPage() {
   const viewTripDetails = (trip: Trip) => {
     // Navigate to chat view with the trip's chat state
     if (trip.chatState) {
-      // Store the trip data in localStorage temporarily
-      localStorage.setItem('viewingTrip', JSON.stringify({
-        id: trip.id,
-        prompt: trip.prompt,
-        chatState: trip.chatState
-      }));
-      router.push('/');
+      // Pass the trip ID in the URL to track we're viewing an existing trip
+      router.push(`/?tripId=${trip.id}&mode=view`);
     }
   };
 
@@ -207,12 +200,27 @@ export default function TripsPage() {
         <div className="min-h-screen pt-12 md:pt-16 bg-gray-50">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <History className="h-8 w-8" />
-              Trip History
-            </h1>
-            <p className="text-gray-600">View and manage all your travel plans</p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <History className="h-8 w-8" />
+                Trip History
+              </h1>
+              <p className="text-gray-600">View and manage all your travel plans</p>
+            </div>
+            {trips.length > 0 && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={async () => {
+                  if (confirm('Are you sure you want to delete ALL trips? This cannot be undone.')) {
+                    await clearAllTrips();
+                  }
+                }}
+              >
+                Clear All Trips
+              </Button>
+            )}
           </div>
 
           {/* Filters and Search */}

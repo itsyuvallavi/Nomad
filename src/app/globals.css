@@ -5,6 +5,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent auto-zoom on mobile inputs - COMPREHENSIVE FIX */
+@layer base {
+  /* Set all inputs to 16px minimum to prevent zoom on iOS Safari */
+  input,
+  textarea,
+  select,
+  button,
+  [contenteditable],
+  [role="textbox"],
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"] {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+  
+  /* For iOS devices specifically - override any component styles */
+  @supports (-webkit-touch-callout: none) {
+    input,
+    textarea,
+    select,
+    button,
+    [contenteditable],
+    [role="textbox"] {
+      font-size: 16px !important;
+      -webkit-text-size-adjust: 100% !important;
+      transform: scale(1) !important;
+      zoom: 1 !important;
+    }
+    
+    /* Prevent zoom on focus */
+    input:focus,
+    textarea:focus,
+    select:focus,
+    [contenteditable]:focus,
+    [role="textbox"]:focus {
+      font-size: 16px !important;
+      -webkit-text-size-adjust: 100% !important;
+      transform: scale(1) !important;
+      zoom: 1 !important;
+    }
+  }
+  
+  /* Additional Safari-specific fixes */
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+}
+
 /* Performance optimizations for mobile */
 @layer utilities {
   /* Shimmer loading effect */
@@ -72,15 +135,27 @@
   
   body {
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
   }
   
-  /* Prevent iOS bounce and ensure proper viewport */
+  /* Prevent iOS bounce but allow scrolling */
   @supports (-webkit-touch-callout: none) {
     body {
-      /* iOS specific fixes */
-      position: fixed;
+      /* iOS specific fixes - removed position: fixed to allow scrolling */
       width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: none;
+    }
+    
+    /* Prevent pull-to-refresh */
+    html, body {
+      overscroll-behavior-y: contain;
+      overscroll-behavior: none;
     }
   }
   
