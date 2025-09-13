@@ -4,7 +4,7 @@ import { CoworkingSection } from './coworking-spots';
 import { ExportMenu } from './export-menu';
 import { ItineraryLoadingSkeleton } from './loading-skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { motion, useInView } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Map, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';

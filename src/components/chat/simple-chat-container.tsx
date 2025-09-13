@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Send, Mic, MapIcon, Layers } from 'lucide-react';
-import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
-import { refineItineraryBasedOnFeedback } from '@/ai/flows/refine-itinerary-based-on-feedback';
+import { generatePersonalizedItinerary } from '@/services/ai/flows/generate-personalized-itinerary';
+import { refineItineraryBasedOnFeedback } from '@/services/ai/flows/refine-itinerary-based-on-feedback';
 import type { FormValues } from '../forms/trip-details-form';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import type { RecentSearch, ChatState } from '@/app/page';
 import { Button } from '../ui/button';
 import { AnimatedLogo } from '@/components/ui/animated-logo';

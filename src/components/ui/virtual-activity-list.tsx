@@ -5,7 +5,7 @@ import { FixedSizeList } from 'react-window';
 import { Clock, MapPin, DollarSign, Star, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMotion } from '@/components/providers/motion-provider';
-import type { Activity } from '@/ai/schemas';
+import type { Activity } from '@/services/ai/schemas';
 
 interface VirtualActivityListProps {
   activities: Activity[];

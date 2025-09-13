@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { MapPin, Navigation, Layers, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { geocodeAddresses, getCenterPoint, getBounds, getCoordinatesWithFallback, CITY_COORDINATES, type Coordinates } from './utils/geocoding';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

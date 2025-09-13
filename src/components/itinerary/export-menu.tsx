@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import jsPDF from 'jspdf';
 
 interface ExportMenuProps {

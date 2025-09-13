@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useMotion } from '@/components/providers/motion-provider';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import type { FormValues } from '@/components/forms/trip-details-form';
 import { Header } from '@/components/navigation/Header';
 import { fadeInScale } from '@/lib/animations';

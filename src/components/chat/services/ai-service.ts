@@ -1,8 +1,8 @@
-import { analyzeInitialPromptFlow } from '@/ai/flows/analyze-initial-prompt';
-import { generatePersonalizedItineraryFlow } from '@/ai/flows/generate-personalized-itinerary';
-import { refineItineraryBasedOnFeedbackFlow } from '@/ai/flows/refine-itinerary-based-on-feedback';
+import { analyzeInitialPromptFlow } from '@/services/ai/flows/analyze-initial-prompt';
+import { generatePersonalizedItineraryFlow } from '@/services/ai/flows/generate-personalized-itinerary';
+import { refineItineraryBasedOnFeedbackFlow } from '@/services/ai/flows/refine-itinerary-based-on-feedback';
 import type { FormValues } from '@/components/forms/trip-details-form';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import type { GenerationProgress } from '../hooks/use-chat-state';
 
 export interface AIServiceOptions {

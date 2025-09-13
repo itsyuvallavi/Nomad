@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generatePersonalizedItinerary } from '@/ai/flows/generate-personalized-itinerary';
-import { analyzeInitialPrompt } from '@/ai/flows/analyze-initial-prompt';
+import { generatePersonalizedItinerary } from '@/services/ai/flows/generate-personalized-itinerary';
+import { analyzeInitialPrompt } from '@/services/ai/flows/analyze-initial-prompt';
 
 // Cache for recent prompts (in-memory cache)
 const promptCache = new Map<string, { data: any; timestamp: number }>();

@@ -15,8 +15,6 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
   onAuthStateChanged,
   UserCredential,
   setPersistence,
@@ -109,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userData: Omit<UserData, 'uid'> = {
         email: user.email!,
         displayName: user.displayName || additionalData.displayName || '',
-        photoURL: user.photoURL || null,
+        photoURL: user.photoURL || undefined,
         createdAt: serverTimestamp() as Timestamp,
         lastLoginAt: serverTimestamp() as Timestamp,
         preferences: defaultPreferences,
@@ -225,9 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set custom parameters
       provider.setCustomParameters({
-        prompt: 'select_account',
-        // Add redirect_uri to ensure proper callback
-        redirect_uri: window.location.origin
+        prompt: 'select_account'
       });
       
       console.log('📱 Provider configured');
@@ -236,11 +232,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('📍 Current origin:', window.location.origin);
       
       // Try popup with better error handling
+      const popupStartTime = Date.now();
       try {
         console.log('🪟 Attempting popup sign-in...');
-        
+        console.log('⏰ Start time:', new Date().toISOString());
+
         // Use signInWithPopup directly
         const result = await signInWithPopup(auth, provider);
+
+        const popupDuration = Date.now() - popupStartTime;
+        console.log(`⏱️ Popup was open for ${popupDuration}ms`);
+        console.log('📦 Raw result received:', result ? 'Result exists' : 'No result');
         
         if (result && result.user) {
           console.log('✅ Google sign-in successful via popup');
@@ -265,36 +267,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } catch (popupError: any) {
+        const popupDuration = Date.now() - popupStartTime;
+        console.log(`⏱️ Popup closed/failed after ${popupDuration}ms`);
+
         console.error('❌ Popup error details:', {
           code: popupError.code,
           message: popupError.message,
           customData: popupError.customData,
           name: popupError.name
         });
-        
-        // Check if it's a real popup close or a configuration issue
+
+        // Check if this is a Firebase IDE specific issue
+        const isFirebaseIDE = window.location.hostname.includes('cloudworkstations.dev');
+
+        // Log the error but don't automatically redirect
         if (popupError.code === 'auth/popup-closed-by-user') {
-          // Check if this is actually a configuration issue
-          console.log('🔍 Checking if popup was actually closed or if there\'s a config issue...');
-          console.log('📍 Make sure this domain is authorized:', window.location.hostname);
-          
-          // Try redirect as fallback
-          console.log('🔄 Attempting redirect sign-in as fallback...');
-          await signInWithRedirect(auth, provider);
-          console.log('✅ Redirect initiated');
+          console.log('🔍 Popup was closed');
+          console.log('📍 Current domain:', window.location.hostname);
+
+          if (isFirebaseIDE) {
+            console.log('🔥 Detected Firebase IDE environment');
+            console.log('⚠️ Firebase IDE may have issues with popup auth');
+            console.log('💡 Try one of these solutions:');
+            console.log('   1. Deploy to Firebase Hosting and test there');
+            console.log('   2. Test locally with npm run dev');
+            console.log('   3. Add this exact domain to OAuth redirect URIs in Google Cloud Console');
+            throw new Error('Google sign-in may not work properly in Firebase IDE. Deploy to Firebase Hosting or test locally.');
+          }
+
+          console.log('⚠️ NOT automatically redirecting - user can retry if needed');
+          throw new Error('Sign-in popup was closed. Please try again.');
         } else if (popupError.code === 'auth/popup-blocked') {
-          // Browser blocked popup
-          console.log('🚫 Popup was blocked by browser, using redirect...');
-          await signInWithRedirect(auth, provider);
+          console.log('🚫 Popup was blocked by browser');
+          console.log('⚠️ NOT automatically redirecting - user needs to allow popups');
+          throw new Error('Popup was blocked by your browser. Please allow popups for this site and try again.');
         } else if (popupError.code === 'auth/unauthorized-domain') {
           console.error('🚨 DOMAIN NOT AUTHORIZED!');
           console.error('Add this domain to Firebase Console:', window.location.hostname);
-          console.log('🔄 Attempting redirect as fallback for unauthorized domain...');
-          // Try redirect even for unauthorized domain
-          await signInWithRedirect(auth, provider);
-          console.log('✅ Redirect initiated');
+          throw new Error(`This domain (${window.location.hostname}) is not authorized for Google sign-in. Please contact support.`);
+        } else if (popupError.code === 'auth/cancelled-popup-request') {
+          console.log('⚠️ Another popup is already open');
+          throw new Error('Another sign-in popup is already open. Please close it and try again.');
         } else {
-          // Other errors should be thrown
+          // Other errors should be thrown with more detail
+          console.error('❌ Unexpected popup error:', popupError);
           throw popupError;
         }
       }
@@ -359,56 +375,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserData(data);
   };
 
-  // Handle redirect result from Google sign-in
-  useEffect(() => {
-    // Only run on client side
-    if (typeof window === 'undefined') return;
-
-    // Check for redirect result from Google sign-in
-    const handleRedirectResult = async () => {
-      console.log('🔍 Checking for redirect result...');
-      try {
-        const result = await getRedirectResult(auth);
-        console.log('🔍 Redirect result:', result);
-        
-        if (result && result.user) {
-          console.log('✅ Google sign-in successful via redirect');
-          console.log('👤 User info:', {
-            uid: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName
-          });
-          
-          // Create user document if it doesn't exist
-          await createUserDocument(result.user);
-          
-          // Update last login time
-          const userRef = doc(db, 'users', result.user.uid);
-          const userDoc = await getDoc(userRef);
-          
-          if (userDoc.exists()) {
-            await updateDoc(userRef, {
-              lastLoginAt: serverTimestamp()
-            });
-            console.log('✅ User document updated');
-          }
-        } else {
-          console.log('ℹ️ No redirect result found');
-        }
-      } catch (error: any) {
-        // Only log errors that aren't the expected 'no-auth-event'
-        if (error.code === 'auth/no-auth-event') {
-          console.log('ℹ️ No auth event to process (normal on regular page load)');
-        } else {
-          console.error('❌ Redirect result error:', error);
-          console.error('Error code:', error.code);
-          console.error('Error message:', error.message);
-        }
-      }
-    };
-
-    handleRedirectResult();
-  }, []);
+  // Removed redirect result handler since we're using popup-only authentication
 
   // Listen to auth state changes
   useEffect(() => {

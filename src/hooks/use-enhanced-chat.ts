@@ -11,11 +11,11 @@ import {
   clearConversationState,
   type ChatRequest,
   type ChatResponse 
-} from '@/ai/flows/chat-conversation';
+} from '@/services/ai/flows/chat-conversation';
 import { 
   ConversationState, 
   type EnhancedMessage 
-} from '@/ai/flows/generate-dialog-response';
+} from '@/services/ai/flows/generate-dialog-response';
 import { logger } from '@/lib/logger';
 
 interface UseEnhancedChatOptions {

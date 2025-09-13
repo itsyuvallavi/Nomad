@@ -1,7 +1,0 @@
-{"id":"req_1757649245049_2y3lt","timestamp":"2025-09-12T03:54:05.049Z","type":"request","prompt":"Flying from New York to London for 3 days","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
-{"id":"req_1757649245197_lcqfcl","timestamp":"2025-09-12T03:54:05.197Z","type":"request","prompt":"Weekend trip from Los Angeles to Paris","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
-{"id":"req_1757649245392_kwcfjq","timestamp":"2025-09-12T03:54:05.392Z","type":"request","prompt":"Departing from San Francisco for one week in Tokyo and 3 days in Kyoto","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
-{"id":"req_1757649245765_ri3wcu","timestamp":"2025-09-12T03:54:05.765Z","type":"request","prompt":"Starting from Boston for 2 weeks across London, Paris, Rome, and Barcelona","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
-{"id":"req_1757649245860_uriis4","timestamp":"2025-09-12T03:54:05.860Z","type":"request","prompt":"Leaving from Chicago for 30 days visiting London, Paris, Rome, Barcelona, and Amsterdam","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
-{"id":"req_1757649245954_83ioc","timestamp":"2025-09-12T03:54:05.954Z","type":"request","prompt":"From Miami for 3 weeks in London, Paris, Rome, Barcelona, Amsterdam, and Berlin","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}
-{"id":"req_1757649246022_o5omod","timestamp":"2025-09-12T03:54:06.022Z","type":"request","prompt":"From Seattle for 35 days exploring Europe","metadata":{"model":"gpt-4o-mini","strategy":"ultra-fast"}}

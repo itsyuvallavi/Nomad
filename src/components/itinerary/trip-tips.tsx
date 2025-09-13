@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { GeneratePersonalizedItineraryOutput } from '@/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 
 interface TripActionsProps {
   itinerary: GeneratePersonalizedItineraryOutput;

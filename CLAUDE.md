@@ -14,9 +14,9 @@ This file provides guidance to Claude Code when working with the Nomad Navigator
 Nomad Navigator - AI-powered travel planning application for digital nomads using Next.js 15, OpenAI APIs, and modern web technologies.
 
 ## Current Firebase Project
-**Project ID**: nomad-navigator-xej23
-**Auth Domain**: nomad-navigator-xej23.firebaseapp.com
-**Project Number**: 843370239890
+**Project ID**: nomad-navigatordup-70195-f4cf9
+**Auth Domain**: nomad-navigatordup-70195-f4cf9.firebaseapp.com
+**Project Number**: 476100182115
 
 ## Current Technology Stack
 - **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS, shadcn/ui
@@ -34,19 +34,65 @@ Nomad Navigator - AI-powered travel planning application for digital nomads usin
 4. **Think MVP**: Focus on minimal viable solutions
 
 ### File Organization - CRITICAL
-**ALWAYS place files in their correct directories:**
-- **Tasks & Plans**: `.claude/tasks/[component]/task-name.md` - NEVER in root
-- **Documentation**: `.claude/docs/` or `docs/` - NEVER in root
-- **Test Files**: `src/__tests__/` or appropriate test directories
-- **Components**: `src/components/[category]/`
-- **API Routes**: `src/app/api/`
-- **Utilities**: `src/lib/utils/`
-- **Configurations**: Root level only for configs like `.env`, `next.config.ts`
 
-**NEVER create files in root unless they are:**
-- Configuration files (`.env`, `next.config.ts`, `package.json`)
-- Standard project files (`README.md`, `LICENSE`)
-- Git files (`.gitignore`)
+#### Project Structure (As of Jan 13, 2025)
+```
+nomad-navigator/
+├── config/                      # ALL configuration files
+│   ├── build/                   # Build configs (next, tailwind, postcss, tsconfig)
+│   ├── firebase/                # Firebase configs (firebase.json, firestore files)
+│   └── dev/                     # Dev configs (eslint, components, mcp)
+├── data/                        # ALL static/mock data
+│   ├── static/                  # Static data files
+│   ├── mock/                    # Mock data for testing
+│   └── cache/                   # Cached data
+├── src/
+│   ├── app/                     # Next.js App Router (pages only)
+│   ├── components/              # React components
+│   │   └── pages/               # Full page components
+│   ├── services/                # ALL business logic
+│   │   ├── ai/                  # AI flows and utilities
+│   │   ├── api/                 # External API integrations
+│   │   ├── firebase/            # Firebase services (auth, analytics)
+│   │   ├── trips/               # Trip-related services
+│   │   └── storage/             # Storage services
+│   ├── lib/                     # Utilities ONLY
+│   │   ├── utils/               # Utility functions
+│   │   ├── constants/           # App constants
+│   │   └── monitoring/          # Logging, errors, performance
+│   ├── contexts/                # React contexts
+│   ├── hooks/                   # Custom React hooks
+│   └── types/                   # TypeScript type definitions
+├── public/                      # Static assets (favicons, PWA manifest)
+├── docs/                        # Documentation
+└── scripts/                     # Build/utility scripts
+```
+
+#### File Placement Rules
+**ALWAYS place files in their correct directories:**
+- **Services/Business Logic**: `src/services/[category]/` - NOT in lib
+- **External APIs**: `src/services/api/` - NOT in lib/api
+- **AI Code**: `src/services/ai/` - NOT in src/ai
+- **Firebase Code**: `src/services/firebase/` - NOT in lib
+- **Utilities**: `src/lib/utils/` - Pure functions only
+- **Constants**: `src/lib/constants/` - Static values
+- **Monitoring**: `src/lib/monitoring/` - Loggers, error handlers
+- **Mock Data**: `data/mock/` - NOT in src/data
+- **Config Files**: `config/[category]/` - NOT in root
+- **Page Components**: `src/components/pages/` - Full page logic
+
+**Root Directory Files (only these):**
+- `.env`, `.env.local` - Environment variables
+- `package.json`, `package-lock.json` - NPM files
+- `README.md`, `CLAUDE.md` - Documentation
+- `next-env.d.ts` - Next.js types
+- Symbolic links to config files
+
+**NEVER create in root:**
+- Test files or results
+- Temporary documentation
+- Config files (use config/ directory)
+- Data files (use data/ directory)
 
 **Examples of incorrect placement:**
 - ❌ `/FIREBASE_AUTH_SETUP.md` → ✅ `.claude/docs/firebase-auth-setup.md`
@@ -108,19 +154,32 @@ npm run build              # Production build test
 ### Key Directories
 ```
 src/
-├── ai/flows/              # AI processing logic
+├── services/              # All business logic
+│   ├── ai/               # AI processing logic
+│   │   ├── flows/        # AI flow definitions
+│   │   ├── utils/        # AI utilities
+│   │   └── schemas.ts    # AI type schemas
+│   ├── api/              # External API integrations
+│   │   ├── amadeus.ts    # Flight/hotel APIs
+│   │   ├── google-places.ts
+│   │   └── weather.ts
+│   └── firebase/         # Firebase services
+│       └── auth.ts       # Authentication
 ├── components/            # React components
+│   ├── pages/            # Full page components
 │   ├── chat/             # Chat interface
 │   ├── itinerary/        # Trip display
 │   └── ui/               # Reusable components
-├── lib/api/              # External API integrations
-└── lib/utils/            # Utility functions
+└── lib/                   # Utilities only
+    ├── utils/            # Helper functions
+    ├── constants/        # Static values
+    └── monitoring/       # Logging/errors
 ```
 
 ### AI Flows (Primary Logic)
-- `analyze-initial-prompt.ts`: Parses user input
-- `generate-personalized-itinerary.ts`: Creates trip plans
-- `refine-itinerary-based-on-feedback.ts`: Handles modifications
+- `src/services/ai/flows/analyze-initial-prompt.ts`: Parses user input
+- `src/services/ai/flows/generate-personalized-itinerary.ts`: Creates trip plans
+- `src/services/ai/flows/refine-itinerary-based-on-feedback.ts`: Handles modifications
 
 ### External APIs
 - **Amadeus**: Flights, hotels, car rentals
@@ -190,8 +249,8 @@ OPENWEATHERMAP=            # Weather forecasts
 ## Common Patterns
 
 ### AI Flow Development
-1. Update schemas in `src/ai/schemas.ts`
-2. Modify flow logic in `src/ai/flows/`
+1. Update schemas in `src/services/ai/schemas.ts`
+2. Modify flow logic in `src/services/ai/flows/`
 3. Test with Genkit UI (`npm run genkit:dev`)
 4. Run baseline tests
 5. Deploy only after tests pass
@@ -203,10 +262,25 @@ OPENWEATHERMAP=            # Weather forecasts
 4. Test responsive design
 
 ### API Integration
-1. Add new APIs to `src/lib/api/`
+1. Add new APIs to `src/services/api/`
 2. Include proper error handling
 3. Implement fallback strategies
 4. Add environment variable validation
+
+### Import Path Guidelines
+```typescript
+// Correct imports after reorganization:
+import { auth } from '@/services/firebase/auth';
+import { amadeus } from '@/services/api/amadeus';
+import { generateItinerary } from '@/services/ai/flows/generate-personalized-itinerary';
+import { logger } from '@/lib/monitoring/logger';
+import { formatDate } from '@/lib/utils/date-parser';
+import { CITY_LANDMARKS } from '@/lib/constants/city-landmarks';
+
+// Backward compatibility (still works but avoid in new code):
+import { auth } from '@/lib/firebase';  // Re-exports from services
+import { tripsService } from '@/lib/trips-service';  // Re-exports from services
+```
 
 ## Performance Optimization Strategy
 

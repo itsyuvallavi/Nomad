@@ -21,8 +21,8 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ConversationState } from '@/ai/flows/generate-dialog-response';
-import { ClassificationResult } from '@/ai/utils/hybrid-parser';
+import { ConversationState } from '@/services/ai/flows/generate-dialog-response';
+import { ClassificationResult } from '@/services/ai/utils/hybrid-parser';
 import { cn } from '@/lib/utils';
 
 interface ContextDisplayProps {

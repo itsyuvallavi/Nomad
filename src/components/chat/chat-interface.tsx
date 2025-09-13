@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { EmptyState } from '@/components/ui/empty-state';
 import { AnimatedLogo } from '@/components/ui/animated-logo';
 import { Badge } from '@/components/ui/badge';
-import { ConversationState, DialogResponse } from '@/ai/flows/generate-dialog-response';
-import { ClassificationResult, ParseResult } from '@/ai/utils/hybrid-parser';
+import { ConversationState, DialogResponse } from '@/services/ai/flows/generate-dialog-response';
+import { ClassificationResult, ParseResult } from '@/services/ai/utils/hybrid-parser';
 
 // Enhanced message interface with metadata from Phase 3
 interface EnhancedMessage {
