@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 // Bundle analyzer for performance optimization
@@ -7,7 +8,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // Removed 'output: export' to support API routes and SSR
+  // Removed 'output: export' and 'trailingSlash: true' to support API routes and fix static asset 404s
   typescript: {
     ignoreBuildErrors: true,
   },
