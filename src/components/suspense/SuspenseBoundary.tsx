@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { Suspense, type ReactNode } from 'react';

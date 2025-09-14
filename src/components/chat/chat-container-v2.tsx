@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useEffect, useRef, useCallback, memo, useState } from 'react';
+import { useEffect, useRef, useCallback, memo, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { ArrowLeft, Map, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,12 +12,14 @@ import type { FormValues } from '@/components/forms/trip-details-form';
 // Hooks
 import { useChatState, type ChatState } from './hooks/use-chat-state';
 import { useChatStorage } from './hooks/use-chat-storage';
-import { useSwipeGestures } from '@/lib/animations';
+import { useSwipeGestures } from '@/hooks/use-swipe-gestures';
 
 // Components
 import MessageList from './message-list';
 import ChatInput from './chat-input';
 import GenerationProgress from './generation-progress';
+import { SuspenseBoundary } from '@/components/suspense/SuspenseBoundary';
+
 
 // Services
 import { aiService } from './services/ai-service';
@@ -236,7 +239,9 @@ export const ChatContainer = memo(function ChatContainer({
               />
             </div>
           ) : currentItinerary ? (
-            <ItineraryPanel itinerary={currentItinerary} />
+            <SuspenseBoundary name="Itinerary">
+                <ItineraryPanel itinerary={currentItinerary} />
+            </SuspenseBoundary>
           ) : null}
         </div>
 
@@ -315,13 +320,17 @@ export const ChatContainer = memo(function ChatContainer({
         <>
           {/* Itinerary Panel */}
           <div className="w-[400px] border-l flex flex-col bg-card">
-            <ItineraryPanel itinerary={currentItinerary} />
+            <SuspenseBoundary name="Itinerary">
+                <ItineraryPanel itinerary={currentItinerary} />
+            </SuspenseBoundary>
           </div>
 
           {/* Map Panel */}
           {showMapPanel && (
             <div className="w-[500px] border-l">
-              <MapPanel itinerary={currentItinerary} />
+              <SuspenseBoundary name="Map">
+                  <MapPanel itinerary={currentItinerary} />
+              </SuspenseBoundary>
             </div>
           )}
         </>
