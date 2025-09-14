@@ -1,3 +1,4 @@
+
 'use client';
 
 /**
@@ -15,6 +16,8 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   UserCredential,
   setPersistence,
@@ -208,120 +211,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign in with Google
+  // Sign in with Google using Redirect flow
   const signInWithGoogle = async (): Promise<void> => {
-    console.log('🚀 Starting Google sign-in...');
+    console.log('🚀 Starting Google sign-in with redirect...');
     try {
-      // Ensure persistence is set
       await setPersistence(auth, browserLocalPersistence);
-      console.log('✅ Persistence set to local');
-      
       const provider = new GoogleAuthProvider();
-      
-      // IMPORTANT: Don't add scopes - let Firebase handle defaults
-      // Adding scopes can cause issues with the popup flow
-      
-      // Set custom parameters
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      });
-      
-      console.log('📱 Provider configured');
-      console.log('🔑 Using project:', auth.app.options.projectId);
-      console.log('🌐 Auth domain:', auth.app.options.authDomain);
-      console.log('📍 Current origin:', window.location.origin);
-      
-      // Try popup with better error handling
-      const popupStartTime = Date.now();
-      try {
-        console.log('🪟 Attempting popup sign-in...');
-        console.log('⏰ Start time:', new Date().toISOString());
-
-        // Use signInWithPopup directly
-        const result = await signInWithPopup(auth, provider);
-
-        const popupDuration = Date.now() - popupStartTime;
-        console.log(`⏱️ Popup was open for ${popupDuration}ms`);
-        console.log('📦 Raw result received:', result ? 'Result exists' : 'No result');
-        
-        if (result && result.user) {
-          console.log('✅ Google sign-in successful via popup');
-          console.log('👤 User info:', {
-            uid: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName
-          });
-          
-          // Create user document
-          await createUserDocument(result.user);
-          
-          // Update last login time
-          const userRef = doc(db, 'users', result.user.uid);
-          const userDoc = await getDoc(userRef);
-          
-          if (userDoc.exists()) {
-            await updateDoc(userRef, {
-              lastLoginAt: serverTimestamp()
-            });
-            console.log('✅ User document updated');
-          }
-        }
-      } catch (popupError: any) {
-        const popupDuration = Date.now() - popupStartTime;
-        console.log(`⏱️ Popup closed/failed after ${popupDuration}ms`);
-
-        console.error('❌ Popup error details:', {
-          code: popupError.code,
-          message: popupError.message,
-          customData: popupError.customData,
-          name: popupError.name
-        });
-
-        // Check if this is a Firebase IDE specific issue
-        const isFirebaseIDE = window.location.hostname.includes('cloudworkstations.dev');
-
-        // Log the error but don't automatically redirect
-        if (popupError.code === 'auth/popup-closed-by-user') {
-          console.log('🔍 Popup was closed');
-          console.log('📍 Current domain:', window.location.hostname);
-
-          if (isFirebaseIDE) {
-            console.log('🔥 Detected Firebase IDE environment');
-            console.log('⚠️ Firebase IDE may have issues with popup auth');
-            console.log('💡 Try one of these solutions:');
-            console.log('   1. Deploy to Firebase Hosting and test there');
-            console.log('   2. Test locally with npm run dev');
-            console.log('   3. Add this exact domain to OAuth redirect URIs in Google Cloud Console');
-            throw new Error('Google sign-in may not work properly in Firebase IDE. Deploy to Firebase Hosting or test locally.');
-          }
-
-          console.log('⚠️ NOT automatically redirecting - user can retry if needed');
-          throw new Error('Sign-in popup was closed. Please try again.');
-        } else if (popupError.code === 'auth/popup-blocked') {
-          console.log('🚫 Popup was blocked by browser');
-          console.log('⚠️ NOT automatically redirecting - user needs to allow popups');
-          throw new Error('Popup was blocked by your browser. Please allow popups for this site and try again.');
-        } else if (popupError.code === 'auth/unauthorized-domain') {
-          console.error('🚨 DOMAIN NOT AUTHORIZED!');
-          console.error('Add this domain to Firebase Console:', window.location.hostname);
-          throw new Error(`This domain (${window.location.hostname}) is not authorized for Google sign-in. Please contact support.`);
-        } else if (popupError.code === 'auth/cancelled-popup-request') {
-          console.log('⚠️ Another popup is already open');
-          throw new Error('Another sign-in popup is already open. Please close it and try again.');
-        } else {
-          // Other errors should be thrown with more detail
-          console.error('❌ Unexpected popup error:', popupError);
-          throw popupError;
-        }
-      }
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithRedirect(auth, provider);
     } catch (error: any) {
-      console.error('❌ Google sign in error:', error);
-      console.error('Full error details:', {
-        code: error.code,
-        message: error.message,
-        stack: error.stack
-      });
-      
+      console.error('❌ Google sign-in redirect error:', error);
       throw error;
     }
   };
@@ -375,43 +274,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserData(data);
   };
 
-  // Removed redirect result handler since we're using popup-only authentication
-
-  // Listen to auth state changes
+  // Handle auth state changes and redirect results
   useEffect(() => {
-    // Only run on client side
-    if (typeof window === 'undefined') return;
-    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
-      
-      try {
-        if (user) {
-          setUser(user);
-          
-          // Fetch additional user data from Firestore
-          const data = await fetchUserData(user.uid);
-          setUserData(data);
-          
-          // Sync localStorage trips to Firestore
+      if (user) {
+        setUser(user);
+        const data = await fetchUserData(user.uid);
+        setUserData(data);
+        if (data) {
           try {
             await tripsService.syncLocalStorageToFirestore(user.uid);
             console.log('✅ Local trips synced to Firestore on auth');
           } catch (syncError) {
             console.error('Error syncing local trips:', syncError);
           }
-        } else {
-          setUser(null);
-          setUserData(null);
         }
-      } catch (error) {
-        console.error('Auth state change error:', error);
+      } else {
         setUser(null);
         setUserData(null);
       }
-      
       setLoading(false);
     });
+
+    // Handle redirect result
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result && result.user) {
+          console.log('✅ Google sign-in redirect result received');
+          const user = result.user;
+          setUser(user);
+          await createUserDocument(user);
+          const data = await fetchUserData(user.uid);
+          setUserData(data);
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('❌ Google sign-in getRedirectResult error:', error);
+        setLoading(false);
+      });
 
     return unsubscribe;
   }, []);
