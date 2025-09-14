@@ -35,6 +35,20 @@ const nextConfig: NextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
+  
+  // Add webpack configuration to handle problematic modules
+  webpack: (config, { isServer }) => {
+    // This prevents the 'handlebars' module from being bundled on the client
+    // where it's not needed and causes build errors.
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'handlebars': false
+      };
+    }
+    return config;
+  },
+
   // Allow Firebase Studio environment
   async headers() {
     return [
