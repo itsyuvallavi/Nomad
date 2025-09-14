@@ -3,7 +3,7 @@
  * Extracts and structures destinations from user input for better AI processing
  */
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 export interface ParsedDestination {
   name: string;

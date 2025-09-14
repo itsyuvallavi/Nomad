@@ -19,7 +19,7 @@ import {
   serverTimestamp,
   writeBatch
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/services/firebase/auth';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import type { ChatState } from '@/app/page';
 

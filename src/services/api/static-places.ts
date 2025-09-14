@@ -4,7 +4,7 @@
  */
 
 import staticActivities from '../../../data/static/static-activities.json';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 // Category mapping for AI requests to static data categories
 const CATEGORY_MAPPING: Record<string, string[]> = {

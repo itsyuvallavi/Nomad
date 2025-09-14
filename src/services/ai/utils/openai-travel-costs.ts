@@ -4,7 +4,7 @@
  */
 
 import OpenAI from 'openai';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 function getOpenAIClient(): OpenAI {
   if (!process.env.OPENAI_API_KEY) {

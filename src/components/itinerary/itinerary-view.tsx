@@ -9,11 +9,11 @@ import { motion, useInView } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Map, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
 import { LazyImage } from '@/components/ui/lazy-image';
-import { searchPexelsImages, type PexelsImage } from '@/lib/api/pexels';
-import { logger } from '@/lib/logger';
+import { searchPexelsImages, type PexelsImage } from '@/services/api/pexels';
+import { logger } from '@/lib/monitoring/logger';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
-import { getIconicImageSearch } from '@/lib/city-landmarks';
+import { getIconicImageSearch } from '@/lib/constants/city-landmarks';
 import { fadeInUp, staggerContainer, countAnimation } from '@/lib/animations';
 
 // Dynamically import map to avoid SSR issues

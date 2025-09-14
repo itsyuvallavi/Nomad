@@ -46,7 +46,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
-import { tripsService, type Trip as FirestoreTrip } from '@/lib/trips-service';
+import { tripsService, type Trip as FirestoreTrip } from '@/services/trips/trips-service';
 import { clearAllTrips } from '@/utils/clear-all-trips';
 
 // Use Trip type from trips service

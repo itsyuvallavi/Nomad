@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 import { parseDestinations } from '@/services/ai/utils/destination-parser';
 import { GeneratePersonalizedItineraryOutputSchema, ItinerarySchema } from '@/services/ai/schemas';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';

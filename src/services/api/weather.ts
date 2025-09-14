@@ -1,5 +1,5 @@
 // OpenWeatherMap API integration
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 const WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 

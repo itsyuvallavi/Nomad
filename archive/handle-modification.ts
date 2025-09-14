@@ -3,7 +3,7 @@
  * Handles adding/removing destinations, changing durations, updating preferences
  */
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 import { ParsedTrip, ParsedDestination } from '../utils/destination-parser';
 import { ClassificationResult } from '../utils/hybrid-parser';
 import { ConversationState } from './generate-dialog-response';

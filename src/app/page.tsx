@@ -9,7 +9,7 @@ import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas'
 import type { FormValues } from '@/components/forms/trip-details-form';
 import { Header } from '@/components/navigation/Header';
 import { fadeInScale } from '@/lib/animations';
-import { tripsService } from '@/lib/trips-service';
+import { tripsService } from '@/services/trips/trips-service';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Lazy load heavy components

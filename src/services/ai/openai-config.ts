@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 import dotenv from 'dotenv';
 import path from 'path';
 

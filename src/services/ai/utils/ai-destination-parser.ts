@@ -4,7 +4,7 @@
  */
 
 import { openai, MODEL_CONFIG } from '@/services/ai/openai-config';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 export interface AIParseResult {
   origin?: string;

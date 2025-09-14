@@ -2,7 +2,7 @@
 
 import { z } from 'genkit';
 import { parseDestinations } from '@/services/ai/utils/destination-parser';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 const AnalyzeInitialPromptInputSchema = z.object({
   prompt: z.string().describe('The user\'s travel request'),

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 interface ServiceWorkerState {
   isSupported: boolean;

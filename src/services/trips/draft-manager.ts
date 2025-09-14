@@ -4,7 +4,7 @@
  */
 
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 export type DraftStage = 'initialized' | 'validating' | 'parsing' | 'generating' | 'enhancing' | 'finalizing' | 'complete' | 'error';
 

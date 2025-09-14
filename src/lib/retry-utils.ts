@@ -3,7 +3,7 @@
  * Handles automatic retry logic with exponential backoff
  */
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 export interface RetryConfig {
   maxAttempts?: number;

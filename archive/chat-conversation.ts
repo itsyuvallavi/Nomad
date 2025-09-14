@@ -3,7 +3,7 @@
  * Integrates hybrid parsing, dialog responses, and modification handling
  */
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 import { hybridParser, classifyInput, ClassificationResult, ParseResult } from '../utils/hybrid-parser';
 import { 
   generateDialogResponse, 

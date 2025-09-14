@@ -3,7 +3,7 @@
  * Handles clarifications, confirmations, suggestions, and error explanations
  */
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 import { ClassificationResult, ParseResult } from '../utils/hybrid-parser';
 import { ParsedTrip } from '../utils/destination-parser';
 

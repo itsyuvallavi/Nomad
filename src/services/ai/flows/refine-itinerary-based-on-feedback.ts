@@ -9,7 +9,7 @@
  * - RefineItineraryBasedOnFeedbackOutput - The return type for the refineItineraryBasedOnFeedback function.
  */
 import {z} from 'genkit';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 import { openai, MODEL_CONFIG } from '@/services/ai/openai-config';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { GeneratePersonalizedItineraryOutputSchema } from '@/services/ai/schemas';

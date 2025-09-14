@@ -2,7 +2,7 @@
 // Run this in the browser console or as a component
 
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/services/firebase/auth';
 import { getAuth } from 'firebase/auth';
 
 export async function clearAllTrips() {

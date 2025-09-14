@@ -24,7 +24,7 @@ import ItineraryForm from './trip-details-form';
 import type { FormValues } from './trip-details-form';
 import type { RecentSearch, ChatState } from '@/app/page';
 import { useAuth } from '@/contexts/AuthContext';
-import { tripsService } from '@/lib/trips-service';
+import { tripsService } from '@/services/trips/trips-service';
 
 type StartItineraryProps = {
     onItineraryRequest: (values: FormValues, chatState?: ChatState, searchId?: string) => void;

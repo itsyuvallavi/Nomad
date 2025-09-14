@@ -2,7 +2,7 @@
  * Pexels API Integration
  * Alternative image provider with simpler API
  */
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || 'JDkOJu5vNAQmnwxkw9mGixEZsvuAmzNBPSOjuwtmyQiKpUdlG3fdwpKF';
 const PEXELS_API_URL = 'https://api.pexels.com/v1';

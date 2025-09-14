@@ -20,13 +20,13 @@ import { MobileMapModal } from '../map/mobile-map-modal';
 import { cn } from '@/lib/utils';
 import { ModernLoadingPanel } from './modern-loading-panel';
 import { ErrorDialog } from '../ui/error-dialog';
-import { logger } from '@/lib/logger';
-import { getDraftManager } from '@/lib/draft-manager';
+import { logger } from '@/lib/monitoring/logger';
+import { getDraftManager } from '@/services/trips/draft-manager';
 import { retryApiCall } from '@/lib/retry-utils';
-import { handleError, ErrorCategory } from '@/lib/error-handler';
-import { offlineStorage } from '@/lib/offline-storage';
+import { handleError, ErrorCategory } from '@/lib/monitoring/error-handler';
+import { offlineStorage } from '@/services/storage/offline-storage';
 import { useAuth } from '@/contexts/AuthContext';
-import { tripsService } from '@/lib/trips-service';
+import { tripsService } from '@/services/trips/trips-service';
 
 type Message = {
   role: 'user' | 'assistant';

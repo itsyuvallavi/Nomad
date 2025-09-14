@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react';
 import { useServiceWorker } from '@/hooks/use-service-worker';
-import { offlineStorage } from '@/lib/offline-storage';
-import { logger } from '@/lib/logger';
+import { offlineStorage } from '@/services/storage/offline-storage';
+import { logger } from '@/lib/monitoring/logger';
 
 interface OfflineProviderProps {
   children: React.ReactNode;

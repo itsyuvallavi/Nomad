@@ -31,8 +31,8 @@ import {
   serverTimestamp,
   Timestamp
 } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
-import { tripsService } from '@/lib/trips-service';
+import { auth, db } from '@/services/firebase/auth';
+import { tripsService } from '@/services/trips/trips-service';
 
 // User data interface stored in Firestore
 interface UserData {

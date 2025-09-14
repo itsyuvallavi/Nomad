@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 const CACHE_NAME = 'nomad-navigator-v1';
 const SEARCH_CACHE_KEY = 'recent-searches';

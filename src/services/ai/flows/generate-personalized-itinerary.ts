@@ -13,14 +13,13 @@ import {z} from 'genkit';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 // Only using AI parser now - no regex fallbacks
 import { parseDestinationsWithAI } from '@/services/ai/utils/ai-destination-parser';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 import { generateUnifiedItinerary, getUnifiedGenerator } from '@/services/ai/utils/unified-generator';
-import { validateTripComplexity } from '@/services/ai/utils/enhanced-generator';
-// Keep ultra-fast for now as primary until fully tested
-import { generateUltraFastItinerary } from '@/services/ai/utils/enhanced-generator-ultra-fast';
+// Use simplified generator
+import { validateTripComplexity, generateUltraFastItinerary } from '@/services/ai/utils/simple-generator';
 import { enrichItineraryWithLocationIQ } from '@/services/ai/services/location-enrichment-locationiq';
 import { logAIRequest, logAIResponse, logAIError } from '@/lib/utils/ai-logger';
-import { logItinerary, logUserAction, logPerformance, logError } from '@/lib/production-logger';
+import { logItinerary, logUserAction, logPerformance, logError } from '@/lib/monitoring/production-logger';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({
   prompt: z

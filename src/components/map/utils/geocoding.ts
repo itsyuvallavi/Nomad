@@ -2,7 +2,7 @@
  * Geocoding utilities for converting addresses to coordinates
  */
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 export interface Coordinates {
   lat: number;

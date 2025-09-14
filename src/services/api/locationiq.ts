@@ -13,23 +13,47 @@ const LOG_CATEGORY = 'API' as const;
 const LOCATIONIQ_API_KEY = process.env.LOCATIONIQ_API_KEY || process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY;
 const LOCATIONIQ_BASE_URL = 'https://us1.locationiq.com/v1';
 
-// Rate limiting configuration
+// Rate limiting configuration - LocationIQ free tier is 2 req/sec, 5000/day
 const RATE_LIMIT = {
-  maxRequests: 60, // LocationIQ allows 60 requests per minute for free tier
-  windowMs: 60000, // 1 minute
+  maxRequests: 2, // 2 requests per second for free tier
+  windowMs: 1000, // 1 second window
   requests: [] as number[],
+  dailyLimit: 5000,
+  dailyCount: 0,
+  lastReset: Date.now(),
 };
 
-// Check rate limit
-function checkRateLimit(): boolean {
+// Check rate limit with automatic delay
+async function checkRateLimit(): Promise<boolean> {
   const now = Date.now();
-  RATE_LIMIT.requests = RATE_LIMIT.requests.filter(time => now - time < RATE_LIMIT.windowMs);
 
-  if (RATE_LIMIT.requests.length >= RATE_LIMIT.maxRequests) {
+  // Reset daily counter if needed
+  if (now - RATE_LIMIT.lastReset > 86400000) { // 24 hours
+    RATE_LIMIT.dailyCount = 0;
+    RATE_LIMIT.lastReset = now;
+  }
+
+  // Check daily limit
+  if (RATE_LIMIT.dailyCount >= RATE_LIMIT.dailyLimit) {
+    logger.error(LOG_CATEGORY, 'Daily rate limit exceeded');
     return false;
   }
 
+  RATE_LIMIT.requests = RATE_LIMIT.requests.filter(time => now - time < RATE_LIMIT.windowMs);
+
+  // If at limit, wait before allowing request
+  if (RATE_LIMIT.requests.length >= RATE_LIMIT.maxRequests) {
+    const oldestRequest = Math.min(...RATE_LIMIT.requests);
+    const waitTime = RATE_LIMIT.windowMs - (now - oldestRequest) + 100; // Add 100ms buffer
+    if (waitTime > 0) {
+      logger.debug(LOG_CATEGORY, `Rate limit reached, waiting ${waitTime}ms`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      return checkRateLimit(); // Recursive call after wait
+    }
+  }
+
   RATE_LIMIT.requests.push(now);
+  RATE_LIMIT.dailyCount++;
   return true;
 }
 
@@ -87,10 +111,9 @@ export async function searchPlaces(options: SearchOptions): Promise<LocationIQPl
     throw new Error('LocationIQ API key is required');
   }
 
-  if (!checkRateLimit()) {
-    logger.warn(LOG_CATEGORY, 'Rate limit exceeded, waiting...');
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-    return searchPlaces(options); // Retry after wait
+  if (!(await checkRateLimit())) {
+    logger.warn(LOG_CATEGORY, 'Rate limit exceeded');
+    throw new Error('Rate limit exceeded');
   }
 
   try {
@@ -156,10 +179,9 @@ export async function getPlaceDetails(placeId: string): Promise<LocationIQPlace 
     throw new Error('LocationIQ API key is required');
   }
 
-  if (!checkRateLimit()) {
-    logger.warn(LOG_CATEGORY, 'Rate limit exceeded, waiting...');
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return getPlaceDetails(placeId);
+  if (!(await checkRateLimit())) {
+    logger.warn(LOG_CATEGORY, 'Rate limit exceeded');
+    return null;
   }
 
   try {
@@ -220,9 +242,8 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string |
     return null;
   }
 
-  if (!checkRateLimit()) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return reverseGeocode(lat, lng);
+  if (!(await checkRateLimit())) {
+    return null;
   }
 
   try {
@@ -258,9 +279,8 @@ export async function getRoute(options: RouteOptions): Promise<any> {
     throw new Error('LocationIQ API key is required');
   }
 
-  if (!checkRateLimit()) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return getRoute(options);
+  if (!(await checkRateLimit())) {
+    return null;
   }
 
   try {

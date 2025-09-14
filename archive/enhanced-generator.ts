@@ -8,8 +8,8 @@
 import OpenAI from 'openai';
 // Removed Gemini - using only OpenAI
 import { logger } from '@/lib/logger';
-import { getUnifiedActivities } from '@/lib/api/places-unified';
-import { getWeatherForecast } from '@/lib/api/weather';
+import { getUnifiedActivities } from '@/services/api/places-unified';
+import { getWeatherForecast } from '@/services/api/weather';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { parseDestinations } from '@/services/ai/utils/destination-parser';
 

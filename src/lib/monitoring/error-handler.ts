@@ -3,7 +3,7 @@
  * Provides user-friendly error messages and recovery suggestions
  */
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/monitoring/logger';
 
 export enum ErrorCategory {
   NETWORK = 'network',
