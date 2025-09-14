@@ -1,21 +1,20 @@
 /**
  * Enhanced itinerary generator that uses multiple APIs
- * - OpenAI/Gemini for structure and descriptions
- * - Google Places for real venues
+ * - OpenAI for structure and descriptions
+ * - LocationIQ for real venues
  * - OpenWeatherMap for weather forecasts
  */
 
 import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// Removed Gemini - using only OpenAI
 import { logger } from '@/lib/logger';
 import { getUnifiedActivities } from '@/lib/api/places-unified';
 import { getWeatherForecast } from '@/lib/api/weather';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { parseDestinations } from '@/services/ai/utils/destination-parser';
 
-// Initialize AI clients
+// Initialize OpenAI client only
 let openai: OpenAI | null = null;
-let gemini: GoogleGenerativeAI | null = null;
 
 function getOpenAIClient(): OpenAI {
   if (!openai && process.env.OPENAI_API_KEY) {
@@ -26,13 +25,6 @@ function getOpenAIClient(): OpenAI {
     });
   }
   return openai!;
-}
-
-function getGeminiClient(): GoogleGenerativeAI {
-  if (!gemini && process.env.GEMINI_API_KEY) {
-    gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  }
-  return gemini!;
 }
 
 /**
@@ -149,30 +141,8 @@ Return a JSON object with:
     const content = response.choices[0]?.message?.content || '{}';
     return JSON.parse(content);
   } catch (openAIError: any) {
-    logger.warn('AI', 'OpenAI failed, trying Gemini fallback', { error: openAIError.message });
-    
-    // Fallback to Gemini
-    try {
-      const geminiClient = getGeminiClient();
-      const model = geminiClient.getGenerativeModel({ model: 'gemini-pro' });
-      
-      const result = await model.generateContent(`${systemPrompt}\n\nUser request: ${prompt}`);
-      const response = await result.response;
-      const text = response.text();
-      
-      // Extract JSON from response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
-      throw new Error('Gemini response did not contain valid JSON');
-    } catch (geminiError: any) {
-      logger.error('AI', 'Both OpenAI and Gemini failed', { 
-        openAIError: openAIError.message,
-        geminiError: geminiError.message 
-      });
-      throw new Error(`AI generation failed. OpenAI: ${openAIError.message}, Gemini: ${geminiError.message}`);
-    }
+    logger.error('AI', 'OpenAI failed', { error: openAIError.message });
+    throw new Error(`AI generation failed: ${openAIError.message}`);
   }
 }
 
@@ -231,13 +201,13 @@ async function enhanceWithRealVenues(itinerary: any): Promise<any> {
             source: place.source
           });
         } else {
-          // Fallback to generic address
-          activity.address = `${cityName} city center`;
+          // Fallback to N/A when no venue data
+          activity.address = 'Address N/A - Venue data unavailable';
           logger.warn('AI', 'No venues found via unified API', { city: cityName, query: searchQuery });
         }
       } catch (error) {
         logger.error('AI', 'Unified places search failed', { error, city: cityName });
-        activity.address = `${cityName} city center`;
+        activity.address = 'Address N/A - Venue data unavailable';
       }
     }
   }
@@ -335,7 +305,7 @@ export async function generateEnhancedItinerary(
     duration: `${duration}ms`,
     destinations: parsedTrip.destinations.length,
     totalDays: itinerary.itinerary.length,
-    hasRealVenues: !!process.env.GEMINI_API_KEY,
+    hasRealVenues: !!process.env.LOCATIONIQ_API_KEY,
     hasWeather: !!process.env.OPENWEATHERMAP
   });
   
@@ -351,7 +321,7 @@ export async function generateEnhancedItinerary(
         time: activity.time,
         description: activity.description,
         category: activity.category,
-        address: activity.address || 'Location TBD'
+        address: activity.address || 'Address N/A - Venue data unavailable'
       }))
     })),
     quickTips: itinerary.quickTips || []

@@ -9,6 +9,8 @@ export const ActivitySchema = z.object({
     .enum(['Work', 'Leisure', 'Food', 'Travel', 'Accommodation', 'Attraction'])
     .describe('The category of the activity.'),
   address: z.string().describe('The specific address of the activity location (e.g., "123 Main St, City, Country").'),
+  venue_name: z.string().optional().describe('The specific name of the venue (e.g., "Louvre Museum", "Café de Flore").'),
+  venue_search: z.string().optional().describe('Search query for LocationIQ (e.g., "Louvre Museum Paris").'),
 });
 
 export const DailyItinerarySchema = z.object({
@@ -51,6 +53,7 @@ export const Activity = zodZ.object({
   category: zodZ.enum(['Work','Leisure','Food','Travel','Accommodation','Attraction']).optional(),
   address: zodZ.string().optional(),
   venue_name: zodZ.string().optional(),
+  venue_search: zodZ.string().optional(),
   rating: zodZ.number().min(0).max(5).optional(),
   _tips: zodZ.string().optional()
 });

@@ -8,7 +8,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig: NextConfig = {
   /* config options here */
   // Removed 'output: export' to support API routes and SSR
-  trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,
   },

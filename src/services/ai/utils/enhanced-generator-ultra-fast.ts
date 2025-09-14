@@ -11,8 +11,9 @@ import { estimateTripCost as estimateTripCostOpenAI, estimateFlightCost, estimat
 import { logger } from '@/lib/logger';
 import type { GeneratePersonalizedItineraryOutput } from '../flows/generate-personalized-itinerary';
 import { shouldUseStaticData } from '@/lib/config/api-config';
-import { getRandomStaticActivities, hasStaticData } from '@/lib/api/static-places';
+import { getRandomStaticActivities as getRandomActivities, hasStaticData as isLocationIQConfigured } from '@/services/api/places-unified';
 import { parseDestinationsWithAI } from './ai-destination-parser';
+import { ITINERARY_SYSTEM_PROMPT, buildChunkPrompt, buildCombinedPrompt } from './openai-travel-prompts';
 
 // Enhanced cache with optimized TTLs and smart invalidation
 interface CacheEntry<T> {
@@ -414,11 +415,11 @@ function quickExtract(prompt: string): any {
     };
   }
   
-  // Handle weekend specially
+  // Handle weekend specially (weekend = 2 days)
   if (lowerPrompt.includes('weekend')) {
     const weekendMatch = prompt.match(/weekend\s+trip\s+from\s+[A-Z][a-zA-Z\s]+?\s+to\s+([A-Z][a-zA-Z\s]+)/i);
     if (weekendMatch) {
-      destinations.push({ city: weekendMatch[1].trim(), days: 3 });
+      destinations.push({ city: weekendMatch[1].trim(), days: 2 });
       const originMatch = prompt.match(/from\s+([A-Z][a-zA-Z\s]+?)(?:\s+to|\s+for)/i);
       const origin = originMatch ? originMatch[1].trim() : 'Unknown';
       
@@ -521,30 +522,30 @@ function quickExtract(prompt: string): any {
  */
 function generateFallbackActivities(destination: string, days: number) {
   const foodActivities = [
-    { description: `Local breakfast cafe in ${destination}`, category: 'Food', venue_name: `${destination} Breakfast Spot`, address: `${destination}`, rating: 4.3, tips: 'Try the local specialties' },
-    { description: `Traditional restaurant in ${destination}`, category: 'Food', venue_name: `${destination} Traditional Restaurant`, address: `${destination}`, rating: 4.5, tips: 'Ask for local recommendations' },
-    { description: `Local lunch spot in ${destination}`, category: 'Food', venue_name: `${destination} Lunch Place`, address: `${destination}`, rating: 4.2, tips: 'Great for midday meals' },
-    { description: `Evening dining in ${destination}`, category: 'Food', venue_name: `${destination} Dinner Restaurant`, address: `${destination}`, rating: 4.6, tips: 'Perfect for dinner' },
-    { description: `Coffee and pastries in ${destination}`, category: 'Food', venue_name: `${destination} Cafe`, address: `${destination}`, rating: 4.4, tips: 'Excellent coffee' },
-    { description: `Street food in ${destination}`, category: 'Food', venue_name: `${destination} Street Food Market`, address: `${destination}`, rating: 4.3, tips: 'Authentic local flavors' }
+    { description: `Local breakfast cafe in ${destination}`, category: 'Food', venue_name: 'Breakfast Cafe', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Traditional restaurant in ${destination}`, category: 'Food', venue_name: 'Local Restaurant', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Local lunch spot in ${destination}`, category: 'Food', venue_name: 'Lunch Venue', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Evening dining in ${destination}`, category: 'Food', venue_name: 'Dinner Restaurant', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Coffee and pastries in ${destination}`, category: 'Food', venue_name: 'Cafe', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Street food in ${destination}`, category: 'Food', venue_name: 'Street Food Area', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' }
   ];
-  
+
   const attractionActivities = [
-    { description: `Historic city center of ${destination}`, category: 'Attraction', venue_name: `${destination} Historic Center`, address: `${destination}`, rating: 4.7, tips: 'Rich in history and culture' },
-    { description: `Main cathedral in ${destination}`, category: 'Attraction', venue_name: `${destination} Cathedral`, address: `${destination}`, rating: 4.6, tips: 'Beautiful architecture' },
-    { description: `City museum in ${destination}`, category: 'Attraction', venue_name: `${destination} City Museum`, address: `${destination}`, rating: 4.5, tips: 'Learn about local history' },
-    { description: `Scenic viewpoint in ${destination}`, category: 'Attraction', venue_name: `${destination} Viewpoint`, address: `${destination}`, rating: 4.8, tips: 'Best views of the city' },
-    { description: `Local market in ${destination}`, category: 'Attraction', venue_name: `${destination} Market`, address: `${destination}`, rating: 4.4, tips: 'Great for shopping and people watching' },
-    { description: `Art gallery in ${destination}`, category: 'Attraction', venue_name: `${destination} Art Gallery`, address: `${destination}`, rating: 4.5, tips: 'Features local and international art' }
+    { description: `Historic city center of ${destination}`, category: 'Attraction', venue_name: 'Historic Center', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Main cathedral in ${destination}`, category: 'Attraction', venue_name: 'Cathedral', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `City museum in ${destination}`, category: 'Attraction', venue_name: 'Museum', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Scenic viewpoint in ${destination}`, category: 'Attraction', venue_name: 'Viewpoint', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Local market in ${destination}`, category: 'Attraction', venue_name: 'Market', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Art gallery in ${destination}`, category: 'Attraction', venue_name: 'Art Gallery', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' }
   ];
-  
+
   const leisureActivities = [
-    { description: `Central park in ${destination}`, category: 'Leisure', venue_name: `${destination} Central Park`, address: `${destination}`, rating: 4.6, tips: 'Perfect for relaxing walks' },
-    { description: `Shopping district in ${destination}`, category: 'Leisure', venue_name: `${destination} Shopping District`, address: `${destination}`, rating: 4.3, tips: 'Browse local shops and boutiques' },
-    { description: `Riverside walk in ${destination}`, category: 'Leisure', venue_name: `${destination} Riverside`, address: `${destination}`, rating: 4.7, tips: 'Peaceful stroll along the water' },
-    { description: `Local cultural quarter in ${destination}`, category: 'Leisure', venue_name: `${destination} Cultural Quarter`, address: `${destination}`, rating: 4.5, tips: 'Experience local culture' }
+    { description: `Central park in ${destination}`, category: 'Leisure', venue_name: 'Park', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Shopping district in ${destination}`, category: 'Leisure', venue_name: 'Shopping Area', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Riverside walk in ${destination}`, category: 'Leisure', venue_name: 'Riverside', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' },
+    { description: `Local cultural quarter in ${destination}`, category: 'Leisure', venue_name: 'Cultural Quarter', address: 'Address N/A - Venue data unavailable', rating: null, tips: 'LocationIQ data unavailable' }
   ];
-  
+
   return {
     Food: foodActivities,
     Attraction: attractionActivities,
@@ -555,17 +556,17 @@ function generateFallbackActivities(destination: string, days: number) {
 /**
  * Generate static itinerary chunk using pre-defined activities
  */
-function generateStaticChunk(destination: string, days: number, dayOffset: number): any[] {
+async function generateStaticChunk(destination: string, days: number, dayOffset: number): Promise<any[]> {
   const result: any[] = [];
-  
+
   let activities;
-  
-  // Try to use static data first
-  if (hasStaticData(destination)) {
+
+  // Try to use LocationIQ data first
+  if (isLocationIQConfigured()) {
     activities = {
-      Food: getRandomStaticActivities(destination, 'Food', days * 2),
-      Attraction: getRandomStaticActivities(destination, 'Attraction', days * 2), 
-      Leisure: getRandomStaticActivities(destination, 'Leisure', days)
+      Food: await getRandomActivities(destination, days * 2),
+      Attraction: await getRandomActivities(destination, days * 2),
+      Leisure: await getRandomActivities(destination, days)
     };
   } else {
     // Fallback activities for cities without static data
@@ -631,13 +632,13 @@ async function generateCombinedItinerary(
     return cached;
   }
 
-  // Use static data if configured
-  if (shouldUseStaticData()) {
-    logger.info('AI', `Using static data for combined itinerary`);
+  // Use LocationIQ data if configured
+  if (isLocationIQConfigured()) {
+    logger.info('AI', `Using LocationIQ data for combined itinerary`);
     let allDays: any[] = [];
     let dayOffset = 0;
     for (const dest of destinations) {
-      allDays = allDays.concat(generateStaticChunk(dest.city, dest.days, dayOffset));
+      allDays = allDays.concat(await generateStaticChunk(dest.city, dest.days, dayOffset));
       dayOffset += dest.days;
     }
     return allDays;
@@ -649,32 +650,15 @@ async function generateCombinedItinerary(
     throw new Error('OpenAI API key not configured');
   }
 
-  // Create a structured prompt for all destinations
-  const destinationList = destinations.map((d, i) => {
-    const startDay = destinations.slice(0, i).reduce((sum, dest) => sum + dest.days, 1);
-    const endDay = startDay + d.days - 1;
-    return `- Days ${startDay}-${endDay}: ${d.city} (${d.days} days)`;
-  }).join('\n');
-
-  const prompt = `Generate a complete ${totalDays}-day itinerary for this multi-city trip:
-${destinationList}
-
-Return a JSON array with EXACTLY ${totalDays} day objects.
-Each day must include:
-- day: number (1 to ${totalDays})
-- destination_city: current city name
-- title: "Day X: Descriptive Title"
-- theme: day's theme
-- activities: array of 5 activities with time, description, category (Food|Museum|Park|Attraction|Shopping), duration, and tips
-
-CRITICAL: Return exactly ${totalDays} days total, respecting the city breakdown above.`;
+  // Use the new enhanced prompt from openai-travel-prompts
+  const prompt = buildCombinedPrompt(destinations, totalDays);
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [
-      { 
-        role: 'system', 
-        content: 'Return JSON array only. No text. Generate realistic, detailed itineraries.' 
+      {
+        role: 'system',
+        content: ITINERARY_SYSTEM_PROMPT
       },
       { role: 'user', content: prompt }
     ],
@@ -724,10 +708,10 @@ async function generateDestinationChunk(
     return cached;
   }
   
-  // Use static data if configured
-  if (shouldUseStaticData()) {
-    logger.info('AI', `Using static data for ${destination} (${days} days)`);
-    return generateStaticChunk(destination, days, dayOffset);
+  // Use LocationIQ data if configured
+  if (isLocationIQConfigured()) {
+    logger.info('AI', `Using LocationIQ data for ${destination} (${days} days)`);
+    return await generateStaticChunk(destination, days, dayOffset);
   }
   
   // Check if OpenAI is available
@@ -736,19 +720,15 @@ async function generateDestinationChunk(
     throw new Error('OpenAI API key not configured');
   }
   
-  // Explicit prompt ensuring correct day count
-  const prompt = `Generate EXACTLY ${days} days for ${destination}.
-Return a JSON array with EXACTLY ${days} objects.
-Each object: {"day":${dayOffset+1} to ${dayOffset+days},"destination_city":"${destination}","title":"Day X: Title","theme":"Theme","activities":[5 activities]}
-Each activity: {"time":"HH:MM AM/PM","description":"Activity","category":"Food|Museum|Park|Attraction|Shopping","duration":"X hours","tips":"Tips"}
-CRITICAL: Must return exactly ${days} day objects, no more, no less.`;
+  // Use the new enhanced prompt from openai-travel-prompts
+  const prompt = buildChunkPrompt(destination, days, dayOffset);
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [
-      { 
-        role: 'system', 
-        content: 'Return JSON array only. No text.' 
+      {
+        role: 'system',
+        content: ITINERARY_SYSTEM_PROMPT
       },
       { role: 'user', content: prompt }
     ],
@@ -1002,36 +982,51 @@ function createFallbackDays(destination: string, days: number, dayOffset: number
         {
           time: '9:00 AM',
           description: 'Breakfast at local cafe',
+          venue_name: 'Local Cafe',
+          venue_search: `Cafe ${destination}`,
           category: 'Food',
           duration: '1 hour',
+          address: 'Address N/A',
           tips: 'Try local specialties'
         },
         {
           time: '10:30 AM',
           description: 'Visit main attraction',
+          venue_name: 'Main Attraction',
+          venue_search: `Tourist Attraction ${destination}`,
           category: 'Attraction',
           duration: '2 hours',
+          address: 'Address N/A',
           tips: 'Book tickets in advance'
         },
         {
           time: '1:00 PM',
           description: 'Lunch at recommended restaurant',
+          venue_name: 'Restaurant',
+          venue_search: `Restaurant ${destination}`,
           category: 'Food',
           duration: '1.5 hours',
+          address: 'Address N/A',
           tips: 'Make reservations'
         },
         {
           time: '3:00 PM',
           description: 'Explore local area',
+          venue_name: 'Local Area',
+          venue_search: `Tourist Area ${destination}`,
           category: 'Attraction',
           duration: '2 hours',
+          address: 'Address N/A',
           tips: 'Wear comfortable shoes'
         },
         {
           time: '6:30 PM',
           description: 'Dinner and evening activities',
+          venue_name: 'Dinner Restaurant',
+          venue_search: `Dinner Restaurant ${destination}`,
           category: 'Food',
           duration: '2 hours',
+          address: 'Address N/A',
           tips: 'Enjoy local cuisine'
         }
       ]
@@ -1322,7 +1317,7 @@ async function batchFetchHotelsEstimated(
               name: `Quality Hotel in ${dest.city}`,
               price: estimate.pricePerNight.midRange,
               rating: 4.2,
-              address: estimate.recommendedAreas[0] || `${dest.city} city center`,
+              address: estimate.recommendedAreas[0] || 'Address N/A - Hotel location unavailable',
               id: 'openai-estimate'
             }];
             hotelMap.set(dest.city, hotelData);
@@ -1727,8 +1722,9 @@ export async function generateUltraFastItinerary(
           time: activity.time || '9:00 AM',
           description: activity.description || 'Activity',
           category: mapToValidCategory(activity.category),
-          address: activity.address || activity.tips || `${actualCity} area`,
+          address: activity.address || 'Address N/A',
           venue_name: activity.venue_name,
+          venue_search: activity.venue_search || (activity.venue_name ? `${activity.venue_name} ${actualCity}` : undefined),
           rating: activity.rating,
           _tips: activity.tips // Preserve tips as metadata
         }))

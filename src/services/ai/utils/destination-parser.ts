@@ -28,9 +28,9 @@ export interface ParsedTrip {
 function parseDuration(durationText: string): number {
   const text = durationText.toLowerCase().trim();
   
-  // Handle "weekend" specifically as 3 days (Friday night to Sunday)
+  // Handle "weekend" specifically as 2 days (Saturday and Sunday)
   if (text === 'weekend' || text === 'a weekend' || text === 'the weekend') {
-    return 3;
+    return 2;
   }
   
   // Handle "a week" or "one week" or "two weeks"

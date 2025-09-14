@@ -18,7 +18,7 @@ import { generateUnifiedItinerary, getUnifiedGenerator } from '@/services/ai/uti
 import { validateTripComplexity } from '@/services/ai/utils/enhanced-generator';
 // Keep ultra-fast for now as primary until fully tested
 import { generateUltraFastItinerary } from '@/services/ai/utils/enhanced-generator-ultra-fast';
-import { enrichItineraryWithRealPlaces } from '@/services/ai/services/location-enrichment';
+import { enrichItineraryWithLocationIQ } from '@/services/ai/services/location-enrichment-locationiq';
 import { logAIRequest, logAIResponse, logAIError } from '@/lib/utils/ai-logger';
 import { logItinerary, logUserAction, logPerformance, logError } from '@/lib/production-logger';
 
@@ -195,24 +195,21 @@ export async function generatePersonalizedItinerary(
   logger.info('AI', 'Trip complexity validated - proceeding with generation');
   
   // Use enhanced generator if we have the APIs configured
-  const hasGoogleAPI = !!process.env.GOOGLE_API_KEY;
+  const hasLocationIQ = !!process.env.LOCATIONIQ_API_KEY || !!process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY;
   const hasWeatherAPI = !!process.env.OPENWEATHERMAP;
-  const hasGeminiAPI = !!process.env.GEMINI_API_KEY;
-  const useEnhanced = hasGoogleAPI || hasWeatherAPI;
+  const useEnhanced = hasLocationIQ || hasWeatherAPI;
   
   if (useEnhanced) {
     if (typeof window !== 'undefined') {
       console.log('🎯 Using ENHANCED generation with APIs:', {
-        Google: hasGoogleAPI,
-        Weather: hasWeatherAPI,
-        Gemini: hasGeminiAPI
+        LocationIQ: hasLocationIQ,
+        Weather: hasWeatherAPI
       });
     }
-    
+
     logger.info('AI', 'Using ENHANCED generation with multiple APIs', {
-      hasGoogle: hasGoogleAPI,
-      hasWeather: hasWeatherAPI,
-      hasGemini: hasGeminiAPI
+      hasLocationIQ: hasLocationIQ,
+      hasWeather: hasWeatherAPI
     });
     
     try {
@@ -228,13 +225,15 @@ export async function generatePersonalizedItinerary(
       }
       logger.info('AI', 'Ultra-fast generation successful');
       
-      // Enrich with Radar Places data if available
-      const hasRadarAPI = !!process.env.RADAR_API_SECRET_KEY;
-      if (hasRadarAPI) {
-        logger.info('AI', 'Enriching ultra-fast itinerary with Radar Places data');
+      // Enrich with LocationIQ data if available
+      if (hasLocationIQ) {
+        logger.info('AI', 'Enriching ultra-fast itinerary with LocationIQ data');
         try {
-          const enrichedResult = await enrichItineraryWithRealPlaces(result, { useRadar: true });
-          logger.info('AI', 'Radar enrichment successful for ultra-fast');
+          const enrichedResult = await enrichItineraryWithLocationIQ(result, {
+            useLocationIQ: true,
+            optimizeRoutes: true
+          });
+          logger.info('AI', 'LocationIQ enrichment successful for ultra-fast');
           
           // Log successful response with enrichment
           await logAIResponse(requestId, enrichedResult, {
@@ -277,7 +276,7 @@ export async function generatePersonalizedItinerary(
           
           return enrichedResult as GeneratePersonalizedItineraryOutput;
         } catch (enrichError: any) {
-          logger.warn('AI', 'Radar enrichment failed for ultra-fast, using non-enriched result', { error: enrichError.message });
+          logger.warn('AI', 'LocationIQ enrichment failed for ultra-fast, using non-enriched result', { error: enrichError.message });
           // Fall back to non-enriched result
           await logAIResponse(requestId, result, {
             model: 'gpt-4o-mini',
@@ -392,13 +391,15 @@ export async function generatePersonalizedItinerary(
     const metrics = generator.getMetrics();
     logger.info('AI', 'Generation metrics', metrics);
     
-    // Enrich with Radar Places data if available
-    const hasRadarAPI = !!process.env.RADAR_API_SECRET_KEY;
-    if (hasRadarAPI) {
-      logger.info('AI', 'Enriching itinerary with Radar Places data');
+    // Enrich with LocationIQ data if available
+    if (hasLocationIQ) {
+      logger.info('AI', 'Enriching itinerary with LocationIQ data');
       try {
-        const enrichedResult = await enrichItineraryWithRealPlaces(result, { useRadar: true });
-        logger.info('AI', 'Radar enrichment successful');
+        const enrichedResult = await enrichItineraryWithLocationIQ(result, {
+          useLocationIQ: true,
+          optimizeRoutes: true
+        });
+        logger.info('AI', 'LocationIQ enrichment successful');
         
         // Log successful response from unified generator with enrichment
         await logAIResponse(requestId, enrichedResult, {
@@ -410,7 +411,7 @@ export async function generatePersonalizedItinerary(
         
         return enrichedResult as GeneratePersonalizedItineraryOutput;
       } catch (enrichError: any) {
-        logger.warn('AI', 'Radar enrichment failed, using non-enriched result', { error: enrichError.message });
+        logger.warn('AI', 'LocationIQ enrichment failed, using non-enriched result', { error: enrichError.message });
         // Fall back to non-enriched result
         await logAIResponse(requestId, result, {
           model: 'gpt-4o-mini',

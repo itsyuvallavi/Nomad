@@ -29,7 +29,7 @@ Return a JSON object with:
 
 Rules:
 - If user says "next month", use first day of next month from today
-- "Weekend" = 3 days  
+- "Weekend" = 2 days
 - "Week" or "one week" = 7 days
 - If no duration specified for a destination, assume 7 days
 - For sequential trips (using "then", "after", "followed by"), list each destination separately with their individual durations
@@ -47,7 +47,7 @@ Input: "From NYC for 2 weeks in Tokyo, then Kyoto for 5 days"
 Output: {"origin": "NYC", "destinations": [{"name": "Tokyo", "days": 14}, {"name": "Kyoto", "days": 5}], "totalDays": 19, "startDate": null}
 
 Input: "Weekend trip from LA to Paris next month"
-Output: {"origin": "LA", "destinations": [{"name": "Paris", "days": 3}], "totalDays": 3, "startDate": "2025-10-01"}
+Output: {"origin": "LA", "destinations": [{"name": "Paris", "days": 2}], "totalDays": 2, "startDate": "2025-10-01"}
 
 Input: "2 weeks across London, Paris, Rome, and Barcelona"
 Output: {"origin": null, "destinations": [{"name": "London", "days": 4}, {"name": "Paris", "days": 4}, {"name": "Rome", "days": 3}, {"name": "Barcelona", "days": 3}], "totalDays": 14, "startDate": null}

@@ -7,13 +7,13 @@ import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 
-// Dynamically import Radar map to avoid SSR issues
-const RadarMap = dynamic(
-  () => import('./radar-map').then(mod => ({ default: mod.RadarMap })),
-  { 
+// Dynamically import LocationIQ map to avoid SSR issues
+const LocationIQMap = dynamic(
+  () => import('./locationiq-map').then(mod => ({ default: mod.LocationIQMap })),
+  {
     ssr: false,
     loading: () => (
-      <motion.div 
+      <motion.div
         className="h-full bg-gray-50 flex items-center justify-center"
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -99,14 +99,14 @@ export function MapPanel({
         transition={{ delay: 0.2 }}
       >
         <div className="h-full min-h-[400px] rounded overflow-hidden border border-gray-200">
-          <RadarMap
+          <LocationIQMap
             itinerary={{
               ...itinerary,
               days: displayDays
             }}
             selectedDay={selectedDay === 0 ? undefined : selectedDay}
             className="h-full w-full"
-            radarApiKey={process.env.NEXT_PUBLIC_RADAR_PUBLISHABLE_KEY}
+            locationiqApiKey={process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY || process.env.LOCATIONIQ_API_KEY}
           />
         </div>
       </motion.div>

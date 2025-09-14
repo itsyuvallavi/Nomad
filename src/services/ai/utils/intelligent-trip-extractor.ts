@@ -69,16 +69,11 @@ Extract the following information and return as JSON:
 }
 
 Important rules:
-1. Convert all duration phrases to days: "a week" = 7, "weekend" = 3, "fortnight" = 14
+1. Convert all duration phrases to days: "a week" = 7, "weekend" = 2, "fortnight" = 14
 2. If no duration given for a destination, estimate based on context (default 3-5 days)
 3. Extract destinations in the order they're mentioned
-4. Zimbabwe is a country (capital: Harare)
-5. Nicaragua is a country (capital: Managua)
-6. Madagascar is a country (capital: Antananarivo)
-7. Ethiopia is a country (capital: Addis Ababa)
-8. If someone says "visit Denmark", Denmark is the destination
-9. Parse "after X then Y" as sequential destinations
-10. The total days should be the sum of all destination durations`;
+4. Parse "after X then Y" as sequential destinations
+5. The total days should be the sum of all destination durations`;
 
   try {
     const completion = await openai!.chat.completions.create({
