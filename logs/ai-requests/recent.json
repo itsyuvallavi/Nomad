@@ -9468,5 +9468,528 @@
       ],
       "totalDays": 3
     }
+  },
+  {
+    "id": "req_1757830600823_vakk9g",
+    "timestamp": "2025-09-14T06:16:40.823Z",
+    "type": "request",
+    "prompt": "plan a trip to seattle",
+    "metadata": {
+      "model": "gpt-4o-mini",
+      "strategy": "ultra-fast"
+    }
+  },
+  {
+    "id": "req_1757830600823_vakk9g",
+    "timestamp": "2025-09-14T06:17:09.221Z",
+    "type": "response",
+    "response": {
+      "destination": "Seattle",
+      "title": "7 Days in Seattle",
+      "itinerary": [
+        {
+          "day": 1,
+          "date": "2025-09-15",
+          "title": "Day 1: Explore Seattle",
+          "_destination": "Seattle",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.6038321,
+                "lng": -122.330062
+              },
+              "_approximateLocation": true
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dine at The Fisherman's Restaurant & Bar",
+              "category": "Food",
+              "address": "The Fisherman's Restaurant & Bar, 1301, Alaskan Way, West Edge, Belltown, Seattle, King County, Washington, 98101, USA",
+              "venue_name": "The Fisherman's Restaurant & Bar",
+              "venue_search": "The Fisherman's Restaurant & Bar Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.60604305,
+                "lng": -122.34216670187175
+              },
+              "website": "https://www.thefishermansrestaurant.com/",
+              "phone": "+1-206-623-3500",
+              "_locationiq_place_id": "309548708"
+            },
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.6038321,
+                "lng": -122.330062
+              },
+              "_approximateLocation": true
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.6298388,
+                "lng": -122.29717863868424
+              },
+              "website": "https://www.seattle.gov/parks/parkspaces/japanesegarden.htm",
+              "phone": "+1-206-684-4725",
+              "_locationiq_place_id": "309391277"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dine at Jade Garden Restaurant",
+              "category": "Food",
+              "address": "Beacon Food Forest, 16th Avenue South, South Seattle, Beacon Hill, Seattle, King County, Washington, 98108, USA",
+              "venue_name": "Beacon Food Forest",
+              "venue_search": "Jade Garden Restaurant Seattle",
+              "_tips": "chinese",
+              "coordinates": {
+                "lat": 47.568127950000004,
+                "lng": -122.31274363841601
+              },
+              "website": "https://beaconfoodforest.org/",
+              "_locationiq_place_id": "309418728"
+            }
+          ],
+          "_routeInfo": {
+            "totalDistance": 12641,
+            "isEfficient": false,
+            "warnings": [
+              "⚠️ Consider closer venues: Mediterranean Garden Bed K-f and Japanese Garden are 3.8km apart in same time slot",
+              "⚠️ Long distance: Japanese Garden → Beacon Food Forest (7.0km)",
+              "⚠️ Consider closer venues: Japanese Garden and Beacon Food Forest are 7.0km apart in same time slot"
+            ],
+            "segments": [
+              {
+                "from": "Mediterranean Garden Bed K-f",
+                "to": "The Fisherman's Restaurant & Bar",
+                "distance": 940
+              },
+              {
+                "from": "The Fisherman's Restaurant & Bar",
+                "to": "Mediterranean Garden Bed K-f",
+                "distance": 940
+              },
+              {
+                "from": "Mediterranean Garden Bed K-f",
+                "to": "Japanese Garden",
+                "distance": 3800
+              },
+              {
+                "from": "Japanese Garden",
+                "to": "Beacon Food Forest",
+                "distance": 6960
+              }
+            ]
+          },
+          "_coordinates": {
+            "lat": 47.6038321,
+            "lng": -122.330062
+          }
+        },
+        {
+          "day": 2,
+          "date": "2025-09-16",
+          "title": "Day 2: Explore Seattle",
+          "_destination": "Seattle",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.6298388,
+                "lng": -122.29717863868424
+              },
+              "website": "https://www.seattle.gov/parks/parkspaces/japanesegarden.htm",
+              "phone": "+1-206-684-4725",
+              "_locationiq_place_id": "309391277"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dine at Momiji",
+              "category": "Food",
+              "address": "Momiji, 1522, 12th Avenue, Capitol Hill, Seattle, King County, Washington, 98122, USA",
+              "venue_name": "Momiji",
+              "venue_search": "Momiji Seattle",
+              "_tips": "japanese",
+              "coordinates": {
+                "lat": 47.6148043,
+                "lng": -122.31652675000001
+              },
+              "website": "https://www.momijiseattle.com/",
+              "_locationiq_place_id": "309553622"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dine at The Fisherman's Restaurant & Bar",
+              "category": "Food",
+              "address": "The Fisherman's Restaurant & Bar, 1301, Alaskan Way, West Edge, Belltown, Seattle, King County, Washington, 98101, USA",
+              "venue_name": "The Fisherman's Restaurant & Bar",
+              "venue_search": "The Fisherman's Restaurant & Bar Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.60604305,
+                "lng": -122.34216670187175
+              },
+              "website": "https://www.thefishermansrestaurant.com/",
+              "phone": "+1-206-623-3500",
+              "_locationiq_place_id": "309548708"
+            },
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.6298388,
+                "lng": -122.29717863868424
+              },
+              "website": "https://www.seattle.gov/parks/parkspaces/japanesegarden.htm",
+              "phone": "+1-206-684-4725",
+              "_locationiq_place_id": "309391277"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability",
+              "coordinates": {
+                "lat": 47.63432505,
+                "lng": -122.29472608993507
+              },
+              "_locationiq_place_id": "309383249"
+            }
+          ],
+          "_routeInfo": {
+            "totalDistance": 9186,
+            "isEfficient": false,
+            "warnings": [
+              "⚠️ Consider closer venues: Momiji and The Fisherman's Restaurant & Bar are 2.2km apart in same time slot",
+              "⚠️ Consider closer venues: The Fisherman's Restaurant & Bar and Japanese Garden are 4.3km apart in same time slot",
+              "⚠️ Possible zigzag pattern detected between Japanese Garden, Momiji, and The Fisherman's Restaurant & Bar"
+            ],
+            "segments": [
+              {
+                "from": "Japanese Garden",
+                "to": "Momiji",
+                "distance": 2213
+              },
+              {
+                "from": "Momiji",
+                "to": "The Fisherman's Restaurant & Bar",
+                "distance": 2155
+              },
+              {
+                "from": "The Fisherman's Restaurant & Bar",
+                "to": "Japanese Garden",
+                "distance": 4286
+              },
+              {
+                "from": "Japanese Garden",
+                "to": "Mediterranean Garden Bed K-f",
+                "distance": 532
+              }
+            ]
+          },
+          "_coordinates": {
+            "lat": 47.6038321,
+            "lng": -122.330062
+          }
+        },
+        {
+          "day": 3,
+          "date": "2025-09-17",
+          "title": "Day 3: Explore Seattle",
+          "_destination": "Seattle",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dine at Jade Garden Restaurant",
+              "category": "Food",
+              "address": "Jade Garden Restaurant, 424, 7th Avenue South, Chinatown, Chinatown International District, Seattle, King County, Washington, 98104, USA",
+              "venue_name": "Jade Garden Restaurant",
+              "venue_search": "Jade Garden Restaurant Seattle",
+              "_tips": "chinese"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dine at Momiji",
+              "category": "Food",
+              "address": "Momiji, 1522, 12th Avenue, Capitol Hill, Seattle, King County, Washington, 98122, USA",
+              "venue_name": "Momiji",
+              "venue_search": "Momiji Seattle",
+              "_tips": "japanese"
+            }
+          ]
+        },
+        {
+          "day": 4,
+          "date": "2025-09-18",
+          "title": "Day 4: Explore Seattle",
+          "_destination": "Seattle",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dine at The Fisherman's Restaurant & Bar",
+              "category": "Food",
+              "address": "The Fisherman's Restaurant & Bar, 1301, Alaskan Way, West Edge, Belltown, Seattle, King County, Washington, 98101, USA",
+              "venue_name": "The Fisherman's Restaurant & Bar",
+              "venue_search": "The Fisherman's Restaurant & Bar Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dine at Jade Garden Restaurant",
+              "category": "Food",
+              "address": "Jade Garden Restaurant, 424, 7th Avenue South, Chinatown, Chinatown International District, Seattle, King County, Washington, 98104, USA",
+              "venue_name": "Jade Garden Restaurant",
+              "venue_search": "Jade Garden Restaurant Seattle",
+              "_tips": "chinese"
+            }
+          ]
+        },
+        {
+          "day": 5,
+          "date": "2025-09-19",
+          "title": "Day 5: Explore Seattle",
+          "_destination": "Seattle",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dine at Momiji",
+              "category": "Food",
+              "address": "Momiji, 1522, 12th Avenue, Capitol Hill, Seattle, King County, Washington, 98122, USA",
+              "venue_name": "Momiji",
+              "venue_search": "Momiji Seattle",
+              "_tips": "japanese"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dine at The Fisherman's Restaurant & Bar",
+              "category": "Food",
+              "address": "The Fisherman's Restaurant & Bar, 1301, Alaskan Way, West Edge, Belltown, Seattle, King County, Washington, 98101, USA",
+              "venue_name": "The Fisherman's Restaurant & Bar",
+              "venue_search": "The Fisherman's Restaurant & Bar Seattle",
+              "_tips": "Check current hours and availability"
+            }
+          ]
+        },
+        {
+          "day": 6,
+          "date": "2025-09-20",
+          "title": "Day 6: Explore Seattle",
+          "_destination": "Seattle",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dine at Jade Garden Restaurant",
+              "category": "Food",
+              "address": "Jade Garden Restaurant, 424, 7th Avenue South, Chinatown, Chinatown International District, Seattle, King County, Washington, 98104, USA",
+              "venue_name": "Jade Garden Restaurant",
+              "venue_search": "Jade Garden Restaurant Seattle",
+              "_tips": "chinese"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dine at Momiji",
+              "category": "Food",
+              "address": "Momiji, 1522, 12th Avenue, Capitol Hill, Seattle, King County, Washington, 98122, USA",
+              "venue_name": "Momiji",
+              "venue_search": "Momiji Seattle",
+              "_tips": "japanese"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "date": "2025-09-21",
+          "title": "Day 7: Explore Seattle",
+          "_destination": "Seattle",
+          "activities": [
+            {
+              "time": "09:00 AM",
+              "description": "Relax at Mediterranean Garden Bed K-f",
+              "category": "Leisure",
+              "address": "Mediterranean Garden Bed K-f, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Mediterranean Garden Bed K-f",
+              "venue_search": "Mediterranean Garden Bed K-f Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "01:00 PM",
+              "description": "Dine at The Fisherman's Restaurant & Bar",
+              "category": "Food",
+              "address": "The Fisherman's Restaurant & Bar, 1301, Alaskan Way, West Edge, Belltown, Seattle, King County, Washington, 98101, USA",
+              "venue_name": "The Fisherman's Restaurant & Bar",
+              "venue_search": "The Fisherman's Restaurant & Bar Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "03:00 PM",
+              "description": "Relax at Japanese Garden",
+              "category": "Leisure",
+              "address": "Japanese Garden, 1075, Lake Washington Boulevard East, Madison Park, Seattle, King County, Washington, 98112, USA",
+              "venue_name": "Japanese Garden",
+              "venue_search": "Japanese Garden Seattle",
+              "_tips": "Check current hours and availability"
+            },
+            {
+              "time": "06:00 PM",
+              "description": "Dine at Jade Garden Restaurant",
+              "category": "Food",
+              "address": "Jade Garden Restaurant, 424, 7th Avenue South, Chinatown, Chinatown International District, Seattle, King County, Washington, 98104, USA",
+              "venue_name": "Jade Garden Restaurant",
+              "venue_search": "Jade Garden Restaurant Seattle",
+              "_tips": "chinese"
+            }
+          ]
+        }
+      ],
+      "quickTips": [
+        "Book accommodations in advance",
+        "Check visa requirements",
+        "Get travel insurance",
+        "Download offline maps",
+        "Keep digital copies of documents"
+      ],
+      "_costEstimate": {
+        "total": 3150,
+        "flights": 1050,
+        "accommodation": 1400,
+        "dailyExpenses": 700,
+        "currency": "USD",
+        "breakdown": [
+          {
+            "type": "flight",
+            "description": "Unknown → Seattle",
+            "amount": 350
+          },
+          {
+            "type": "flight",
+            "description": "Seattle → Unknown",
+            "amount": 700
+          },
+          {
+            "type": "accommodation",
+            "description": "Seattle (7 nights)",
+            "amount": 1400
+          }
+        ]
+      },
+      "_hotelOptions": {},
+      "_flightOptions": {},
+      "_enrichedWithLocationIQ": true,
+      "_routesOptimized": true
+    },
+    "duration": 28398,
+    "metadata": {
+      "model": "gpt-4o-mini",
+      "strategy": "ultra-fast-enriched",
+      "destinations": [
+        "Seattle"
+      ],
+      "totalDays": 7
+    }
   }
 ]
