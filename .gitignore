@@ -46,3 +46,4 @@ firestore-debug.log
 .firebase/
 functions/node_modules/
 functions/.next/
+src/services/firebase/auth.ts

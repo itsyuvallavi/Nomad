@@ -128,22 +128,5 @@ export function getAvailableDestinations(): string[] {
   return Object.keys(staticActivities);
 }
 
-/**
- * Convert static activity to Google Places format for compatibility
- */
-export function formatAsGooglePlace(activity: StaticActivity) {
-  return {
-    name: activity.venue_name,
-    formatted_address: activity.address,
-    rating: activity.rating,
-    geometry: {
-      location: { lat: 0, lng: 0 } // Placeholder coordinates
-    },
-    place_id: `static_${activity.venue_name.replace(/\s+/g, '_').toLowerCase()}`,
-    types: [activity.category.toLowerCase()],
-    opening_hours: { open_now: true },
-    price_level: 2,
-    photos: [],
-    reviews: []
-  };
-}
+// Removed formatAsGooglePlace - Google Places API not implemented
+// LocationIQ is now the primary location service

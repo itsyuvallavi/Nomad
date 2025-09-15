@@ -1,4 +1,4 @@
-import { generatePersonalizedItinerary } from './src/services/ai/flows/generate-personalized-itinerary';
+import { generatePersonalizedItinerary } from '../../src/services/ai/flows/generate-personalized-itinerary';
 
 async function testSimpleItinerary() {
   console.log('\n🚀 Testing simple request: "2 days in Tokyo"\n');

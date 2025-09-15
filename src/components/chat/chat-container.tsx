@@ -470,9 +470,11 @@ export default function ChatDisplay({
                 activities: itinerary.itinerary.reduce((acc, day) => acc + day.activities.length, 0)
             });
             
-            setMessages(prev => [...prev, { 
-                role: 'assistant', 
-                content: "✨ Your personalized itinerary is ready! You can see it on the right." 
+            // Use AI's conversational response if available, otherwise use default
+            const aiMessage = (itinerary as any).aiMessage || "✨ Your personalized itinerary is ready! You can see it on the right.";
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: aiMessage
             }]);
             
             // Complete progress

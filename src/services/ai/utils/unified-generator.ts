@@ -28,7 +28,7 @@ export interface GenerationContext {
   origin?: string;
   destinations: { city: string; days: number }[];
   startDate?: string;
-  keys: { places?: boolean; weather?: boolean; amadeus?: boolean };
+  keys: { weather?: boolean }; // Removed unused places and amadeus
   flags: { stream?: boolean };
 }
 
@@ -91,7 +91,7 @@ class UnifiedItineraryGenerator {
   private pickStrategy(ctx: GenerationContext): (ctx: GenerationContext, emit?: (evt: string, data: any) => void, metrics?: GenerationMetrics) => Promise<GeneratePersonalizedItineraryOutput> {
     const n = ctx.destinations.length;
     const totalDays = ctx.destinations.reduce((a, b) => a + b.days, 0);
-    const hasAPIs = !!(ctx.keys.places || ctx.keys.weather || ctx.keys.amadeus);
+    const hasAPIs = !!(ctx.keys.weather); // Only weather API check remains
     
     if (n === 1 && totalDays <= 5) return this.generateSimple.bind(this);
     if (hasAPIs && totalDays >= 6) return this.generateUltraFast.bind(this);
@@ -285,9 +285,8 @@ export async function generateUnifiedItinerary(
       days: d.days
     })),
     keys: {
-      places: !!process.env.GOOGLE_PLACES_API_KEY,
-      weather: !!process.env.OPENWEATHERMAP,
-      amadeus: !!process.env.AMADEUS_API_KEY
+      weather: !!process.env.OPENWEATHERMAP
+      // Removed Google Places and Amadeus - not implemented
     },
     flags: { stream: false }
   };
