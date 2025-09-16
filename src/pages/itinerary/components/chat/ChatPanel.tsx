@@ -1,7 +1,7 @@
 import { Settings, Mic, Send, MessageCircle, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EmptyState } from '@/components/ui/empty-state';
-import { AnimatedLogo } from '@/components/ui/animated-logo';
+import { EmptyState } from '@/components/common/EmptyState';
+import { AnimatedLogo } from '@/components/common/AnimatedLogo';
 import { Badge } from '@/components/ui/badge';
 import { ConversationState, DialogResponse } from '@/services/ai/flows/generate-dialog-response';
 import { ClassificationResult, ParseResult } from '@/services/ai/utils/hybrid-parser';

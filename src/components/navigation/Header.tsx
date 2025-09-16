@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { UserMenu } from '@/components/auth/UserMenu';
-import { AuthModal } from '@/components/auth/AuthModal';
-import { useAuth } from '@/contexts/AuthContext';
+import { UserMenu } from '@/components/navigation/auth/UserMenu';
+import { AuthModal } from '@/components/navigation/auth/AuthModal';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { LogIn, UserPlus, ArrowLeft } from 'lucide-react';
 
 export const Header: React.FC = () => {

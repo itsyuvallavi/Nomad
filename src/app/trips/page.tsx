@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -47,7 +47,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { tripsService, type Trip as FirestoreTrip } from '@/services/trips/trips-service';
-import { clearAllTrips } from '@/lib/utils/clear-all-trips';
+import { clearAllTrips } from '@/lib/helpers/clear-all-trips';
 
 // Use Trip type from trips service
 type Trip = Omit<FirestoreTrip, 'userId' | 'createdAt' | 'updatedAt'> & {

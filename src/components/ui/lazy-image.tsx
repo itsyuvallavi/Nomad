@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image, { ImageProps } from 'next/image';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/helpers/general';
 
 interface LazyImageProps extends Omit<ImageProps, 'onLoad'> {
   fallback?: string;

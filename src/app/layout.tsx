@@ -1,9 +1,9 @@
 import type {Metadata, Viewport} from 'next';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { PasswordGate } from '@/components/PasswordGate';
-import { OfflineProvider } from '@/components/providers/offline-provider';
-import { MotionProvider } from '@/components/providers/motion-provider';
+import { AuthProvider } from '@/infrastructure/contexts/AuthContext';
+import { ErrorBoundary } from '@/infrastructure/components/ErrorBoundary';
+import { PasswordGate } from '@/infrastructure/components/PasswordGate';
+import { OfflineProvider } from '@/infrastructure/providers/offline';
+import { MotionProvider } from '@/infrastructure/providers/motion';
 import './globals.css';
 
 export const metadata: Metadata = {

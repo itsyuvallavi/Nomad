@@ -47,7 +47,7 @@ function getUnifiedGenerator() {
 }
 import { enrichItineraryWithLocationIQ } from '@/services/ai/services/location-enrichment-locationiq';
 import { getWeatherForecast } from '@/services/api/weather';
-import { logAIRequest, logAIResponse, logAIError } from '@/lib/utils/ai-logger';
+import { logAIRequest, logAIResponse, logAIError } from '@/lib/monitoring/ai-logger';
 import { logItinerary, logUserAction, logPerformance, logError } from '@/lib/monitoring/production-logger';
 
 const GeneratePersonalizedItineraryInputSchema = z.object({

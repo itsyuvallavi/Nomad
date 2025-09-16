@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * Signup Form Component
- * Beautiful, accessible signup form with validation
+ * Login Form Component
+ * Beautiful, accessible login form with validation
  */
 
 import React, { useState } from 'react';
@@ -10,48 +10,36 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
 
 // Validation schema
-const signupSchema = z.object({
-  displayName: z.string().min(2, 'Name must be at least 2 characters'),
+const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
-    .regex(/(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
-    .regex(/(?=.*\d)/, 'Password must contain at least one number'),
-  confirmPassword: z.string(),
-  acceptTerms: z.boolean().refine(val => val === true, {
-    message: 'You must accept the terms and conditions'
-  })
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword']
+  password: z.string().min(6, 'Password must be at least 6 characters')
 });
 
-type SignupFormData = z.infer<typeof signupSchema>;
+type LoginFormData = z.infer<typeof loginSchema>;
 
-interface SignupFormProps {
-  onSwitchToLogin?: () => void;
+interface LoginFormProps {
+  onSwitchToSignup?: () => void;
+  onForgotPassword?: () => void;
   redirectTo?: string;
 }
 
-export const SignupForm: React.FC<SignupFormProps> = ({
-  onSwitchToLogin,
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onSwitchToSignup,
+  onForgotPassword,
   redirectTo = '/'
 }) => {
   const router = useRouter();
-  const { signUp, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -59,41 +47,40 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setValue,
-    watch
-  } = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema)
+    formState: { errors }
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema)
   });
 
-  const acceptTerms = watch('acceptTerms');
-
-  const onSubmit = async (data: SignupFormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError('');
 
     try {
-      await signUp(data.email, data.password, data.displayName);
+      await signIn(data.email, data.password);
       router.push(redirectTo);
     } catch (error: any) {
-      console.error('Signup error:', error);
+      console.error('Login error:', error);
       
       // Handle Firebase auth errors
       switch (error.code) {
-        case 'auth/email-already-in-use':
-          setError('An account with this email already exists.');
+        case 'auth/user-not-found':
+          setError('No account found with this email address.');
+          break;
+        case 'auth/wrong-password':
+          setError('Incorrect password. Please try again.');
           break;
         case 'auth/invalid-email':
           setError('Please enter a valid email address.');
           break;
-        case 'auth/weak-password':
-          setError('Password is too weak. Please choose a stronger password.');
+        case 'auth/user-disabled':
+          setError('This account has been disabled. Please contact support.');
           break;
-        case 'auth/operation-not-allowed':
-          setError('Email/password accounts are not enabled. Please contact support.');
+        case 'auth/too-many-requests':
+          setError('Too many failed attempts. Please try again later.');
           break;
         default:
-          setError('Failed to create account. Please try again.');
+          setError('Failed to sign in. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -128,9 +115,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold">Create account</CardTitle>
+        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
         <CardDescription>
-          Start planning your next adventure with Nomad Navigator
+          Sign in to your Nomad Navigator account
         </CardDescription>
       </CardHeader>
 
@@ -141,23 +128,6 @@ export const SignupForm: React.FC<SignupFormProps> = ({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
-          <div className="space-y-2">
-            <Label htmlFor="displayName">Full Name</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                id="displayName"
-                type="text"
-                placeholder="Enter your full name"
-                className="pl-10"
-                {...register('displayName')}
-              />
-            </div>
-            {errors.displayName && (
-              <p className="text-sm text-red-600">{errors.displayName.message}</p>
-            )}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -183,7 +153,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Create a password"
+                placeholder="Enter your password"
                 className="pl-10 pr-10"
                 {...register('password')}
               />
@@ -204,54 +174,18 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm your password"
-                className="pl-10 pr-10"
-                {...register('confirmPassword')}
-              />
+          <div className="flex items-center justify-between">
+            <div></div>
+            {onForgotPassword && (
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={onForgotPassword}
+                className="text-sm text-blue-600 hover:text-blue-500 hover:underline"
               >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                Forgot password?
               </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
             )}
           </div>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="acceptTerms"
-              checked={acceptTerms}
-              onCheckedChange={(checked) => setValue('acceptTerms', !!checked)}
-            />
-            <Label htmlFor="acceptTerms" className="text-sm">
-              I agree to the{' '}
-              <a href="/terms" className="text-blue-600 hover:underline">
-                Terms of Service
-              </a>
-              {' '}and{' '}
-              <a href="/privacy" className="text-blue-600 hover:underline">
-                Privacy Policy
-              </a>
-            </Label>
-          </div>
-          {errors.acceptTerms && (
-            <p className="text-sm text-red-600">{errors.acceptTerms.message}</p>
-          )}
 
           <Button
             type="submit"
@@ -261,10 +195,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
+                Signing in...
               </>
             ) : (
-              'Create account'
+              'Sign in'
             )}
           </Button>
 
@@ -287,7 +221,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({
             {isGoogleLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing up...
+                Signing in...
               </>
             ) : (
               <>
@@ -316,15 +250,15 @@ export const SignupForm: React.FC<SignupFormProps> = ({
         </form>
       </CardContent>
 
-      {onSwitchToLogin && (
+      {onSwitchToSignup && (
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
-            Already have an account?{' '}
+            Don't have an account?{' '}
             <button
-              onClick={onSwitchToLogin}
+              onClick={onSwitchToSignup}
               className="text-blue-600 hover:text-blue-500 hover:underline font-medium"
             >
-              Sign in
+              Sign up
             </button>
           </p>
         </CardFooter>

@@ -5,7 +5,7 @@
 
 import { useRef, useCallback } from 'react';
 import { useGesture } from '@use-gesture/react';
-import { HAPTIC, GESTURE_THRESHOLDS } from '@/lib/animations';
+import { HAPTIC, GESTURE_THRESHOLDS } from '@/lib/utils/animations';
 
 interface GestureHandlers {
   onTap?: () => void;

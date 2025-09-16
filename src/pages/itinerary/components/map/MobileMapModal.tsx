@@ -3,7 +3,7 @@
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/helpers/general';
 import { Button } from '@/components/ui/button';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { MapPanel } from './map-panel';

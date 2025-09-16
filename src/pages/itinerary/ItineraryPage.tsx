@@ -10,24 +10,24 @@ import {
     type ConversationalItineraryOutput
 } from '@/services/ai/flows/generate-personalized-itinerary-v2';
 import { refineItineraryBasedOnFeedback } from '@/services/ai/flows/refine-itinerary-based-on-feedback';
-import type { FormValues } from '../forms/trip-details-form';
+import type { FormValues } from '@/pages/home/components/TripPlanningForm';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { ArrowLeft, MessageSquare, Map as MapIcon, Layers } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import type { RecentSearch, ChatState } from '@/app/page';
-import { ChatPanel } from './chat-interface';
-import { ItineraryPanel } from '../itinerary/itinerary-view';
-import { MapPanel } from '../map/map-panel';
-import { MobileMapModal } from '../map/mobile-map-modal';
-import { cn } from '@/lib/utils';
-import { ModernLoadingPanel } from './modern-loading-panel';
-import { ErrorDialog } from '../ui/error-dialog';
+import { ChatPanel } from './components/chat/ChatPanel';
+import { ItineraryPanel } from './components/itinerary/ItineraryDisplay';
+import { MapPanel } from './components/map/MapView';
+import { MobileMapModal } from './components/map/MobileMapModal';
+import { cn } from '@/lib/helpers/general';
+import { ModernLoadingPanel } from './components/chat/LoadingProgress';
+import { ErrorDialog } from '@/components/ui/error-dialog';
 import { logger } from '@/lib/monitoring/logger';
 import { getDraftManager } from '@/services/trips/draft-manager';
-import { retryApiCall } from '@/lib/retry-utils';
+import { retryApiCall } from '@/lib/utils/retry';
 import { handleError, ErrorCategory } from '@/lib/monitoring/error-handler';
 import { offlineStorage } from '@/services/storage/offline-storage';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { tripsService } from '@/services/trips/trips-service';
 
 type Message = {

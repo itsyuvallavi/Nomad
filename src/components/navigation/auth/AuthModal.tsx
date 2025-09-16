@@ -17,7 +17,7 @@ import { LoginForm } from './LoginForm';
 import { SignupForm } from './SignupForm';
 import { ForgotPasswordForm } from './ForgotPasswordForm';
 import { AuthSuccess } from './AuthSuccess';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 
 type AuthView = 'login' | 'signup' | 'forgot-password';
 

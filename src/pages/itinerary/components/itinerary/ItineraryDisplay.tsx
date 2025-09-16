@@ -1,9 +1,9 @@
 import { DayItinerary } from './day-schedule';
-import { DayTimelineV2 } from './day-timeline-v2';
+import { DayTimelineV2 } from './DayTimeline';
 import { CoworkingSection } from './coworking-spots';
 import { ExportMenu } from './export-menu';
 import { ItineraryLoadingSkeleton } from './loading-skeleton';
-import { EmptyState } from '@/components/ui/empty-state';
+import { EmptyState } from '@/components/common/EmptyState';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { motion, useInView } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -14,7 +14,7 @@ import { logger } from '@/lib/monitoring/logger';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { getIconicImageSearch } from '@/lib/constants/city-landmarks';
-import { fadeInUp, staggerContainer, countAnimation } from '@/lib/animations';
+import { fadeInUp, staggerContainer, countAnimation } from '@/lib/utils/animations';
 
 // Dynamically import map to avoid SSR issues
 const ItineraryMap = dynamic(

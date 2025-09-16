@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { AuthModal } from './AuthModal';
+import { AuthModal } from '../navigation/auth/AuthModal';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

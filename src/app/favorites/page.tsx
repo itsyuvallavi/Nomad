@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { Header } from '@/components/navigation/Header';
-import { ScrollablePage } from '@/components/layout/scrollable-page';
+import { ScrollablePage } from '@/components/ui/scrollable-page';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

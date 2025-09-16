@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/helpers/general';
 
 interface LocationIQMapProps {
   itinerary: GeneratePersonalizedItineraryOutput | {

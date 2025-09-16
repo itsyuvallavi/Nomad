@@ -4,9 +4,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, MessageSquare, Plus, Mic } from 'lucide-react';
-import { AnimatedLogo } from '@/components/ui/animated-logo';
+import { AnimatedLogo } from '@/components/common/AnimatedLogo';
 import { formatDistanceToNow } from 'date-fns';
-import { fadeInUp, staggerContainer, hoverLift, tapScale } from '@/lib/animations';
+import { fadeInUp, staggerContainer, hoverLift, tapScale } from '@/lib/utils/animations';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,10 +20,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import ItineraryForm from './trip-details-form';
-import type { FormValues } from './trip-details-form';
+import ItineraryForm from './components/TripPlanningForm';
+import type { FormValues } from './components/TripPlanningForm';
 import type { RecentSearch, ChatState } from '@/app/page';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { tripsService } from '@/services/trips/trips-service';
 
 type StartItineraryProps = {
