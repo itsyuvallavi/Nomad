@@ -35,15 +35,15 @@ export type FormValues = {
   fileDataUrl?: string;
 };
 
-type ItineraryFormProps = {
+type SearchInputProps = {
   onSubmit: (values: FormValues) => void;
   isSubmitting: boolean;
 };
 
-export default function ItineraryForm({
+export default function SearchInput({
   onSubmit,
   isSubmitting,
-}: ItineraryFormProps) {
+}: SearchInputProps) {
   const [placeholder, setPlaceholder] = useState(placeholderTexts[0]);
   const [textIndex, setTextIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);

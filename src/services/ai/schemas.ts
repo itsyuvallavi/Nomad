@@ -13,6 +13,23 @@ export const ActivitySchema = z.object({
   venue_search: z.string().optional().describe('Search query for LocationIQ (e.g., "Louvre Museum Paris").'),
 });
 
+// Weather schema for daily forecast
+export const WeatherSchema = z.object({
+  temp: z.object({
+    min: z.number().describe('Minimum temperature in Celsius'),
+    max: z.number().describe('Maximum temperature in Celsius'),
+    day: z.number().describe('Average day temperature in Celsius')
+  }),
+  weather: z.object({
+    main: z.string().describe('Main weather condition (e.g., "Clear", "Rain")'),
+    description: z.string().describe('Detailed weather description'),
+    icon: z.string().describe('Weather icon code')
+  }),
+  humidity: z.number().describe('Humidity percentage'),
+  wind_speed: z.number().describe('Wind speed in m/s'),
+  pop: z.number().describe('Probability of precipitation (0-1)')
+}).optional();
+
 export const DailyItinerarySchema = z.object({
   day: z.number().describe('The day number of the itinerary (e.g., 1).'),
   date: z
@@ -24,6 +41,7 @@ export const DailyItinerarySchema = z.object({
   activities: z
     .array(ActivitySchema)
     .describe('A list of activities for the day.'),
+  weather: WeatherSchema.describe('Weather forecast for this day')
 });
 
 export const GeneratePersonalizedItineraryOutputSchema = z.object({
@@ -58,12 +76,30 @@ export const Activity = zodZ.object({
   _tips: zodZ.string().optional()
 });
 
+// Weather type for Zod schema
+export const Weather = zodZ.object({
+  temp: zodZ.object({
+    min: zodZ.number(),
+    max: zodZ.number(),
+    day: zodZ.number()
+  }),
+  weather: zodZ.object({
+    main: zodZ.string(),
+    description: zodZ.string(),
+    icon: zodZ.string()
+  }),
+  humidity: zodZ.number(),
+  wind_speed: zodZ.number(),
+  pop: zodZ.number()
+}).optional();
+
 export const Day = zodZ.object({
   day: zodZ.number().int().min(1),
   date: zodZ.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   title: zodZ.string().min(2),
   _destination: zodZ.string().min(2),
-  activities: zodZ.array(Activity).default([])
+  activities: zodZ.array(Activity).default([]),
+  weather: Weather
 });
 
 export const ItinerarySchema = zodZ.object({

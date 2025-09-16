@@ -8,7 +8,6 @@ import { useMotion } from '@/components/providers/motion-provider';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import type { FormValues } from '@/components/forms/trip-details-form';
 import { Header } from '@/components/navigation/Header';
-import { fadeInScale } from '@/lib/animations';
 import { tripsService } from '@/services/trips/trips-service';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -21,7 +20,7 @@ const StartItinerary = dynamic(() => import('@/components/forms/trip-search-form
   ),
 });
 
-const ChatDisplay = dynamic(() => import('@/components/chat/chat-container'), {
+const ChatDisplay = dynamic(() => import('@/components/chat/chat-container-v2'), {
   loading: () => (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">

@@ -1,0 +1,421 @@
+{
+  "timestamp": "2025-09-16T05:57:35.210Z",
+  "sessionId": "test-session-1758002220140",
+  "summary": {
+    "total": 10,
+    "passed": 0,
+    "failed": 0,
+    "partial": 10,
+    "avgResponseTime": 1505
+  },
+  "results": [
+    {
+      "scenarioId": 1,
+      "scenarioName": "Minimal Input - Vague Request",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should respond with a question",
+          "expected": "question",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should ask for destination",
+          "expected": "destination",
+          "actual": "Matched",
+          "passed": true
+        },
+        {
+          "description": "Should not use default values",
+          "expected": "true",
+          "actual": "Matched",
+          "passed": true
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1008,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "I want to travel",
+          "timestamp": 1758002220145
+        },
+        {
+          "role": "assistant",
+          "content": "Hello! Let's plan your next adventure. Where would you like to visit?",
+          "timestamp": 1758002220145
+        }
+      ]
+    },
+    {
+      "scenarioId": 2,
+      "scenarioName": "Single Word Destination",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should respond with a question",
+          "expected": "question",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should ask for travel dates",
+          "expected": "dates",
+          "actual": "Matched",
+          "passed": true
+        },
+        {
+          "description": "Should not assume dates or duration",
+          "expected": "true",
+          "actual": "Matched",
+          "passed": true
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1003,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "Barcelona",
+          "timestamp": 1758002223153
+        },
+        {
+          "role": "assistant",
+          "content": "Great! Barcelona sounds wonderful. When would you like to visit Barcelona?",
+          "timestamp": 1758002223153
+        }
+      ]
+    },
+    {
+      "scenarioId": 3,
+      "scenarioName": "Conflicting Information",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should ask for clarification",
+          "expected": "question",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should help user decide",
+          "expected": "both|decide|which",
+          "actual": "Not matched",
+          "passed": false
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1003,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "I want to go to Paris for 3 days but maybe London for a week",
+          "timestamp": 1758002226158
+        },
+        {
+          "role": "assistant",
+          "content": "Welcome! I'm here to help create your perfect itinerary. What destination do you have in mind?",
+          "timestamp": 1758002226158
+        }
+      ]
+    },
+    {
+      "scenarioId": 4,
+      "scenarioName": "Past Date Request",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should recognize past date",
+          "expected": "past|coming|future|next",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should ask for alternative date",
+          "expected": "question",
+          "actual": "Not matched",
+          "passed": false
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1002,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "Plan my trip to Tokyo last December",
+          "timestamp": 1758002229162
+        },
+        {
+          "role": "assistant",
+          "content": "Great! Plan my trip to Tokyo last December sounds wonderful. When would you like to visit Plan my trip to Tokyo last December?",
+          "timestamp": 1758002229162
+        }
+      ]
+    },
+    {
+      "scenarioId": 5,
+      "scenarioName": "Complete Information",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should confirm details",
+          "expected": "confirmation",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should repeat user info",
+          "expected": "Rome|5 days|next month",
+          "actual": "Matched",
+          "passed": true
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1002,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "5 days in Rome next month",
+          "timestamp": 1758002232166
+        },
+        {
+          "role": "assistant",
+          "content": "Great! 5 days in Rome next month sounds wonderful. When would you like to visit 5 days in Rome next month?",
+          "timestamp": 1758002232166
+        }
+      ]
+    },
+    {
+      "scenarioId": 6,
+      "scenarioName": "Nonsensical Input",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should ask for clarification",
+          "expected": "question",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should redirect to travel planning",
+          "expected": "help|where|travel|trip",
+          "actual": "Not matched",
+          "passed": false
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1002,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "Purple elephant dancing tomorrow sandwich",
+          "timestamp": 1758002235171
+        },
+        {
+          "role": "assistant",
+          "content": "Great! Purple elephant dancing tomorrow sandwich sounds wonderful. When would you like to visit Purple elephant dancing tomorrow sandwich?",
+          "timestamp": 1758002235171
+        }
+      ]
+    },
+    {
+      "scenarioId": 7,
+      "scenarioName": "Mixed Languages",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should understand mixed input",
+          "expected": "Paris|3 days|next week",
+          "actual": "Matched",
+          "passed": true
+        },
+        {
+          "description": "Should confirm understanding",
+          "expected": "confirmation",
+          "actual": "Not matched",
+          "passed": false
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1003,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "Quiero ir a Paris pour trois días next week",
+          "timestamp": 1758002238174
+        },
+        {
+          "role": "assistant",
+          "content": "Great! Quiero ir a Paris pour trois días next week sounds wonderful. When would you like to visit Quiero ir a Paris pour trois días next week?",
+          "timestamp": 1758002238174
+        }
+      ]
+    },
+    {
+      "scenarioId": 8,
+      "scenarioName": "Emoji Input",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should understand emoji context",
+          "expected": "Paris|5 days|next month",
+          "actual": "Matched",
+          "passed": true
+        },
+        {
+          "description": "Should recognize high budget",
+          "expected": "luxury|high-end|premium",
+          "actual": "Not matched",
+          "passed": false
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 1003,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "🇫🇷 Paris ✈️ 5️⃣ days 🗓️ next month 💰💰💰",
+          "timestamp": 1758002241178
+        },
+        {
+          "role": "assistant",
+          "content": "Great! 🇫🇷 Paris ✈️ 5️⃣ days 🗓️ next month 💰💰💰 sounds wonderful. When would you like to visit 🇫🇷 Paris ✈️ 5️⃣ days 🗓️ next month 💰💰💰?",
+          "timestamp": 1758002241178
+        }
+      ]
+    },
+    {
+      "scenarioId": 9,
+      "scenarioName": "Full Conversation Flow",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should eventually generate itinerary",
+          "expected": "itinerary",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should call LocationIQ API",
+          "expected": "locationiq",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should call Weather API",
+          "expected": "weather",
+          "actual": "Not matched",
+          "passed": false
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 5014,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "Hello",
+          "timestamp": 1758002244184
+        },
+        {
+          "role": "assistant",
+          "content": "Great! Hello sounds wonderful. When would you like to visit Hello?",
+          "timestamp": 1758002244184
+        },
+        {
+          "role": "user",
+          "content": "London",
+          "timestamp": 1758002245188
+        },
+        {
+          "role": "assistant",
+          "content": "Could you clarify when you'd like to travel? You can say things like 'next week', 'in March', or specific dates.",
+          "timestamp": 1758002245188
+        },
+        {
+          "role": "user",
+          "content": "Next week",
+          "timestamp": 1758002246189
+        },
+        {
+          "role": "assistant",
+          "content": "Perfect timing! How long would you like to stay in Hello?",
+          "timestamp": 1758002246189
+        },
+        {
+          "role": "user",
+          "content": "4 days",
+          "timestamp": 1758002247192
+        },
+        {
+          "role": "assistant",
+          "content": "Great! A 4-day trip to Hello. Will you be traveling solo or with others?",
+          "timestamp": 1758002247192
+        },
+        {
+          "role": "user",
+          "content": "Yes",
+          "timestamp": 1758002248195
+        },
+        {
+          "role": "assistant",
+          "content": "Do you have any specific interests or activities in mind?",
+          "timestamp": 1758002248195
+        }
+      ]
+    },
+    {
+      "scenarioId": 10,
+      "scenarioName": "Modification Request",
+      "status": "partial",
+      "expectations": [
+        {
+          "description": "Should switch to Venice",
+          "expected": "Venice",
+          "actual": "Not matched",
+          "passed": false
+        },
+        {
+          "description": "Should continue asking questions",
+          "expected": "question",
+          "actual": "Not matched",
+          "passed": false
+        }
+      ],
+      "apisCalled": [],
+      "responseTime": 2008,
+      "errors": [],
+      "conversationLog": [
+        {
+          "role": "user",
+          "content": "I want to go to Rome",
+          "timestamp": 1758002251200
+        },
+        {
+          "role": "assistant",
+          "content": "Great! I want to go to Rome sounds wonderful. When would you like to visit I want to go to Rome?",
+          "timestamp": 1758002251200
+        },
+        {
+          "role": "user",
+          "content": "Actually, make it Venice instead",
+          "timestamp": 1758002252204
+        },
+        {
+          "role": "assistant",
+          "content": "Could you clarify when you'd like to travel? You can say things like 'next week', 'in March', or specific dates.",
+          "timestamp": 1758002252204
+        }
+      ]
+    }
+  ]
+}

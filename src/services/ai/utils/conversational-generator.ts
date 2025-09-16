@@ -5,7 +5,7 @@
 
 import { openai } from '../openai-config';
 import { logger } from '@/lib/monitoring/logger';
-import { understandTripIntent, getSmartDefaults } from './intent-understanding';
+import { understandTripIntent, getMissingRequirements, hasRequiredInformation } from './intent-understanding';
 import { estimateTripCost } from './openai-travel-costs';
 import type { GeneratePersonalizedItineraryOutput } from '../flows/generate-personalized-itinerary';
 
@@ -125,9 +125,9 @@ ${cities.length > 1 ? `- Each day MUST have destination_city set to the actual c
     // Validate we got the expected number of days
     if (generatedDays.length !== days) {
       logger.warn('AI', `Expected ${days} days but got ${generatedDays.length}, filling in missing days`);
-      // Fill in missing days if needed
-      while (generatedDays.length < days) {
-        generatedDays.push(createDefaultVacationDays(destination, 1, includeCoworking)[0]);
+      // If we don't have enough days, throw error instead of using defaults
+      if (generatedDays.length < days) {
+        throw new Error(`Only generated ${generatedDays.length} days, expected ${days}`);
       }
     }
 
@@ -135,80 +135,16 @@ ${cities.length > 1 ? `- Each day MUST have destination_city set to the actual c
     return generatedDays;
   } catch (error) {
     logger.error('AI', `Failed to generate activities for ${destination}`, error);
-    return createDefaultVacationDays(destination, days, includeCoworking);
+    throw error; // Don't fall back to defaults - propagate error
   }
 }
 
-/**
- * Create default vacation activities
- */
-function createDefaultVacationDays(
-  destination: string,
-  days: number,
-  includeCoworking: boolean = false
-): any[] {
-  const result = [];
-
-  for (let i = 0; i < days; i++) {
-    const activities = [];
-
-    // Add coworking if requested
-    if (includeCoworking) {
-      activities.push({
-        time: '9:00 AM',
-        description: `Work from coworking space`,
-        category: 'Work',
-        venue_name: `Coworking ${destination}`,
-        tips: 'Check for day pass availability'
-      });
-    }
-
-    // Add vacation activities
-    activities.push(
-      {
-        time: includeCoworking ? '2:00 PM' : '9:00 AM',
-        description: 'Explore main attractions',
-        category: 'Attraction',
-        venue_name: `${destination} City Center`,
-        tips: 'Start early to avoid crowds'
-      },
-      {
-        time: includeCoworking ? '4:00 PM' : '12:00 PM',
-        description: 'Lunch at local restaurant',
-        category: 'Food',
-        venue_name: 'Local Restaurant',
-        tips: 'Try regional specialties'
-      },
-      {
-        time: includeCoworking ? '6:00 PM' : '3:00 PM',
-        description: 'Visit museum or cultural site',
-        category: 'Culture',
-        venue_name: `${destination} Museum`,
-        tips: 'Check opening hours'
-      },
-      {
-        time: '7:30 PM',
-        description: 'Dinner and evening entertainment',
-        category: 'Food',
-        venue_name: 'Evening Restaurant',
-        tips: 'Make reservations'
-      }
-    );
-
-    result.push({
-      day: i + 1,
-      destination_city: destination,
-      title: `Day ${i + 1} in ${destination}`,
-      activities
-    });
-  }
-
-  return result;
-}
+// REMOVED: createDefaultVacationDays function
+// We no longer provide default activities - always require real AI generation
 
 /**
  * Main conversational generation function
- * NEVER FAILS - Always returns something useful
+ * Requires complete information - no defaults
  */
 export async function generateConversationalItinerary(
   prompt: string,
@@ -221,12 +157,17 @@ export async function generateConversationalItinerary(
     // Step 1: Understand what the user wants
     const intent = await understandTripIntent(prompt, conversationHistory);
 
-    // Step 2: Fill in missing pieces with smart defaults
-    const defaults = getSmartDefaults(prompt);
+    // Step 2: Check if we have minimum required information
+    if (!intent.location || !intent.duration) {
+      const missing = [];
+      if (!intent.location) missing.push('destination');
+      if (!intent.duration) missing.push('duration');
+      throw new Error(`Missing required information: ${missing.join(', ')}`);
+    }
 
-    const location = intent.location || defaults.location;
-    const duration = intent.duration || defaults.duration;
-    const startDate = intent.startDate || defaults.startDate;
+    const location = intent.location;
+    const duration = intent.duration;
+    const startDate = intent.startDate || 'flexible dates';
     const needsCoworking = intent.needsCoworking;
 
     logger.info('AI', 'Using parameters', {
@@ -248,12 +189,23 @@ export async function generateConversationalItinerary(
 
     // Step 4: Format the itinerary
     const formattedDays = activities.map((day: any, index: number) => {
-      const dayDate = new Date(startDate);
-      dayDate.setDate(dayDate.getDate() + index);
+      // Handle flexible dates or invalid date strings
+      let dateString = 'TBD';
+      if (startDate && startDate !== 'flexible dates' && startDate !== 'flexible') {
+        try {
+          const dayDate = new Date(startDate);
+          if (!isNaN(dayDate.getTime())) {
+            dayDate.setDate(dayDate.getDate() + index);
+            dateString = dayDate.toISOString().split('T')[0];
+          }
+        } catch (e) {
+          // Keep dateString as 'TBD' if date parsing fails
+        }
+      }
 
       return {
         day: index + 1,
-        date: dayDate.toISOString().split('T')[0],
+        date: dateString,
         title: day.title || `Day ${index + 1}`,
         activities: (day.activities || []).map((activity: any) => ({
           time: activity.time || '9:00 AM',
@@ -331,39 +283,9 @@ export async function generateConversationalItinerary(
     return result;
 
   } catch (error: any) {
-    logger.error('AI', 'Conversational generation had an issue, using defaults', error);
+    logger.error('AI', 'Conversational generation failed', error);
 
-    // NEVER FAIL - Return a default itinerary
-    const defaults = getSmartDefaults(prompt);
-    const defaultDays = createDefaultVacationDays(defaults.location, defaults.duration);
-
-    const formattedDays = defaultDays.map((day: any, index: number) => {
-      const dayDate = new Date(defaults.startDate);
-      dayDate.setDate(dayDate.getDate() + index);
-
-      return {
-        day: index + 1,
-        date: dayDate.toISOString().split('T')[0],
-        title: day.title,
-        activities: day.activities.map((activity: any) => ({
-          ...activity
-          // address will be added by LocationIQ enrichment if needed
-        }))
-      };
-    });
-
-    return {
-      destination: defaults.location,
-      title: `${defaults.duration} Days in ${defaults.location}`,
-      itinerary: formattedDays,
-      quickTips: [
-        'Book accommodations in advance',
-        'Check visa requirements',
-        'Get travel insurance',
-        'Download offline maps',
-        'Keep digital copies of documents'
-      ],
-      aiMessage: "I've created a sample itinerary to get you started. Tell me what you'd like to change!"
-    };
+    // Don't provide defaults - throw error with helpful message
+    throw new Error('Unable to generate itinerary. Please provide destination, dates, and duration.');
   }
 }

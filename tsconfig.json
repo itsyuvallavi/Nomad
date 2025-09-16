@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "tests/ai/.old/run-tests.ts", "tests/ai/.old/automated-test-runner.ts", "tests/ai/.old/ai-testing-monitor.ts", "src/components/forms/trip-details-form.tsx"],
   "exclude": ["node_modules", "Nomad_UI_v2.3", "tests"]
 }

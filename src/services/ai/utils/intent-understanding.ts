@@ -148,7 +148,7 @@ Respond in JSON format.` }
   } catch (error) {
     logger.error('AI', 'Intent understanding failed', error);
 
-    // Return defaults if AI fails
+    // Return null values if AI fails - NO DEFAULTS
     return {
       location: null,
       startDate: null,
@@ -160,8 +160,8 @@ Respond in JSON format.` }
       dietaryRestrictions: [],
       specificActivities: [],
       budgetLevel: null,
-      missingRequirements: ['location', 'duration'],
-      aiResponse: "I'd love to help you plan an amazing trip! Where would you like to go and for how long?"
+      missingRequirements: ['location', 'dates', 'duration'],
+      aiResponse: "I'd love to help you plan an amazing trip! Where would you like to go?"
     };
   }
 }
@@ -239,7 +239,10 @@ function generateAIResponse(intent: TripIntent, originalPrompt: string): string 
 
   if (missing.includes('location')) {
     // Has duration but missing location
-    return `Perfect! A ${intent.duration || 3}-day trip sounds wonderful. Where would you like to explore?`;
+    if (intent.duration) {
+      return `Perfect! A ${intent.duration}-day trip sounds wonderful. Where would you like to explore?`;
+    }
+    return "Where would you like to explore?";
   }
 
   if (missing.includes('duration')) {
@@ -252,59 +255,30 @@ function generateAIResponse(intent: TripIntent, originalPrompt: string): string 
 }
 
 /**
- * Get smart defaults based on partial input
+ * Get missing requirements from intent
+ * NEVER provides defaults - only identifies what's missing
  */
-export function getSmartDefaults(prompt: string): {
-  location: string;
-  duration: number;
-  startDate: string;
-  tripType: 'vacation' | 'workation' | 'business';
-} {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+export function getMissingRequirements(intent: TripIntent): string[] {
+  const missing: string[] = [];
 
-  const lowerPrompt = prompt.toLowerCase();
-
-  // Default trip type is always vacation unless work is mentioned
-  let tripType: 'vacation' | 'workation' | 'business' = 'vacation';
-  if (lowerPrompt.match(/work|remote|coworking|digital nomad/)) {
-    tripType = 'workation';
-  } else if (lowerPrompt.match(/business|meeting|conference/)) {
-    tripType = 'business';
+  // Check core requirements
+  if (!intent.location) {
+    missing.push('location');
+  }
+  if (!intent.startDate) {
+    missing.push('dates');
+  }
+  if (!intent.duration) {
+    missing.push('duration');
   }
 
-  // Duration defaults
-  let duration = 3; // Default
-  if (lowerPrompt.includes('weekend')) duration = 2;
-  else if (lowerPrompt.includes('week')) duration = 7;
-  else if (lowerPrompt.match(/(\d+)/)) {
-    const match = lowerPrompt.match(/(\d+)/);
-    if (match) {
-      duration = Math.min(30, Math.max(1, parseInt(match[1])));
-    }
-  }
+  return missing;
+}
 
-  // Location defaults based on context
-  let location = 'London'; // Safe default
-
-  if (lowerPrompt.includes('beach') || lowerPrompt.includes('relax')) {
-    location = 'Bali';
-  } else if (lowerPrompt.includes('europe')) {
-    location = 'Paris';
-  } else if (lowerPrompt.includes('asia')) {
-    location = 'Tokyo';
-  } else if (lowerPrompt.includes('adventure')) {
-    location = 'Iceland';
-  } else if (tripType === 'workation') {
-    location = 'Lisbon'; // Popular for digital nomads
-  } else if (tripType === 'business') {
-    location = 'New York';
-  }
-
-  return {
-    location,
-    duration,
-    startDate: tomorrow.toISOString().split('T')[0],
-    tripType
-  };
+/**
+ * Check if we have enough information to generate an itinerary
+ * NO DEFAULTS - must have actual user input
+ */
+export function hasRequiredInformation(intent: TripIntent): boolean {
+  return !!(intent.location && intent.startDate && intent.duration);
 }

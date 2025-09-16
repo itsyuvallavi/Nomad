@@ -1,392 +1,5 @@
 [
   {
-    "id": "req_1757851059572_axzyj",
-    "timestamp": "2025-09-14T11:58:14.165Z",
-    "type": "response",
-    "response": {
-      "destination": "París",
-      "title": "3 Days in París",
-      "itinerary": [
-        {
-          "day": 1,
-          "date": "2025-09-15",
-          "title": "Day 1 in París",
-          "activities": [
-            {
-              "time": "9:00 AM",
-              "description": "Breakfast at local cafe",
-              "category": "Food",
-              "address": "Fairy Restaurant Srilankan food, Htu Par Yone Road, သာကေတ, ဗိုလ်တထောင်ခရိုင်, ရန်ကုန်မြို့, ရန်ကုန်တိုင်းဒေသကြီး, 11231, မြန်မာ",
-              "venue_name": "Fairy Restaurant Srilankan food",
-              "venue_search": "Local Cafe París",
-              "coordinates": {
-                "lat": 16.7939682,
-                "lng": 96.201159
-              },
-              "_locationiq_place_id": "228734795"
-            },
-            {
-              "time": "10:30 AM",
-              "description": "Visit main attraction",
-              "category": "Attraction",
-              "address": "Address TBD",
-              "venue_name": "Main Attraction",
-              "venue_search": "Main Attraction París",
-              "coordinates": {
-                "lat": -26.0585185,
-                "lng": 28.0609276
-              },
-              "_approximateLocation": true
-            },
-            {
-              "time": "1:00 PM",
-              "description": "Lunch",
-              "category": "Food",
-              "address": "Restaurant Parada, N-II, la Panadella, Montmaneu, Anoia, Barcelona, Catalunya, 08717, España",
-              "venue_name": "Restaurant Parada",
-              "venue_search": "Restaurant París",
-              "coordinates": {
-                "lat": 41.6169068,
-                "lng": 1.4003338
-              },
-              "_locationiq_place_id": "80933263"
-            },
-            {
-              "time": "3:00 PM",
-              "description": "Explore local area",
-              "category": "Leisure",
-              "address": "Leisure Village Par 3, East Leisure Village Avenue, Fox Lake, Lake County, Illinois, 60020, USA",
-              "venue_name": "Leisure Village Par 3",
-              "venue_search": "Local Area París",
-              "coordinates": {
-                "lat": 42.4323555,
-                "lng": -88.19008776976113
-              },
-              "_locationiq_place_id": "355798035"
-            },
-            {
-              "time": "9:00 AM",
-              "description": "Breakfast at local cafe",
-              "category": "Food",
-              "address": "Fairy Restaurant Srilankan food, Htu Par Yone Road, သာကေတ, ဗိုလ်တထောင်ခရိုင်, ရန်ကုန်မြို့, ရန်ကုန်တိုင်းဒေသကြီး, 11231, မြန်မာ",
-              "venue_name": "Fairy Restaurant Srilankan food",
-              "venue_search": "Local Cafe París",
-              "coordinates": {
-                "lat": 16.7939682,
-                "lng": 96.201159
-              },
-              "_locationiq_place_id": "228734795"
-            }
-          ],
-          "_routeInfo": {
-            "totalDistance": 37211244,
-            "isEfficient": false,
-            "warnings": [
-              "⚠️ Long distance: Fairy Restaurant Srilankan food → Main Attraction (8768.3km)",
-              "⚠️ Consider closer venues: Fairy Restaurant Srilankan food and Main Attraction are 8768.3km apart in same time slot",
-              "⚠️ Long distance: Main Attraction → Restaurant Parada (8009.8km)",
-              "⚠️ Long distance: Restaurant Parada → Leisure Village Par 3 (7019.1km)",
-              "⚠️ Consider closer venues: Restaurant Parada and Leisure Village Par 3 are 7019.1km apart in same time slot",
-              "⚠️ Long distance: Leisure Village Par 3 → Fairy Restaurant Srilankan food (13414.1km)",
-              "⚠️ Consider closer venues: Leisure Village Par 3 and Fairy Restaurant Srilankan food are 13414.1km apart in same time slot"
-            ],
-            "segments": [
-              {
-                "from": "Fairy Restaurant Srilankan food",
-                "to": "Main Attraction",
-                "distance": 8768250
-              },
-              {
-                "from": "Main Attraction",
-                "to": "Restaurant Parada",
-                "distance": 8009846
-              },
-              {
-                "from": "Restaurant Parada",
-                "to": "Leisure Village Par 3",
-                "distance": 7019097
-              },
-              {
-                "from": "Leisure Village Par 3",
-                "to": "Fairy Restaurant Srilankan food",
-                "distance": 13414050
-              }
-            ]
-          },
-          "_destination": "Par",
-          "_coordinates": {
-            "lat": -28.8166236,
-            "lng": 24.991639
-          }
-        },
-        {
-          "day": 2,
-          "date": "2025-09-16",
-          "title": "Day 2 in París",
-          "activities": [
-            {
-              "time": "9:00 AM",
-              "description": "Breakfast at local cafe",
-              "category": "Food",
-              "address": "Address TBD",
-              "venue_name": "Local Cafe",
-              "venue_search": "Local Cafe París",
-              "coordinates": {
-                "lat": -28.8166236,
-                "lng": 24.991639
-              },
-              "_approximateLocation": true
-            },
-            {
-              "time": "10:30 AM",
-              "description": "Visit main attraction",
-              "category": "Attraction",
-              "address": "Address TBD",
-              "venue_name": "Main Attraction",
-              "venue_search": "Main Attraction París",
-              "coordinates": {
-                "lat": -28.8166236,
-                "lng": 24.991639
-              },
-              "_approximateLocation": true
-            },
-            {
-              "time": "1:00 PM",
-              "description": "Lunch",
-              "category": "Food",
-              "address": "Restaurant Parada, N-II, la Panadella, Montmaneu, Anoia, Barcelona, Catalunya, 08717, España",
-              "venue_name": "Restaurant Parada",
-              "venue_search": "Restaurant París",
-              "coordinates": {
-                "lat": 41.6169068,
-                "lng": 1.4003338
-              },
-              "_locationiq_place_id": "80933263"
-            },
-            {
-              "time": "7:00 PM",
-              "description": "Dinner",
-              "category": "Food",
-              "address": "Address TBD",
-              "venue_name": "Dinner Restaurant",
-              "venue_search": "Dinner Restaurant París",
-              "coordinates": {
-                "lat": 16.7939682,
-                "lng": 96.201159
-              },
-              "_approximateLocation": true
-            },
-            {
-              "time": "3:00 PM",
-              "description": "Explore local area",
-              "category": "Leisure",
-              "address": "Par Avion, 115, Kennedy Drive, Cambridge, Hobart, City of Clarence, Tasmania, 7170, Australia",
-              "venue_name": "Par Avion",
-              "venue_search": "Local Area París",
-              "coordinates": {
-                "lat": -42.8298189,
-                "lng": 147.4763353838919
-              },
-              "website": "https://paravion.gov.au",
-              "phone": "+61 3 6248 5390",
-              "_locationiq_place_id": "23530979"
-            }
-          ],
-          "_routeInfo": {
-            "totalDistance": 25807685,
-            "isEfficient": false,
-            "warnings": [
-              "⚠️ Long distance: Main Attraction → Restaurant Parada (8198.5km)",
-              "⚠️ Long distance: Restaurant Parada → Dinner Restaurant (9164.2km)",
-              "⚠️ Consider closer venues: Restaurant Parada and Dinner Restaurant are 9164.2km apart in same time slot",
-              "⚠️ Long distance: Dinner Restaurant → Par Avion (8445.1km)",
-              "⚠️ Consider closer venues: Dinner Restaurant and Par Avion are 8445.1km apart in same time slot"
-            ],
-            "segments": [
-              {
-                "from": "Local Cafe",
-                "to": "Main Attraction",
-                "distance": 0
-              },
-              {
-                "from": "Main Attraction",
-                "to": "Restaurant Parada",
-                "distance": 8198459
-              },
-              {
-                "from": "Restaurant Parada",
-                "to": "Dinner Restaurant",
-                "distance": 9164157
-              },
-              {
-                "from": "Dinner Restaurant",
-                "to": "Par Avion",
-                "distance": 8445069
-              }
-            ]
-          },
-          "_destination": "Par",
-          "_coordinates": {
-            "lat": -28.8166236,
-            "lng": 24.991639
-          }
-        },
-        {
-          "day": 3,
-          "date": "2025-09-17",
-          "title": "Day 3 in París",
-          "activities": [
-            {
-              "time": "9:00 AM",
-              "description": "Breakfast at local cafe",
-              "category": "Food",
-              "address": "Fairy Restaurant Srilankan food, Htu Par Yone Road, သာကေတ, ဗိုလ်တထောင်ခရိုင်, ရန်ကုန်မြို့, ရန်ကုန်တိုင်းဒေသကြီး, 11231, မြန်မာ",
-              "venue_name": "Fairy Restaurant Srilankan food",
-              "venue_search": "Local Cafe París",
-              "coordinates": {
-                "lat": 16.7939682,
-                "lng": 96.201159
-              },
-              "_locationiq_place_id": "228734795"
-            },
-            {
-              "time": "10:30 AM",
-              "description": "Visit main attraction",
-              "category": "Attraction",
-              "address": "Mane Attraction Hairstylists, Rivonia Boulevard, Rivonia, Johannesburg Ward 106, Sandton, City of Johannesburg Metropolitan Municipality, Gauteng, 2128, South Africa",
-              "venue_name": "Mane Attraction Hairstylists",
-              "venue_search": "Main Attraction París",
-              "coordinates": {
-                "lat": -26.0585185,
-                "lng": 28.0609276
-              },
-              "website": "https://maneattraction.co.za/",
-              "phone": "+27 11 234 0034; +27 11 234 0035; +27 76 998 4100",
-              "opening_hours": "Mo-Fr 07:00-18:00; Sa 08:00-16:00; Su,PH 09:00-14:00",
-              "_locationiq_place_id": "33418279"
-            },
-            {
-              "time": "1:00 PM",
-              "description": "Lunch",
-              "category": "Food",
-              "address": "Restaurant Parada, N-II, la Panadella, Montmaneu, Anoia, Barcelona, Catalunya, 08717, España",
-              "venue_name": "Restaurant Parada",
-              "venue_search": "Restaurant París",
-              "coordinates": {
-                "lat": 41.6169068,
-                "lng": 1.4003338
-              },
-              "_locationiq_place_id": "80933263"
-            },
-            {
-              "time": "7:00 PM",
-              "description": "Dinner",
-              "category": "Food",
-              "address": "Address TBD",
-              "venue_name": "Dinner Restaurant",
-              "venue_search": "Dinner Restaurant París",
-              "coordinates": {
-                "lat": 16.7939682,
-                "lng": 96.201159
-              },
-              "_approximateLocation": true
-            },
-            {
-              "time": "3:00 PM",
-              "description": "Explore local area",
-              "category": "Leisure",
-              "address": "Par Avion, 115, Kennedy Drive, Cambridge, Hobart, City of Clarence, Tasmania, 7170, Australia",
-              "venue_name": "Par Avion",
-              "venue_search": "Local Area París",
-              "coordinates": {
-                "lat": -42.8298189,
-                "lng": 147.4763353838919
-              },
-              "website": "https://paravion.gov.au",
-              "phone": "+61 3 6248 5390",
-              "_locationiq_place_id": "23530979"
-            }
-          ],
-          "_routeInfo": {
-            "totalDistance": 34387322,
-            "isEfficient": false,
-            "warnings": [
-              "⚠️ Long distance: Fairy Restaurant Srilankan food → Mane Attraction Hairstylists (8768.3km)",
-              "⚠️ Consider closer venues: Fairy Restaurant Srilankan food and Mane Attraction Hairstylists are 8768.3km apart in same time slot",
-              "⚠️ Long distance: Mane Attraction Hairstylists → Restaurant Parada (8009.8km)",
-              "⚠️ Long distance: Restaurant Parada → Dinner Restaurant (9164.2km)",
-              "⚠️ Consider closer venues: Restaurant Parada and Dinner Restaurant are 9164.2km apart in same time slot",
-              "⚠️ Long distance: Dinner Restaurant → Par Avion (8445.1km)",
-              "⚠️ Consider closer venues: Dinner Restaurant and Par Avion are 8445.1km apart in same time slot"
-            ],
-            "segments": [
-              {
-                "from": "Fairy Restaurant Srilankan food",
-                "to": "Mane Attraction Hairstylists",
-                "distance": 8768250
-              },
-              {
-                "from": "Mane Attraction Hairstylists",
-                "to": "Restaurant Parada",
-                "distance": 8009846
-              },
-              {
-                "from": "Restaurant Parada",
-                "to": "Dinner Restaurant",
-                "distance": 9164157
-              },
-              {
-                "from": "Dinner Restaurant",
-                "to": "Par Avion",
-                "distance": 8445069
-              }
-            ]
-          },
-          "_destination": "Par",
-          "_coordinates": {
-            "lat": -28.8166236,
-            "lng": 24.991639
-          }
-        }
-      ],
-      "quickTips": [
-        "Book accommodations in advance",
-        "Check visa requirements",
-        "Get travel insurance",
-        "Download offline maps",
-        "Keep digital copies of documents"
-      ],
-      "_costEstimate": {
-        "total": null,
-        "flights": null,
-        "accommodation": null,
-        "dailyExpenses": null,
-        "breakdown": []
-      },
-      "_enrichedWithLocationIQ": true,
-      "_routesOptimized": true
-    },
-    "duration": 34593,
-    "metadata": {
-      "model": "gpt-4o-mini",
-      "strategy": "ultra-fast-enriched",
-      "destinations": [
-        "París"
-      ],
-      "totalDays": 3
-    }
-  },
-  {
-    "id": "req_1757851095220_cnfnpl",
-    "timestamp": "2025-09-14T11:58:15.220Z",
-    "type": "request",
-    "prompt": "Can you help me plan a trip?",
-    "metadata": {
-      "model": "gpt-4o-mini",
-      "strategy": "ultra-fast"
-    }
-  },
-  {
     "id": "req_1757851095220_cnfnpl",
     "timestamp": "2025-09-14T11:58:15.953Z",
     "type": "error",
@@ -12387,6 +12000,315 @@
         "London"
       ],
       "totalDays": 3
+    }
+  },
+  {
+    "id": "req_1757964609784_uoxzb",
+    "timestamp": "2025-09-15T19:30:09.784Z",
+    "type": "request",
+    "prompt": "Generate 7 day itinerary for Plan a trip to London",
+    "metadata": {
+      "model": "gpt-3.5-turbo",
+      "strategy": "conversational"
+    }
+  },
+  {
+    "id": "req_1757964609784_uoxzb",
+    "timestamp": "2025-09-15T19:30:41.495Z",
+    "type": "response",
+    "response": {
+      "destination": "London",
+      "title": "7 Days in London",
+      "itinerary": [
+        {
+          "day": 1,
+          "date": "2025-01-01",
+          "title": "Day 1: Historical Exploration",
+          "activities": [
+            {
+              "time": "10:00",
+              "description": "Visit the Tower of London",
+              "category": "Attraction",
+              "venue_name": "Tower of London",
+              "tips": "Purchase tickets in advance to skip the lines"
+            },
+            {
+              "time": "13:00",
+              "description": "Explore the British Museum",
+              "category": "Culture",
+              "venue_name": "The British Museum",
+              "tips": "Don't miss the Rosetta Stone and Egyptian mummies"
+            },
+            {
+              "time": "16:00",
+              "description": "Stroll through Covent Garden",
+              "category": "Leisure",
+              "venue_name": "Covent Garden",
+              "tips": "Enjoy street performances and unique shops"
+            },
+            {
+              "time": "19:00",
+              "description": "Dinner at Dishoom",
+              "category": "Food",
+              "venue_name": "Dishoom",
+              "tips": "Try their signature black daal"
+            }
+          ]
+        },
+        {
+          "day": 2,
+          "date": "2025-01-02",
+          "title": "Day 2: Royal London",
+          "activities": [
+            {
+              "time": "09:00",
+              "description": "Visit Buckingham Palace",
+              "category": "Attraction",
+              "venue_name": "Buckingham Palace",
+              "tips": "Witness the Changing of the Guard ceremony"
+            },
+            {
+              "time": "12:00",
+              "description": "Explore Kensington Palace",
+              "category": "Culture",
+              "venue_name": "Kensington Palace",
+              "tips": "Discover the beautiful gardens and royal history"
+            },
+            {
+              "time": "15:00",
+              "description": "Afternoon Tea at The Ritz",
+              "category": "Food",
+              "venue_name": "The Ritz London",
+              "tips": "Dress up for this traditional British experience"
+            },
+            {
+              "time": "17:00",
+              "description": "Walk in Hyde Park",
+              "category": "Leisure",
+              "venue_name": "Hyde Park",
+              "tips": "Rent a boat on the Serpentine Lake"
+            }
+          ]
+        },
+        {
+          "day": 3,
+          "date": "2025-01-03",
+          "title": "Day 3: Art & Architecture",
+          "activities": [
+            {
+              "time": "10:00",
+              "description": "Visit Tate Modern",
+              "category": "Culture",
+              "venue_name": "Tate Modern",
+              "tips": "Experience contemporary art in a former power station"
+            },
+            {
+              "time": "13:00",
+              "description": "Lunch at Borough Market",
+              "category": "Food",
+              "venue_name": "Borough Market",
+              "tips": "Try different street foods from around the world"
+            },
+            {
+              "time": "15:00",
+              "description": "Explore St. Paul's Cathedral",
+              "category": "Attraction",
+              "venue_name": "St. Paul's Cathedral",
+              "tips": "Climb to the top for panoramic views of London"
+            },
+            {
+              "time": "18:00",
+              "description": "Dinner at Sketch",
+              "category": "Food",
+              "venue_name": "Sketch",
+              "tips": "Don't miss the quirky decor and futuristic bathrooms"
+            }
+          ]
+        },
+        {
+          "day": 4,
+          "date": "2025-01-04",
+          "title": "Day 4: Greenwich Day Trip",
+          "activities": [
+            {
+              "time": "09:00",
+              "description": "Visit the Royal Observatory",
+              "category": "Attraction",
+              "venue_name": "Royal Observatory Greenwich",
+              "tips": "Stand on the Prime Meridian Line"
+            },
+            {
+              "time": "12:00",
+              "description": "Lunch at The Gypsy Moth",
+              "category": "Food",
+              "venue_name": "The Gypsy Moth",
+              "tips": "Enjoy pub food with a view of the Thames"
+            },
+            {
+              "time": "14:00",
+              "description": "Explore the Cutty Sark",
+              "category": "Attraction",
+              "venue_name": "Cutty Sark",
+              "tips": "Learn about the life of a 19th-century sailor"
+            },
+            {
+              "time": "17:00",
+              "description": "Relax in Greenwich Park",
+              "category": "Leisure",
+              "venue_name": "Greenwich Park",
+              "tips": "Enjoy views of London's skyline"
+            }
+          ]
+        },
+        {
+          "day": 5,
+          "date": "2025-01-05",
+          "title": "Day 5: Shopping & Entertainment",
+          "activities": [
+            {
+              "time": "10:00",
+              "description": "Shop on Oxford Street",
+              "category": "Shopping",
+              "venue_name": "Oxford Street",
+              "tips": "Find a mix of high street and luxury brands"
+            },
+            {
+              "time": "13:00",
+              "description": "Lunch at Harrods Food Hall",
+              "category": "Food",
+              "venue_name": "Harrods",
+              "tips": "Try gourmet delicacies from around the world"
+            },
+            {
+              "time": "15:00",
+              "description": "Watch a West End show",
+              "category": "Entertainment",
+              "venue_name": "West End Theatres",
+              "tips": "Book tickets in advance for popular shows"
+            },
+            {
+              "time": "19:00",
+              "description": "Dinner at Sketchley's",
+              "category": "Food",
+              "venue_name": "Sketchley's",
+              "tips": "Experience traditional British cuisine with a modern twist"
+            }
+          ]
+        },
+        {
+          "day": 6,
+          "date": "2025-01-06",
+          "title": "Day 6: River Thames Exploration",
+          "activities": [
+            {
+              "time": "10:00",
+              "description": "Take a Thames River Cruise",
+              "category": "Leisure",
+              "venue_name": "Thames River Cruise",
+              "tips": "Enjoy views of London's iconic landmarks from the water"
+            },
+            {
+              "time": "13:00",
+              "description": "Visit the Tower Bridge Exhibition",
+              "category": "Attraction",
+              "venue_name": "Tower Bridge Exhibition",
+              "tips": "Walk across the glass floor for a thrilling experience"
+            },
+            {
+              "time": "16:00",
+              "description": "Explore the Tate Britain",
+              "category": "Culture",
+              "venue_name": "Tate Britain",
+              "tips": "Discover British art from the 1500s to the present day"
+            },
+            {
+              "time": "19:00",
+              "description": "Dinner at The Shard",
+              "category": "Food",
+              "venue_name": "The Shard",
+              "tips": "Enjoy a meal with a view from London's tallest building"
+            }
+          ]
+        },
+        {
+          "day": 7,
+          "date": "2025-01-07",
+          "title": "Day 7: Parks & Gardens",
+          "activities": [
+            {
+              "time": "09:00",
+              "description": "Visit Kew Gardens",
+              "category": "Attraction",
+              "venue_name": "Royal Botanic Gardens, Kew",
+              "tips": "Explore the diverse plant collections and iconic glasshouses"
+            },
+            {
+              "time": "12:00",
+              "description": "Picnic in Regent's Park",
+              "category": "Leisure",
+              "venue_name": "Regent's Park",
+              "tips": "Relax by the lake and visit the Open Air Theatre"
+            },
+            {
+              "time": "15:00",
+              "description": "Walk through Hampstead Heath",
+              "category": "Leisure",
+              "venue_name": "Hampstead Heath",
+              "tips": "Enjoy panoramic views of London from Parliament Hill"
+            },
+            {
+              "time": "18:00",
+              "description": "Farewell Dinner at The Ivy",
+              "category": "Food",
+              "venue_name": "The Ivy",
+              "tips": "Savor modern British cuisine in an elegant setting"
+            }
+          ]
+        }
+      ],
+      "quickTips": [
+        "Book accommodations in advance",
+        "Check visa requirements",
+        "Get travel insurance",
+        "Download offline maps",
+        "Keep digital copies of documents"
+      ],
+      "aiMessage": "Wonderful! Here's your 7-day London adventure!",
+      "_costEstimate": {
+        "total": 5400,
+        "flights": 1300,
+        "accommodation": 3400,
+        "dailyExpenses": 100,
+        "currency": "USD",
+        "breakdown": [
+          {
+            "type": "flight",
+            "description": "Round-trip flights",
+            "amount": 1300
+          },
+          {
+            "type": "hotel",
+            "description": "7 nights accommodation",
+            "amount": 3400
+          },
+          {
+            "type": "daily",
+            "description": "Food and activities",
+            "amount": 700
+          }
+        ]
+      },
+      "_enrichedWithLocationIQ": true,
+      "_routesOptimized": true
+    },
+    "duration": 31711,
+    "metadata": {
+      "tokensUsed": 1000,
+      "origin": "Plan a trip to London",
+      "destinations": [
+        "Plan a trip to London"
+      ],
+      "totalDays": 7
     }
   }
 ]
