@@ -236,7 +236,18 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
                              <MessageSquare size={16} className="text-muted-foreground mb-2 sm:mb-3" />
                            </motion.div>
                            <p className="font-medium text-foreground text-xs sm:text-sm flex-1 leading-snug line-clamp-2 sm:line-clamp-3">{search.title || search.prompt || 'New chat'}</p>
-                           <p className="text-muted-foreground text-[10px] sm:text-xs mt-2 sm:mt-3">{formatDistanceToNow(new Date(search.lastUpdated || search.id), { addSuffix: true })}</p>
+                           <p className="text-muted-foreground text-[10px] sm:text-xs mt-2 sm:mt-3">
+                            {(() => {
+                              const dateString = search.lastUpdated;
+                              const date = dateString ? new Date(dateString) : null;
+                              const isValidDate = date && !isNaN(date.getTime());
+
+                              if (isValidDate) {
+                                return formatDistanceToNow(date, { addSuffix: true });
+                              }
+                              return 'Recently';
+                            })()}
+                          </p>
                         </CardContent>
                       </Card>
                     </motion.div>
