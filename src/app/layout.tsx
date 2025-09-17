@@ -1,6 +1,6 @@
 import type {Metadata, Viewport} from 'next';
 import { AuthProvider } from '@/infrastructure/contexts/AuthContext';
-import { ErrorBoundary } from '@/infrastructure/components/ErrorBoundary';
+import ErrorBoundary from '@/components/common/ClientErrorBoundary';
 import { PasswordGate } from '@/infrastructure/components/PasswordGate';
 import { OfflineProvider } from '@/infrastructure/providers/offline';
 import { MotionProvider } from '@/infrastructure/providers/motion';

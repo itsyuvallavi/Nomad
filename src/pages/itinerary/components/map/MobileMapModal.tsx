@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/helpers/general';
 import { Button } from '@/components/ui/button';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
-import { MapPanel } from './map-panel';
+import { MapPanel } from './MapView';
 
 interface MobileMapModalProps {
   isOpen: boolean;

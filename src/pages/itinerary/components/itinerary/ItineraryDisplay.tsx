@@ -1,8 +1,8 @@
-import { DayItinerary } from './day-schedule';
+import { DayItinerary } from './Day-schedule';
 import { DayTimelineV2 } from './DayTimeline';
-import { CoworkingSection } from './coworking-spots';
-import { ExportMenu } from './export-menu';
-import { ItineraryLoadingSkeleton } from './loading-skeleton';
+import { CoworkingSection } from './Coworking-spots';
+import { ExportMenu } from './Export-menu';
+import { ItineraryLoadingSkeleton } from './Loading-skeleton';
 import { EmptyState } from '@/components/common/EmptyState';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { motion, useInView } from 'framer-motion';
@@ -18,7 +18,7 @@ import { fadeInUp, staggerContainer, countAnimation } from '@/lib/utils/animatio
 
 // Dynamically import map to avoid SSR issues
 const ItineraryMap = dynamic(
-  () => import('@/components/map/itinerary-map').then(mod => ({ default: mod.ItineraryMap })),
+  () => import('../map/ItineraryMap').then(mod => ({ default: mod.ItineraryMap })),
   { 
     ssr: false,
     loading: () => (
@@ -430,7 +430,7 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
                       : itinerary.itinerary
                   }}
                   selectedDay={selectedMapDay}
-                  onDaySelect={(day) => {
+                  onDaySelect={(day: number) => {
                     setSelectedMapDay(day);
                     // Scroll to the selected day in the itinerary
                     const dayElement = document.getElementById(`day-${day}`);

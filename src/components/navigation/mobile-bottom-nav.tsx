@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/helpers/general";
 import { HAPTIC, animationConfig } from "@/lib/animations";
 import { useHapticTap } from "@/hooks/use-premium-gestures";
 

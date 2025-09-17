@@ -23,12 +23,12 @@ const TileLayer = dynamic(
 // We'll import it directly when needed inside components
 
 const ActivityMarker = dynamic(
-  () => import('./activity-marker').then(mod => ({ default: mod.ActivityMarker })),
+  () => import('./Activity-marker').then(mod => ({ default: mod.ActivityMarker })),
   { ssr: false }
 );
 
 const RouteLayer = dynamic(
-  () => import('./route-layer'),
+  () => import('./Route-layer'),
   { ssr: false }
 );
 

@@ -1,0 +1,1201 @@
+{
+  "timestamp": "2025-09-17T08:57:53.933Z",
+  "summary": {
+    "total": 6,
+    "passed": 0,
+    "failed": 6,
+    "totalDuration": 177181
+  },
+  "results": [
+    {
+      "testName": "Vague Request Test",
+      "scenario": "Test if AI asks for clarification on vague requests",
+      "passed": false,
+      "duration": 45755,
+      "errors": [
+        "AI did not engage in sufficient conversation"
+      ],
+      "warnings": [
+        "Only 2 conversation turns, expected at least 3"
+      ],
+      "aiResponses": [
+        {
+          "type": "question",
+          "message": "What destination are you considering for your trip?",
+          "awaitingInput": "destination",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\"],\"data\":{\"destination\":null,\"startDate\":null,\"duration\":null,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758099286737\"}"
+        },
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 3-day itinerary for Barcelona!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Barcelona",
+            "title": "3 Days in Barcelona",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "TBD",
+                "title": "Day 1: Exploring the City",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit Sagrada Familia",
+                    "category": "Attraction",
+                    "venue_name": "Saint Mary Of The Angels Basilica",
+                    "tips": "Book tickets online in advance to skip the long lines.",
+                    "address": "Saint Mary Of The Angels Basilica, 150, Yarra Street, Geelong, City of Greater Geelong, Victoria, 3220, Australia",
+                    "coordinates": {
+                      "lat": -38.152671100000006,
+                      "lng": 144.36030150623975
+                    },
+                    "website": "https://www.stmarysgeelong.com.au/",
+                    "_locationiq_place_id": "18977656"
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at La Boqueria Market",
+                    "category": "Food",
+                    "venue_name": "Food",
+                    "tips": "Try the local tapas and fresh juices.",
+                    "address": "Food, 10571, West Pico Boulevard, Los Angeles, Los Angeles County, California, 90064, USA",
+                    "coordinates": {
+                      "lat": 34.0440296,
+                      "lng": -118.4213724
+                    },
+                    "website": "https://food-la.com/",
+                    "opening_hours": "Tu-Fr 07:30-15:30; Sa-Mo 08:00-15:00",
+                    "_locationiq_place_id": "305355467"
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at La Boqueria Market",
+                    "category": "Food",
+                    "venue_name": "Food",
+                    "tips": "Try the local tapas and fresh juices.",
+                    "address": "Food, 10571, West Pico Boulevard, Los Angeles, Los Angeles County, California, 90064, USA",
+                    "coordinates": {
+                      "lat": 34.0440296,
+                      "lng": -118.4213724
+                    },
+                    "website": "https://food-la.com/",
+                    "opening_hours": "Tu-Fr 07:30-15:30; Sa-Mo 08:00-15:00",
+                    "_locationiq_place_id": "305355467"
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Explore the Gothic Quarter",
+                    "category": "Culture",
+                    "venue_name": "Barri Gotic",
+                    "tips": "Get lost in the narrow streets and discover hidden gems.",
+                    "coordinates": {
+                      "lat": 38.914681,
+                      "lng": -76.9851566
+                    },
+                    "_approximateLocation": true
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Relax at Barceloneta Beach",
+                    "category": "Leisure",
+                    "venue_name": "Barceloneta Beach",
+                    "tips": "Enjoy a refreshing swim and watch the sunset.",
+                    "coordinates": {
+                      "lat": 53.3402729,
+                      "lng": -2.9777992890776974
+                    },
+                    "_approximateLocation": true
+                  }
+                ],
+                "_routeInfo": {
+                  "totalDistance": 22185055,
+                  "isEfficient": false,
+                  "warnings": [
+                    "⚠️ Long distance: Saint Mary Of The Angels Basilica → Food (12823.3km)",
+                    "⚠️ Long distance: Food → Barri Gotic (3712.0km)",
+                    "⚠️ Consider closer venues: Food and Barri Gotic are 3712.0km apart in same time slot",
+                    "⚠️ Long distance: Barri Gotic → Barceloneta Beach (5649.7km)",
+                    "⚠️ Consider closer venues: Barri Gotic and Barceloneta Beach are 5649.7km apart in same time slot",
+                    "⚠️ Possible zigzag pattern detected between Saint Mary Of The Angels Basilica, Food, and Food"
+                  ],
+                  "segments": [
+                    {
+                      "from": "Saint Mary Of The Angels Basilica",
+                      "to": "Food",
+                      "distance": 12823275
+                    },
+                    {
+                      "from": "Food",
+                      "to": "Food",
+                      "distance": 0
+                    },
+                    {
+                      "from": "Food",
+                      "to": "Barri Gotic",
+                      "distance": 3712037
+                    },
+                    {
+                      "from": "Barri Gotic",
+                      "to": "Barceloneta Beach",
+                      "distance": 5649744
+                    }
+                  ]
+                },
+                "_destination": "the City",
+                "_coordinates": {
+                  "lat": 51.5156177,
+                  "lng": -0.0919983
+                },
+                "weather": {
+                  "temp": {
+                    "min": 25,
+                    "max": 29,
+                    "day": 27
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "scattered clouds",
+                    "icon": "03d"
+                  },
+                  "humidity": 71,
+                  "wind_speed": 3,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "TBD",
+                "title": "Day 2: Art and Culture",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Visit Picasso Museum",
+                    "category": "Culture",
+                    "venue_name": "Museu Picasso",
+                    "tips": "Learn about Picasso's early years and his connection to Barcelona."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at Can Culleretes",
+                    "category": "Food",
+                    "venue_name": "Can Culleretes",
+                    "tips": "One of the oldest restaurants in Barcelona, try the Catalan specialties."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Explore Park Güell",
+                    "category": "Attraction",
+                    "venue_name": "Park Güell",
+                    "tips": "Buy your tickets in advance for the Monumental Zone."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Visit Palau de la Música Catalana",
+                    "category": "Culture",
+                    "venue_name": "Palau de la Música Catalana",
+                    "tips": "Take a guided tour to admire the modernist architecture."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Dinner at Tickets Bar",
+                    "category": "Food",
+                    "venue_name": "Tickets Bar",
+                    "tips": "Experience innovative tapas by Chef Albert Adrià."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 24,
+                    "max": 26,
+                    "day": 25
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "scattered clouds",
+                    "icon": "03n"
+                  },
+                  "humidity": 75,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 3,
+                "date": "TBD",
+                "title": "Day 3: Shopping and Relaxation",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Shop on Passeig de Gràcia",
+                    "category": "Shopping",
+                    "venue_name": "Passeig de Gràcia",
+                    "tips": "Find luxury brands and unique boutiques along this avenue."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at El Nacional",
+                    "category": "Food",
+                    "venue_name": "El Nacional",
+                    "tips": "A gastronomic paradise offering a variety of Spanish dishes."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Relax at Aire de Barcelona",
+                    "category": "Leisure",
+                    "venue_name": "Aire de Barcelona",
+                    "tips": "Indulge in a luxurious thermal bath experience."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Stroll down La Rambla",
+                    "category": "Culture",
+                    "venue_name": "La Rambla",
+                    "tips": "Watch street performers and visit La Boqueria market."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Farewell Dinner at 7 Portes",
+                    "category": "Food",
+                    "venue_name": "7 Portes",
+                    "tips": "A historic restaurant serving traditional Catalan cuisine."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 23,
+                    "max": 26,
+                    "day": 25
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01d"
+                  },
+                  "humidity": 71,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "I'd be happy to help you plan an amazing trip! Where would you like to go and for how long?",
+            "_costEstimate": {
+              "total": 3450,
+              "flights": 1200,
+              "accommodation": 1950,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 1200
+                },
+                {
+                  "type": "hotel",
+                  "description": "3 nights accommodation",
+                  "amount": 1950
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 300
+                }
+              ]
+            },
+            "_enrichedWithLocationIQ": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\",\"Barcelona\"],\"data\":{\"destination\":\"Barcelona\",\"startDate\":null,\"duration\":null,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758099289544\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Complex Multi-City Trip",
+      "scenario": "Test generation of complex multi-destination itinerary",
+      "passed": false,
+      "duration": 29989,
+      "errors": [
+        "Failed to generate itinerary for complex request"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to London, Paris, Amsterdam, Barcelona?",
+          "conversationContext": "{\"history\":[\"I need a 2-week trip starting in London on April 1st, then Paris for 4 days, Amsterdam for 3 days, and ending in Barcelona. I work remotely so need coworking spaces. Budget is $5000. I'm vegetarian and love museums.\"],\"data\":{\"destination\":\"London, Paris, Amsterdam, Barcelona\",\"startDate\":\"2024-04-01\",\"duration\":14,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"coworking spaces\",\"museums\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Complex Multi-City Trip-1758099334494\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Specific Constraints Test",
+      "scenario": "Test handling of specific accessibility and dietary constraints",
+      "passed": false,
+      "duration": 22289,
+      "errors": [
+        "No mention of wheelchair accessibility",
+        "No dialysis centers or medical facilities included",
+        "Included seafood despite severe allergy",
+        "Expected questions but none were asked"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 4-day itinerary for Tokyo!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Tokyo",
+            "title": "4 Days in Tokyo",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "TBD",
+                "title": "Day 1: Introduction to Tokyo",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit Meiji Shrine",
+                    "category": "Attraction",
+                    "venue_name": "Meiji Jingu Shrine",
+                    "tips": "Don't miss the beautiful forested entrance leading to the shrine."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at Tsukiji Fish Market",
+                    "category": "Food",
+                    "venue_name": "Tsukiji Outer Market",
+                    "tips": "Try fresh sushi at one of the many renowned stalls."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Explore Asakusa Senso-ji Temple",
+                    "category": "Culture",
+                    "venue_name": "Senso-ji Temple",
+                    "tips": "Shop for traditional souvenirs on Nakamise Shopping Street."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner in Akihabara",
+                    "category": "Food",
+                    "venue_name": "Akihabara Gachapon Kaikan",
+                    "tips": "Experience the unique vending machine restaurant culture."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Night view from Tokyo Skytree",
+                    "category": "Attraction",
+                    "venue_name": "Tokyo Skytree",
+                    "tips": "Enjoy panoramic views of Tokyo from the observation decks."
+                  },
+                  {
+                    "time": "10:00 PM",
+                    "description": "Relax at Odaiba Seaside Park",
+                    "category": "Leisure",
+                    "venue_name": "Odaiba Seaside Park",
+                    "tips": "Take a leisurely stroll along the waterfront to unwind."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 29,
+                    "max": 31,
+                    "day": 30
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "few clouds",
+                    "icon": "02n"
+                  },
+                  "humidity": 73,
+                  "wind_speed": 3,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "TBD",
+                "title": "Day 2: Traditional & Modern Tokyo",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Visit the Imperial Palace",
+                    "category": "Attraction",
+                    "venue_name": "Tokyo Imperial Palace",
+                    "tips": "Join a guided tour to learn about the history of the palace."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at Ginza District",
+                    "category": "Food",
+                    "venue_name": "Sukiyabashi Jiro",
+                    "tips": "Try world-famous sushi at a Michelin-starred restaurant."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Explore Harajuku Takeshita Street",
+                    "category": "Culture",
+                    "venue_name": "Takeshita Street",
+                    "tips": "Experience the vibrant street fashion and quirky shops."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner in Shibuya",
+                    "category": "Food",
+                    "venue_name": "Ichiran Shibuya",
+                    "tips": "Enjoy a unique ramen dining experience in individual booths."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Crossing the Shibuya Scramble",
+                    "category": "Attraction",
+                    "venue_name": "Shibuya Crossing",
+                    "tips": "Witness the famous pedestrian crossing in action."
+                  },
+                  {
+                    "time": "9:00 PM",
+                    "description": "Visit a Robot Show in Shinjuku",
+                    "category": "Culture",
+                    "venue_name": "Robot Restaurant",
+                    "tips": "Experience a futuristic performance like no other."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 23,
+                    "max": 33,
+                    "day": 27
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "moderate rain",
+                    "icon": "10n"
+                  },
+                  "humidity": 72,
+                  "wind_speed": 5,
+                  "pop": 0.60375
+                }
+              },
+              {
+                "day": 3,
+                "date": "TBD",
+                "title": "Day 3: Nature & Tranquility",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Explore Ueno Park and Zoo",
+                    "category": "Attraction",
+                    "venue_name": "Ueno Park",
+                    "tips": "Don't miss the cherry blossoms in spring or the pandas at the zoo."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at Ameya-Yokocho Market",
+                    "category": "Food",
+                    "venue_name": "Ameya-Yokocho Market",
+                    "tips": "Try various street food stalls offering local delights."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Visit Shinjuku Gyoen National Garden",
+                    "category": "Culture",
+                    "venue_name": "Shinjuku Gyoen",
+                    "tips": "Relax in the serene surroundings of this beautiful garden."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner in Roppongi Hills",
+                    "category": "Food",
+                    "venue_name": "Roppongi Hills",
+                    "tips": "Choose from a range of international cuisines at the upscale dining options."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Nightlife in Roppongi",
+                    "category": "Leisure",
+                    "venue_name": "Roppongi Nightlife District",
+                    "tips": "Experience Tokyo's vibrant nightlife scene with bars and clubs."
+                  },
+                  {
+                    "time": "10:00 PM",
+                    "description": "Relax at Oedo Onsen Monogatari",
+                    "category": "Leisure",
+                    "venue_name": "Oedo Onsen Monogatari",
+                    "tips": "Experience a traditional Japanese hot spring bath and relaxation."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 22,
+                    "max": 23,
+                    "day": 22
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "light rain",
+                    "icon": "10d"
+                  },
+                  "humidity": 74,
+                  "wind_speed": 4,
+                  "pop": 0.68
+                }
+              },
+              {
+                "day": 4,
+                "date": "TBD",
+                "title": "Day 4: Shopping & Farewell",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Shopping in Harajuku & Omotesando",
+                    "category": "Shopping",
+                    "venue_name": "Omotesando Hills",
+                    "tips": "Explore high-end boutiques and designer stores in this trendy area."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at Kawaii Monster Cafe",
+                    "category": "Food",
+                    "venue_name": "Kawaii Monster Cafe",
+                    "tips": "Experience a colorful and quirky dining experience."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Shop at Takeshita Street",
+                    "category": "Shopping",
+                    "venue_name": "Takeshita Street",
+                    "tips": "Find unique fashion items and accessories in this bustling street."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Farewell Dinner at Shinjuku Omoide Yokocho",
+                    "category": "Food",
+                    "venue_name": "Shinjuku Omoide Yokocho",
+                    "tips": "Enjoy traditional yakitori and local delicacies in a nostalgic setting."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Night view from Tokyo Tower",
+                    "category": "Attraction",
+                    "venue_name": "Tokyo Tower",
+                    "tips": "Catch a stunning view of Tokyo illuminated at night."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 22,
+                    "max": 24,
+                    "day": 23
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "overcast clouds",
+                    "icon": "04d"
+                  },
+                  "humidity": 76,
+                  "wind_speed": 3,
+                  "pop": 0.22749999999999998
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 4-day Tokyo adventure!",
+            "_costEstimate": {
+              "total": 5120,
+              "flights": 1800,
+              "accommodation": 2920,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 1800
+                },
+                {
+                  "type": "hotel",
+                  "description": "4 nights accommodation",
+                  "amount": 2920
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 400
+                }
+              ]
+            },
+            "_enrichedWithLocationIQ": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"Plan a 4-day Tokyo trip for next month. I use a wheelchair, am severely allergic to seafood, and need dialysis every other day. Budget $3000.\"],\"data\":{\"destination\":\"Tokyo\",\"startDate\":null,\"duration\":4,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[],\"budget\":\"mid\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Specific Constraints Test-1758099366486\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Edge Case - Impossible Request",
+      "scenario": "Test handling of impossible or contradictory requests",
+      "passed": false,
+      "duration": 22432,
+      "errors": [
+        "Expected questions but none were asked"
+      ],
+      "warnings": [
+        "Only 1 conversation turns, expected at least 2"
+      ],
+      "aiResponses": [
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 3-day itinerary for Antarctica!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Antarctica",
+            "title": "3 Days in Antarctica",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "TBD",
+                "title": "Day 1: Adventure and Exploration",
+                "activities": [
+                  {
+                    "time": "8:00 AM",
+                    "description": "Guided Iceberg Tour",
+                    "category": "Attraction",
+                    "venue_name": "Antarctica XXI",
+                    "tips": "Dress warmly and bring a camera."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at Iceberg Bar & Grill",
+                    "category": "Food",
+                    "venue_name": "Iceberg Bar & Grill",
+                    "tips": "Try the fresh seafood."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Visit Port Lockroy Museum",
+                    "category": "Culture",
+                    "venue_name": "Port Lockroy Museum",
+                    "tips": "Learn about Antarctic history."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner at Ice Cave Restaurant",
+                    "category": "Food",
+                    "venue_name": "Ice Cave Restaurant",
+                    "tips": "Enjoy the unique ice cave setting."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Stargazing at Polar Observatory",
+                    "category": "Leisure",
+                    "venue_name": "Polar Observatory",
+                    "tips": "Experience the mesmerizing Antarctic night sky."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 32,
+                    "max": 39,
+                    "day": 35
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "few clouds",
+                    "icon": "02d"
+                  },
+                  "humidity": 57,
+                  "wind_speed": 3,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "TBD",
+                "title": "Day 2: Wildlife Encounters and Cultural Immersion",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Penguin Watching Tour",
+                    "category": "Attraction",
+                    "venue_name": "Penguin Colony Tours",
+                    "tips": "Observe penguins in their natural habitat."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at Aurora Borealis Cafe",
+                    "category": "Food",
+                    "venue_name": "Aurora Borealis Cafe",
+                    "tips": "Try the local Antarctic cuisine."
+                  },
+                  {
+                    "time": "4:00 PM",
+                    "description": "Explore Whalers Bay Ruins",
+                    "category": "Culture",
+                    "venue_name": "Whalers Bay Ruins",
+                    "tips": "Discover the remnants of an old whaling station."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dinner at Iceberg Tavern",
+                    "category": "Food",
+                    "venue_name": "Iceberg Tavern",
+                    "tips": "Savor a hearty meal with a view."
+                  },
+                  {
+                    "time": "9:00 PM",
+                    "description": "Antarctic Film Screening",
+                    "category": "Culture",
+                    "venue_name": "Antarctic Film Center",
+                    "tips": "Watch documentaries about Antarctica."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 31,
+                    "max": 34,
+                    "day": 32
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "overcast clouds",
+                    "icon": "04n"
+                  },
+                  "humidity": 59,
+                  "wind_speed": 3,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 3,
+                "date": "TBD",
+                "title": "Day 3: Relaxation and Reflection",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Yoga Session on Ice",
+                    "category": "Leisure",
+                    "venue_name": "Ice Yoga Studio",
+                    "tips": "Experience serenity amidst icy surroundings."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Farewell Lunch at Glacier View Restaurant",
+                    "category": "Food",
+                    "venue_name": "Glacier View Restaurant",
+                    "tips": "Enjoy a meal with panoramic glacier views."
+                  },
+                  {
+                    "time": "4:00 PM",
+                    "description": "Ice Sculpting Workshop",
+                    "category": "Culture",
+                    "venue_name": "Antarctic Art Studio",
+                    "tips": "Learn to carve ice sculptures like a pro."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dinner at Snowflake Bistro",
+                    "category": "Food",
+                    "venue_name": "Snowflake Bistro",
+                    "tips": "Indulge in gourmet dishes inspired by Antarctica."
+                  },
+                  {
+                    "time": "9:00 PM",
+                    "description": "Northern Lights Viewing",
+                    "category": "Attraction",
+                    "venue_name": "Antarctic Aurora Observatory",
+                    "tips": "Witness the mesmerizing aurora borealis in Antarctica."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 31,
+                    "max": 34,
+                    "day": 32
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01d"
+                  },
+                  "humidity": 55,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 3-day Antarctica adventure!",
+            "_costEstimate": {
+              "total": 14500,
+              "flights": 6500,
+              "accommodation": 7700,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 6500
+                },
+                {
+                  "type": "hotel",
+                  "description": "3 nights accommodation",
+                  "amount": 7700
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 300
+                }
+              ]
+            },
+            "_enrichedWithLocationIQ": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"I want to visit Antarctica for a beach vacation next week with a $500 budget\"],\"data\":{\"destination\":\"Antarctica\",\"startDate\":\"next week\",\"duration\":null,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"beach vacation\"],\"budget\":\"budget\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Edge Case - Impossible Request-1758099390776\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Modification Flow Test",
+      "scenario": "Test the ability to modify an existing itinerary",
+      "passed": false,
+      "duration": 25691,
+      "errors": [
+        "Expected questions but none were asked"
+      ],
+      "warnings": [
+        "Only 1 conversation turns, expected at least 2"
+      ],
+      "aiResponses": [
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 3-day itinerary for Paris!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Paris",
+            "title": "3 Days in Paris",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "TBD",
+                "title": "Day 1: Exploring Paris",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit the Louvre Museum",
+                    "category": "Attraction",
+                    "venue_name": "Musée du Louvre",
+                    "tips": "Buy tickets online to skip the line.",
+                    "address": "Musée du Louvre, Place du Palais Royal, Quartier Saint-Germain-l'Auxerrois, Paris 1er Arrondissement, Paris, Île-de-France, France métropolitaine, 75001, France",
+                    "coordinates": {
+                      "lat": 48.8611473,
+                      "lng": 2.33802768704666
+                    },
+                    "opening_hours": "Mo,Th,Sa-Su 09:00-18:00; Tu off; We,Fr 09:00-21:00; Jan 01,May 01,Dec 25 off",
+                    "_locationiq_place_id": "417206622"
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at Le Grand Véfour",
+                    "category": "Food",
+                    "venue_name": "Le Grand Véfour",
+                    "tips": "Try the traditional French dishes.",
+                    "address": "Le Grand Véfour, Péristyle de Joinville, Quartier du Palais Royal, Paris 1er Arrondissement, Paris, Île-de-France, France métropolitaine, 75001, France",
+                    "coordinates": {
+                      "lat": 48.8661551,
+                      "lng": 2.3379157
+                    },
+                    "website": "https://www.grand-vefour.com/",
+                    "opening_hours": "Tu-Sa 12:00-13:45,19:00-21:30",
+                    "_locationiq_place_id": "408626584",
+                    "_zone": "Louvre & Opéra"
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner at Le Procope",
+                    "category": "Food",
+                    "venue_name": "Le Procope",
+                    "tips": "Oldest cafe in Paris, try their signature dishes.",
+                    "address": "Le Procope, Rue de l'Ancienne Comédie, Quartier de la Monnaie, Paris 6e Arrondissement, Paris, Île-de-France, France métropolitaine, 75006, France",
+                    "coordinates": {
+                      "lat": 48.8530584,
+                      "lng": 2.3387505
+                    },
+                    "website": "https://www.procope.com",
+                    "phone": "+33 1 40 46 79 00",
+                    "opening_hours": "12:00-24:00",
+                    "_locationiq_place_id": "93028681"
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Seine River Cruise",
+                    "category": "Leisure",
+                    "venue_name": "Bateaux Parisiens",
+                    "tips": "Enjoy the illuminated landmarks from the river.",
+                    "address": "Bateaux Parisiens, Port de la Bourdonnais, Quartier du Gros-Caillou, Paris 7e Arrondissement, Paris, Île-de-France, France métropolitaine, 75007, France",
+                    "coordinates": {
+                      "lat": 48.860454700000005,
+                      "lng": 2.293626917722926
+                    },
+                    "website": "https://www.bateauxparisiens.com/",
+                    "phone": "+33 1 44 11 33 36",
+                    "_locationiq_place_id": "94374676"
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Explore Montmartre and Sacré-Cœur Basilica",
+                    "category": "Attraction",
+                    "venue_name": "Montmartre",
+                    "tips": "Enjoy the view of Paris from the basilica.",
+                    "address": "Montmartre, Paris, Île-de-France, France métropolitaine, 75018, France",
+                    "coordinates": {
+                      "lat": 48.8867054,
+                      "lng": 2.3415715
+                    },
+                    "_locationiq_place_id": "93215445",
+                    "_zone": "Montmartre"
+                  }
+                ],
+                "_routeInfo": {
+                  "totalDistance": 9979,
+                  "isEfficient": false,
+                  "warnings": [
+                    "⚠️ Consider closer venues: Le Procope and Bateaux Parisiens are 3.4km apart in same time slot",
+                    "⚠️ Consider closer venues: Bateaux Parisiens and Montmartre are 4.6km apart in same time slot"
+                  ],
+                  "segments": [
+                    {
+                      "from": "Musée du Louvre",
+                      "to": "Le Grand Véfour",
+                      "distance": 557
+                    },
+                    {
+                      "from": "Le Grand Véfour",
+                      "to": "Le Procope",
+                      "distance": 1458
+                    },
+                    {
+                      "from": "Le Procope",
+                      "to": "Bateaux Parisiens",
+                      "distance": 3402
+                    },
+                    {
+                      "from": "Bateaux Parisiens",
+                      "to": "Montmartre",
+                      "distance": 4562
+                    }
+                  ]
+                },
+                "_destination": "Paris",
+                "_coordinates": {
+                  "lat": 48.8588897,
+                  "lng": 2.3200410217200766
+                },
+                "_zones": [
+                  "Eiffel Tower & Trocadéro",
+                  "Latin Quarter & Saint-Germain"
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 17,
+                    "max": 22,
+                    "day": 20
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01d"
+                  },
+                  "humidity": 51,
+                  "wind_speed": 3,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "TBD",
+                "title": "Day 2: Art and Culture",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Visit Musée d'Orsay",
+                    "category": "Attraction",
+                    "venue_name": "Musée d'Orsay",
+                    "tips": "Marvel at the Impressionist masterpieces."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at Angelina Paris",
+                    "category": "Food",
+                    "venue_name": "Angelina Paris",
+                    "tips": "Known for their hot chocolate and pastries."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Walk around Le Marais district",
+                    "category": "Culture",
+                    "venue_name": "Le Marais",
+                    "tips": "Explore the trendy shops and cafes."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner at Le Comptoir du Relais",
+                    "category": "Food",
+                    "venue_name": "Le Comptoir du Relais",
+                    "tips": "Cozy French bistro with excellent food."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Attend a cabaret show at Moulin Rouge",
+                    "category": "Entertainment",
+                    "venue_name": "Moulin Rouge",
+                    "tips": "Book tickets in advance for the best seats."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 17,
+                    "max": 28,
+                    "day": 22
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01n"
+                  },
+                  "humidity": 36,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 3,
+                "date": "TBD",
+                "title": "Day 3: Relaxation and Shopping",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Stroll through Jardin des Tuileries",
+                    "category": "Leisure",
+                    "venue_name": "Jardin des Tuileries",
+                    "tips": "Relax by the fountains and enjoy the gardens."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at Le Meurice Alain Ducasse",
+                    "category": "Food",
+                    "venue_name": "Le Meurice Alain Ducasse",
+                    "tips": "Experience Michelin-starred cuisine."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Shopping on Champs-Élysées",
+                    "category": "Shopping",
+                    "venue_name": "Champs-Élysées",
+                    "tips": "Explore the luxury boutiques and flagship stores."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Relax at Hammam Pacha",
+                    "category": "Leisure",
+                    "venue_name": "Hammam Pacha",
+                    "tips": "Indulge in a traditional Moroccan spa experience."
+                  },
+                  {
+                    "time": "8:00 PM",
+                    "description": "Farewell Dinner at Le Cinq",
+                    "category": "Food",
+                    "venue_name": "Le Cinq",
+                    "tips": "Elegant dining with a tasting menu."
+                  }
+                ],
+                "weather": {
+                  "temp": {
+                    "min": 18,
+                    "max": 33,
+                    "day": 25
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "scattered clouds",
+                    "icon": "03n"
+                  },
+                  "humidity": 29,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "I'd be happy to help you plan an amazing trip! Where would you like to go and for how long?",
+            "_costEstimate": {
+              "total": 3850,
+              "flights": 1250,
+              "accommodation": 2300,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 1250
+                },
+                {
+                  "type": "hotel",
+                  "description": "3 nights accommodation",
+                  "amount": 2300
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 300
+                }
+              ]
+            },
+            "_enrichedWithLocationIQ": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"Create a simple 3-day Paris trip for next month\"],\"data\":{\"destination\":\"Paris\",\"startDate\":null,\"duration\":3,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Modification Flow Test-1758099415210\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Stress Test - Maximum Complexity",
+      "scenario": "Test with maximum complexity: 30-day trip, 10 cities, multiple constraints",
+      "passed": false,
+      "duration": 31025,
+      "errors": [
+        "Failed to handle maximum complexity request"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to Europe?",
+          "conversationContext": "{\"history\":[\"Plan a 30-day European tour starting June 1st: London (3 days), Paris (3 days), Rome (4 days), Venice (2 days), Vienna (3 days), Prague (3 days), Berlin (3 days), Amsterdam (3 days), Brussels (2 days), Barcelona (4 days). I need gluten-free food, prefer boutique hotels under $150/night, want to avoid tourist traps, love hidden gems, need laundry every week, work remotely Mondays and Wednesdays, and want to take overnight trains when possible. Budget $8000.\"],\"data\":{\"destination\":\"Europe\",\"startDate\":\"2023-06-01\",\"duration\":30,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"gluten-free food\",\"avoid tourist traps\",\"hidden gems\",\"laundry every week\",\"work remotely\",\"overnight trains\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Stress Test - Maximum Complexity-1758099442905\"}"
+        }
+      ]
+    }
+  ]
+}

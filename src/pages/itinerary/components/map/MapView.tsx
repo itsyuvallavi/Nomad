@@ -9,7 +9,7 @@ import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas'
 
 // Dynamically import LocationIQ map to avoid SSR issues
 const LocationIQMap = dynamic(
-  () => import('./locationiq-map').then(mod => ({ default: mod.LocationIQMap })),
+  () => import('./Locationiq-map').then(mod => mod.LocationIQMap),
   {
     ssr: false,
     loading: () => (

@@ -69,8 +69,8 @@ export default function Home() {
 
   // Check URL parameters for trip viewing
   useEffect(() => {
-    const tripId = searchParams.get('tripId');
-    const mode = searchParams.get('mode') as TripMode;
+    const tripId = searchParams?.get('tripId');
+    const mode = searchParams?.get('mode') as TripMode;
     
     if (tripId && mode) {
       // Load trip from Firestore

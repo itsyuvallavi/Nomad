@@ -35,51 +35,71 @@ Nomad Navigator - AI-powered travel planning application for digital nomads usin
 
 ### File Organization - CRITICAL
 
-#### Project Structure (As of Jan 13, 2025)
+#### Project Structure (As of Jan 17, 2025 - UPDATED)
 ```
 nomad-navigator/
-├── config/                      # ALL configuration files
-│   ├── build/                   # Build configs (next, tailwind, postcss, tsconfig)
-│   ├── firebase/                # Firebase configs (firebase.json, firestore files)
-│   └── dev/                     # Dev configs (eslint, components, mcp)
-├── data/                        # ALL static/mock data
+├── config/                      # Configuration files (if present)
+├── data/                        # Static/mock data
 │   ├── static/                  # Static data files
-│   ├── mock/                    # Mock data for testing
-│   └── cache/                   # Cached data
+│   └── mock/                    # Mock data for testing
 ├── src/
-│   ├── app/                     # Next.js App Router (pages only)
-│   ├── components/              # React components
-│   │   └── pages/               # Full page components
-│   ├── services/                # ALL business logic
+│   ├── app/                     # Next.js App Router
+│   │   ├── api/                 # API routes
+│   │   ├── favorites/           # Favorites page
+│   │   ├── profile/             # Profile page
+│   │   ├── settings/            # Settings page
+│   │   ├── trips/               # Trips page
+│   │   └── page.tsx             # Main page
+│   ├── pages/                   # Page components (NEW)
+│   │   ├── home/                # Home page
+│   │   │   ├── components/      # Home-specific components
+│   │   │   └── HomePage.tsx     # Main home page component
+│   │   └── itinerary/           # Itinerary page
+│   │       ├── components/      # Itinerary-specific components
+│   │       │   ├── chat/        # Chat components
+│   │       │   ├── itinerary/   # Itinerary display components
+│   │       │   └── map/         # Map components
+│   │       └── ItineraryPage.tsx
+│   ├── infrastructure/          # Infrastructure layer (NEW)
+│   │   ├── components/          # Infrastructure components
+│   │   ├── contexts/            # Auth and other contexts
+│   │   └── providers/           # App providers (motion, offline)
+│   ├── components/              # Shared React components
+│   │   ├── common/              # Common/shared components
+│   │   ├── navigation/          # Navigation components
+│   │   └── ui/                  # UI components (shadcn/ui)
+│   ├── services/                # Business logic
 │   │   ├── ai/                  # AI flows and utilities
 │   │   ├── api/                 # External API integrations
-│   │   ├── firebase/            # Firebase services (auth, analytics)
+│   │   ├── firebase/            # Firebase services
 │   │   ├── trips/               # Trip-related services
 │   │   └── storage/             # Storage services
-│   ├── lib/                     # Utilities ONLY
-│   │   ├── utils/               # Utility functions
+│   ├── lib/                     # Utilities and helpers
+│   │   ├── helpers/             # Helper functions (includes general.ts with cn)
+│   │   ├── utils/               # Utility functions (animations, retry)
 │   │   ├── constants/           # App constants
 │   │   └── monitoring/          # Logging, errors, performance
-│   ├── contexts/                # React contexts
-│   ├── hooks/                   # Custom React hooks
-│   └── types/                   # TypeScript type definitions
-├── public/                      # Static assets (favicons, PWA manifest)
+│   └── hooks/                   # Custom React hooks
+├── public/                      # Static assets
 ├── docs/                        # Documentation
 └── scripts/                     # Build/utility scripts
 ```
 
 #### File Placement Rules
-**ALWAYS place files in their correct directories:**
-- **Services/Business Logic**: `src/services/[category]/` - NOT in lib
-- **External APIs**: `src/services/api/` - NOT in lib/api
-- **AI Code**: `src/services/ai/` - NOT in src/ai
-- **Firebase Code**: `src/services/firebase/` - NOT in lib
-- **Utilities**: `src/lib/utils/` - Pure functions only
-- **Constants**: `src/lib/constants/` - Static values
-- **Monitoring**: `src/lib/monitoring/` - Loggers, error handlers
-- **Mock Data**: `data/mock/` - NOT in src/data
-- **Config Files**: `config/[category]/` - NOT in root
-- **Page Components**: `src/components/pages/` - Full page logic
+**IMPORTANT: Case-sensitive file names - many components use PascalCase:**
+- **Page Components**: `src/pages/[page]/` - Full page implementations
+- **Infrastructure**: `src/infrastructure/` - Auth, providers, contexts
+- **Services/Business Logic**: `src/services/[category]/`
+- **External APIs**: `src/services/api/`
+- **AI Code**: `src/services/ai/`
+- **Firebase Code**: `src/services/firebase/`
+- **Utilities**:
+  - `src/lib/helpers/general.ts` - Contains cn() utility function
+  - `src/lib/utils/` - animations.ts, retry.ts
+- **Constants**: `src/lib/constants/`
+- **Monitoring**: `src/lib/monitoring/`
+- **UI Components**: `src/components/ui/` - shadcn/ui components
+- **Mock Data**: `data/mock/`
 
 **Root Directory Files (only these):**
 - `.env`, `.env.local` - Environment variables
@@ -151,9 +171,22 @@ npm run build              # Production build test
 
 ## Architecture Quick Reference
 
-### Key Directories
+### Key Directories (Updated Jan 17, 2025)
 ```
 src/
+├── app/                   # Next.js App Router & API routes
+│   └── api/ai/           # AI API endpoints
+├── pages/                 # Page components & logic
+│   ├── home/             # Home page & components
+│   └── itinerary/        # Itinerary page & components
+│       └── components/
+│           ├── chat/     # Chat interface
+│           ├── itinerary/# Trip display (Day-schedule.tsx, etc.)
+│           └── map/      # Map components (ItineraryMap.tsx, etc.)
+├── infrastructure/        # Core infrastructure
+│   ├── components/       # ErrorBoundary, PasswordGate
+│   ├── contexts/         # AuthContext
+│   └── providers/        # App providers
 ├── services/              # All business logic
 │   ├── ai/               # AI processing logic
 │   │   ├── flows/        # AI flow definitions
@@ -165,13 +198,13 @@ src/
 │   │   └── weather.ts
 │   └── firebase/         # Firebase services
 │       └── auth.ts       # Authentication
-├── components/            # React components
-│   ├── pages/            # Full page components
-│   ├── chat/             # Chat interface
-│   ├── itinerary/        # Trip display
-│   └── ui/               # Reusable components
-└── lib/                   # Utilities only
-    ├── utils/            # Helper functions
+├── components/            # Shared React components
+│   ├── common/           # Shared/common components
+│   ├── navigation/       # Navigation components
+│   └── ui/               # shadcn/ui components
+└── lib/                   # Utilities and helpers
+    ├── helpers/          # Helper functions (general.ts with cn)
+    ├── utils/            # Utilities (animations.ts, retry.ts)
     ├── constants/        # Static values
     └── monitoring/       # Logging/errors
 ```
@@ -269,17 +302,35 @@ OPENWEATHERMAP=            # Weather forecasts
 
 ### Import Path Guidelines
 ```typescript
-// Correct imports after reorganization:
+// Current import paths (Updated Jan 17, 2025):
+
+// Infrastructure imports
+import { AuthProvider } from '@/infrastructure/contexts/AuthContext';
+import { PasswordGate } from '@/infrastructure/components/PasswordGate';
+import { OfflineProvider } from '@/infrastructure/providers/offline';
+import { MotionProvider } from '@/infrastructure/providers/motion';
+
+// Services imports
 import { auth } from '@/services/firebase/auth';
 import { amadeus } from '@/services/api/amadeus';
 import { generateItinerary } from '@/services/ai/flows/generate-personalized-itinerary';
+
+// UI Components
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/helpers/general';  // IMPORTANT: cn utility is here
+
+// Utilities and helpers
 import { logger } from '@/lib/monitoring/logger';
-import { formatDate } from '@/lib/utils/date-parser';
+import { fadeInUp, staggerContainer } from '@/lib/utils/animations';
+import { retryApiCall } from '@/lib/utils/retry';
 import { CITY_LANDMARKS } from '@/lib/constants/city-landmarks';
 
-// Backward compatibility (still works but avoid in new code):
-import { auth } from '@/lib/firebase';  // Re-exports from services
-import { tripsService } from '@/lib/trips-service';  // Re-exports from services
+// Page components
+import { HomePage } from '@/pages/home/HomePage';
+import { ItineraryPage } from '@/pages/itinerary/ItineraryPage';
+
+// Case-sensitive imports (watch the capitalization!)
+// Many components use PascalCase: Day-schedule.tsx, Coworking-spots.tsx, etc.
 ```
 
 ## Performance Optimization Strategy
@@ -297,6 +348,26 @@ import { tripsService } from '@/lib/trips-service';  // Re-exports from services
 - Measure conversion rates
 
 ## Troubleshooting
+
+### Common Import Issues & Solutions
+1. **Case-sensitive file names**: Many files use PascalCase (e.g., `Day-schedule.tsx`, `Coworking-spots.tsx`)
+   - Always check exact file names with proper capitalization
+   - macOS/Windows may be case-insensitive but production Linux is case-sensitive
+
+2. **cn utility location**: The `cn` utility is in `@/lib/helpers/general`
+   ```typescript
+   import { cn } from '@/lib/helpers/general';  // NOT from '@/lib/utils'
+   ```
+
+3. **Page components location**: Full page components are in `src/pages/`, not `src/components/pages/`
+   ```typescript
+   import { HomePage } from '@/pages/home/HomePage';
+   ```
+
+4. **Infrastructure imports**: Auth, providers, and contexts are in `src/infrastructure/`
+   ```typescript
+   import { AuthProvider } from '@/infrastructure/contexts/AuthContext';
+   ```
 
 ### AI Tests Failing
 1. Check recent changes to AI flows
