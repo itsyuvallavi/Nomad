@@ -50,11 +50,14 @@ export class AIPoweredAnalyzer {
     conversationHistory?: string[],
     currentData?: ExtractedInfo
   ): Promise<AnalysisResult> {
+    const currentDate = new Date();
     const systemPrompt = `You are an expert travel assistant analyzer. Your job is to understand what the user wants and extract travel planning information from their messages.
+
+CRITICAL: Today's date is ${currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} (${currentDate.toISOString().split('T')[0]})
 
 Extract the following information if present:
 - Destination (city, country, or region)
-- Travel dates (start date, end date, or general timeframe)
+- Travel dates (start date, end date, or general timeframe) - MUST be in the future from today's date
 - Duration (number of days)
 - Number and type of travelers (solo, couple, family, group)
 - Preferences (activities, budget level, trip type, work needs)
@@ -63,7 +66,14 @@ Extract the following information if present:
 Also determine:
 - What information is still missing to create a complete itinerary
 - What question to ask next (be conversational and natural)
-- Whether we have enough info to generate an itinerary (we need at minimum: destination. Duration can default to 3 days if not specified)
+- Whether we have enough info to generate an itinerary (we need at minimum: destination and duration)
+
+IMPORTANT:
+- Extract duration from phrases like "3 days", "a week", "weekend" (=2-3 days), "fortnight" (=14 days)
+- If user provides destination and duration, mark as readyToGenerate: true
+- Don't ask for too many details - destination and duration are enough to generate
+- Limit missingInfo to ONLY essential items (destination, duration)
+- Don't include preferences, travelers, dates in missingInfo unless explicitly needed
 
 Current collected data: ${JSON.stringify(currentData || {})}
 Conversation history: ${conversationHistory?.join(' -> ') || 'None'}
@@ -73,6 +83,19 @@ Respond in JSON format.`;
     const userPrompt = `User message: "${message}"
 
 Extract all travel information from this message. Consider the context from previous messages.
+Common patterns to watch for:
+- "X days in [destination]" → extract duration (X) and destination
+- "Week in [destination]" → extract duration (7) and destination
+- "Weekend in [destination]" → extract duration (2-3) and destination
+- "[number] days/nights in [place]" → extract both duration and destination
+
+For dates, understand relative terms based on today (${currentDate.toISOString().split('T')[0]}):
+- "next week" → starting next Monday
+- "next monday" → the upcoming Monday
+- "next month" → first day of next month
+- "tomorrow" → ${new Date(currentDate.getTime() + 24*60*60*1000).toISOString().split('T')[0]}
+- "this weekend" → upcoming Saturday
+
 If the user mentions a destination (even within a phrase like "plan a trip to Paris"), extract it.
 Be smart about understanding variations and natural language.
 
@@ -90,7 +113,7 @@ Response format:
   "missingInfo": ["list of missing required info"],
   "nextQuestion": "natural conversational question to ask next",
   "confidence": "high/medium/low",
-  "readyToGenerate": boolean (true if we have destination, even without duration)
+  "readyToGenerate": boolean (true if we have BOTH destination AND duration)
 }`;
 
     try {

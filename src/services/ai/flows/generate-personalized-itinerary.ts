@@ -45,7 +45,7 @@ function getUnifiedGenerator() {
     })
   };
 }
-import { enrichItineraryWithLocationIQ } from '@/services/ai/services/location-enrichment-locationiq';
+import { enrichItineraryWithOSM } from '@/services/ai/services/location-enrichment-osm';
 import { getWeatherForecast } from '@/services/api/weather';
 import { logAIRequest, logAIResponse, logAIError } from '@/lib/monitoring/ai-logger';
 import { logItinerary, logUserAction, logPerformance, logError } from '@/lib/monitoring/production-logger';
@@ -255,8 +255,8 @@ export async function generatePersonalizedItinerary(
       if (hasLocationIQ) {
         logger.info('AI', 'Enriching ultra-fast itinerary with LocationIQ data');
         try {
-          const enrichedResult = await enrichItineraryWithLocationIQ(result, {
-            useLocationIQ: true,
+          const enrichedResult = await enrichItineraryWithOSM(result, {
+            useOSM: true,
             optimizeRoutes: true
           });
           logger.info('AI', 'LocationIQ enrichment successful for ultra-fast');
@@ -455,8 +455,8 @@ export async function generatePersonalizedItinerary(
     if (hasLocationIQ) {
       logger.info('AI', 'Enriching itinerary with LocationIQ data');
       try {
-        const enrichedResult = await enrichItineraryWithLocationIQ(result, {
-          useLocationIQ: true,
+        const enrichedResult = await enrichItineraryWithOSM(result, {
+          useOSM: true,
           optimizeRoutes: true
         });
         logger.info('AI', 'LocationIQ enrichment successful');

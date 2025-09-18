@@ -10,6 +10,63 @@ import { estimateTripCost } from './openai-travel-costs';
 import type { GeneratePersonalizedItineraryOutput } from '../flows/generate-personalized-itinerary';
 
 /**
+ * Parse relative date strings to actual dates
+ */
+function parseRelativeDate(dateStr: string): Date | null {
+  if (!dateStr || dateStr === 'flexible' || dateStr === 'flexible dates') {
+    return null;
+  }
+
+  const today = new Date();
+  const lowercaseStr = dateStr.toLowerCase().trim();
+
+  // Try parsing as a standard date first
+  const standardDate = new Date(dateStr);
+  if (!isNaN(standardDate.getTime()) && standardDate > new Date('2024-01-01')) {
+    return standardDate;
+  }
+
+  // Handle relative date terms
+  if (lowercaseStr.includes('tomorrow')) {
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow;
+  }
+
+  if (lowercaseStr.includes('next week') || lowercaseStr.includes('next monday')) {
+    const nextMonday = new Date(today);
+    const daysUntilMonday = (8 - today.getDay()) % 7 || 7;
+    nextMonday.setDate(today.getDate() + daysUntilMonday);
+    return nextMonday;
+  }
+
+  if (lowercaseStr.includes('next month')) {
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(today.getMonth() + 1);
+    nextMonth.setDate(1);
+    return nextMonth;
+  }
+
+  if (lowercaseStr.includes('this weekend')) {
+    const thisSaturday = new Date(today);
+    const daysUntilSaturday = (6 - today.getDay() + 7) % 7 || 7;
+    thisSaturday.setDate(today.getDate() + daysUntilSaturday);
+    return thisSaturday;
+  }
+
+  // Try to extract date in YYYY-MM-DD format from the string
+  const dateMatch = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (dateMatch) {
+    const parsedDate = new Date(dateMatch[0]);
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Generate vacation activities for a destination
  * Focus on tourism, culture, food, and relaxation
  */
@@ -46,7 +103,7 @@ Return a JSON object with a "days" array property containing the itinerary. Each
     {
       "day": <number>,
       "destination_city": "${cities.length > 1 ? '<actual city for this day, e.g., London or Paris>' : destination}",
-      "title": "Day X ${cities.length > 1 ? 'in <city>: ' : ': '}<theme>",
+      "title": "Day X: <theme>",
       "activities": [
         ${includeCoworking ? `{
           "time": "9:00 AM",
@@ -69,11 +126,15 @@ Return a JSON object with a "days" array property containing the itinerary. Each
 
 ${includeCoworking ?
   'Include 1 coworking session + 3-4 vacation activities per day.' :
+  days > 10 ? 'Include 3-4 activities per day. Be concise.' :
   'Include 5-6 activities per day mixing attractions, food, and culture.'}
 
-IMPORTANT:
+IMPORTANT RULES:
 - Return exactly ${days} days in the array
-${cities.length > 1 ? `- Each day MUST have destination_city set to the actual city (e.g., "London" or "Paris", NOT "${destination}")
+- DO NOT include duplicate activities (each activity must be unique)
+- Each activity must have a unique description and venue_name
+- EVERY day MUST have a "destination_city" field set to the correct city
+${cities.length > 1 ? `- For multi-city trips, set destination_city to the actual city (e.g., "London" or "Paris", NOT "${destination}")
 - Divide days evenly: ${cities.map((city, i) => {
   const startDay = Math.floor(i * days / cities.length) + 1;
   const endDay = Math.floor((i + 1) * days / cities.length);
@@ -85,21 +146,30 @@ ${cities.length > 1 ? `- Each day MUST have destination_city set to the actual c
       throw new Error('OpenAI client not configured');
     }
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a travel planning assistant. Create realistic vacation itineraries with actual venue names. Always return a valid JSON object with a "days" array.'
-        },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 4000  // Increased to handle multi-city trips
+    // Combine system and user prompts for GPT-5 Responses API
+    const systemPrompt = 'You are a travel planning assistant. Create realistic vacation itineraries with actual venue names. Always return a valid JSON object with a "days" array. Be concise to fit within token limits.';
+    const fullPrompt = `${systemPrompt}\n\n${prompt}`;
+
+    // Determine reasoning effort and verbosity based on trip complexity
+    // For multi-city or long trips, use higher reasoning but lower verbosity
+    const isMultiCity = cities.length > 1;
+    const reasoningEffort = days > 20 || (isMultiCity && days > 10) ? 'medium' : days > 14 ? 'low' : 'minimal';
+    const textVerbosity = days > 10 || isMultiCity ? 'low' : 'medium';
+
+    // Use the Responses API for GPT-5
+    const completion = await (openai as any).responses.create({
+      model: 'gpt-5',
+      input: fullPrompt,
+      reasoning: {
+        effort: reasoningEffort
+      },
+      text: {
+        verbosity: textVerbosity
+      }
     });
 
-    const content = completion.choices[0].message.content || '{"days":[]}';
+    // Extract content from Responses API format
+    const content = completion.output_text || completion.output || '{"days":[]}';
 
     let parsed;
     try {
@@ -133,9 +203,35 @@ ${cities.length > 1 ? `- Each day MUST have destination_city set to the actual c
 
     logger.info('AI', `Generated ${generatedDays.length} days of activities for ${destination}`);
     return generatedDays;
-  } catch (error) {
+  } catch (error: any) {
     logger.error('AI', `Failed to generate activities for ${destination}`, error);
-    throw error; // Don't fall back to defaults - propagate error
+
+    // Check if it's a token limit or API error
+    if (error.message?.includes('max_tokens') || error.message?.includes('max_completion_tokens') ||
+        error.code === 'invalid_value' || error.message?.includes('responses')) {
+      // Parse the destination to provide helpful examples
+      const isMultiCity = destination.includes(',') || destination.includes(' and ');
+      const cityCount = destination.split(/,| and /).length;
+
+      let suggestion = '';
+      if (days > 14) {
+        suggestion = `Try a shorter trip like "${destination} for ${Math.floor(days/2)} days"`;
+      } else if (isMultiCity && cityCount > 3) {
+        const firstTwoCities = destination.split(/,| and /).slice(0, 2).join(' and ');
+        suggestion = `Try fewer cities like "${firstTwoCities} for ${days} days"`;
+      } else if (days > 10 && isMultiCity) {
+        suggestion = `Try either "${destination} for 7 days" or a single city for ${days} days`;
+      } else {
+        suggestion = `Try a simpler itinerary like "${destination.split(/,| and /)[0]} for 5 days"`;
+      }
+
+      throw new Error(
+        `Your ${days}-day trip to ${destination} is too complex for me to generate in detail. ` +
+        `${suggestion}. Alternatively, you can break it into smaller segments and plan each separately.`
+      );
+    }
+
+    throw error; // Re-throw other errors
   }
 }
 
@@ -191,29 +287,37 @@ export async function generateConversationalItinerary(
     const formattedDays = activities.map((day: any, index: number) => {
       // Handle flexible dates or invalid date strings
       let dateString = 'TBD';
-      if (startDate && startDate !== 'flexible dates' && startDate !== 'flexible') {
-        try {
-          const dayDate = new Date(startDate);
-          if (!isNaN(dayDate.getTime())) {
-            dayDate.setDate(dayDate.getDate() + index);
-            dateString = dayDate.toISOString().split('T')[0];
-          }
-        } catch (e) {
-          // Keep dateString as 'TBD' if date parsing fails
-        }
+
+      // Use our relative date parser
+      const parsedStartDate = parseRelativeDate(startDate);
+      if (parsedStartDate) {
+        const dayDate = new Date(parsedStartDate);
+        dayDate.setDate(dayDate.getDate() + index);
+        dateString = dayDate.toISOString().split('T')[0];
       }
+
+      // Deduplicate activities based on description and time
+      const uniqueActivities = new Map();
+      (day.activities || []).forEach((activity: any) => {
+        const key = `${activity.time}-${activity.description}`;
+        if (!uniqueActivities.has(key)) {
+          uniqueActivities.set(key, activity);
+        } else {
+          logger.warn('AI', `Duplicate activity removed: ${activity.description} at ${activity.time}`);
+        }
+      });
 
       return {
         day: index + 1,
         date: dateString,
         title: day.title || `Day ${index + 1}`,
-        activities: (day.activities || []).map((activity: any) => ({
+        activities: Array.from(uniqueActivities.values()).map((activity: any) => ({
           time: activity.time || '9:00 AM',
           description: activity.description || 'Activity',
           category: activity.category || 'Attraction',
           venue_name: activity.venue_name,
           tips: activity.tips
-          // address will be added by LocationIQ enrichment
+          // address will be added by OSM enrichment
        }))
       };
     });

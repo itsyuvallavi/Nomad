@@ -1,0 +1,3016 @@
+{
+  "timestamp": "2025-09-17T21:20:36.194Z",
+  "summary": {
+    "total": 6,
+    "passed": 3,
+    "failed": 3,
+    "totalDuration": 421722
+  },
+  "results": [
+    {
+      "testName": "Vague Request Test",
+      "scenario": "Test if AI asks for clarification on vague requests",
+      "passed": true,
+      "duration": 63502,
+      "errors": [],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "question",
+          "message": "What destination are you considering for your trip?",
+          "awaitingInput": "destination",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\"],\"data\":{\"destination\":null,\"startDate\":null,\"duration\":null,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758143604455\"}"
+        },
+        {
+          "type": "question",
+          "message": "What dates are you considering for your trip to Barcelona, and how long do you plan to stay?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\",\"Barcelona\"],\"data\":{\"destination\":\"Barcelona\",\"startDate\":null,\"duration\":null,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758143608767\"}"
+        },
+        {
+          "type": "question",
+          "message": "How many travelers will be joining you, and what kind of activities are you interested in?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\",\"Barcelona\",\"March 15-20\"],\"data\":{\"destination\":\"Barcelona\",\"startDate\":\"2024-03-15\",\"duration\":5,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758143611578\"}"
+        },
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 5-day itinerary for Barcelona!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Barcelona",
+            "title": "5 Days in Barcelona",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "2024-03-15",
+                "title": "Day 1 : Arrival and Gothic Quarter",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Arrive at Barcelona-El Prat Airport and check into your hotel.",
+                    "category": "Leisure",
+                    "venue_name": "Hotel Arts Barcelona",
+                    "tips": "Consider booking an early check-in."
+                  },
+                  {
+                    "time": "11:00",
+                    "description": "Explore the Gothic Quarter's narrow streets and visit the Cathedral.",
+                    "category": "Attraction",
+                    "venue_name": "Barcelona Cathedral",
+                    "tips": "Visit early to avoid crowds."
+                  },
+                  {
+                    "time": "13:00",
+                    "description": "Enjoy tapas lunch at a local bar.",
+                    "category": "Food",
+                    "venue_name": "Tapeo",
+                    "tips": "Try the patatas bravas."
+                  },
+                  {
+                    "time": "15:00",
+                    "description": "Visit the Picasso Museum to see his early works.",
+                    "category": "Culture",
+                    "venue_name": "Museu Picasso",
+                    "tips": "Free entry on the first Sunday of the month."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Stroll through Parc de la Ciutadella.",
+                    "category": "Leisure",
+                    "venue_name": "Parc de la Ciutadella",
+                    "tips": "Bring a book for a relaxing afternoon."
+                  },
+                  {
+                    "time": "20:00",
+                    "description": "Dinner at a famous Catalan restaurant.",
+                    "category": "Food",
+                    "venue_name": "Can Culleretes",
+                    "tips": "Order the traditional Catalan cream for dessert."
+                  }
+                ],
+                "_destination": "Barcelona",
+                "weather": {
+                  "temp": {
+                    "min": 24,
+                    "max": 28,
+                    "day": 26
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01n"
+                  },
+                  "humidity": 73,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "2024-03-16",
+                "title": "Day 2 : Gaudí and Modernisme",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the iconic Sagrada Família.",
+                    "category": "Attraction",
+                    "venue_name": "Sagrada Família",
+                    "tips": "Book tickets online to skip the line."
+                  },
+                  {
+                    "time": "11:30",
+                    "description": "Explore Park Güell and its colorful mosaics.",
+                    "category": "Attraction",
+                    "venue_name": "Park Güell",
+                    "tips": "Go early in the morning for fewer visitors."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Lunch at a nearby café with a view of the park.",
+                    "category": "Food",
+                    "venue_name": "Café del Parc Güell",
+                    "tips": "Try their fresh juices."
+                  },
+                  {
+                    "time": "16:00",
+                    "description": "Discover Casa Batlló, a masterpiece of Gaudí.",
+                    "category": "Attraction",
+                    "venue_name": "Casa Batlló",
+                    "tips": "Audio guides are very informative."
+                  },
+                  {
+                    "time": "18:30",
+                    "description": "Visit La Pedrera (Casa Milà) and enjoy the rooftop.",
+                    "category": "Attraction",
+                    "venue_name": "Casa Milà",
+                    "tips": "Take the evening tour for stunning sunset views."
+                  },
+                  {
+                    "time": "21:00",
+                    "description": "Dinner at a restaurant serving modern Catalan cuisine.",
+                    "category": "Food",
+                    "venue_name": "Cinc Sentits",
+                    "tips": "Make a reservation for a tasting menu."
+                  }
+                ],
+                "_destination": "Barcelona",
+                "weather": {
+                  "temp": {
+                    "min": 23,
+                    "max": 26,
+                    "day": 24
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01d"
+                  },
+                  "humidity": 73,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 3,
+                "date": "2024-03-17",
+                "title": "Day 3 : Markets and Montjuïc",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit La Boqueria Market for a breakfast of fresh fruits.",
+                    "category": "Food",
+                    "venue_name": "Mercat de Sant Josep de la Boqueria",
+                    "tips": "Try the fresh juice stalls."
+                  },
+                  {
+                    "time": "11:00",
+                    "description": "Take a cable car ride to Montjuïc Castle.",
+                    "category": "Attraction",
+                    "venue_name": "Montjuïc Castle",
+                    "tips": "Great views of the city from the top."
+                  },
+                  {
+                    "time": "13:00",
+                    "description": "Lunch at a restaurant with views over the harbor.",
+                    "category": "Food",
+                    "venue_name": "Restaurant 360",
+                    "tips": "Opt for the seafood paella."
+                  },
+                  {
+                    "time": "15:00",
+                    "description": "Visit the National Art Museum of Catalonia.",
+                    "category": "Culture",
+                    "venue_name": "MNAC",
+                    "tips": "Check out the rooftop terrace."
+                  },
+                  {
+                    "time": "17:30",
+                    "description": "Relax at the Magic Fountain of Montjuïc.",
+                    "category": "Leisure",
+                    "venue_name": "Magic Fountain of Montjuïc",
+                    "tips": "Stay for the evening light show."
+                  },
+                  {
+                    "time": "20:30",
+                    "description": "Dinner at a local pizzeria.",
+                    "category": "Food",
+                    "venue_name": "Pizza Circus",
+                    "tips": "Try their unique topping combinations."
+                  }
+                ],
+                "_destination": "Barcelona",
+                "weather": {
+                  "temp": {
+                    "min": 23,
+                    "max": 25,
+                    "day": 24
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "scattered clouds",
+                    "icon": "03d"
+                  },
+                  "humidity": 76,
+                  "wind_speed": 2,
+                  "pop": 0.05
+                }
+              },
+              {
+                "day": 4,
+                "date": "2024-03-18",
+                "title": "Day 4 : Beaches and Shopping",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Spend the morning at Barceloneta Beach.",
+                    "category": "Leisure",
+                    "venue_name": "Barceloneta Beach",
+                    "tips": "Bring sunscreen and a towel."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Have seafood lunch at a beachfront restaurant.",
+                    "category": "Food",
+                    "venue_name": "La Barca del Salamanca",
+                    "tips": "Order the grilled fish."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Shop at the boutiques in El Born district.",
+                    "category": "Shopping",
+                    "venue_name": "El Born",
+                    "tips": "Look for unique handmade items."
+                  },
+                  {
+                    "time": "16:30",
+                    "description": "Visit the Chocolate Museum.",
+                    "category": "Culture",
+                    "venue_name": "Museu de la Xocolata",
+                    "tips": "Don't miss the chocolate sculptures."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Relax with a coffee at a nearby café.",
+                    "category": "Leisure",
+                    "venue_name": "Cafè de l'Opera",
+                    "tips": "Try a traditional churro with chocolate."
+                  },
+                  {
+                    "time": "20:00",
+                    "description": "Dinner at a Michelin-starred restaurant.",
+                    "category": "Food",
+                    "venue_name": "Disfrutar",
+                    "tips": "Make a reservation well in advance."
+                  }
+                ],
+                "_destination": "Barcelona",
+                "weather": {
+                  "temp": {
+                    "min": 23,
+                    "max": 26,
+                    "day": 24
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "broken clouds",
+                    "icon": "04n"
+                  },
+                  "humidity": 71,
+                  "wind_speed": 3,
+                  "pop": 0.25625
+                }
+              },
+              {
+                "day": 5,
+                "date": "2024-03-19",
+                "title": "Day 5 : Culture and Departure",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Basilica de Santa Maria del Mar.",
+                    "category": "Attraction",
+                    "venue_name": "Basilica de Santa Maria del Mar",
+                    "tips": "Early morning is peaceful and quiet."
+                  },
+                  {
+                    "time": "11:00",
+                    "description": "Explore the vibrant street art in Poblenou.",
+                    "category": "Culture",
+                    "venue_name": "Poblenou",
+                    "tips": "Bring a camera for amazing photos."
+                  },
+                  {
+                    "time": "13:00",
+                    "description": "Enjoy a farewell lunch at a fusion restaurant.",
+                    "category": "Food",
+                    "venue_name": "La Paradeta",
+                    "tips": "Choose your seafood and have it cooked on the spot."
+                  },
+                  {
+                    "time": "15:00",
+                    "description": "Last-minute shopping at Passeig de Gràcia.",
+                    "category": "Shopping",
+                    "venue_name": "Passeig de Gràcia",
+                    "tips": "Look for designer brands and souvenirs."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Head to the airport for departure.",
+                    "category": "Leisure",
+                    "venue_name": "Barcelona-El Prat Airport",
+                    "tips": "Arrive at least 2 hours before your flight."
+                  }
+                ],
+                "_destination": "Barcelona",
+                "weather": {
+                  "temp": {
+                    "min": 21,
+                    "max": 27,
+                    "day": 23
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "light rain",
+                    "icon": "10n"
+                  },
+                  "humidity": 65,
+                  "wind_speed": 4,
+                  "pop": 0.17875
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 5-day Barcelona adventure!",
+            "_costEstimate": {
+              "total": 4350,
+              "flights": 1300,
+              "accommodation": 2550,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 1300
+                },
+                {
+                  "type": "hotel",
+                  "description": "5 nights accommodation",
+                  "amount": 2550
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 500
+                }
+              ]
+            },
+            "_enrichedWithOSM": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\",\"Barcelona\",\"March 15-20\",\"Please use reasonable defaults\"],\"data\":{\"destination\":\"Barcelona\",\"startDate\":\"2024-03-15\",\"duration\":5,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758143613953\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Complex Multi-City Trip",
+      "scenario": "Test generation of complex multi-destination itinerary",
+      "passed": false,
+      "duration": 94221,
+      "errors": [
+        "Only found 0 cities, expected at least 3",
+        "No coworking spaces included despite remote work requirement",
+        "No vegetarian dining options mentioned"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 14-day itinerary for London, Paris, Amsterdam, Barcelona!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "London, Paris, Amsterdam, Barcelona",
+            "title": "14 Days in London, Paris, Amsterdam, Barcelona",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "2024-04-01",
+                "title": "Day 1 : Arrival & Relaxation",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Check into your hotel and freshen up.",
+                    "category": "Leisure",
+                    "venue_name": "The Savoy",
+                    "tips": "Ask for a room with a river view."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Enjoy a classic English afternoon tea.",
+                    "category": "Food",
+                    "venue_name": "Fortnum & Mason",
+                    "tips": "Book in advance to secure a spot."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Stroll through Hyde Park.",
+                    "category": "Leisure",
+                    "venue_name": "Hyde Park",
+                    "tips": "Visit the Diana Memorial Fountain."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner at a traditional pub.",
+                    "category": "Food",
+                    "venue_name": "The Churchill Arms",
+                    "tips": "Try the Thai food served here."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 2,
+                "date": "2024-04-02",
+                "title": "Day 2 : Culture & Sightseeing",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit the British Museum.",
+                    "category": "Attraction",
+                    "venue_name": "British Museum",
+                    "tips": "Free entry; consider a guided tour."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at a local cafe.",
+                    "category": "Food",
+                    "venue_name": "Dishoom",
+                    "tips": "Try the bacon naan roll."
+                  },
+                  {
+                    "time": "2:00 PM",
+                    "description": "Explore the Tower of London.",
+                    "category": "Attraction",
+                    "venue_name": "Tower of London",
+                    "tips": "Book tickets online to skip the queue."
+                  },
+                  {
+                    "time": "5:00 PM",
+                    "description": "Walk across Tower Bridge.",
+                    "category": "Leisure",
+                    "venue_name": "Tower Bridge",
+                    "tips": "Great photo opportunities!"
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 3,
+                "date": "2024-04-03",
+                "title": "Day 3 : Markets & Arts",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Explore Camden Market.",
+                    "category": "Shopping",
+                    "venue_name": "Camden Market",
+                    "tips": "Try street food from various stalls."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a popular food stall.",
+                    "category": "Food",
+                    "venue_name": "Pavilion Cafe",
+                    "tips": "Enjoy views of the park."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Visit the Tate Modern.",
+                    "category": "Culture",
+                    "venue_name": "Tate Modern",
+                    "tips": "Free entry; check for exhibitions."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dinner in Soho.",
+                    "category": "Food",
+                    "venue_name": "Hoppers",
+                    "tips": "Reservations recommended."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 4,
+                "date": "2024-04-04",
+                "title": "Day 4 : Royal Attractions",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Visit Buckingham Palace.",
+                    "category": "Attraction",
+                    "venue_name": "Buckingham Palace",
+                    "tips": "Check for the changing of the guard."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a nearby café.",
+                    "category": "Food",
+                    "venue_name": "The Goring",
+                    "tips": "Famous for its afternoon tea."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Explore the Victoria and Albert Museum.",
+                    "category": "Culture",
+                    "venue_name": "Victoria and Albert Museum",
+                    "tips": "Free entry; check for special exhibits."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner at a Michelin-starred restaurant.",
+                    "category": "Food",
+                    "venue_name": "Dinner by Heston Blumenthal",
+                    "tips": "Book well in advance."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 5,
+                "date": "2024-04-05",
+                "title": "Day 5 : Day Trip & Departure",
+                "activities": [
+                  {
+                    "time": "8:00 AM",
+                    "description": "Day trip to Windsor Castle.",
+                    "category": "Attraction",
+                    "venue_name": "Windsor Castle",
+                    "tips": "Take the train from Paddington."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch in Windsor.",
+                    "category": "Food",
+                    "venue_name": "The Duchess of Cambridge",
+                    "tips": "Try the Sunday roast."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Return to London and pack.",
+                    "category": "Leisure",
+                    "venue_name": "Hotel",
+                    "tips": "Check out by 4 PM."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Evening flight to Paris.",
+                    "category": "Leisure",
+                    "venue_name": "Charles de Gaulle Airport",
+                    "tips": "Arrive early for check-in."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 6,
+                "date": "2024-04-06",
+                "title": "Day 6 : Arrival & Seine River",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Check into your Paris hotel.",
+                    "category": "Leisure",
+                    "venue_name": "Le Meurice",
+                    "tips": "Enjoy the central location."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a Parisian café.",
+                    "category": "Food",
+                    "venue_name": "Café de Flore",
+                    "tips": "Great for people-watching."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Take a Seine River cruise.",
+                    "category": "Attraction",
+                    "venue_name": "Bateaux Parisiens",
+                    "tips": "Book tickets online for discounts."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dinner at a local bistro.",
+                    "category": "Food",
+                    "venue_name": "Le Relais de l'Entrecôte",
+                    "tips": "Famous for steak frites."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 7,
+                "date": "2024-04-07",
+                "title": "Day 7 : Iconic Landmarks",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit the Eiffel Tower.",
+                    "category": "Attraction",
+                    "venue_name": "Eiffel Tower",
+                    "tips": "Book tickets in advance."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch with a view.",
+                    "category": "Food",
+                    "venue_name": "58 Tour Eiffel",
+                    "tips": "Enjoy dining on the first floor."
+                  },
+                  {
+                    "time": "2:00 PM",
+                    "description": "Explore the Louvre Museum.",
+                    "category": "Culture",
+                    "venue_name": "Louvre Museum",
+                    "tips": "Go early to avoid crowds."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner in the Latin Quarter.",
+                    "category": "Food",
+                    "venue_name": "Le Procope",
+                    "tips": "The oldest café in Paris."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 8,
+                "date": "2024-04-08",
+                "title": "Day 8 : Montmartre & Art",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Visit Sacré-Cœur Basilica.",
+                    "category": "Attraction",
+                    "venue_name": "Sacré-Cœur Basilica",
+                    "tips": "Climb to the top for a panoramic view."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at a local eatery.",
+                    "category": "Food",
+                    "venue_name": "Le Consulat",
+                    "tips": "Try the croissants."
+                  },
+                  {
+                    "time": "2:00 PM",
+                    "description": "Explore the Musée d'Orsay.",
+                    "category": "Culture",
+                    "venue_name": "Musée d'Orsay",
+                    "tips": "Home to many Impressionist masterpieces."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner at a rooftop restaurant.",
+                    "category": "Food",
+                    "venue_name": "Le Ciel de Paris",
+                    "tips": "Enjoy the views of the city."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 9,
+                "date": "2024-04-09",
+                "title": "Day 9 : Shopping & Departure",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Shop at Champs-Élysées.",
+                    "category": "Shopping",
+                    "venue_name": "Champs-Élysées",
+                    "tips": "Visit the flagship stores."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a trendy spot.",
+                    "category": "Food",
+                    "venue_name": "L'Atelier de Joël Robuchon",
+                    "tips": "High-end French cuisine."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Relax at Luxembourg Gardens.",
+                    "category": "Leisure",
+                    "venue_name": "Jardin du Luxembourg",
+                    "tips": "Great for a leisurely stroll."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Evening train to Amsterdam.",
+                    "category": "Leisure",
+                    "venue_name": "Amsterdam Centraal",
+                    "tips": "Book tickets online."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 10,
+                "date": "2024-04-10",
+                "title": "Day 10 : Arrival & Canals",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Check into your hotel in Amsterdam.",
+                    "category": "Leisure",
+                    "venue_name": "Hotel Pulitzer",
+                    "tips": "Enjoy the canal views."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a canal-side cafe.",
+                    "category": "Food",
+                    "venue_name": "Café de Jaren",
+                    "tips": "Great coffee and pastries."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Take a canal cruise.",
+                    "category": "Attraction",
+                    "venue_name": "Blue Boat Company",
+                    "tips": "Best views of the city."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dinner at a local pub.",
+                    "category": "Food",
+                    "venue_name": "De Silveren Spiegel",
+                    "tips": "Try traditional Dutch dishes."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 11,
+                "date": "2024-04-11",
+                "title": "Day 11 : Art & Culture",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit the Rijksmuseum.",
+                    "category": "Culture",
+                    "venue_name": "Rijksmuseum",
+                    "tips": "Don't miss The Night Watch."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch at a nearby café.",
+                    "category": "Food",
+                    "venue_name": "Blushing Amsterdam",
+                    "tips": "Famous for its brunch options."
+                  },
+                  {
+                    "time": "2:00 PM",
+                    "description": "Explore the Van Gogh Museum.",
+                    "category": "Culture",
+                    "venue_name": "Van Gogh Museum",
+                    "tips": "Check for special exhibits."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner in the Jordaan district.",
+                    "category": "Food",
+                    "venue_name": "Restaurant Greetje",
+                    "tips": "Reservations recommended."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 12,
+                "date": "2024-04-12",
+                "title": "Day 12 : Markets & Departure",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Visit the Albert Cuyp Market.",
+                    "category": "Shopping",
+                    "venue_name": "Albert Cuyp Market",
+                    "tips": "Try the stroopwafels."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a market stall.",
+                    "category": "Food",
+                    "venue_name": "Fried Fish Stall",
+                    "tips": "Try the haring."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Relax at Vondelpark.",
+                    "category": "Leisure",
+                    "venue_name": "Vondelpark",
+                    "tips": "Perfect for a picnic."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Evening flight to Barcelona.",
+                    "category": "Leisure",
+                    "venue_name": "Barcelona El Prat Airport",
+                    "tips": "Arrive early for check-in."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 13,
+                "date": "2024-04-13",
+                "title": "Day 13 : Arrival & Gaudí",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Check into your hotel.",
+                    "category": "Leisure",
+                    "venue_name": "Hotel Arts Barcelona",
+                    "tips": "Opt for a sea view room."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a beachside restaurant.",
+                    "category": "Food",
+                    "venue_name": "Xiringuito Escribà",
+                    "tips": "Famous for paella."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Visit Casa Batlló.",
+                    "category": "Attraction",
+                    "venue_name": "Casa Batlló",
+                    "tips": "Book a guided tour."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dinner at a tapas bar.",
+                    "category": "Food",
+                    "venue_name": "Tickets",
+                    "tips": "Reservations are essential."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              },
+              {
+                "day": 14,
+                "date": "2024-04-14",
+                "title": "Day 14 : Culture & Departure",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit La Sagrada Familia.",
+                    "category": "Attraction",
+                    "venue_name": "La Sagrada Familia",
+                    "tips": "Pre-book your tickets."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch in the Gothic Quarter.",
+                    "category": "Food",
+                    "venue_name": "Cervecería Catalana",
+                    "tips": "Great for tapas."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Stroll through Park Güell.",
+                    "category": "Leisure",
+                    "venue_name": "Park Güell",
+                    "tips": "Best to go early for fewer crowds."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Evening flight home.",
+                    "category": "Leisure",
+                    "venue_name": "Barcelona El Prat Airport",
+                    "tips": "Check your airline's policy."
+                  }
+                ],
+                "_destination": "London, Paris, Amsterdam, Barcelona"
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 14-day London, Paris, Amsterdam, Barcelona adventure!",
+            "_enrichedWithOSM": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"I need a 2-week trip starting in London on April 1st, then Paris for 4 days, Amsterdam for 3 days, and ending in Barcelona. I work remotely so need coworking spaces. Budget is $5000. I'm vegetarian and love museums.\"],\"data\":{\"destination\":\"London, Paris, Amsterdam, Barcelona\",\"startDate\":\"2024-04-01\",\"duration\":14,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"coworking spaces\",\"museums\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Complex Multi-City Trip-1758143669957\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Basic Tokyo Trip Test",
+      "scenario": "Test basic Tokyo trip generation (constraint detection not yet implemented)",
+      "passed": true,
+      "duration": 54020,
+      "errors": [],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 4-day itinerary for Tokyo!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Tokyo",
+            "title": "4 Days in Tokyo",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "TBD",
+                "title": "Day 1 : Exploring Shibuya and Shinjuku",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit the iconic Shibuya Crossing and take photos.",
+                    "category": "Attraction",
+                    "venue_name": "Shibuya Sta.",
+                    "tips": "Visit early to avoid crowds.",
+                    "address": "Hachiko Square, Dogenzaka, Shibuya, Japan",
+                    "coordinates": {
+                      "lat": 35.6594951,
+                      "lng": 139.7004982
+                    },
+                    "_osm_place_id": 416932192
+                  },
+                  {
+                    "time": "10:30 AM",
+                    "description": "Explore the trendy shops at Shibuya 109.",
+                    "category": "Shopping",
+                    "venue_name": "Shibuya 109",
+                    "tips": "Check out the latest fashion trends.",
+                    "address": "1, Dogenzaka, Shibuya, Japan",
+                    "coordinates": {
+                      "lat": 35.6596004,
+                      "lng": 139.6986799
+                    },
+                    "website": "https://www.shibuya109.jp/",
+                    "wheelchair": "limited",
+                    "_osm_place_id": 243557684
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Enjoy lunch at a local ramen shop.",
+                    "category": "Food",
+                    "venue_name": "Ichiran ramen",
+                    "tips": "Opt for the solo dining booths for a unique experience.",
+                    "address": "Meiji Avenue, Jingumae 6, Shibuya, Japan",
+                    "coordinates": {
+                      "lat": 35.6679219,
+                      "lng": 139.7052087
+                    },
+                    "wheelchair": "no",
+                    "dietary_options": {
+                      "vegetarian": true,
+                      "vegan": true
+                    },
+                    "_osm_place_id": 247573586
+                  },
+                  {
+                    "time": "4:00 PM",
+                    "description": "Explore the bustling streets of Harajuku.",
+                    "category": "Leisure",
+                    "venue_name": "Takeshita Street",
+                    "tips": "Try some crepes from the street vendors.",
+                    "address": "Takeshita Street, Jingūmae 1, Shibuya, Japan",
+                    "coordinates": {
+                      "lat": 35.6711612,
+                      "lng": 139.7049553
+                    },
+                    "_osm_place_id": 247289607
+                  },
+                  {
+                    "time": "2:00 PM",
+                    "description": "Visit the Meiji Shrine for a cultural experience.",
+                    "category": "Culture",
+                    "venue_name": "Meiji Shrine",
+                    "tips": "Take a peaceful walk through the forested area.",
+                    "address": "1, Yoyogi Kamizono-chō, Shibuya, Japan",
+                    "coordinates": {
+                      "lat": 35.6748417,
+                      "lng": 139.6996266
+                    },
+                    "_osm_place_id": 245133493
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dine at an izakaya for authentic Japanese cuisine.",
+                    "category": "Food",
+                    "venue_name": "ドトールコーヒーショップ",
+                    "tips": "Try the seasonal dishes for the best experience.",
+                    "address": "2, 渋谷区",
+                    "coordinates": {
+                      "lat": 35.6812934,
+                      "lng": 139.6981229
+                    },
+                    "_approximateLocation": true
+                  }
+                ],
+                "_routeInfo": {
+                  "totalDistance": 2.984862939671645,
+                  "optimized": true,
+                  "originalOrder": [
+                    "Shibuya Sta.",
+                    "Shibuya 109",
+                    "Ichiran ramen",
+                    "Meiji Shrine",
+                    "Takeshita Street",
+                    "ドトールコーヒーショップ"
+                  ],
+                  "optimizedOrder": [
+                    "Shibuya Sta.",
+                    "Shibuya 109",
+                    "Ichiran ramen",
+                    "Takeshita Street",
+                    "Meiji Shrine",
+                    "ドトールコーヒーショップ"
+                  ]
+                },
+                "_destination": "Shibuya",
+                "_coordinates": {
+                  "lat": 35.6633709,
+                  "lng": 139.6964952
+                },
+                "weather": {
+                  "temp": {
+                    "min": 22,
+                    "max": 33,
+                    "day": 27
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "moderate rain",
+                    "icon": "10n"
+                  },
+                  "humidity": 73,
+                  "wind_speed": 6,
+                  "pop": 0.625
+                }
+              },
+              {
+                "day": 2,
+                "date": "TBD",
+                "title": "Day 2 : Cultural Heritage and Relaxation",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit the historic Senso-ji Temple.",
+                    "category": "Attraction",
+                    "venue_name": "Senso-ji Temple",
+                    "tips": "Arrive early to avoid large crowds."
+                  },
+                  {
+                    "time": "11:00 AM",
+                    "description": "Stroll through the Asakusa Nakamise shopping street.",
+                    "category": "Shopping",
+                    "venue_name": "Nakamise Street",
+                    "tips": "Sample traditional snacks along the way."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Have lunch at a local tempura restaurant.",
+                    "category": "Food",
+                    "venue_name": "Tempura Daichi",
+                    "tips": "Order the tempura set for a full experience."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Relax at Ueno Park and visit the Tokyo National Museum.",
+                    "category": "Leisure",
+                    "venue_name": "Ueno Park",
+                    "tips": "Bring a blanket for a picnic."
+                  },
+                  {
+                    "time": "5:00 PM",
+                    "description": "Explore the art exhibits at the Tokyo National Museum.",
+                    "category": "Culture",
+                    "venue_name": "Tokyo National Museum",
+                    "tips": "Check for special exhibitions."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Dinner at a sushi restaurant.",
+                    "category": "Food",
+                    "venue_name": "Sushi Zanmai",
+                    "tips": "Try the chef's special platter."
+                  }
+                ],
+                "_destination": "Tokyo",
+                "weather": {
+                  "temp": {
+                    "min": 21,
+                    "max": 22,
+                    "day": 22
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "light rain",
+                    "icon": "10d"
+                  },
+                  "humidity": 76,
+                  "wind_speed": 4,
+                  "pop": 0.95125
+                }
+              },
+              {
+                "day": 3,
+                "date": "TBD",
+                "title": "Day 3 : Modern Tokyo and Nightlife",
+                "activities": [
+                  {
+                    "time": "9:00 AM",
+                    "description": "Visit the Tokyo Skytree for panoramic views.",
+                    "category": "Attraction",
+                    "venue_name": "Tokyo Skytree",
+                    "tips": "Book tickets online to skip the line."
+                  },
+                  {
+                    "time": "11:30 AM",
+                    "description": "Explore the shopping at Solamachi mall.",
+                    "category": "Shopping",
+                    "venue_name": "Tokyo Solamachi",
+                    "tips": "Look for unique souvenirs."
+                  },
+                  {
+                    "time": "1:00 PM",
+                    "description": "Lunch at a modern café in Solamachi.",
+                    "category": "Food",
+                    "venue_name": "Blue Bottle Coffee",
+                    "tips": "Try their seasonal coffee blends."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Visit teamLab Borderless digital art museum.",
+                    "category": "Attraction",
+                    "venue_name": "teamLab Borderless",
+                    "tips": "Reserve tickets in advance."
+                  },
+                  {
+                    "time": "6:00 PM",
+                    "description": "Dinner at a themed restaurant.",
+                    "category": "Food",
+                    "venue_name": "Robot Restaurant",
+                    "tips": "Enjoy the show as much as the meal."
+                  },
+                  {
+                    "time": "8:30 PM",
+                    "description": "Experience Tokyo's nightlife in Shinjuku.",
+                    "category": "Leisure",
+                    "venue_name": "Golden Gai",
+                    "tips": "Visit several small bars for a unique experience."
+                  }
+                ],
+                "_destination": "Tokyo",
+                "weather": {
+                  "temp": {
+                    "min": 20,
+                    "max": 23,
+                    "day": 21
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "moderate rain",
+                    "icon": "10d"
+                  },
+                  "humidity": 80,
+                  "wind_speed": 3,
+                  "pop": 0.475
+                }
+              },
+              {
+                "day": 4,
+                "date": "TBD",
+                "title": "Day 4 : Relaxation and Shopping",
+                "activities": [
+                  {
+                    "time": "10:00 AM",
+                    "description": "Enjoy a tranquil morning at the Yoyogi Park.",
+                    "category": "Leisure",
+                    "venue_name": "Yoyogi Park",
+                    "tips": "Great for a peaceful walk or jog."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Visit the nearby Yoyogi National Gymnasium.",
+                    "category": "Attraction",
+                    "venue_name": "Yoyogi National Gymnasium",
+                    "tips": "Check for any events during your visit."
+                  },
+                  {
+                    "time": "1:30 PM",
+                    "description": "Lunch at a bento shop.",
+                    "category": "Food",
+                    "venue_name": "Bento Ya",
+                    "tips": "Try their seasonal bento boxes."
+                  },
+                  {
+                    "time": "3:00 PM",
+                    "description": "Shop for souvenirs at Omotesando Hills.",
+                    "category": "Shopping",
+                    "venue_name": "Omotesando Hills",
+                    "tips": "Look for designer brands and local crafts."
+                  },
+                  {
+                    "time": "5:00 PM",
+                    "description": "Enjoy a relaxing foot massage.",
+                    "category": "Leisure",
+                    "venue_name": "Foot Massage Tokyo",
+                    "tips": "Book an appointment in advance."
+                  },
+                  {
+                    "time": "7:00 PM",
+                    "description": "Farewell dinner at a kaiseki restaurant.",
+                    "category": "Food",
+                    "venue_name": "Kikunoi",
+                    "tips": "Experience a multi-course meal."
+                  }
+                ],
+                "_destination": "Tokyo",
+                "weather": {
+                  "temp": {
+                    "min": 22,
+                    "max": 27,
+                    "day": 25
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "broken clouds",
+                    "icon": "04d"
+                  },
+                  "humidity": 48,
+                  "wind_speed": 5,
+                  "pop": 0
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 4-day Tokyo adventure!",
+            "_costEstimate": {
+              "total": 5120,
+              "flights": 1800,
+              "accommodation": 2920,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 1800
+                },
+                {
+                  "type": "hotel",
+                  "description": "4 nights accommodation",
+                  "amount": 2920
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 400
+                }
+              ]
+            },
+            "_enrichedWithOSM": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"Plan a 4-day Tokyo trip for next month. Budget $3000.\"],\"data\":{\"destination\":\"Tokyo\",\"startDate\":null,\"duration\":4,\"travelers\":null,\"preferences\":{\"activities\":[],\"budget\":\"luxury\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Basic Tokyo Trip Test-1758143766181\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Edge Case - Impossible Request",
+      "scenario": "Test handling of impossible or contradictory requests",
+      "passed": true,
+      "duration": 47209,
+      "errors": [],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "question",
+          "message": "How many days do you plan to stay in Antarctica?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"I want to visit Antarctica for a beach vacation next week with a $500 budget\"],\"data\":{\"destination\":\"Antarctica\",\"startDate\":\"next week\",\"duration\":null,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"beach vacation\"],\"budget\":\"budget\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Edge Case - Impossible Request-1758143822204\"}"
+        },
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 3-day itinerary for Antarctica!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Antarctica",
+            "title": "3 Days in Antarctica",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "2023-10-30",
+                "title": "Day 1: Exploration and Adventure",
+                "activities": [
+                  {
+                    "time": "09:00 AM",
+                    "description": "Embark on a guided penguin watching tour.",
+                    "category": "Attraction",
+                    "venue_name": "Antarctic Peninsula",
+                    "tips": "Dress warmly and bring binoculars for the best views."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Enjoy a hearty lunch at a local expedition vessel.",
+                    "category": "Food",
+                    "venue_name": "MS Expedition Dining Room",
+                    "tips": "Try the fresh seafood dishes."
+                  },
+                  {
+                    "time": "02:00 PM",
+                    "description": "Visit the historic huts of early explorers.",
+                    "category": "Culture",
+                    "venue_name": "Scott's Hut",
+                    "tips": "Take your time to appreciate the history."
+                  },
+                  {
+                    "time": "04:00 PM",
+                    "description": "Take a scenic kayak tour around icebergs.",
+                    "category": "Leisure",
+                    "venue_name": "Kayaking in Paradise Bay",
+                    "tips": "Wear a waterproof jacket and enjoy the tranquility."
+                  },
+                  {
+                    "time": "07:00 PM",
+                    "description": "Dine under the stars while enjoying local cuisine.",
+                    "category": "Food",
+                    "venue_name": "The Ice Restaurant",
+                    "tips": "Make reservations in advance."
+                  }
+                ],
+                "_destination": "Antarctica",
+                "weather": {
+                  "temp": {
+                    "min": 31,
+                    "max": 37,
+                    "day": 33
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "few clouds",
+                    "icon": "02n"
+                  },
+                  "humidity": 65,
+                  "wind_speed": 3,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "2023-10-31",
+                "title": "Day 2: Wildlife and Relaxation",
+                "activities": [
+                  {
+                    "time": "08:00 AM",
+                    "description": "Join a sunrise photography session to capture amazing landscapes.",
+                    "category": "Attraction",
+                    "venue_name": "Deception Island",
+                    "tips": "Bring a tripod for better stability."
+                  },
+                  {
+                    "time": "11:00 AM",
+                    "description": "Attend a lecture on Antarctic wildlife.",
+                    "category": "Culture",
+                    "venue_name": "Research Station Briefing Room",
+                    "tips": "Ask questions to get the most out of the experience."
+                  },
+                  {
+                    "time": "01:00 PM",
+                    "description": "Lunch at a café with a view of the glaciers.",
+                    "category": "Food",
+                    "venue_name": "Glacier View Café",
+                    "tips": "Try the hot chocolate to warm up."
+                  },
+                  {
+                    "time": "03:00 PM",
+                    "description": "Explore the stunning ice formations on a guided hike.",
+                    "category": "Attraction",
+                    "venue_name": "Lemaire Channel",
+                    "tips": "Wear good hiking boots for traction."
+                  },
+                  {
+                    "time": "06:00 PM",
+                    "description": "Relax at the hot tub on your expedition ship.",
+                    "category": "Leisure",
+                    "venue_name": "Expedition Ship Hot Tub",
+                    "tips": "Enjoy the view of icebergs while you unwind."
+                  },
+                  {
+                    "time": "08:00 PM",
+                    "description": "Dinner featuring traditional Antarctic fare.",
+                    "category": "Food",
+                    "venue_name": "Captain's Table",
+                    "tips": "Opt for the chef's special for a unique experience."
+                  }
+                ],
+                "_destination": "Antarctica",
+                "weather": {
+                  "temp": {
+                    "min": 30,
+                    "max": 34,
+                    "day": 32
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "broken clouds",
+                    "icon": "04n"
+                  },
+                  "humidity": 61,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 3,
+                "date": "2023-11-01",
+                "title": "Day 3: Cultural Immersion and Farewell",
+                "activities": [
+                  {
+                    "time": "09:00 AM",
+                    "description": "Visit a research station to learn about scientific efforts.",
+                    "category": "Culture",
+                    "venue_name": "Palmer Station",
+                    "tips": "Be respectful of the scientists' work."
+                  },
+                  {
+                    "time": "12:00 PM",
+                    "description": "Lunch onboard with a focus on sustainability.",
+                    "category": "Food",
+                    "venue_name": "Sustainable Dining Room",
+                    "tips": "Enjoy dishes made from local ingredients."
+                  },
+                  {
+                    "time": "02:00 PM",
+                    "description": "Explore the unique geology of Antarctica.",
+                    "category": "Attraction",
+                    "venue_name": "Mount Vinson",
+                    "tips": "Bring a guide for an informative tour."
+                  },
+                  {
+                    "time": "04:00 PM",
+                    "description": "Participate in a farewell gathering with fellow travelers.",
+                    "category": "Leisure",
+                    "venue_name": "Expedition Lounge",
+                    "tips": "Share your favorite moments and photos."
+                  },
+                  {
+                    "time": "07:00 PM",
+                    "description": "Enjoy a final dinner with a focus on local delicacies.",
+                    "category": "Food",
+                    "venue_name": "The Polar Plate",
+                    "tips": "Savor the last taste of Antarctica."
+                  }
+                ],
+                "_destination": "Antarctica",
+                "weather": {
+                  "temp": {
+                    "min": 30,
+                    "max": 33,
+                    "day": 31
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01d"
+                  },
+                  "humidity": 59,
+                  "wind_speed": 3,
+                  "pop": 0
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 3-day Antarctica adventure!",
+            "_costEstimate": {
+              "total": 17500,
+              "flights": 8000,
+              "accommodation": 9200,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 8000
+                },
+                {
+                  "type": "hotel",
+                  "description": "3 nights accommodation",
+                  "amount": 9200
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 300
+                }
+              ]
+            },
+            "_enrichedWithOSM": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"I want to visit Antarctica for a beach vacation next week with a $500 budget\",\"Please use reasonable defaults\"],\"data\":{\"destination\":\"Antarctica\",\"startDate\":\"next week\",\"duration\":null,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"beach vacation\"],\"budget\":\"budget\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Edge Case - Impossible Request-1758143826458\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Modification Flow Test",
+      "scenario": "Test the ability to modify an existing itinerary",
+      "passed": false,
+      "duration": 34440,
+      "errors": [
+        "Expected questions but none were asked"
+      ],
+      "warnings": [
+        "Only 1 conversation turns, expected at least 2"
+      ],
+      "aiResponses": [
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 3-day itinerary for Paris, France!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Paris, France",
+            "title": "3 Days in Paris, France",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "TBD",
+                "title": "Day 1: Iconic Landmarks",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the iconic Eiffel Tower and enjoy stunning views of the city.",
+                    "category": "Attraction",
+                    "venue_name": "Eiffel Tower",
+                    "tips": "Book tickets online to skip the line."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Enjoy a leisurely lunch at a classic Parisian café.",
+                    "category": "Food",
+                    "venue_name": "Café de Flore",
+                    "tips": "Try the croque monsieur and a café au lait."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Stroll through the beautiful Tuileries Garden.",
+                    "category": "Leisure",
+                    "venue_name": "Jardin des Tuileries",
+                    "tips": "Bring a book to relax by the fountains."
+                  },
+                  {
+                    "time": "16:00",
+                    "description": "Explore the stunning art at the Louvre Museum.",
+                    "category": "Attraction",
+                    "venue_name": "Louvre Museum",
+                    "tips": "Visit the Mona Lisa and take a guided tour."
+                  },
+                  {
+                    "time": "19:00",
+                    "description": "Dinner at a traditional French bistro.",
+                    "category": "Food",
+                    "venue_name": "Le Relais de l'Entrecôte",
+                    "tips": "Don’t miss the secret sauce with steak frites."
+                  }
+                ],
+                "_destination": "Paris, France",
+                "weather": {
+                  "temp": {
+                    "min": 13,
+                    "max": 28,
+                    "day": 20
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01n"
+                  },
+                  "humidity": 46,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "TBD",
+                "title": "Day 2: Culture and History",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the majestic Notre-Dame Cathedral.",
+                    "category": "Attraction",
+                    "venue_name": "Notre-Dame Cathedral",
+                    "tips": "Check the schedule for choral performances."
+                  },
+                  {
+                    "time": "11:30",
+                    "description": "Explore the charming streets of Montmartre.",
+                    "category": "Leisure",
+                    "venue_name": "Montmartre",
+                    "tips": "Don’t forget to visit the Sacré-Cœur Basilica."
+                  },
+                  {
+                    "time": "13:00",
+                    "description": "Lunch at a local crêperie.",
+                    "category": "Food",
+                    "venue_name": "Crêperie Bretonne",
+                    "tips": "Try the salted caramel crêpe for dessert."
+                  },
+                  {
+                    "time": "15:00",
+                    "description": "Discover the art scene at the Musée d'Orsay.",
+                    "category": "Attraction",
+                    "venue_name": "Musée d'Orsay",
+                    "tips": "Look for works by Monet and Van Gogh."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Enjoy a Seine River cruise at sunset.",
+                    "category": "Leisure",
+                    "venue_name": "Bateaux Parisiens",
+                    "tips": "Book a dinner cruise for a romantic experience."
+                  }
+                ],
+                "_destination": "Paris, France",
+                "weather": {
+                  "temp": {
+                    "min": 18,
+                    "max": 32,
+                    "day": 25
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "broken clouds",
+                    "icon": "04n"
+                  },
+                  "humidity": 29,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 3,
+                "date": "TBD",
+                "title": "Day 3: Food and Shopping",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Start with a pastry class to learn about French baking.",
+                    "category": "Culture",
+                    "venue_name": "Le Foodist",
+                    "tips": "Book in advance for a hands-on experience."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local market with diverse food stalls.",
+                    "category": "Food",
+                    "venue_name": "Marché des Enfants Rouges",
+                    "tips": "Sample different cuisines available at the stalls."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Shop at the famous Champs-Élysées.",
+                    "category": "Shopping",
+                    "venue_name": "Champs-Élysées",
+                    "tips": "Visit flagship stores and enjoy window shopping."
+                  },
+                  {
+                    "time": "16:00",
+                    "description": "Relax at a rooftop bar with a view of the city.",
+                    "category": "Leisure",
+                    "venue_name": "Le Ciel de Paris",
+                    "tips": "Go for the sunset for breathtaking views."
+                  },
+                  {
+                    "time": "19:00",
+                    "description": "Dinner at a Michelin-starred restaurant.",
+                    "category": "Food",
+                    "venue_name": "Le Meurice",
+                    "tips": "Reserve a table well in advance for a fine dining experience."
+                  }
+                ],
+                "_destination": "Paris, France",
+                "weather": {
+                  "temp": {
+                    "min": 22,
+                    "max": 25,
+                    "day": 23
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "broken clouds",
+                    "icon": "04n"
+                  },
+                  "humidity": 53,
+                  "wind_speed": 3,
+                  "pop": 0.27375
+                }
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 3-day Paris, France adventure!",
+            "_costEstimate": {
+              "total": 3850,
+              "flights": 1250,
+              "accommodation": 2300,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 1250
+                },
+                {
+                  "type": "hotel",
+                  "description": "3 nights accommodation",
+                  "amount": 2300
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 300
+                }
+              ]
+            },
+            "_enrichedWithOSM": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"Create a simple 3-day Paris trip for next month\"],\"data\":{\"destination\":\"Paris, France\",\"startDate\":null,\"duration\":3,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Modification Flow Test-1758143871414\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Stress Test - Maximum Complexity",
+      "scenario": "Test with maximum complexity: 30-day trip, 10 cities, multiple constraints",
+      "passed": false,
+      "duration": 128330,
+      "errors": [
+        "No work sessions on Mondays/Wednesdays"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "question",
+          "message": "Is there anything else you'd like to add or modify for your trip?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"Plan a 30-day European tour starting June 1st: London (3 days), Paris (3 days), Rome (4 days), Venice (2 days), Vienna (3 days), Prague (3 days), Berlin (3 days), Amsterdam (3 days), Brussels (2 days), Barcelona (4 days). I need gluten-free food, prefer boutique hotels under $150/night, want to avoid tourist traps, love hidden gems, need laundry every week, work remotely Mondays and Wednesdays, and want to take overnight trains when possible. Budget $8000.\"],\"data\":{\"destination\":\"Europe\",\"startDate\":\"2024-06-01\",\"duration\":30,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"gluten-free food\",\"avoid tourist traps\",\"hidden gems\",\"laundry every week\",\"work remotely\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Stress Test - Maximum Complexity-1758143907855\"}"
+        },
+        {
+          "type": "itinerary",
+          "message": "Here's your personalized 30-day itinerary for Europe!\n\nI've crafted this based on your preferences. Feel free to ask me to modify anything - I can change activities, adjust the schedule, or completely revise any day.",
+          "itinerary": {
+            "destination": "Europe",
+            "title": "30 Days in Europe",
+            "itinerary": [
+              {
+                "day": 1,
+                "date": "2024-06-01",
+                "title": "Day 1 : Arrival & Sightseeing",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Arrive in Paris and check into hotel",
+                    "category": "Leisure",
+                    "venue_name": "Hôtel Le Meurice",
+                    "tips": "Arrive early to enjoy breakfast."
+                  },
+                  {
+                    "time": "11:00",
+                    "description": "Visit the Eiffel Tower",
+                    "category": "Attraction",
+                    "venue_name": "Eiffel Tower",
+                    "tips": "Book tickets in advance to skip the lines."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Lunch at a classic Parisian café",
+                    "category": "Food",
+                    "venue_name": "Café de Flore",
+                    "tips": "Try the croque monsieur."
+                  },
+                  {
+                    "time": "16:00",
+                    "description": "Explore the Louvre Museum",
+                    "category": "Culture",
+                    "venue_name": "Louvre Museum",
+                    "tips": "Visit during late hours for fewer crowds."
+                  }
+                ],
+                "_destination": "Europe",
+                "weather": {
+                  "temp": {
+                    "min": 13,
+                    "max": 27,
+                    "day": 20
+                  },
+                  "weather": {
+                    "main": "Clear",
+                    "description": "clear sky",
+                    "icon": "01n"
+                  },
+                  "humidity": 47,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 2,
+                "date": "2024-06-02",
+                "title": "Day 2 : Art & History",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit Montmartre and Sacré-Cœur",
+                    "category": "Attraction",
+                    "venue_name": "Sacré-Cœur Basilica",
+                    "tips": "Climb to the dome for a panoramic view."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local bistro",
+                    "category": "Food",
+                    "venue_name": "Le Consulat",
+                    "tips": "Enjoy the vibrant street life."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Tour of Musée d'Orsay",
+                    "category": "Culture",
+                    "venue_name": "Musée d'Orsay",
+                    "tips": "Check out the Impressionist collection."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Dinner cruise on the Seine",
+                    "category": "Leisure",
+                    "venue_name": "Bateaux Parisiens",
+                    "tips": "Reserve a window seat."
+                  }
+                ],
+                "_destination": "Europe",
+                "weather": {
+                  "temp": {
+                    "min": 18,
+                    "max": 32,
+                    "day": 24
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "broken clouds",
+                    "icon": "04n"
+                  },
+                  "humidity": 29,
+                  "wind_speed": 2,
+                  "pop": 0
+                }
+              },
+              {
+                "day": 3,
+                "date": "2024-06-03",
+                "title": "Day 3 : Culture & Shopping",
+                "activities": [
+                  {
+                    "time": "10:00",
+                    "description": "Visit the Palais Garnier",
+                    "category": "Attraction",
+                    "venue_name": "Palais Garnier",
+                    "tips": "Take a guided tour for insights."
+                  },
+                  {
+                    "time": "12:30",
+                    "description": "Lunch at a gourmet food market",
+                    "category": "Food",
+                    "venue_name": "Marché des Enfants Rouges",
+                    "tips": "Sample different cuisines."
+                  },
+                  {
+                    "time": "15:00",
+                    "description": "Shopping at Galeries Lafayette",
+                    "category": "Shopping",
+                    "venue_name": "Galeries Lafayette",
+                    "tips": "Visit the rooftop for a great view."
+                  },
+                  {
+                    "time": "19:00",
+                    "description": "Dinner at a Michelin-star restaurant",
+                    "category": "Food",
+                    "venue_name": "Le Meurice Alain Ducasse",
+                    "tips": "Dress smartly for this experience."
+                  }
+                ],
+                "_destination": "Europe",
+                "weather": {
+                  "temp": {
+                    "min": 22,
+                    "max": 24,
+                    "day": 23
+                  },
+                  "weather": {
+                    "main": "Clouds",
+                    "description": "broken clouds",
+                    "icon": "04n"
+                  },
+                  "humidity": 53,
+                  "wind_speed": 3,
+                  "pop": 0.29500000000000004
+                }
+              },
+              {
+                "day": 4,
+                "date": "2024-06-04",
+                "title": "Day 4 : Travel to Rome & Ancient Sites",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Rome and check into hotel",
+                    "category": "Leisure",
+                    "venue_name": "Hotel Artemide",
+                    "tips": "Take a taxi from the airport."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch near the Colosseum",
+                    "category": "Food",
+                    "venue_name": "Trattoria Da Enzo al 29",
+                    "tips": "Try the pasta carbonara."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Visit the Colosseum",
+                    "category": "Attraction",
+                    "venue_name": "Colosseum",
+                    "tips": "Buy a guided tour for better insights."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Walk through Roman Forum",
+                    "category": "Attraction",
+                    "venue_name": "Roman Forum",
+                    "tips": "Wear comfortable shoes."
+                  }
+                ],
+                "_destination": "Europe",
+                "weather": {
+                  "temp": {
+                    "min": 15,
+                    "max": 21,
+                    "day": 18
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "light rain",
+                    "icon": "10n"
+                  },
+                  "humidity": 70,
+                  "wind_speed": 3,
+                  "pop": 0.62375
+                }
+              },
+              {
+                "day": 5,
+                "date": "2024-06-05",
+                "title": "Day 5 : Vatican & Culture",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit Vatican Museums",
+                    "category": "Culture",
+                    "venue_name": "Vatican Museums",
+                    "tips": "Book early morning tickets."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a nearby café",
+                    "category": "Food",
+                    "venue_name": "Caffè Vaticano",
+                    "tips": "Try the espresso."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore St. Peter's Basilica",
+                    "category": "Attraction",
+                    "venue_name": "St. Peter's Basilica",
+                    "tips": "Climb the dome for stunning views."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Dinner in Trastevere",
+                    "category": "Food",
+                    "venue_name": "Osteria da Zi Umberto",
+                    "tips": "Enjoy the lively atmosphere."
+                  }
+                ],
+                "_destination": "Europe",
+                "weather": {
+                  "temp": {
+                    "min": 13,
+                    "max": 21,
+                    "day": 16
+                  },
+                  "weather": {
+                    "main": "Rain",
+                    "description": "light rain",
+                    "icon": "10n"
+                  },
+                  "humidity": 68,
+                  "wind_speed": 2,
+                  "pop": 0.41625
+                }
+              },
+              {
+                "day": 6,
+                "date": "2024-06-06",
+                "title": "Day 6 : Relaxation & Parks",
+                "activities": [
+                  {
+                    "time": "10:00",
+                    "description": "Relax at Villa Borghese",
+                    "category": "Leisure",
+                    "venue_name": "Villa Borghese",
+                    "tips": "Rent a bike to explore the gardens."
+                  },
+                  {
+                    "time": "12:30",
+                    "description": "Picnic lunch in the park",
+                    "category": "Food",
+                    "venue_name": "Pincio Terrace",
+                    "tips": "Bring local pastries."
+                  },
+                  {
+                    "time": "15:00",
+                    "description": "Visit Galleria Borghese",
+                    "category": "Culture",
+                    "venue_name": "Galleria Borghese",
+                    "tips": "Reserve your tickets online."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner in a local pizzeria",
+                    "category": "Food",
+                    "venue_name": "Pizzeria Da Baffetto",
+                    "tips": "Try the classic Margherita."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 7,
+                "date": "2024-06-07",
+                "title": "Day 7 : Travel to Florence & Art",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Train to Florence",
+                    "category": "Leisure",
+                    "venue_name": "Santa Maria Novella",
+                    "tips": "Book tickets in advance."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at Mercato Centrale",
+                    "category": "Food",
+                    "venue_name": "Mercato Centrale",
+                    "tips": "Sample local cheeses."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Visit the Uffizi Gallery",
+                    "category": "Culture",
+                    "venue_name": "Uffizi Gallery",
+                    "tips": "Download the app for audio guides."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Walk across the Ponte Vecchio",
+                    "category": "Attraction",
+                    "venue_name": "Ponte Vecchio",
+                    "tips": "Best time for photos is sunset."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 8,
+                "date": "2024-06-08",
+                "title": "Day 8 : Renaissance & Tuscan Cuisine",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Duomo",
+                    "category": "Attraction",
+                    "venue_name": "Duomo di Firenze",
+                    "tips": "Climb to the top for views."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a traditional trattoria",
+                    "category": "Food",
+                    "venue_name": "Trattoria Mario",
+                    "tips": "Very popular, arrive early."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore Palazzo Vecchio",
+                    "category": "Culture",
+                    "venue_name": "Palazzo Vecchio",
+                    "tips": "Check out the art exhibitions."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Dinner cooking class",
+                    "category": "Food",
+                    "venue_name": "Cucina Lorenzo de' Medici",
+                    "tips": "Learn to cook traditional dishes."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 9,
+                "date": "2024-06-09",
+                "title": "Day 9 : Travel to Venice & Canals",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Train to Venice",
+                    "category": "Leisure",
+                    "venue_name": "Santa Maria Novella",
+                    "tips": "Enjoy the scenic ride."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch along the Grand Canal",
+                    "category": "Food",
+                    "venue_name": "Ristorante Da Raffaele",
+                    "tips": "Try seafood risotto."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Gondola ride through canals",
+                    "category": "Leisure",
+                    "venue_name": "Gondola Station",
+                    "tips": "Negotiate prices before boarding."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Visit St. Mark's Basilica",
+                    "category": "Attraction",
+                    "venue_name": "Basilica di San Marco",
+                    "tips": "Visit during late hours for fewer crowds."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 10,
+                "date": "2024-06-10",
+                "title": "Day 10 : Art & Culture",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Doge's Palace",
+                    "category": "Attraction",
+                    "venue_name": "Doge's Palace",
+                    "tips": "Get a guided tour for insights."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch in the Jewish Ghetto",
+                    "category": "Food",
+                    "venue_name": "Gam Gam",
+                    "tips": "Try the traditional gefilte fish."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore the Peggy Guggenheim Collection",
+                    "category": "Culture",
+                    "venue_name": "Peggy Guggenheim Collection",
+                    "tips": "Check for temporary exhibitions."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a canal-side restaurant",
+                    "category": "Food",
+                    "venue_name": "Osteria alle Testiere",
+                    "tips": "Make a reservation."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 11,
+                "date": "2024-06-11",
+                "title": "Day 11 : Travel to Milan & Shopping",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Train to Milan",
+                    "category": "Leisure",
+                    "venue_name": "Milano Centrale",
+                    "tips": "Arrive early to catch the train."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a trendy café",
+                    "category": "Food",
+                    "venue_name": "Café Trussardi",
+                    "tips": "Try the truffle pasta."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Shopping at Galleria Vittorio Emanuele II",
+                    "category": "Shopping",
+                    "venue_name": "Galleria Vittorio Emanuele II",
+                    "tips": "Check out high-end brands."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Visit the Duomo di Milano",
+                    "category": "Attraction",
+                    "venue_name": "Duomo di Milano",
+                    "tips": "Climb to the rooftop for views."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 12,
+                "date": "2024-06-12",
+                "title": "Day 12 : Culture & Relaxation",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit The Last Supper",
+                    "category": "Culture",
+                    "venue_name": "Santa Maria delle Grazie",
+                    "tips": "Book tickets weeks in advance."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local trattoria",
+                    "category": "Food",
+                    "venue_name": "Trattoria Milanese",
+                    "tips": "Try the risotto."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Relax at Sempione Park",
+                    "category": "Leisure",
+                    "venue_name": "Sempione Park",
+                    "tips": "Bring a book and enjoy the scenery."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a rooftop restaurant",
+                    "category": "Food",
+                    "venue_name": "Terrazza Gallia",
+                    "tips": "Enjoy the skyline view."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 13,
+                "date": "2024-06-13",
+                "title": "Day 13 : Travel to Barcelona & Gaudí",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Barcelona",
+                    "category": "Leisure",
+                    "venue_name": "El Prat Airport",
+                    "tips": "Get an early flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a tapas bar",
+                    "category": "Food",
+                    "venue_name": "Cervecería Catalana",
+                    "tips": "Try the patatas bravas."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Visit La Sagrada Familia",
+                    "category": "Attraction",
+                    "venue_name": "Basílica de la Sagrada Família",
+                    "tips": "Book a skip-the-line ticket."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Stroll through Park Güell",
+                    "category": "Attraction",
+                    "venue_name": "Park Güell",
+                    "tips": "Best visited in the late afternoon."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 14,
+                "date": "2024-06-14",
+                "title": "Day 14 : Culture & Beaches",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit Casa Batlló",
+                    "category": "Attraction",
+                    "venue_name": "Casa Batlló",
+                    "tips": "Get audio guides for more info."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a beachside restaurant",
+                    "category": "Food",
+                    "venue_name": "Xiringuito Escribà",
+                    "tips": "Try the paella."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Relax at Barceloneta Beach",
+                    "category": "Leisure",
+                    "venue_name": "Barceloneta Beach",
+                    "tips": "Bring sunscreen."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a local restaurant",
+                    "category": "Food",
+                    "venue_name": "Cal Pep",
+                    "tips": "Arrive early to avoid waiting."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 15,
+                "date": "2024-06-15",
+                "title": "Day 15 : Travel to Madrid & Culture",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Madrid",
+                    "category": "Leisure",
+                    "venue_name": "Adolfo Suárez Madrid-Barajas Airport",
+                    "tips": "Choose a morning flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at Mercado de San Miguel",
+                    "category": "Food",
+                    "venue_name": "Mercado de San Miguel",
+                    "tips": "Sample a variety of tapas."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Visit the Royal Palace",
+                    "category": "Attraction",
+                    "venue_name": "Palacio Real de Madrid",
+                    "tips": "Visit in the afternoon for fewer crowds."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Explore the Prado Museum",
+                    "category": "Culture",
+                    "venue_name": "Museo del Prado",
+                    "tips": "Focus on the main highlights."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 16,
+                "date": "2024-06-16",
+                "title": "Day 16 : Parks & Gastronomy",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Relax at Retiro Park",
+                    "category": "Leisure",
+                    "venue_name": "Parque del Retiro",
+                    "tips": "Rent a boat on the lake."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a traditional Spanish restaurant",
+                    "category": "Food",
+                    "venue_name": "Casa Lucio",
+                    "tips": "Try the huevos rotos."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Visit the Thyssen-Bornemisza Museum",
+                    "category": "Culture",
+                    "venue_name": "Museo Thyssen-Bornemisza",
+                    "tips": "Check out the temporary exhibits."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Dinner at a Michelin-star restaurant",
+                    "category": "Food",
+                    "venue_name": "DiverXO",
+                    "tips": "Reservation is essential."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 17,
+                "date": "2024-06-17",
+                "title": "Day 17 : Travel to Lisbon & City Views",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Lisbon",
+                    "category": "Leisure",
+                    "venue_name": "Humberto Delgado Airport",
+                    "tips": "Take an early flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch in Alfama district",
+                    "category": "Food",
+                    "venue_name": "Tasca da Bela",
+                    "tips": "Try the bacalhau à brás."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Visit the Castelo de São Jorge",
+                    "category": "Attraction",
+                    "venue_name": "Castelo de São Jorge",
+                    "tips": "Enjoy the panoramic views."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Stroll along the Tagus River",
+                    "category": "Leisure",
+                    "venue_name": "Cais do Sodré",
+                    "tips": "Great spot for sunset."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 18,
+                "date": "2024-06-18",
+                "title": "Day 18 : Culture & Food",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Jerónimos Monastery",
+                    "category": "Attraction",
+                    "venue_name": "Mosteiro dos Jerónimos",
+                    "tips": "Arrive early to avoid queues."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a famous pastry shop",
+                    "category": "Food",
+                    "venue_name": "Pastéis de Belém",
+                    "tips": "Don't miss the pastéis de nata."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore the MAAT Museum",
+                    "category": "Culture",
+                    "venue_name": "Museum of Art, Architecture and Technology",
+                    "tips": "Check out the building design."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a rooftop restaurant",
+                    "category": "Food",
+                    "venue_name": "Sky Bar Lisboa",
+                    "tips": "Enjoy the views of the city."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 19,
+                "date": "2024-06-19",
+                "title": "Day 19 : Travel to Prague & Old Town",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Prague",
+                    "category": "Leisure",
+                    "venue_name": "Václav Havel Airport",
+                    "tips": "Book an early flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local pub",
+                    "category": "Food",
+                    "venue_name": "Lokál Dlouhááá",
+                    "tips": "Try the goulash."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Walk around Old Town Square",
+                    "category": "Attraction",
+                    "venue_name": "Old Town Square",
+                    "tips": "Don't miss the Astronomical Clock."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Visit Charles Bridge",
+                    "category": "Attraction",
+                    "venue_name": "Charles Bridge",
+                    "tips": "Best time for photos is sunset."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 20,
+                "date": "2024-06-20",
+                "title": "Day 20 : Culture & History",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit Prague Castle",
+                    "category": "Attraction",
+                    "venue_name": "Prague Castle",
+                    "tips": "Plan to spend a few hours here."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a historic restaurant",
+                    "category": "Food",
+                    "venue_name": "U Zlaté Hrušky",
+                    "tips": "Try traditional Czech cuisine."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore the Jewish Quarter",
+                    "category": "Culture",
+                    "venue_name": "Josefov",
+                    "tips": "Visit the synagogues and cemetery."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a riverside restaurant",
+                    "category": "Food",
+                    "venue_name": "V Zátiší",
+                    "tips": "Taste the local beers."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 21,
+                "date": "2024-06-21",
+                "title": "Day 21 : Travel to Budapest & Thermal Baths",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Budapest",
+                    "category": "Leisure",
+                    "venue_name": "Budapest Ferenc Liszt International Airport",
+                    "tips": "Choose a morning flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local café",
+                    "category": "Food",
+                    "venue_name": "Café Gerbeaud",
+                    "tips": "Try the famous Dobos torte."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Relax at Széchenyi Thermal Bath",
+                    "category": "Leisure",
+                    "venue_name": "Széchenyi Thermal Bath",
+                    "tips": "Bring a swimsuit and towel."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner with a Danube view",
+                    "category": "Food",
+                    "venue_name": "Fisherman’s Bastion",
+                    "tips": "Enjoy the stunning sunset."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 22,
+                "date": "2024-06-22",
+                "title": "Day 22 : Culture & Relaxation",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Hungarian Parliament",
+                    "category": "Attraction",
+                    "venue_name": "Országház",
+                    "tips": "Take a guided tour for insights."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a bistro",
+                    "category": "Food",
+                    "venue_name": "Menza",
+                    "tips": "Try traditional Hungarian dishes."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore the Great Market Hall",
+                    "category": "Shopping",
+                    "venue_name": "Nagyvásárcsarnok",
+                    "tips": "Look for local delicacies."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a traditional restaurant",
+                    "category": "Food",
+                    "venue_name": "Kiosk",
+                    "tips": "Sample local wines."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 23,
+                "date": "2024-06-23",
+                "title": "Day 23 : Travel to Amsterdam & Canals",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Amsterdam",
+                    "category": "Leisure",
+                    "venue_name": "Amsterdam Airport Schiphol",
+                    "tips": "Book an early flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a canal-side café",
+                    "category": "Food",
+                    "venue_name": "Café de Jaren",
+                    "tips": "Try the Dutch pancakes."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Take a canal cruise",
+                    "category": "Leisure",
+                    "venue_name": "Blue Boat Company",
+                    "tips": "Book in advance for best prices."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Visit the Anne Frank House",
+                    "category": "Culture",
+                    "venue_name": "Anne Frank House",
+                    "tips": "Reserve tickets online."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 24,
+                "date": "2024-06-24",
+                "title": "Day 24 : Art & Culture",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Rijksmuseum",
+                    "category": "Culture",
+                    "venue_name": "Rijksmuseum",
+                    "tips": "Focus on Rembrandt's works."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local eatery",
+                    "category": "Food",
+                    "venue_name": "Foodhallen",
+                    "tips": "Try a variety of street foods."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore the Van Gogh Museum",
+                    "category": "Culture",
+                    "venue_name": "Van Gogh Museum",
+                    "tips": "Check for special exhibitions."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a brewery",
+                    "category": "Food",
+                    "venue_name": "Brouwerij 't IJ",
+                    "tips": "Enjoy the local beers."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 25,
+                "date": "2024-06-25",
+                "title": "Day 25 : Travel to Brussels & City Highlights",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Train to Brussels",
+                    "category": "Leisure",
+                    "venue_name": "Bruxelles-Midi",
+                    "tips": "Book tickets in advance."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local café",
+                    "category": "Food",
+                    "venue_name": "Maison Antoine",
+                    "tips": "Famous for Belgian fries."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Visit the Grand Place",
+                    "category": "Attraction",
+                    "venue_name": "Grand Place",
+                    "tips": "Best viewed in the afternoon light."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Explore the Atomium",
+                    "category": "Attraction",
+                    "venue_name": "Atomium",
+                    "tips": "Take the elevator for views."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 26,
+                "date": "2024-06-26",
+                "title": "Day 26 : Culture & Chocolate",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Royal Palace",
+                    "category": "Attraction",
+                    "venue_name": "Royal Palace of Brussels",
+                    "tips": "Check the opening hours."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a chocolate café",
+                    "category": "Food",
+                    "venue_name": "Pierre Marcolini",
+                    "tips": "Try the pralines."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore the Magritte Museum",
+                    "category": "Culture",
+                    "venue_name": "Magritte Museum",
+                    "tips": "Focus on surrealist art."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a Belgian brasserie",
+                    "category": "Food",
+                    "venue_name": "Chez Léon",
+                    "tips": "Try the moules-frites."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 27,
+                "date": "2024-06-27",
+                "title": "Day 27 : Travel to Copenhagen & Nyhavn",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Copenhagen",
+                    "category": "Leisure",
+                    "venue_name": "Copenhagen Airport",
+                    "tips": "Book an early flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a canal-side restaurant",
+                    "category": "Food",
+                    "venue_name": "Nyhavn 17",
+                    "tips": "Enjoy the views."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore Tivoli Gardens",
+                    "category": "Attraction",
+                    "venue_name": "Tivoli Gardens",
+                    "tips": "Visit in the evening for lights."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a famous hotdog stand",
+                    "category": "Food",
+                    "venue_name": "Pølserie",
+                    "tips": "Try the Danish hot dogs."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 28,
+                "date": "2024-06-28",
+                "title": "Day 28 : Culture & Design",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the National Museum",
+                    "category": "Culture",
+                    "venue_name": "National Museum of Denmark",
+                    "tips": "Focus on Viking exhibits."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local café",
+                    "category": "Food",
+                    "venue_name": "The Union Kitchen",
+                    "tips": "Try the meatballs."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Explore Designmuseum Danmark",
+                    "category": "Culture",
+                    "venue_name": "Designmuseum Danmark",
+                    "tips": "Check out Danish design history."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a trendy restaurant",
+                    "category": "Food",
+                    "venue_name": "Noma",
+                    "tips": "Reservations are a must."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 29,
+                "date": "2024-06-29",
+                "title": "Day 29 : Travel to Oslo & Fjord Views",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Fly to Oslo",
+                    "category": "Leisure",
+                    "venue_name": "Oslo Gardermoen Airport",
+                    "tips": "Choose a morning flight."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a local eatery",
+                    "category": "Food",
+                    "venue_name": "Mathallen Oslo",
+                    "tips": "Try the cured salmon."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Take a fjord cruise",
+                    "category": "Leisure",
+                    "venue_name": "Oslo Fjord",
+                    "tips": "Book tickets in advance."
+                  },
+                  {
+                    "time": "18:00",
+                    "description": "Dinner at a waterfront restaurant",
+                    "category": "Food",
+                    "venue_name": "Fjord Restaurant",
+                    "tips": "Enjoy fresh seafood."
+                  }
+                ],
+                "_destination": "Europe"
+              },
+              {
+                "day": 30,
+                "date": "2024-06-30",
+                "title": "Day 30 : Culture & Departure",
+                "activities": [
+                  {
+                    "time": "09:00",
+                    "description": "Visit the Munch Museum",
+                    "category": "Culture",
+                    "venue_name": "MUNCH",
+                    "tips": "Focus on Edvard Munch's works."
+                  },
+                  {
+                    "time": "12:00",
+                    "description": "Lunch at a café",
+                    "category": "Food",
+                    "venue_name": "Café Sorgenfri",
+                    "tips": "Try the open-faced sandwiches."
+                  },
+                  {
+                    "time": "14:00",
+                    "description": "Stroll through Vigeland Park",
+                    "category": "Attraction",
+                    "venue_name": "Vigeland Park",
+                    "tips": "Best time for photos is afternoon."
+                  },
+                  {
+                    "time": "17:00",
+                    "description": "Departure from Oslo",
+                    "category": "Leisure",
+                    "venue_name": "Oslo Gardermoen Airport",
+                    "tips": "Arrive at least 2 hours early."
+                  }
+                ],
+                "_destination": "Europe"
+              }
+            ],
+            "quickTips": [
+              "Book accommodations in advance",
+              "Check visa requirements",
+              "Get travel insurance",
+              "Download offline maps",
+              "Keep digital copies of documents"
+            ],
+            "aiMessage": "Wonderful! Here's your 30-day Europe adventure!",
+            "_costEstimate": {
+              "total": 12100,
+              "flights": 1250,
+              "accommodation": 7850,
+              "dailyExpenses": 100,
+              "currency": "USD",
+              "breakdown": [
+                {
+                  "type": "flight",
+                  "description": "Round-trip flights",
+                  "amount": 1250
+                },
+                {
+                  "type": "hotel",
+                  "description": "30 nights accommodation",
+                  "amount": 7850
+                },
+                {
+                  "type": "daily",
+                  "description": "Food and activities",
+                  "amount": 3000
+                }
+              ]
+            },
+            "_enrichedWithOSM": true,
+            "_routesOptimized": true
+          },
+          "conversationContext": "{\"history\":[\"Plan a 30-day European tour starting June 1st: London (3 days), Paris (3 days), Rome (4 days), Venice (2 days), Vienna (3 days), Prague (3 days), Berlin (3 days), Amsterdam (3 days), Brussels (2 days), Barcelona (4 days). I need gluten-free food, prefer boutique hotels under $150/night, want to avoid tourist traps, love hidden gems, need laundry every week, work remotely Mondays and Wednesdays, and want to take overnight trains when possible. Budget $8000.\",\"Please use reasonable defaults\"],\"data\":{\"destination\":\"Europe\",\"startDate\":\"2024-06-01\",\"duration\":30,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"gluten-free food\",\"avoid tourist traps\",\"hidden gems\",\"laundry every week\",\"work remotely\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Stress Test - Maximum Complexity-1758143912460\"}"
+        }
+      ]
+    }
+  ]
+}

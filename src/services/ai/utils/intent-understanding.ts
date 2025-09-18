@@ -19,7 +19,6 @@ export interface TripIntent {
 
   // Optional features (only if explicitly mentioned)
   needsCoworking: boolean;
-  dietaryRestrictions: string[];
   specificActivities: string[];
   budgetLevel: 'budget' | 'moderate' | 'luxury' | null;
 
@@ -53,7 +52,6 @@ TRIP TYPE (default is always "vacation"):
 
 SPECIAL REQUESTS (only note if EXPLICITLY mentioned):
 - needsCoworking: true ONLY if user asks for coworking spaces
-- dietaryRestrictions: ONLY if mentioned (vegan, vegetarian, halal, kosher, gluten-free, etc.)
 - specificActivities: ONLY specific activities requested (hiking, diving, museums, etc.)
 - budgetLevel: ONLY if mentioned (cheap, budget, luxury, expensive)
 
@@ -122,7 +120,6 @@ Respond in JSON format.` }
 
       // Optional features
       needsCoworking: specialReqs.needsCoworking || false,
-      dietaryRestrictions: specialReqs.dietaryRestrictions || [],
       specificActivities: specialReqs.specificActivities || [],
       budgetLevel: specialReqs.budgetLevel || null,
 
@@ -157,7 +154,6 @@ Respond in JSON format.` }
       isVague: true,
       tripType: 'vacation',
       needsCoworking: false,
-      dietaryRestrictions: [],
       specificActivities: [],
       budgetLevel: null,
       missingRequirements: ['location', 'dates', 'duration'],

@@ -1,0 +1,3 @@
+{"sessionId":"session_1758235357347_v9pkftys3","action":"itinerary_generation_v2_start","timestamp":"2025-09-18T22:42:37.359Z","metadata":{"prompt_length":16,"has_context":false,"session_id":"session-1758235356957-kia1tsom6"}}
+{"timestamp":"2025-09-18T22:43:07.433Z","type":"performance","metric":"itinerary_generation_v2","value":30075,"context":{"hasItinerary":true,"sessionId":"session-1758235356957-kia1tsom6"}}
+{"sessionId":"session_1758235357347_v9pkftys3","action":"itinerary_generation_v2_start","timestamp":"2025-09-18T22:45:55.260Z","metadata":{"prompt_length":22,"has_context":true,"session_id":"session-1758235356957-kia1tsom6"}}

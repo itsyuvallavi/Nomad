@@ -1,0 +1,144 @@
+{
+  "timestamp": "2025-09-17T21:37:18.660Z",
+  "summary": {
+    "total": 6,
+    "passed": 1,
+    "failed": 5,
+    "totalDuration": 43952
+  },
+  "results": [
+    {
+      "testName": "Vague Request Test",
+      "scenario": "Test if AI asks for clarification on vague requests",
+      "passed": false,
+      "duration": 13593,
+      "errors": [
+        "AI did not generate an itinerary after gathering information"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "question",
+          "message": "What destination are you considering for your trip?",
+          "awaitingInput": "destination",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\"],\"data\":{\"destination\":null,\"startDate\":null,\"duration\":null,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758144984694\"}"
+        },
+        {
+          "type": "question",
+          "message": "What dates are you considering for your trip to Barcelona?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\",\"Barcelona\"],\"data\":{\"destination\":\"Barcelona\",\"startDate\":null,\"duration\":null,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758144987895\"}"
+        },
+        {
+          "type": "question",
+          "message": "How many people will be traveling with you, and what kind of activities are you interested in?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\",\"Barcelona\",\"March 15-20\"],\"data\":{\"destination\":\"Barcelona\",\"startDate\":\"2024-03-15\",\"duration\":5,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758144990070\"}"
+        },
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to Barcelona?",
+          "conversationContext": "{\"history\":[\"I want to travel somewhere nice\",\"Barcelona\",\"March 15-20\",\"Please use reasonable defaults\"],\"data\":{\"destination\":\"Barcelona\",\"startDate\":\"2024-03-15\",\"duration\":5,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Vague Request Test-1758144992445\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Complex Multi-City Trip",
+      "scenario": "Test generation of complex multi-destination itinerary",
+      "passed": false,
+      "duration": 4506,
+      "errors": [
+        "Failed to generate itinerary for complex request"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to London, Paris, Amsterdam, Barcelona?",
+          "conversationContext": "{\"history\":[\"I need a 2-week trip starting in London on April 1st, then Paris for 4 days, Amsterdam for 3 days, and ending in Barcelona. I work remotely so need coworking spaces. Budget is $5000. I'm vegetarian and love museums.\"],\"data\":{\"destination\":\"London, Paris, Amsterdam, Barcelona\",\"startDate\":\"2024-04-01\",\"duration\":14,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"coworking spaces\",\"museums\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Complex Multi-City Trip-1758145000289\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Basic Tokyo Trip Test",
+      "scenario": "Test basic Tokyo trip generation (constraint detection not yet implemented)",
+      "passed": false,
+      "duration": 5621,
+      "errors": [
+        "Failed to generate Tokyo itinerary"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to Tokyo?",
+          "conversationContext": "{\"history\":[\"Plan a 4-day Tokyo trip for next month. Budget $3000.\"],\"data\":{\"destination\":\"Tokyo\",\"startDate\":null,\"duration\":4,\"travelers\":{\"count\":null,\"type\":null},\"preferences\":{\"activities\":[],\"budget\":\"luxury\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Basic Tokyo Trip Test-1758145006796\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Edge Case - Impossible Request",
+      "scenario": "Test handling of impossible or contradictory requests",
+      "passed": true,
+      "duration": 7205,
+      "errors": [],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "question",
+          "message": "How many people are traveling with you, and what type of trip are you looking for?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"I want to visit Antarctica for a beach vacation next week with a $500 budget\"],\"data\":{\"destination\":\"Antarctica\",\"startDate\":\"next week\",\"duration\":null,\"travelers\":{\"count\":null,\"type\":null},\"preferences\":{\"activities\":[\"beach vacation\"],\"budget\":\"budget\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Edge Case - Impossible Request-1758145014419\"}"
+        },
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to Antarctica?",
+          "conversationContext": "{\"history\":[\"I want to visit Antarctica for a beach vacation next week with a $500 budget\",\"Please use reasonable defaults\"],\"data\":{\"destination\":\"Antarctica\",\"startDate\":\"next week\",\"duration\":3,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"beach vacation\"],\"budget\":\"budget\",\"tripType\":\"leisure\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Edge Case - Impossible Request-1758145017076\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Modification Flow Test",
+      "scenario": "Test the ability to modify an existing itinerary",
+      "passed": false,
+      "duration": 3699,
+      "errors": [
+        "Failed to generate initial itinerary",
+        "Expected questions but none were asked"
+      ],
+      "warnings": [
+        "Only 1 conversation turns, expected at least 2"
+      ],
+      "aiResponses": [
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to Paris?",
+          "conversationContext": "{\"history\":[\"Create a simple 3-day Paris trip for next month\"],\"data\":{\"destination\":\"Paris\",\"startDate\":null,\"duration\":3,\"travelers\":null,\"preferences\":null,\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Modification Flow Test-1758145023627\"}"
+        }
+      ]
+    },
+    {
+      "testName": "Stress Test - Maximum Complexity",
+      "scenario": "Test with maximum complexity: 30-day trip, 10 cities, multiple constraints",
+      "passed": false,
+      "duration": 9328,
+      "errors": [
+        "Failed to handle maximum complexity request"
+      ],
+      "warnings": [],
+      "aiResponses": [
+        {
+          "type": "question",
+          "message": "Is there anything specific you'd like to prioritize or add to your itinerary for each city?",
+          "awaitingInput": "preferences",
+          "conversationContext": "{\"history\":[\"Plan a 30-day European tour starting June 1st: London (3 days), Paris (3 days), Rome (4 days), Venice (2 days), Vienna (3 days), Prague (3 days), Berlin (3 days), Amsterdam (3 days), Brussels (2 days), Barcelona (4 days). I need gluten-free food, prefer boutique hotels under $150/night, want to avoid tourist traps, love hidden gems, need laundry every week, work remotely Mondays and Wednesdays, and want to take overnight trains when possible. Budget $8000.\"],\"data\":{\"destination\":\"Europe\",\"startDate\":\"June 1st\",\"duration\":30,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"gluten-free food\",\"avoid tourist traps\",\"hidden gems\",\"laundry every week\",\"work remotely\",\"overnight trains\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Stress Test - Maximum Complexity-1758145029329\"}"
+        },
+        {
+          "type": "error",
+          "message": "I had trouble creating your itinerary. Let's try again - could you tell me more about your trip to Europe?",
+          "conversationContext": "{\"history\":[\"Plan a 30-day European tour starting June 1st: London (3 days), Paris (3 days), Rome (4 days), Venice (2 days), Vienna (3 days), Prague (3 days), Berlin (3 days), Amsterdam (3 days), Brussels (2 days), Barcelona (4 days). I need gluten-free food, prefer boutique hotels under $150/night, want to avoid tourist traps, love hidden gems, need laundry every week, work remotely Mondays and Wednesdays, and want to take overnight trains when possible. Budget $8000.\",\"Please use reasonable defaults\"],\"data\":{\"destination\":\"Europe\",\"startDate\":\"June 1st\",\"duration\":30,\"travelers\":{\"count\":1,\"type\":\"solo\"},\"preferences\":{\"activities\":[\"gluten-free food\",\"avoid tourist traps\",\"hidden gems\",\"laundry every week\",\"work remotely\",\"overnight trains\"],\"budget\":\"mid\",\"tripType\":\"workation\"},\"userIntent\":\"plan_trip\",\"modificationRequest\":null},\"sessionId\":\"test-Stress Test - Maximum Complexity-1758145033280\"}"
+        }
+      ]
+    }
+  ]
+}

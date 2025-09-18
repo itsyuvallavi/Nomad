@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 // Lazy load heavy components
-const ProtectedRoute = dynamic(() => import('@/components/auth/ProtectedRoute').then(mod => ({ default: mod.ProtectedRoute })), {
+const ProtectedRoute = dynamic(() => import('@/components/common/ProtectedRoute').then(mod => ({ default: mod.ProtectedRoute })), {
   loading: () => <div className="min-h-screen" />,
 });
 
@@ -16,7 +16,7 @@ const Header = dynamic(() => import('@/components/navigation/Header').then(mod =
   loading: () => <div className="h-16" />,
 });
 
-const ScrollablePage = dynamic(() => import('@/components/layout/scrollable-page').then(mod => ({ default: mod.ScrollablePage })), {
+const ScrollablePage = dynamic(() => import('@/components/ui/scrollable-page').then(mod => ({ default: mod.ScrollablePage })), {
   loading: () => <div className="min-h-screen animate-pulse bg-gray-50" />,
 });
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

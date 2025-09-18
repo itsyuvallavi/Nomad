@@ -39,6 +39,8 @@ next-env.d.ts
 
 .genkit/*
 .env*
+.env.local
+.env.production
 
 # firebase
 firebase-debug.log
@@ -46,4 +48,3 @@ firestore-debug.log
 .firebase/
 functions/node_modules/
 functions/.next/
-src/services/firebase/auth.ts

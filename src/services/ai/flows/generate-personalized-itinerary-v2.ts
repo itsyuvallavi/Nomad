@@ -14,7 +14,7 @@ import {
   ResponseType
 } from '@/services/ai/conversation/ai-conversation-controller';
 import { generateConversationalItinerary } from '@/services/ai/utils/conversational-generator';
-import { enrichItineraryWithLocationIQ } from '@/services/ai/services/location-enrichment-locationiq';
+import { enrichItineraryWithOSM } from '@/services/ai/services/location-enrichment-osm';
 import { getWeatherForecast } from '@/services/api/weather';
 import { logAIRequest, logAIResponse, logAIError } from '@/lib/monitoring/ai-logger';
 import { logUserAction, logPerformance } from '@/lib/monitoring/production-logger';

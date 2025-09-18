@@ -7,9 +7,10 @@ import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 
-// Dynamically import LocationIQ map to avoid SSR issues
-const LocationIQMap = dynamic(
-  () => import('./Locationiq-map').then(mod => mod.LocationIQMap),
+// Dynamically import ItineraryMap to avoid SSR issues
+// Now using LocationIQ tiles with OSM geocoding
+const ItineraryMap = dynamic(
+  () => import('./ItineraryMap').then(mod => mod.ItineraryMap),
   {
     ssr: false,
     loading: () => (
@@ -99,14 +100,13 @@ export function MapPanel({
         transition={{ delay: 0.2 }}
       >
         <div className="h-full min-h-[400px] rounded overflow-hidden border border-gray-200">
-          <LocationIQMap
+          <ItineraryMap
             itinerary={{
               ...itinerary,
               days: displayDays
             }}
             selectedDay={selectedDay === 0 ? undefined : selectedDay}
             className="h-full w-full"
-            locationiqApiKey={process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY || process.env.LOCATIONIQ_API_KEY}
           />
         </div>
       </motion.div>

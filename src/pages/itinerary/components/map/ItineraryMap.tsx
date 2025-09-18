@@ -1,21 +1,31 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { MapPin, Navigation, Layers, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { geocodeAddresses, getCenterPoint, getBounds, getCoordinatesWithFallback, CITY_COORDINATES, type Coordinates } from './utils/geocoding';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/helpers/general';
+import { locationIQMap } from '@/services/api/locationiq-map';
+
+// Global registry to track initialized map containers
+const GLOBAL_MAP_REGISTRY = new Map<string, boolean>();
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(
-  () => import('react-leaflet').then(mod => mod.MapContainer),
+  async () => {
+    const mod = await import('react-leaflet');
+    return mod.MapContainer;
+  },
   { ssr: false }
 );
 
 const TileLayer = dynamic(
-  () => import('react-leaflet').then(mod => mod.TileLayer),
+  async () => {
+    const mod = await import('react-leaflet');
+    return mod.TileLayer;
+  },
   { ssr: false }
 );
 
@@ -23,7 +33,10 @@ const TileLayer = dynamic(
 // We'll import it directly when needed inside components
 
 const ActivityMarker = dynamic(
-  () => import('./Activity-marker').then(mod => ({ default: mod.ActivityMarker })),
+  async () => {
+    const mod = await import('./Activity-marker');
+    return { default: mod.ActivityMarker };
+  },
   { ssr: false }
 );
 
@@ -96,33 +109,170 @@ function MapControls({
   );
 }
 
-// Map updater component to handle view changes
-function MapUpdater({ center, zoom, bounds }: { center?: Coordinates; zoom?: number; bounds?: any }) {
-  // Import useMap directly inside the component
-  const { useMap } = require('react-leaflet');
-  const map = useMap();
-  
-  useEffect(() => {
-    if (bounds) {
-      map.fitBounds(bounds, { padding: [50, 50] });
-    } else if (center) {
-      map.setView([center.lat, center.lng], zoom || 13);
-    }
-  }, [map, center, zoom, bounds]);
-  
-  return null;
-}
+// Create MapUpdater as a separate dynamic component to handle the useMap hook
+const MapUpdater = dynamic(
+  async () => {
+    const React = await import('react');
+    const mod = await import('react-leaflet');
+    const { useMap } = mod;
+    const { useEffect } = React;
 
-export function ItineraryMap({ 
-  itinerary, 
+    return function MapUpdaterComponent({ center, zoom, bounds }: { center?: Coordinates; zoom?: number; bounds?: any }) {
+      const map = useMap();
+
+      useEffect(() => {
+        if (bounds) {
+          map.fitBounds(bounds, { padding: [50, 50] });
+        } else if (center) {
+          map.setView([center.lat, center.lng], zoom || 13);
+        }
+      }, [map, center, zoom, bounds]);
+
+      return null;
+    };
+  },
+  { ssr: false }
+);
+
+export function ItineraryMap({
+  itinerary,
   selectedDay,
   onDaySelect,
-  className 
+  className
 }: ItineraryMapProps) {
+  // Debug logging to trace double initialization
+  const instanceId = useRef(`map-instance-${Math.random().toString(36).substr(2, 9)}`);
+  const renderCount = useRef(0);
+  const mountCount = useRef(0);
+  renderCount.current += 1;
+
+  console.log(`🗺️ [${instanceId.current}] ItineraryMap RENDER #${renderCount.current}`, {
+    destination: itinerary.destination,
+    className,
+    timestamp: new Date().toISOString(),
+    phase: 'Component Function Called',
+    stackTrace: new Error().stack
+  });
   const [activities, setActivities] = useState<MapActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showRoutes, setShowRoutes] = useState(true);
   const [mapInstance, setMapInstance] = useState<any>(null);
+
+  // Create stable container ID based on component instance
+  const containerId = useMemo(() => {
+    // Create a stable ID based on the destination and a session key
+    const baseId = `leaflet-${itinerary.destination.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}`;
+    const id = `map-container-${baseId}`;
+
+    console.log(`🗺️ [${instanceId.current}] Container ID logic:`, {
+      id,
+      alreadyInRegistry: GLOBAL_MAP_REGISTRY.has(id),
+      registrySize: GLOBAL_MAP_REGISTRY.size,
+      registryKeys: Array.from(GLOBAL_MAP_REGISTRY.keys())
+    });
+
+    return id;
+  }, [itinerary.destination]);
+
+  // Track mount/unmount lifecycle and manage container registry
+  useEffect(() => {
+    mountCount.current += 1;
+    const existingElement = document.getElementById(containerId);
+    const isInRegistry = GLOBAL_MAP_REGISTRY.has(containerId);
+
+    console.log(`🗺️🔵 [${instanceId.current}] MOUNT #${mountCount.current}`, {
+      timestamp: new Date().toISOString(),
+      renderCount: renderCount.current,
+      containerId,
+      existingElement: !!existingElement,
+      hasLeafletClass: existingElement?.classList.contains('leaflet-container'),
+      isInRegistry,
+      registrySize: GLOBAL_MAP_REGISTRY.size
+    });
+
+    // Clean up existing Leaflet instance if present
+    if (existingElement && existingElement.classList.contains('leaflet-container')) {
+      console.log(`🗺️🧹 [${instanceId.current}] Cleaning up existing Leaflet container`);
+
+      // Try to get the Leaflet map instance and properly remove it
+      const L = (window as any).L;
+      if (L && L.DomUtil) {
+        // Remove Leaflet's event listeners
+        L.DomUtil.empty(existingElement);
+      }
+
+      // Remove all Leaflet classes and content
+      existingElement.innerHTML = '';
+      existingElement.className = existingElement.className.replace(/leaflet-[\w-]+/g, '').trim();
+
+      // Clear from registry
+      GLOBAL_MAP_REGISTRY.delete(containerId);
+    }
+
+    return () => {
+      console.log(`🗺️🔴 [${instanceId.current}] UNMOUNT`, {
+        timestamp: new Date().toISOString(),
+        mountCount: mountCount.current,
+        renderCount: renderCount.current,
+        containerId,
+        willCleanRegistry: GLOBAL_MAP_REGISTRY.has(containerId)
+      });
+
+      // Clean up registry on unmount
+      GLOBAL_MAP_REGISTRY.delete(containerId);
+    };
+  }, [containerId]);
+
+  // Clean up map on unmount to prevent "already initialized" errors
+  useEffect(() => {
+    if (mapInstance) {
+      const mapContainer = mapInstance.getContainer?.();
+      const mapId = mapContainer?.id;
+
+      console.log(`🗺️ [${instanceId.current}] Map instance effect`, {
+        hasInstance: !!mapInstance,
+        mapId,
+        containerElement: mapContainer,
+        registryHasId: mapId ? GLOBAL_MAP_REGISTRY.has(mapId) : false
+      });
+
+      // Mark as initialized in registry
+      if (mapId && !GLOBAL_MAP_REGISTRY.has(mapId)) {
+        GLOBAL_MAP_REGISTRY.set(mapId, true);
+        console.log(`🗺️✅ [${instanceId.current}] Registered map in global registry:`, mapId);
+      }
+    }
+
+    return () => {
+      if (mapInstance) {
+        const mapContainer = mapInstance.getContainer?.();
+        const mapId = mapContainer?.id;
+
+        console.log(`🗺️ [${instanceId.current}] Map cleanup starting`, {
+          hasInstance: !!mapInstance,
+          mapId
+        });
+
+        try {
+          // Check if container still exists in DOM
+          const containerExists = mapId ? document.getElementById(mapId) : null;
+          console.log(`🗺️ [${instanceId.current}] Container exists in DOM:`, !!containerExists);
+
+          // Remove the map instance
+          mapInstance.remove?.();
+          console.log(`🗺️ [${instanceId.current}] Map instance removed successfully`);
+
+          // Clean up registry
+          if (mapId) {
+            GLOBAL_MAP_REGISTRY.delete(mapId);
+            console.log(`🗺️ [${instanceId.current}] Removed from global registry:`, mapId);
+          }
+        } catch (e) {
+          console.error(`🗺️ [${instanceId.current}] Error removing map:`, e);
+        }
+      }
+    };
+  }, [mapInstance]);
 
   // Extract activities from itinerary - only run once on mount
   useEffect(() => {
@@ -292,7 +442,39 @@ export function ItineraryMap({
     }
   };
 
-  if (isLoading) {
+  // Removed mapKey - now using unique containerId as the key
+
+  // LocationIQ API key - hardcoded for now (env vars need rebuild in Next.js)
+  const locationIQKey = 'pk.640f8feec3de6cc33e2d8fcbd44e5cfe';
+
+  // Get LocationIQ tile URL and attribution - NO FALLBACK
+  const { tileUrl, attribution } = useMemo(() => {
+    console.log('Using LocationIQ tiles exclusively');
+    return {
+      tileUrl: locationIQMap.getTileUrl(locationIQKey, 'streets'),
+      attribution: locationIQMap.getAttribution()
+    };
+  }, [locationIQKey]);
+
+  // Delay map rendering to avoid StrictMode double-mount issues
+  const [canRenderMap, setCanRenderMap] = useState(false);
+
+  useEffect(() => {
+    console.log(`🗺️⏱️ [${instanceId.current}] Setting render delay timer`);
+    // Small delay to let StrictMode's first mount/unmount cycle complete
+    const timer = setTimeout(() => {
+      console.log(`🗺️✅ [${instanceId.current}] Timer fired, enabling map render`);
+      setCanRenderMap(true);
+    }, 10);
+
+    return () => {
+      console.log(`🗺️⏱️ [${instanceId.current}] Clearing render delay timer`);
+      clearTimeout(timer);
+      setCanRenderMap(false);
+    };
+  }, []);
+
+  if (isLoading || !canRenderMap) {
     return (
       <div className={cn("relative h-[400px] bg-background rounded-xl flex items-center justify-center border border-border", className)}>
         <div className="text-center">
@@ -311,17 +493,64 @@ export function ItineraryMap({
     );
   }
 
+  // Check if we should skip rendering due to existing initialization
+  const shouldSkipRender = GLOBAL_MAP_REGISTRY.has(containerId);
+
+  console.log(`🗺️🎨 [${instanceId.current}] RENDER CHECK`, {
+    containerId,
+    shouldSkipRender,
+    existingElement: !!document.getElementById(containerId),
+    existingLeafletMaps: document.querySelectorAll('.leaflet-container').length,
+    registrySize: GLOBAL_MAP_REGISTRY.size,
+    phase: 'Pre-Render Check'
+  });
+
+  // Check for existing Leaflet instances before rendering
+  const existingMaps = document.querySelectorAll('.leaflet-container');
+  if (existingMaps.length > 0) {
+    console.warn(`🗺️⚠️ [${instanceId.current}] Found ${existingMaps.length} existing Leaflet maps:`);
+    existingMaps.forEach((map, i) => {
+      console.warn(`  Map ${i}: ID=${map.id}, Parent=${map.parentElement?.id}, InRegistry=${GLOBAL_MAP_REGISTRY.has(map.id)}`);
+    });
+  }
+
+  // If container is already initialized, skip rendering to prevent errors
+  if (shouldSkipRender) {
+    console.warn(`🗺️🚫 [${instanceId.current}] SKIPPING MAP RENDER - Container already initialized:`, containerId);
+    return (
+      <div className={cn("relative h-[400px] bg-background rounded-xl flex items-center justify-center border border-border", className)}>
+        <div className="text-center">
+          <p className="text-sm text-foreground">Map already initialized</p>
+          <p className="text-xs text-muted-foreground mt-1">Please refresh if map is not visible</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log(`🗺️✨ [${instanceId.current}] RENDERING MAP COMPONENT`, {
+    containerId,
+    phase: 'Final Render'
+  });
+
   return (
-    <div className={cn("relative h-[400px] rounded-lg overflow-hidden", className)}>
+    <div id={containerId} className={cn("relative h-[400px] rounded-lg overflow-hidden", className)}>
       <MapContainer
+        key={containerId}
         center={[center.lat, center.lng]}
         zoom={13}
         className="h-full w-full"
-        ref={setMapInstance}
+        ref={(instance) => {
+          console.log(`🗺️📍 [${instanceId.current}] MapContainer ref callback`, {
+            hasInstance: !!instance,
+            containerId: instance?.getContainer?.()?.id,
+            registryState: GLOBAL_MAP_REGISTRY.has(containerId)
+          });
+          setMapInstance(instance);
+        }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/positron/{z}/{x}/{y}{r}.png"
+          attribution={attribution}
+          url={tileUrl}
         />
         
         <MapUpdater 

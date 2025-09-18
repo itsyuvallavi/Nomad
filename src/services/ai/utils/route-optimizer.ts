@@ -3,7 +3,7 @@
  * Optimizes the order of activities to minimize travel distance and time
  */
 
-import { calculateDistance } from '@/services/api/locationiq';
+import { calculateDistance } from '@/services/api/openstreetmap';
 import { logger } from '@/lib/monitoring/logger';
 
 // Use 'API' as the log category for route optimization logs

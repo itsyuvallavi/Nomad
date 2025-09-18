@@ -6,7 +6,7 @@
 
 import { AIPoweredAnalyzer, ExtractedInfo, AnalysisResult } from './ai-powered-analyzer';
 import { generateConversationalItinerary } from '@/services/ai/utils/conversational-generator';
-import { enrichItineraryWithLocationIQ } from '@/services/ai/services/location-enrichment-locationiq';
+import { enrichItineraryWithOSM } from '@/services/ai/services/location-enrichment-osm';
 import { getWeatherForecast } from '@/services/api/weather';
 import { logger } from '@/lib/monitoring/logger';
 
@@ -80,13 +80,47 @@ export class AIConversationController {
         return this.handleModification(analysis);
       }
 
-      // Check if we have enough info to generate
-      if (analysis.readyToGenerate) {
+      // Check if user wants to proceed with generation
+      const messageText = message.toLowerCase();
+      const wantsToProceed = messageText.includes('default') ||
+                             messageText.includes('whatever') ||
+                             messageText.includes('reasonable') ||
+                             messageText.includes('skip') ||
+                             messageText.includes('go ahead') ||
+                             messageText.includes('make the itinerary') ||
+                             messageText.includes('generate') ||
+                             messageText.includes('create') ||
+                             messageText.includes('yes') && messageText.length < 20;
+
+      if (wantsToProceed && this.collectedData.destination) {
+        // User wants to proceed, generate itinerary
         return this.generateItinerary();
       }
 
-      // Ask for missing information
-      if (analysis.missingInfo.length > 0 && analysis.nextQuestion) {
+      // Check if we have enough info to generate
+      if (analysis.readyToGenerate || (this.collectedData.destination && this.collectedData.duration)) {
+        // If we have destination and duration, generate immediately
+        return this.generateItinerary();
+      }
+
+      // If we only have destination, ask for duration
+      if (this.collectedData.destination && !this.collectedData.duration) {
+        return {
+          type: ResponseType.QUESTION,
+          message: "How many days would you like to spend there?",
+          awaitingInput: 'duration',
+          canProceed: false,
+          conversationContext: this.getContext()
+        };
+      }
+
+      // Only ask for truly missing ESSENTIAL information
+      const essentialMissing = analysis.missingInfo.filter(item =>
+        item.toLowerCase().includes('destination') ||
+        item.toLowerCase().includes('duration')
+      );
+
+      if (essentialMissing.length > 0 && analysis.nextQuestion) {
         return {
           type: ResponseType.QUESTION,
           message: analysis.nextQuestion,
@@ -146,9 +180,20 @@ export class AIConversationController {
     try {
       logger.info('AI', 'Generating itinerary with collected data', this.collectedData);
 
+      // Validate we have minimum required data
+      if (!this.collectedData.destination) {
+        return {
+          type: ResponseType.QUESTION,
+          message: "Where would you like to travel?",
+          awaitingInput: 'destination',
+          canProceed: false,
+          conversationContext: this.getContext()
+        };
+      }
+
       // Set defaults for missing optional fields
       const tripData = {
-        destination: this.collectedData.destination!,
+        destination: this.collectedData.destination,
         duration: this.collectedData.duration || 3,
         startDate: this.collectedData.startDate || 'flexible',
         travelers: this.collectedData.travelers || { count: 1, type: 'solo' },
@@ -156,24 +201,23 @@ export class AIConversationController {
       };
 
       // Generate base itinerary using OpenAI
-      // Format the prompt to include all information
-      const prompt = `Generate a ${tripData.duration} day itinerary for ${tripData.destination} ${
+      // Format the prompt to include all information and constraints
+      let prompt = `Generate a ${tripData.duration} day itinerary for ${tripData.destination} ${
         tripData.startDate && tripData.startDate !== 'flexible' ? `starting ${tripData.startDate}` : 'with flexible dates'
       } for ${tripData.travelers.count} ${tripData.travelers.type} travelers`;
 
+
       const itinerary = await generateConversationalItinerary(prompt, '');
 
-      // Enrich with LocationIQ if available
-      const hasLocationIQ = !!process.env.LOCATIONIQ_API_KEY || !!process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY;
-      let enrichedItinerary = itinerary;
+      // Enrich with OpenStreetMap (always available - no API key needed!)
+      let enrichedItinerary: any = itinerary;
 
-      if (hasLocationIQ) {
-        try {
-          enrichedItinerary = await enrichItineraryWithLocationIQ(itinerary);
-          logger.info('AI', 'Itinerary enriched with LocationIQ');
-        } catch (error) {
-          logger.warn('AI', 'LocationIQ enrichment failed', error);
-        }
+      try {
+        // Cast to any to bypass type checking - the enrichment service handles missing fields
+        enrichedItinerary = await enrichItineraryWithOSM(itinerary as any);
+        logger.info('AI', 'Itinerary enriched with OpenStreetMap');
+      } catch (error) {
+        logger.warn('AI', 'OSM enrichment failed', error);
       }
 
       // Add weather data if available

@@ -7,27 +7,14 @@ import { EmptyState } from '@/components/common/EmptyState';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { motion, useInView } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MapPin, Map, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
+import { MapPin, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { searchPexelsImages, type PexelsImage } from '@/services/api/pexels';
 import { logger } from '@/lib/monitoring/logger';
-import dynamic from 'next/dynamic';
-import { Button } from '@/components/ui/button';
 import { getIconicImageSearch } from '@/lib/constants/city-landmarks';
-import { fadeInUp, staggerContainer, countAnimation } from '@/lib/utils/animations';
+import { fadeInUp, staggerContainer } from '@/lib/utils/animations';
 
-// Dynamically import map to avoid SSR issues
-const ItineraryMap = dynamic(
-  () => import('../map/ItineraryMap').then(mod => ({ default: mod.ItineraryMap })),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="h-[400px] bg-muted/50 rounded-lg flex items-center justify-center">
-        <Map className="h-8 w-8 text-muted-foreground animate-pulse" />
-      </div>
-    )
-  }
-);
+// Map component removed - using MapPanel from ItineraryPage instead
 
 interface ItineraryPanelProps {
   itinerary: GeneratePersonalizedItineraryOutput & {
@@ -48,10 +35,9 @@ interface ItineraryPanelProps {
   };
   onRefine?: (feedback: string) => void;
   isRefining?: boolean;
-  showMapToggle?: boolean;
 }
 
-export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, onRefine }: ItineraryPanelProps) {
+export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPanelProps) {
   // Show loading skeleton while refining
   if (isRefining) {
     return (
@@ -74,8 +60,6 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
     );
   }
   const [destinationImages, setDestinationImages] = useState<Record<string, PexelsImage[]>>({});
-  const [showMap, setShowMap] = useState(false);
-  const [selectedMapDay, setSelectedMapDay] = useState<number | undefined>(undefined);
   const [selectedDayInTimeline, setSelectedDayInTimeline] = useState(1);
   
   // Extract all activities for coworking section
@@ -275,17 +259,6 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
               <p className="text-xs text-muted-foreground">{tripDuration}</p>
             </div>
             <div className="flex gap-1.5 sm:gap-2">
-              {showMapToggle && (
-                <Button
-                  onClick={() => setShowMap(!showMap)}
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                >
-                  <Map className="h-3 w-3 mr-1" />
-                  {showMap ? 'Hide' : 'Map'}
-                </Button>
-              )}
               <ExportMenu itinerary={itinerary} className="self-start" />
             </div>
           </div>
@@ -412,61 +385,7 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
             </div>
           </div>
 
-          {/* Interactive Map View - Only show if map toggle is enabled */}
-          {showMapToggle && showMap && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mb-6"
-            >
-              <div className="rounded-xl border border-slate-700 overflow-hidden p-2">
-                <ItineraryMap
-                  itinerary={{
-                    ...itinerary,
-                    days: locations.length > 1 
-                      ? (daysByLocation[selectedLocation]?.days || itinerary.itinerary)
-                      : itinerary.itinerary
-                  }}
-                  selectedDay={selectedMapDay}
-                  onDaySelect={(day: number) => {
-                    setSelectedMapDay(day);
-                    // Scroll to the selected day in the itinerary
-                    const dayElement = document.getElementById(`day-${day}`);
-                    if (dayElement) {
-                      dayElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                  }}
-                  className="h-[400px] md:h-[500px]"
-                />
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant={selectedMapDay === undefined ? "default" : "outline"}
-                  onClick={() => setSelectedMapDay(undefined)}
-                  className="text-xs"
-                >
-                  All Days
-                </Button>
-                {(locations.length > 1 
-                  ? (daysByLocation[selectedLocation]?.days || itinerary.itinerary)
-                  : itinerary.itinerary
-                ).map((day) => (
-                  <Button
-                    key={`day-btn-${day.day}`}
-                    size="sm"
-                    variant={selectedMapDay === day.day ? "default" : "outline"}
-                    onClick={() => setSelectedMapDay(day.day)}
-                    className="text-xs"
-                  >
-                    Day {day.day}
-                  </Button>
-                ))}
-              </div>
-            </motion.div>
-          )}
+          {/* Map removed - now shown in MapPanel in ItineraryPage */}
         </motion.div>
       </div>
 
@@ -532,8 +451,6 @@ export function ItineraryPanel({ itinerary, showMapToggle = true, isRefining, on
               selectedDay={selectedDayInTimeline}
               onDaySelect={(day) => {
                 setSelectedDayInTimeline(day);
-                // Also update map day selection if needed
-                setSelectedMapDay(day);
               }}
               location={locations.length > 1 ? selectedLocation : undefined}
               dates={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map(d => d.date)}
