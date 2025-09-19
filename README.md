@@ -1,44 +1,216 @@
-cl# Firebase Studio
+# Nomad Navigator
 
-This is a NextJS starter in Firebase Studio.
+AI-powered travel planning application with real-world venues from OpenStreetMap.
 
-To get started, take a look at src/app/page.tsx.
+## 🚀 Features
 
-## Project Insights from "Layla"
+- **🗺️ Real Venues**: Every restaurant, hotel, and attraction is a real place from OpenStreetMap
+- **🤖 Smart AI**: Conversational interface that never assumes information - asks for what it needs
+- **📍 Zone-Based Planning**: Each day focuses on one neighborhood to minimize travel time
+- **💯 100% Enrichment**: Every activity includes real venue data with addresses and coordinates
+- **💾 Offline Support**: Save and access trips offline
+- **🔒 Privacy-First**: Firebase Auth for secure user data
 
-The following is a summary of a conversation with a travel planning AI named Layla, outlining the key components and architecture for building a similar application.
+## 🏗️ Tech Stack
 
-### Core Functionality
+- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS
+- **AI**: OpenAI GPT-4 for natural language processing
+- **POI Data**: OpenStreetMap/Overpass API (primary), LocationIQ (fallback)
+- **Backend**: Firebase (Auth, Firestore, Analytics)
+- **APIs**: OpenWeather, Pexels
+- **Deployment**: Firebase Hosting
 
-- **Travel Planning Assistant:** Provides inspiration, flight and hotel options, and itinerary suggestions.
-- **Natural Language Chat:** Users can modify trips, get recommendations, and ask for details through a conversational interface.
-- **Third-Party Bookings:** Directs users to third-party providers to complete bookings for flights, hotels, or activities. The app does not handle bookings or payments directly.
-- **Interactive UI:** The interface includes buttons for actions like booking, sharing, modifying trips, and downloading PDFs.
+## 📱 Example Output
 
-### High-Level Architecture
+When you ask for "3 days in Paris", the app generates:
 
-Building a travel assistant like this involves several key technological components:
+```
+Day 1: Central Paris
+- 🥐 Breakfast at Café de Flore (172 Boulevard Saint-Germain)
+- 🎨 Visit Louvre Museum (Rue de Rivoli, 75001)
+- 🍽️ Lunch at L'Ami Louis (32 Rue du Vertbois)
+- 🌳 Explore Luxembourg Gardens (6th arrondissement)
+- 🍷 Dinner at Le Comptoir du Relais (9 Carrefour de l'Odéon)
+```
 
-1.  **Natural Language Processing (NLP):** To understand and respond to user queries in a natural, human-like way.
-2.  **Dialog Management:** To maintain the context of the conversation, keeping track of what the user has asked for previously.
-3.  **Integration with Travel APIs:** To fetch real-time data for flights, hotels, activities, and attractions.
-4.  **Personalization Engine:** To tailor recommendations based on user preferences and previous interactions.
-5.  **User Interface (UI):** A combination of a chat interface for conversation and interactive "trip cards" or displays for visual information.
-6.  **Backend Services:** To manage user sessions, orchestrate calls to external APIs, and handle the core application logic.
+All venues are real places with accurate addresses from OpenStreetMap!
 
-### Application Flow
+## 🎯 Architecture
 
-The user experience will follow a specific flow inspired by the Layla app:
+### Simplified AI System (5 core files)
+```
+src/services/ai/
+├── ai-controller.ts       # Conversation management
+├── trip-generator.ts      # Itinerary generation
+├── prompts.ts            # AI templates
+├── schemas.ts            # TypeScript types
+└── services/
+    └── osm-poi-service.ts # OpenStreetMap integration
+```
 
-1.  **Initial Interaction:** The user is first presented with a simple chat interface.
-2.  **Conversational Information Gathering:** The AI will proactively ask clarifying questions to gather all the necessary details to plan a trip. This includes, but is not limited to:
-    *   Budget
-    *   Travel Dates & Flexibility
-    *   Departure & Arrival Cities
-    *   One-way or Round-trip
-    *   Travel style (e.g., business, pleasure, backpacking)
-    *   Preferred activities and interests
-3.  **Split-View Results:** Once the AI has sufficient information, the interface will transform into a three-column layout:
-    *   **Chat Column:** The chat interface remains visible, allowing the user to make continuous adjustments and edits to their itinerary.
-    *   **Itinerary Column:** A detailed, day-by-day itinerary is displayed.
-    *   **Map Column:** An interactive map visualizes the travel route, including pins for hotels, restaurants, and points of interest.
+### API Endpoints
+- `POST /api/ai` - Conversational itinerary generation
+- `POST /api/feedback` - User feedback
+
+## 🚦 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- OpenAI API key
+- Firebase project (for auth)
+
+### Environment Variables
+
+Create a `.env.local` file:
+
+```bash
+# Required
+OPENAI_API_KEY=your_openai_api_key
+
+# Firebase (Required for auth)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
+
+# Optional
+OPENWEATHERMAP=your_weather_api_key
+LOCATIONIQ_API_KEY=your_locationiq_api_key
+```
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run production build
+npm start
+```
+
+Visit `http://localhost:9002` to see the app.
+
+## 🗣️ Conversation Flow
+
+The AI uses a "NO DEFAULTS" philosophy - it never assumes information:
+
+1. User: "Plan a trip to London"
+2. AI: "When are you planning to visit London?"
+3. User: "Next month"
+4. AI: "How many days will you be staying?"
+5. User: "3 days"
+6. AI: *Generates itinerary with real venues*
+
+## 🗺️ OpenStreetMap Integration
+
+The app fetches real POI data using the Overpass API:
+
+- **Restaurants**: Real cafés, restaurants with addresses
+- **Hotels**: Actual hotels with contact info
+- **Attractions**: Museums, parks, landmarks with coordinates
+- **Shopping**: Markets, malls, stores
+
+Example query for restaurants in Paris:
+```javascript
+const pois = await osmPOIService.findPOIsByActivity('dinner', {
+  name: 'Central Paris',
+  center: { lat: 48.8566, lng: 2.3522 },
+  radiusKm: 2
+});
+```
+
+## 📂 Project Structure
+
+```
+src/
+├── app/                  # Next.js App Router
+│   ├── api/             # API routes
+│   └── (pages)/         # App pages
+├── components/          # React components
+├── services/           # Business logic
+│   ├── ai/            # AI services
+│   ├── api/           # External APIs
+│   ├── firebase/      # Firebase services
+│   └── trips/         # Trip management
+├── pages/              # Page components
+├── lib/                # Utilities
+└── infrastructure/     # Auth, contexts
+```
+
+## 🧪 Testing
+
+```bash
+# Run AI tests
+npm run test:ai
+
+# Test OSM integration
+npx tsx tests/ai/test-osm-integration.ts
+
+# Test API endpoint
+npx tsx tests/test-new-api-endpoint.ts
+```
+
+## 🚀 Deployment
+
+The app is configured for Firebase Hosting:
+
+```bash
+# Build and deploy
+npm run build
+firebase deploy
+```
+
+## 📝 Key Features Explained
+
+### Zone-Based Planning
+Each day focuses on one neighborhood to minimize travel:
+- Day 1: Central Paris (Louvre, Palais Royal)
+- Day 2: Latin Quarter (Notre-Dame, Sorbonne)
+- Day 3: Montmartre (Sacré-Cœur, Moulin Rouge)
+
+### Real Venue Enrichment
+Every activity includes:
+- Actual venue name
+- Street address
+- GPS coordinates
+- Website (when available)
+- Opening hours (when available)
+
+### Conversation State Management
+The AI maintains context across messages:
+- Remembers destination, dates, preferences
+- Allows modifications to existing itineraries
+- Supports follow-up questions
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🙏 Acknowledgments
+
+- OpenStreetMap contributors for POI data
+- OpenAI for GPT-4 API
+- Firebase for backend infrastructure
+- Next.js team for the framework
+
+---
+
+Built with ❤️ for digital nomads and travel enthusiasts

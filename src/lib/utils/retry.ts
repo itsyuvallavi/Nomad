@@ -134,7 +134,7 @@ export async function withRetry<T>(
     }
   }
   
-  throw lastError || new Error('Retry failed');
+  throw lastError || new Error('Retry failed without a specific error.');
 }
 
 /**

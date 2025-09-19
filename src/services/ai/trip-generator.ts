@@ -8,7 +8,7 @@ import OpenAI from 'openai';
 import { logger } from '@/lib/monitoring/logger';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { locationEnrichmentService } from '@/services/ai/services/location-enrichment-locationiq';
-import { estimateTravelCosts } from '@/services/ai/utils/openai-travel-costs';
+import { osmPOIService, type QueryZone } from '@/services/ai/services/osm-poi-service';
 import { PROMPTS } from './prompts';
 
 // Initialize OpenAI client
@@ -315,13 +315,178 @@ export class TripGenerator {
    */
   private async enrichItinerary(itinerary: GeneratePersonalizedItineraryOutput): Promise<GeneratePersonalizedItineraryOutput> {
     try {
-      // Use existing location enrichment service
-      const enriched = await locationEnrichmentService.enrichItinerary(itinerary);
-      return enriched;
+      // Use OSM as primary source for all POI data
+      const osmEnriched = await this.enrichWithOSMData(itinerary);
+
+      // Only use LocationIQ as fallback for activities without POI data
+      const fullyEnriched = await this.enrichWithLocationIQFallback(osmEnriched);
+
+      return fullyEnriched;
     } catch (error) {
       logger.warn('AI', 'Location enrichment failed, using base itinerary', error);
       return itinerary;
     }
+  }
+
+  /**
+   * Uses LocationIQ only as fallback for activities without OSM data
+   */
+  private async enrichWithLocationIQFallback(
+    itinerary: GeneratePersonalizedItineraryOutput
+  ): Promise<GeneratePersonalizedItineraryOutput> {
+    // Only process if LocationIQ is configured
+    if (!process.env.LOCATIONIQ_API_KEY) {
+      logger.info('AI', 'LocationIQ not configured, skipping fallback enrichment');
+      return itinerary;
+    }
+
+    const needsFallback = itinerary.itinerary?.some(day =>
+      day.activities?.some(activity => !activity.venue_name && !activity.coordinates)
+    );
+
+    if (!needsFallback) {
+      logger.info('AI', 'All activities have POI data, skipping LocationIQ');
+      return itinerary;
+    }
+
+    logger.info('AI', 'Using LocationIQ as fallback for missing POIs');
+
+    try {
+      // Only enrich activities that don't have OSM data
+      const enriched = await locationEnrichmentService.enrichItineraryWithLocationIQ(itinerary, {
+        useLocationIQ: true,
+        optimizeRoutes: false, // Already optimized
+        onlyMissing: true // New option to only process missing venues
+      });
+      return enriched;
+    } catch (error) {
+      logger.warn('AI', 'LocationIQ fallback failed', error);
+      return itinerary;
+    }
+  }
+
+  /**
+   * Enriches itinerary with OSM POI data
+   */
+  private async enrichWithOSMData(
+    itinerary: GeneratePersonalizedItineraryOutput
+  ): Promise<GeneratePersonalizedItineraryOutput> {
+    if (!itinerary.itinerary) return itinerary;
+
+    const cityLower = itinerary.destination.toLowerCase();
+    const zones = CITY_ZONES[cityLower] || [];
+
+    logger.info('AI', 'Enriching with OSM data', {
+      destination: itinerary.destination,
+      days: itinerary.itinerary.length
+    });
+
+    const enrichedItinerary = { ...itinerary };
+    enrichedItinerary.itinerary = await Promise.all(
+      itinerary.itinerary.map(async (day) => {
+        if (!day.activities || day.activities.length === 0) return day;
+
+        // Find the zone for this day based on activities
+        const dayZone = this.findDayZone(day, zones);
+        const queryZone: QueryZone = dayZone
+          ? {
+              name: dayZone.name,
+              center: dayZone.coordinates,
+              radiusKm: 2
+            }
+          : {
+              name: itinerary.destination,
+              center: zones[0]?.coordinates || { lat: 0, lng: 0 },
+              radiusKm: 5
+            };
+
+        // Enrich each activity with OSM POI
+        const enrichedActivities = await Promise.all(
+          day.activities.map(async (activity) => {
+            try {
+              // Try to find matching POI
+              const poi = await osmPOIService.matchPOIToActivity(
+                activity.description,
+                queryZone
+              );
+
+              if (poi) {
+                logger.info('AI', 'Found POI for activity', {
+                  activity: activity.description.substring(0, 50),
+                  poi: poi.name
+                });
+
+                return {
+                  ...activity,
+                  venue_name: poi.name,
+                  address: poi.address,
+                  coordinates: poi.coordinates,
+                  osm_id: poi.id,
+                  website: poi.website,
+                  phone: poi.phone,
+                  opening_hours: poi.openingHours
+                };
+              }
+            } catch (error) {
+              logger.warn('AI', 'Failed to find POI for activity', {
+                activity: activity.description,
+                error
+              });
+            }
+
+            return activity;
+          })
+        );
+
+        return {
+          ...day,
+          activities: enrichedActivities
+        };
+      })
+    );
+
+    const poiCount = enrichedItinerary.itinerary
+      .flatMap(d => d.activities || [])
+      .filter(a => a.osm_id).length;
+
+    logger.info('AI', 'OSM enrichment complete', {
+      totalActivities: enrichedItinerary.itinerary.flatMap(d => d.activities || []).length,
+      enrichedWithPOI: poiCount
+    });
+
+    return enrichedItinerary;
+  }
+
+  /**
+   * Find which zone a day's activities are in
+   */
+  private findDayZone(day: any, zones: Zone[]): Zone | null {
+    if (!day.activities || zones.length === 0) return null;
+
+    // Look for zone mentions in activities
+    for (const zone of zones) {
+      const zoneKeywords = [
+        zone.name.toLowerCase(),
+        ...zone.neighborhoods.map(n => n.toLowerCase())
+      ];
+
+      for (const activity of day.activities) {
+        const description = (activity.description || '').toLowerCase();
+        if (zoneKeywords.some(keyword => description.includes(keyword))) {
+          return zone;
+        }
+      }
+    }
+
+    // Check day theme
+    const theme = (day.theme || '').toLowerCase();
+    for (const zone of zones) {
+      if (theme.includes(zone.name.toLowerCase())) {
+        return zone;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -332,13 +497,13 @@ export class TripGenerator {
     params: TripParams
   ): Promise<GeneratePersonalizedItineraryOutput> {
     try {
-      const costs = await estimateTravelCosts({
-        destination: params.destination,
-        origin: 'New York', // Default origin for estimates
-        duration: params.duration,
-        travelers: params.travelers?.adults || 1,
-        budgetLevel: params.preferences?.budget || 'mid'
-      });
+      // Simple cost estimation based on destination and duration
+      const costs = await this.estimateTripCosts(
+        params.destination,
+        params.duration,
+        params.travelers?.adults || 1,
+        params.preferences?.budget || 'mid'
+      );
 
       return {
         ...itinerary,
@@ -347,6 +512,59 @@ export class TripGenerator {
     } catch (error) {
       logger.warn('AI', 'Cost estimation failed', error);
       return itinerary;
+    }
+  }
+
+  /**
+   * Simple cost estimation using GPT
+   */
+  private async estimateTripCosts(
+    destination: string,
+    duration: number,
+    travelers: number,
+    budgetLevel: 'budget' | 'mid' | 'luxury'
+  ): Promise<any> {
+    const prompt = `Estimate realistic travel costs for:
+    - Destination: ${destination}
+    - Duration: ${duration} days
+    - Travelers: ${travelers}
+    - Budget level: ${budgetLevel}
+
+    Provide a JSON object with total estimated costs including flights, hotels, and daily expenses:
+    {
+      "flights": <total flight cost for all travelers>,
+      "hotels": <total hotel cost for duration>,
+      "dailyExpenses": <food, transport, activities total>,
+      "total": <sum of all costs>
+    }
+
+    Use current 2024-2025 market prices. Be realistic.`;
+
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'You are a travel cost estimator. Provide realistic prices.' },
+          { role: 'user', content: prompt }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.3,
+        max_tokens: 200
+      });
+
+      const costs = JSON.parse(response.choices[0]?.message?.content || '{}');
+      logger.info('AI', 'Cost estimate generated', costs);
+      return costs;
+    } catch (error) {
+      logger.error('AI', 'Failed to estimate costs', error);
+      // Return basic fallback estimate
+      const perDay = budgetLevel === 'budget' ? 100 : budgetLevel === 'mid' ? 200 : 400;
+      return {
+        flights: 800 * travelers,
+        hotels: (perDay * 0.5) * duration,
+        dailyExpenses: (perDay * 0.5) * duration * travelers,
+        total: (800 * travelers) + (perDay * duration * travelers)
+      };
     }
   }
 

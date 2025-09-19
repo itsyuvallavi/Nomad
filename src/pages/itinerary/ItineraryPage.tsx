@@ -234,7 +234,7 @@ export default function ChatDisplayV2({
             // Call the conversational API endpoint
             const response: ConversationalItineraryOutput = await retryApiCall(
                 async () => {
-                    const res = await fetch('/api/ai/generate-itinerary-v2', {
+                    const res = await fetch('/api/ai', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
