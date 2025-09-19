@@ -344,7 +344,7 @@ export function optimizeItinerary(city: string, days: DayPlan[]): DayPlan[] {
       zones: zones as string[]
     });
 
-    logger.info('ZONE_PLANNER', `Day ${day.day} optimized`, {
+    logger.info('AI', `Day ${day.day} optimized`, {
       originalActivities: day.activities.length,
       totalDistance: `${totalDistance.toFixed(2)} km`,
       zonesVisited: zones.length,

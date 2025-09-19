@@ -277,10 +277,10 @@ export function groupActivitiesByProximity(
 /**
  * Suggest optimal day assignment for activities based on location
  */
-export function suggestDayAssignment(
+export async function suggestDayAssignment(
   activities: ActivityWithLocation[],
   numDays: number
-): Map<number, ActivityWithLocation[]> {
+): Promise<Map<number, ActivityWithLocation[]>> {
   const dayAssignments = new Map<number, ActivityWithLocation[]>();
 
   // Group by proximity
@@ -294,10 +294,10 @@ export function suggestDayAssignment(
   });
 
   // Optimize each day's route
-  dayAssignments.forEach((dayActivities, day) => {
-    const optimized = optimizeRoute(dayActivities);
+  for (const [day, dayActivities] of dayAssignments) {
+    const optimized = await optimizeRoute(dayActivities);
     dayAssignments.set(day, optimized);
-  });
+  }
 
   return dayAssignments;
 }

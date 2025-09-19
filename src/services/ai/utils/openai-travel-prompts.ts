@@ -169,10 +169,10 @@ function getVenueExamples(city: string): string {
   const cityLower = city.toLowerCase();
 
   // Try to get venues from knowledge base first
-  const restaurants = getRandomVenues(city, 'restaurants', 3);
-  const cafes = getRandomVenues(city, 'cafes', 2);
-  const attractions = getRandomVenues(city, 'attractions', 3);
-  const museums = getRandomVenues(city, 'museums', 2);
+  const restaurants = getRandomVenues('restaurants', 3);
+  const cafes = getRandomVenues('cafes', 2);
+  const attractions = getRandomVenues('attractions', 3);
+  const museums = getRandomVenues('museums', 2);
 
   if (restaurants.length > 0) {
     const examples = [

@@ -32,7 +32,7 @@ export function useMotionConfig() {
         initial: variants.initial || {},
         animate: variants.animate || {},
         exit: variants.exit || {},
-        transition: { duration: 0 }
+        transition: { duration: 0 } as any
       };
     }
     return variants;
@@ -67,19 +67,19 @@ export const motionSafeVariants = {
   fadeIn: (prefersReducedMotion: boolean): Variants => ({
     initial: prefersReducedMotion ? {} : { opacity: 0 },
     animate: { opacity: 1 },
-    transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }
+    transition: prefersReducedMotion ? ({ duration: 0 } as any) : ({ duration: 0.3 } as any)
   }),
 
   slideIn: (prefersReducedMotion: boolean): Variants => ({
     initial: prefersReducedMotion ? {} : { x: -20, opacity: 0 },
     animate: { x: 0, opacity: 1 },
-    transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }
+    transition: prefersReducedMotion ? ({ duration: 0 } as any) : ({ duration: 0.3 } as any)
   }),
 
   scaleIn: (prefersReducedMotion: boolean): Variants => ({
     initial: prefersReducedMotion ? {} : { scale: 0.95, opacity: 0 },
     animate: { scale: 1, opacity: 1 },
-    transition: prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }
+    transition: prefersReducedMotion ? ({ duration: 0 } as any) : ({ duration: 0.3 } as any)
   }),
 
   stagger: (prefersReducedMotion: boolean): Variants => ({

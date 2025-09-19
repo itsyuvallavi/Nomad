@@ -102,7 +102,7 @@ const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           return (
             <motion.button
               key={item.id}
-              ref={(el) => (itemRefs.current[item.id] = el)}
+              ref={(el) => {itemRefs.current[item.id] = el}}
               onClick={handlePress}
               disabled={item.disabled}
               className={cn(

@@ -354,7 +354,7 @@ export async function findRestaurants(
   // Additional filtering by cuisine if specified
   if (options.cuisine) {
     return pois.filter(poi =>
-      poi.tags.cuisine?.toLowerCase().includes(options.cuisine.toLowerCase())
+      poi.tags.cuisine?.toLowerCase().includes(options.cuisine!.toLowerCase())
     );
   }
 

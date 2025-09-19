@@ -32,14 +32,14 @@ export function getLocationIQTileUrl(
   style: MapStyle = 'streets'
 ): string {
   if (!apiKey) {
-    logger.error(LOG_CATEGORY, 'LocationIQ API key is missing');
+    logger.error('API', 'LocationIQ API key is missing');
     throw new Error('LocationIQ API key is required');
   }
 
   // Format: https://{s}-tiles.locationiq.com/v3/{style}/r/{z}/{x}/{y}.png?key={key}
   const tileUrl = `${LOCATIONIQ_TILE_BASE_URL}/${style}/r/{z}/{x}/{y}.png?key=${apiKey}`;
 
-  logger.info(LOG_CATEGORY, `LocationIQ tile URL configured for style: ${style}`);
+  logger.info('API', `LocationIQ tile URL configured for style: ${style}`);
 
   return tileUrl;
 }

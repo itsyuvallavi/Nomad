@@ -83,21 +83,21 @@ async function showRecentLogs() {
 
 async function showStats() {
   const logger = getAILogger();
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date();
   const stats = await logger.getDailyStats(today);
   
-  console.log(`\n${colors.bright}Daily Statistics (${today}):${colors.reset}\n`);
+  console.log(`\n${colors.bright}Daily Statistics (${today.toISOString().split('T')[0]}):${colors.reset}\n`);
   console.log(`  Total Requests: ${stats.totalRequests}`);
-  console.log(`  Successful: ${stats.successfulResponses}`);
-  console.log(`  Errors: ${stats.errors}`);
-  console.log(`  Success Rate: ${stats.successRate}`);
-  console.log(`  Avg Response Time: ${stats.avgResponseTime}`);
+  console.log(`  Successful: ${stats.totalRequests - stats.totalErrors}`);
+  console.log(`  Errors: ${stats.totalErrors}`);
+  console.log(`  Success Rate: ${stats.totalRequests > 0 ? ((stats.totalRequests - stats.totalErrors) / stats.totalRequests * 100).toFixed(1) : 0}%`);
+  console.log(`  Avg Response Time: ${stats.averageDuration}ms`);
 }
 
 async function showErrors() {
   const logger = getAILogger();
   const logs = await logger.getRecentLogs(100);
-  const errors = logs.filter(l => l.type === 'error');
+  const errors = logs.filter((l: any) => l.type === 'error');
   
   if (errors.length === 0) {
     console.log('No errors found in recent logs');

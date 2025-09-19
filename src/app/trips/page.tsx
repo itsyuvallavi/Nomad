@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Timestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/infrastructure/contexts/AuthContext';
@@ -84,8 +85,16 @@ export default function TripsPage() {
           ...trip,
           createdAt: trip.createdAt?.toDate() || new Date(),
           updatedAt: trip.updatedAt?.toDate() || new Date(),
-          startDate: trip.startDate ? new Date(trip.startDate) : undefined,
-          endDate: trip.endDate ? new Date(trip.endDate) : undefined
+          startDate: trip.startDate ? (
+            trip.startDate instanceof Timestamp
+              ? trip.startDate.toDate()
+              : new Date(trip.startDate as string | Date)
+          ) : undefined,
+          endDate: trip.endDate ? (
+            trip.endDate instanceof Timestamp
+              ? trip.endDate.toDate()
+              : new Date(trip.endDate as string | Date)
+          ) : undefined
         }));
         
         setTrips(convertedTrips);
@@ -405,10 +414,15 @@ export default function TripsPage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                          {trip.startDate && trip.endDate && !isNaN(trip.startDate.getTime()) && !isNaN(trip.endDate.getTime()) && (
+                          {trip.startDate && trip.endDate && (
+                            trip.startDate instanceof Date &&
+                            trip.endDate instanceof Date &&
+                            !isNaN(trip.startDate.getTime()) &&
+                            !isNaN(trip.endDate.getTime())
+                          ) && (
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
-                              {format(trip.startDate, 'MMM d, yyyy')} - {format(trip.endDate, 'MMM d, yyyy')}
+                              {format(trip.startDate as Date, 'MMM d, yyyy')} - {format(trip.endDate as Date, 'MMM d, yyyy')}
                             </div>
                           )}
                           <div className="flex items-center gap-1">

@@ -6,13 +6,13 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useMotion } from '@/infrastructure/providers/motion';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
-import type { FormValues } from '@/pages/home/components/TripPlanningForm';
+import type { FormValues } from '@/page-components/home/components/TripPlanningForm';
 import { Header } from '@/components/navigation/Header';
 import { tripsService } from '@/services/trips/trips-service';
 import { useAuth } from '@/infrastructure/contexts/AuthContext';
 
 // Lazy load heavy components
-const StartItinerary = dynamic(() => import('@/pages/home/HomePage'), {
+const StartItinerary = dynamic(() => import('@/page-components/home/HomePage'), {
   loading: () => (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -20,7 +20,7 @@ const StartItinerary = dynamic(() => import('@/pages/home/HomePage'), {
   ),
 });
 
-const ChatDisplay = dynamic(() => import('@/pages/itinerary/ItineraryPage'), {
+const ChatDisplay = dynamic(() => import('@/page-components/itinerary/ItineraryPage'), {
   loading: () => (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">

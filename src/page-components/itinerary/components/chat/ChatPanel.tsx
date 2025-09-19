@@ -67,7 +67,7 @@ export function ChatPanel({
               <p className="text-xs text-muted-foreground">AI Assistant</p>
               {conversationState && (
                 <Badge variant="outline" className="text-xs px-1.5 py-0">
-                  {conversationState.metadata.messageCount} messages
+                  {conversationState.metadata?.messageCount || 0} messages
                 </Badge>
               )}
             </div>
