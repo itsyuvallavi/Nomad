@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { EventCard } from './activity-card';
+import { EventCard } from './Activity-card';
 import { z } from 'genkit';
 import { ActivitySchema } from '@/services/ai/schemas';
 

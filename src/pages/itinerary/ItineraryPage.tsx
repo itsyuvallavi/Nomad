@@ -5,20 +5,23 @@ import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useSwipeGestures } from '@/hooks/use-swipe-gestures';
 import { Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    generatePersonalizedItineraryV2,
-    type ConversationalItineraryOutput
-} from '@/services/ai/flows/generate-personalized-itinerary-v2';
-import { refineItineraryBasedOnFeedback } from '@/services/ai/flows/refine-itinerary-based-on-feedback';
+// Type imports only - no server-side code
+type ConversationalItineraryOutput = {
+    type: 'question' | 'confirmation' | 'itinerary' | 'error';
+    message: string;
+    awaitingInput?: string;
+    suggestedOptions?: string[];
+    itinerary?: any;
+    requiresGeneration?: boolean;
+    conversationContext?: string;
+};
 import type { FormValues } from '@/pages/home/components/TripPlanningForm';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
-import { ArrowLeft, MessageSquare, Map as MapIcon, Layers } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { RecentSearch, ChatState } from '@/app/page';
 import { ChatPanel } from './components/chat/ChatPanel';
 import { ItineraryPanel } from './components/itinerary/ItineraryDisplay';
-import { MapPanel } from './components/map/MapView';
-import { MobileMapModal } from './components/map/MobileMapModal';
 import { cn } from '@/lib/helpers/general';
 import { ModernLoadingPanel } from './components/chat/LoadingProgress';
 import { ErrorDialog } from '@/components/ui/error-dialog';
@@ -75,8 +78,6 @@ export default function ChatDisplayV2({
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [mobileActiveTab, setMobileActiveTab] = useState<'chat' | 'itinerary'>('chat');
-    const [showMapPanel, setShowMapPanel] = useState(true);
-    const [showMobileMapModal, setShowMobileMapModal] = useState(false);
     const [showShortcuts, setShowShortcuts] = useState(false);
     const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
         stage: 'understanding',
@@ -230,15 +231,29 @@ export default function ChatDisplayV2({
         }
 
         try {
-            // Call the new conversational API
+            // Call the conversational API endpoint
             const response: ConversationalItineraryOutput = await retryApiCall(
-                () => generatePersonalizedItineraryV2({
-                    prompt: message,
-                    attachedFile: initialPrompt.fileDataUrl,
-                    conversationHistory: conversationContext,
-                    sessionId: sessionId
-                }),
-                'generatePersonalizedItineraryV2',
+                async () => {
+                    const res = await fetch('/api/ai/generate-itinerary-v2', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: message,
+                            attachedFile: initialPrompt.fileDataUrl,
+                            conversationContext: conversationContext,
+                            sessionId: sessionId
+                        })
+                    });
+
+                    if (!res.ok) {
+                        const error = await res.json();
+                        throw new Error(error.error || 'Failed to generate itinerary');
+                    }
+
+                    const result = await res.json();
+                    return result.data;
+                },
+                'generateItineraryV2API',
                 {
                     maxAttempts: 2,
                     onRetry: (attempt) => {
@@ -395,46 +410,12 @@ export default function ChatDisplayV2({
         await handleUserMessage(message);
     };
 
-    const _handleRefineItinerary = async (feedback: string) => {
-        if (!currentItinerary || isGenerating) return;
-
-        setIsGenerating(true);
-        setMessages(prev => [...prev,
-            { role: 'user', content: feedback },
-            { role: 'assistant', content: "I'll update your itinerary based on your feedback..." }
-        ]);
-
-        try {
-            const refinedItinerary = await refineItineraryBasedOnFeedback({
-                originalItinerary: currentItinerary || {} as any,
-                userFeedback: feedback
-            });
-
-            setCurrentItinerary(refinedItinerary);
-            setMessages(prev => [...prev, {
-                role: 'assistant',
-                content: "✨ I've updated your itinerary based on your feedback!"
-            }]);
-
-            saveChatStateToStorage(true, refinedItinerary);
-
-            if (window.innerWidth < 768) {
-                setMobileActiveTab('itinerary');
-            }
-        } catch (error: any) {
-            console.error('Error refining itinerary:', error);
-            setMessages(prev => [...prev, {
-                role: 'assistant',
-                content: "I couldn't update the itinerary. Please try again."
-            }]);
-        } finally {
-            setIsGenerating(false);
-        }
-    };
+    // Note: Refinement is now handled through the conversational flow
+    // The _handleRefineItinerary function was deprecated in favor of
+    // sending feedback through the main chat interface
 
     // Keyboard shortcuts
     useKeyboardShortcuts([
-        { key: 'm', action: () => setShowMapPanel(prev => !prev) },
         { key: 'i', action: () => window.innerWidth < 768 && setMobileActiveTab('itinerary') },
         { key: 'c', action: () => window.innerWidth < 768 && setMobileActiveTab('chat') },
         { key: '?', action: () => setShowShortcuts(prev => !prev) },
@@ -478,19 +459,8 @@ export default function ChatDisplayV2({
                     )}
                 </div>
 
-                {/* Desktop Map Toggle */}
+                {/* Desktop Shortcuts Button */}
                 <div className="hidden md:flex gap-2">
-                    {currentItinerary && (
-                        <Button
-                            variant={showMapPanel ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setShowMapPanel(prev => !prev)}
-                            className="gap-2"
-                        >
-                            <MapIcon className="w-4 h-4" />
-                            Map
-                        </Button>
-                    )}
                     <Button
                         variant="ghost"
                         size="sm"
@@ -554,10 +524,7 @@ export default function ChatDisplayV2({
                 {/* Desktop View */}
                 <div className="hidden md:flex w-full gap-4 p-4">
                     {/* Chat Panel */}
-                    <div className={cn(
-                        "transition-all duration-300",
-                        showMapPanel && currentItinerary ? "w-1/3" : "w-1/2"
-                    )}>
+                    <div className="w-1/2">
                         <ChatPanel
                             messages={messages}
                             inputValue={userInput}
@@ -575,10 +542,7 @@ export default function ChatDisplayV2({
 
                     {/* Itinerary Panel */}
                     {currentItinerary ? (
-                        <div className={cn(
-                            "transition-all duration-300",
-                            showMapPanel ? "w-1/3" : "w-1/2"
-                        )}>
+                        <div className="w-1/2">
                             <ItineraryPanel
                                 itinerary={currentItinerary}
                             />
@@ -591,23 +555,9 @@ export default function ChatDisplayV2({
                         </div>
                     )}
 
-                    {/* Map Panel */}
-                    {showMapPanel && currentItinerary && (
-                        <div className="w-1/3">
-                            <MapPanel itinerary={currentItinerary} />
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* Mobile Map Modal */}
-            {showMobileMapModal && currentItinerary && (
-                <MobileMapModal
-                    isOpen={showMobileMapModal}
-                    itinerary={currentItinerary}
-                    onClose={() => setShowMobileMapModal(false)}
-                />
-            )}
 
             {/* Error Dialog */}
             <ErrorDialog
@@ -628,7 +578,6 @@ export default function ChatDisplayV2({
                     >
                         <h3 className="font-semibold mb-2">Keyboard Shortcuts</h3>
                         <div className="space-y-1 text-sm">
-                            <div><kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">M</kbd> Toggle Map</div>
                             <div><kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">I</kbd> Show Itinerary</div>
                             <div><kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">C</kbd> Show Chat</div>
                             <div><kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">?</kbd> Toggle Help</div>

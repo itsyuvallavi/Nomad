@@ -239,7 +239,7 @@ class ProductionLogger {
 
     try {
       // Dynamic import to avoid server-side issues
-      const { logCustomEvent } = await import('@/lib/firebase-analytics');
+      const { logCustomEvent } = await import('@/services/firebase/analytics');
       
       logs.forEach(log => {
         if ('action' in log) {
