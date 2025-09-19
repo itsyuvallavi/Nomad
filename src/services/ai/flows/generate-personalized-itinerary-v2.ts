@@ -3,8 +3,6 @@
  * True conversational flow - NO DEFAULTS EVER
  */
 
-'use server';
-
 import { z } from 'genkit';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { logger } from '@/lib/monitoring/logger';
