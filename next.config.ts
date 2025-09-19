@@ -7,7 +7,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // Removed 'output: export' to support API routes and SSR
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,6 +25,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', 'react-icons', '@radix-ui/*'],
     optimizeCss: true, // Enable CSS optimization
     scrollRestoration: true, // Better scroll restoration
+    // Allow cross-origin requests from Firebase Studio dev environment
+    allowedDevOrigins: ["*.cloudworkstations.dev"],
   },
   
   // Compiler optimizations
