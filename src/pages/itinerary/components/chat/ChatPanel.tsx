@@ -3,17 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { EmptyState } from '@/components/common/EmptyState';
 import { AnimatedLogo } from '@/components/common/AnimatedLogo';
 import { Badge } from '@/components/ui/badge';
-import { ConversationState, DialogResponse } from '@/services/ai/flows/generate-dialog-response';
-import { ClassificationResult, ParseResult } from '@/services/ai/utils/hybrid-parser';
+// NO OLD AI IMPORTS - Using only new simplified AI system
 
-// Enhanced message interface with metadata from Phase 3
+// Enhanced message interface with metadata
 interface EnhancedMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
   metadata?: {
-    classification?: ClassificationResult;
-    parseResult?: ParseResult;
     confidence?: number;
     responseType?: string;
     processingTime?: number;
@@ -35,8 +32,8 @@ interface ChatPanelProps {
   onKeyPress: (e: React.KeyboardEvent) => void;
   isGenerating: boolean;
   onSettings?: () => void;
-  // Phase 3 enhancements
-  conversationState?: ConversationState;
+  // Conversation enhancements
+  conversationState?: string; // Simple string state instead of complex type
   showMetadata?: boolean;
   onQuickAction?: (action: string, data?: any) => void;
   suggestions?: string[];
@@ -65,11 +62,6 @@ export function ChatPanel({
             <h2 className="text-sm sm:text-base text-foreground font-medium">Nomad Navigator</h2>
             <div className="flex items-center gap-2">
               <p className="text-xs text-muted-foreground">AI Assistant</p>
-              {conversationState && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0">
-                  {conversationState.metadata.messageCount} messages
-                </Badge>
-              )}
             </div>
           </div>
         </div>
@@ -254,23 +246,7 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Conversation Context Indicator */}
-      {conversationState && conversationState.context.destinations.length > 0 && (
-        <div className="px-6 py-2 border-t border-border bg-muted/20">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <CheckCircle size={12} className="text-green-600" />
-            <span>
-              Planning: {conversationState.context.destinations.join(', ')}
-              {conversationState.context.origin && ` from ${conversationState.context.origin}`}
-            </span>
-            {conversationState.currentItinerary && (
-              <Badge variant="secondary" className="text-xs px-1.5 py-0 ml-2">
-                {conversationState.currentItinerary.totalDays} days
-              </Badge>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Conversation Context Indicator - simplified for new AI system */}
 
       {/* Input Area - Mobile optimized */}
       <div className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3 md:pt-4 border-t border-border">

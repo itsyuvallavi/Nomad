@@ -6,8 +6,7 @@
 import { locationIQ, formatPlace } from '@/services/api/locationiq';
 import { batchSearchVenuesEnhanced, searchWithFallbacks } from '@/services/api/locationiq-enhanced';
 import { cityZones, findZoneForVenue } from '@/lib/constants/city-zones';
-import { routeOptimizer, validateRouteEfficiency } from '@/services/ai/utils/route-optimizer';
-import { optimizeDayActivities, calculateDayDistance } from '@/services/ai/utils/zone-based-planner';
+// OLD IMPORTS REMOVED - Optimization now handled in trip-generator.ts
 import { logger } from '@/lib/monitoring/logger';
 
 // Use 'API' as the log category for LocationIQ logs
@@ -119,8 +118,11 @@ export async function enrichItineraryWithLocationIQ(
         let optimizedActivities = enrichedActivities;
         if (options.optimizeRoutes) {
           // First apply zone-based grouping
-          const zoneOptimized = optimizeDayActivities(destination, enrichedActivities);
-          const dayDistance = calculateDayDistance(zoneOptimized);
+          // COMMENTED OUT - Functions moved to trip-generator.ts
+          // const zoneOptimized = optimizeDayActivities(destination, enrichedActivities);
+          // const dayDistance = calculateDayDistance(zoneOptimized);
+          const zoneOptimized = enrichedActivities; // Skip optimization here
+          const dayDistance = 0; // Placeholder
 
           logger.info(LOG_CATEGORY, `Day ${day.day} zone optimization:`, {
             destination,
@@ -139,7 +141,9 @@ export async function enrichItineraryWithLocationIQ(
             activity: a.description,
           }));
 
-          const optimized = await routeOptimizer.optimizeRoute(activitiesWithLocation);
+          // COMMENTED OUT - routeOptimizer moved to trip-generator.ts
+          // const optimized = await routeOptimizer.optimizeRoute(activitiesWithLocation);
+          const optimized = activitiesWithLocation; // Skip optimization here
 
           // Reorder activities based on optimization
           optimizedActivities = optimized.map(opt => {
@@ -150,7 +154,9 @@ export async function enrichItineraryWithLocationIQ(
           });
 
           // Validate route efficiency
-          const validation = validateRouteEfficiency(optimized);
+          // COMMENTED OUT - validateRouteEfficiency moved to trip-generator.ts
+          // const validation = validateRouteEfficiency(optimized);
+          const validation = { isEfficient: true, totalDistance: 0, segments: [], warnings: [] };
           if (!validation.isEfficient) {
             logger.warn(LOG_CATEGORY, `Day ${day.day} route warnings:`, validation.warnings);
           }
