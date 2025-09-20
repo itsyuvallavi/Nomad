@@ -1,37 +1,78 @@
-# /hooks - Custom React Hooks
+# Hooks Directory
 
-This directory contains **custom React hooks** used across the application.
+Custom React hooks for reusable stateful logic.
 
-## ✅ What belongs here:
+## Current Hooks
+
+```
+hooks/
+├── use-keyboard-shortcuts.ts  # Keyboard shortcut handling
+├── use-motion-config.ts       # Animation/motion configuration
+├── use-premium-gestures.ts    # Premium gesture features
+├── use-service-worker.ts      # Service worker management
+└── use-swipe-gestures.ts      # Touch/swipe gesture detection
+```
+
+## What Belongs Here
+
+✅ **DO** place here:
 - Custom React hooks (must start with `use`)
-- Hooks that encapsulate reusable logic
-- Hooks for managing state, effects, or other React features
-- Hooks that combine multiple React hooks
+- Hooks that encapsulate reusable stateful logic
+- Hooks for managing state, effects, or React features
+- Hooks that compose multiple React hooks
+- Hooks that provide abstraction over browser APIs
 
-## ❌ What does NOT belong here:
-- Regular utility functions (use `/lib`)
-- React components (use `/components`)
-- API calls (unless wrapped in a hook like `useAPI`)
-- Non-hook functions
+❌ **DON'T** place here:
+- Regular utility functions → Use `src/lib/utils/`
+- React components → Use `src/components/`
+- Direct API calls → Use `src/services/api/`
+- Non-hook functions → Use appropriate service or utility directory
 
-## 📁 Current Hooks:
+## Hook Guidelines
 
-- `use-keyboard-shortcuts.ts` - Keyboard shortcut handling
-- `use-swipe-gestures.ts` - Touch/swipe gesture detection
+### Naming Convention
+- **Required prefix**: All hooks must start with `use`
+- **Descriptive names**: `useKeyboardShortcuts`, not `useKB`
+- **Action-oriented**: `useSwipeGestures`, not `useSwipe`
 
-## Hook Guidelines:
+### Structure Requirements
+1. **TypeScript**: All hooks must be fully typed
+2. **JSDoc**: Include documentation for complex hooks
+3. **Error Handling**: Handle errors gracefully
+4. **Cleanup**: Return cleanup functions from useEffect
+5. **Memoization**: Use useMemo/useCallback appropriately
 
-1. **Naming**: Must start with `use` (React convention)
-2. **Purpose**: Encapsulate reusable stateful logic
-3. **Returns**: Can return state, handlers, or both
-4. **Side Effects**: Can use useEffect internally
-5. **Composition**: Can use other hooks
+## Usage Examples
 
-## Examples:
-- ✅ `useLocalStorage` - Syncs state with localStorage
-- ✅ `useDebounce` - Debounces a value
-- ✅ `useWindowSize` - Tracks window dimensions
-- ✅ `useKeyPress` - Detects key presses
-- ❌ `formatDate` (→ `/lib/helpers`)
-- ❌ `Button` component (→ `/components`)
-- ❌ API service (→ `/services`)
+```tsx
+// Import a hook
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
+import { useSwipeGestures } from '@/hooks/use-swipe-gestures';
+
+// Use in a component
+function MyComponent() {
+  const { isCtrlPressed } = useKeyboardShortcuts();
+  const { onSwipeLeft, onSwipeRight } = useSwipeGestures();
+
+  // Component logic...
+}
+```
+
+## Hook Categories
+
+### User Interaction
+- `use-keyboard-shortcuts.ts` - Global keyboard shortcuts
+- `use-swipe-gestures.ts` - Mobile swipe detection
+- `use-premium-gestures.ts` - Advanced gesture features
+
+### System Integration
+- `use-service-worker.ts` - PWA service worker lifecycle
+- `use-motion-config.ts` - Animation preferences
+
+## Best Practices
+
+1. **Single Responsibility**: Each hook should have one clear purpose
+2. **Reusability**: Hooks should be generic enough to use across components
+3. **Testing**: Include tests for complex hooks
+4. **Performance**: Avoid unnecessary re-renders
+5. **Dependencies**: Specify useEffect dependencies correctly
