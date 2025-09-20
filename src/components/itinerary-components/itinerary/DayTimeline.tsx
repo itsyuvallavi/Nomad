@@ -66,7 +66,9 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
 
   const getDateLabel = (day: number) => {
     if (dates && dates[day - 1]) {
-      const date = new Date(dates[day - 1]);
+      // Parse date in local timezone to avoid off-by-one error
+      const [year, month, dayNum] = dates[day - 1].split('-').map(Number);
+      const date = new Date(year, month - 1, dayNum);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     return '';

@@ -110,8 +110,10 @@ export function ExportMenu({ itinerary, className = '' }: ExportMenuProps) {
     const events: string[] = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Nomad Navigator//EN'];
     
     itinerary.itinerary.forEach((day) => {
-      const date = new Date(day.date);
-      const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
+      // Parse date in local timezone to avoid off-by-one error
+      const [year, month, dayNum] = day.date.split('-').map(Number);
+      const date = new Date(year, month - 1, dayNum);
+      const dateStr = `${year}${String(month).padStart(2, '0')}${String(dayNum).padStart(2, '0')}`;
       
       day.activities.forEach((activity, index) => {
         events.push('BEGIN:VEVENT');

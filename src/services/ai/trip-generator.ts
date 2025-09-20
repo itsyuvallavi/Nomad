@@ -178,27 +178,33 @@ export class TripGenerator {
       throw new Error('Missing required parameters: destination, startDate, and duration are required');
     }
 
-    logger.info('AI', 'Generating itinerary', {
-      destination: params.destination,
-      duration: params.duration,
-      startDate: params.startDate
-    });
+    console.log('\n   📍 TRIP GENERATOR STARTED:');
+    console.log(`      Destination: ${params.destination}`);
+    console.log(`      Duration: ${params.duration} days`);
+    console.log(`      Start Date: ${params.startDate}`);
+    console.log(`      Travelers: ${params.travelers?.adults || 1} adults, ${params.travelers?.children || 0} children`);
 
     try {
       // Step 1: Generate the base itinerary with zone-based planning
       const genStart = Date.now();
+      console.log('\n   🏗️  Generating base itinerary with GPT-3.5...');
       const itinerary = await this.generateBaseItinerary(params);
-      logger.info('AI', 'Base itinerary generated', { time: `${Date.now() - genStart}ms` });
+      console.log(`      Base generation time: ${Date.now() - genStart}ms`);
+      console.log(`      Days created: ${itinerary.itinerary?.length || 0}`);
 
       // Step 2: Optimize routes within each day
+      console.log('\n   🛣️  Optimizing daily routes...');
       const optimizedItinerary = this.optimizeDailyRoutes(itinerary);
 
       // Step 3: Enrich with real location data
       const enrichStart = Date.now();
+      console.log('\n   🏢 Enriching with HERE Places API...');
       const enrichedItinerary = await this.enrichItinerary(optimizedItinerary);
-      logger.info('AI', 'Enrichment complete', { time: `${Date.now() - enrichStart}ms` });
+      console.log(`      Enrichment time: ${Date.now() - enrichStart}ms`);
+      console.log(`      Activities enriched: ${enrichedItinerary.itinerary?.reduce((sum, day) => sum + (day.activities?.length || 0), 0) || 0}`);
 
       // Step 4: Add cost estimates if available
+      console.log('\n   💰 Adding cost estimates...');
       const finalItinerary = await this.addCostEstimates(enrichedItinerary, params);
 
       return finalItinerary;

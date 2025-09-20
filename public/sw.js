@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3-date-fix';
 const CACHE_NAME = `nomad-navigator-${CACHE_VERSION}`;
 const STATIC_CACHE_NAME = `nomad-navigator-static-${CACHE_VERSION}`;
 const IMAGE_CACHE_NAME = `nomad-navigator-images-${CACHE_VERSION}`;

@@ -64,9 +64,14 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
   // Extract all activities for coworking section
   const allActivities = itinerary.itinerary.flatMap(day => day.activities);
   
-  // Calculate trip duration
-  const startDate = new Date(itinerary.itinerary[0]?.date || new Date());
-  const endDate = new Date(itinerary.itinerary[itinerary.itinerary.length - 1]?.date || new Date());
+  // Calculate trip duration - parse dates in local timezone to avoid off-by-one
+  const parseLocalDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const startDate = itinerary.itinerary[0]?.date ? parseLocalDate(itinerary.itinerary[0].date) : new Date();
+  const endDate = itinerary.itinerary[itinerary.itinerary.length - 1]?.date ? parseLocalDate(itinerary.itinerary[itinerary.itinerary.length - 1].date) : new Date();
   const tripDuration = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
   
   // Extract budget info (using quickTips or default)
@@ -475,12 +480,15 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                         Day {selectedDay.day}
                       </h3>
                       <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-                        {new Date(selectedDay.date).toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          month: 'long', 
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
+                        {(() => {
+                          const [year, month, day] = selectedDay.date.split('-').map(Number);
+                          return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                          });
+                        })()}
                       </p>
                     </div>
                     <div className="text-right">

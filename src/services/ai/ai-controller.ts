@@ -191,15 +191,21 @@ export class AIController {
     }
 
     // ALWAYS try pattern-based extraction first (FAST)
+    console.log('\n   🔍 PATTERN EXTRACTION:');
     const patternResult = this.extractWithPatterns(message);
+    console.log(`      Destination: ${patternResult.destination || 'not found'}`);
+    console.log(`      Duration: ${patternResult.duration || 'not found'}`);
+    console.log(`      Start Date: ${patternResult.startDate || 'not found'}`);
+    console.log(`      End Date: ${patternResult.endDate || 'not found'}`);
 
     // If patterns got everything we need, return immediately
     if (patternResult.destination && patternResult.duration &&
         (patternResult.startDate || patternResult.endDate)) {
-      logger.info('AI', 'Complete extraction via patterns (fast path)');
+      console.log('      ✅ Complete extraction via patterns (skipping GPT-5)');
       this.addToCache(cacheKey, patternResult);
       return patternResult;
     }
+    console.log('      ⚠️  Missing fields, using GPT-5 for completion');
 
     // For missing fields or complex cases, use GPT-5 and merge results
     const today = new Date().toISOString().split('T')[0];

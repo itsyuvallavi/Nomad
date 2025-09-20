@@ -113,9 +113,13 @@ class TripsService {
     if (input.itinerary?.itinerary?.[0]?.date) {
       const firstDay = input.itinerary.itinerary[0].date;
       const lastDay = input.itinerary.itinerary[input.itinerary.itinerary.length - 1].date;
-      
-      tripData.startDate = new Date(firstDay);
-      tripData.endDate = new Date(lastDay);
+
+      // Parse dates in local timezone to avoid off-by-one error
+      const [startYear, startMonth, startDay] = firstDay.split('-').map(Number);
+      const [endYear, endMonth, endDay] = lastDay.split('-').map(Number);
+
+      tripData.startDate = new Date(startYear, startMonth - 1, startDay);
+      tripData.endDate = new Date(endYear, endMonth - 1, endDay);
     }
 
     const tripRef = doc(db, this.COLLECTION_NAME, tripId);

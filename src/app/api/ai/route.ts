@@ -29,20 +29,24 @@ export async function POST(request: NextRequest) {
     // Support both 'message' and 'prompt' fields for backwards compatibility
     const userMessage = message || prompt;
 
-    logger.info('API', 'Request received', {
-      sessionId,
-      message: userMessage,
-      hasContext: !!conversationContext || !!context,
-      timestamp: new Date().toISOString()
-    });
+    // Process the message through the conversation controller
+    // Support both 'conversationContext' and 'context' fields
+    const contextToUse = conversationContext || context;
+
+
+    // DETAILED REQUEST LOGGING
+    console.log('\n' + '='.repeat(80));
+    console.log('🔵 NEW UI REQUEST');
+    console.log('='.repeat(80));
+    console.log(`📝 USER INPUT: "${userMessage}"`);
+    console.log(`🕐 TIME: ${new Date().toISOString()}`);
+    console.log(`🆔 SESSION: ${sessionId || 'new-session'}`);
+    console.log(`📦 HAS CONTEXT: ${!!contextToUse}`);
+    console.log('-'.repeat(80));
 
     // Initialize controllers
     const aiController = new AIController();
     const tripGenerator = new TripGenerator();
-
-    // Process the message through the conversation controller
-    // Support both 'conversationContext' and 'context' fields
-    const contextToUse = conversationContext || context;
 
     logger.info('API', 'Processing message with AI controller', {
       hasContext: !!contextToUse
@@ -52,11 +56,22 @@ export async function POST(request: NextRequest) {
     const response = await aiController.processMessage(userMessage, contextToUse);
     const aiTime = Date.now() - aiStartTime;
 
-    logger.info('API', 'AI controller response', {
-      type: response.type,
-      canGenerate: response.canGenerate,
-      processingTime: `${aiTime}ms`
-    });
+    // LOG AI RESPONSE DETAILS
+    console.log('\n⚡ INTENT EXTRACTION:');
+    console.log(`   Time: ${aiTime}ms`);
+    console.log(`   Type: ${response.type}`);
+    console.log(`   Message: "${response.message}"`);
+    if (response.intent) {
+      console.log(`   Extracted Intent:`);
+      console.log(`     - Destination: ${response.intent.destination || 'missing'}`);
+      console.log(`     - Duration: ${response.intent.duration || 'missing'}`);
+      console.log(`     - Start Date: ${response.intent.startDate || 'missing'}`);
+      console.log(`     - Travelers: ${JSON.stringify(response.intent.travelers) || 'missing'}`);
+    }
+    if (response.missingFields?.length) {
+      console.log(`   Missing Fields: ${response.missingFields.join(', ')}`);
+    }
+    console.log('-'.repeat(80));
 
     // Check if we have enough information to generate
     if (response.type === 'ready' && response.canGenerate && response.intent) {
@@ -70,13 +85,24 @@ export async function POST(request: NextRequest) {
 
       // Generate the itinerary with HERE enrichment
       const genStartTime = Date.now();
+      console.log('\n🎯 GENERATING ITINERARY...');
       const itinerary = await tripGenerator.generateItinerary(tripParams);
       const genTime = Date.now() - genStartTime;
 
-      logger.info('API', 'Itinerary generated', {
-        generationTime: `${genTime}ms`,
-        totalTime: `${Date.now() - startTime}ms`
-      });
+      // LOG GENERATION DETAILS
+      console.log(`   Generation Time: ${genTime}ms`);
+      console.log(`   Days Generated: ${itinerary.itinerary?.length || 0}`);
+      console.log(`   Total Activities: ${itinerary.itinerary?.reduce((sum, day) => sum + (day.activities?.length || 0), 0) || 0}`);
+      if (itinerary.itinerary?.length > 0) {
+        console.log(`   First Day: ${itinerary.itinerary[0].date}`);
+        console.log(`   Last Day: ${itinerary.itinerary[itinerary.itinerary.length - 1].date}`);
+      }
+
+      console.log('\n✅ COMPLETE RESPONSE SUMMARY:');
+      console.log(`   Total Time: ${Date.now() - startTime}ms`);
+      console.log(`   Intent Extraction: ${aiTime}ms`);
+      console.log(`   Itinerary Generation: ${genTime}ms`);
+      console.log('='.repeat(80) + '\n');
 
       // Return the generated itinerary
       return NextResponse.json({
@@ -97,10 +123,11 @@ export async function POST(request: NextRequest) {
 
     // Need more information - return question
     if (response.type === 'question') {
-      logger.info('API', 'Returning question', {
-        missingFields: response.missingFields,
-        totalTime: `${Date.now() - startTime}ms`
-      });
+      console.log('\n❓ ASKING FOLLOW-UP QUESTION:');
+      console.log(`   Question: "${response.message}"`);
+      console.log(`   Missing Fields: ${response.missingFields?.join(', ') || 'none'}`);
+      console.log(`   Total Time: ${Date.now() - startTime}ms`);
+      console.log('='.repeat(80) + '\n');
 
       return NextResponse.json({
         success: true,
@@ -120,6 +147,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle other response types
+    console.log('\n💬 OTHER RESPONSE TYPE:');
+    console.log(`   Type: ${response.type}`);
+    console.log(`   Message: "${response.message}"`);
+    console.log(`   Total Time: ${Date.now() - startTime}ms`);
+    console.log('='.repeat(80) + '\n');
+
     return NextResponse.json({
       success: true,
       data: {
@@ -138,12 +171,16 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     const errorTime = Date.now() - startTime;
 
-    logger.error('API', 'Request failed', {
-      error: error.message,
-      stack: error.stack,
-      timeToError: `${errorTime}ms`,
-      type: error.name
-    });
+    // LOG ERROR DETAILS
+    console.log('\n❌ ERROR OCCURRED:');
+    console.log(`   Error Type: ${error.name}`);
+    console.log(`   Error Message: ${error.message}`);
+    console.log(`   Time to Error: ${errorTime}ms`);
+    if (error.stack) {
+      console.log(`   Stack Trace:`);
+      console.log(error.stack.split('\n').slice(0, 5).map((l: string) => `     ${l}`).join('\n'));
+    }
+    console.log('='.repeat(80) + '\n');
 
     // Check for timeout
     if (error.name === 'AbortError' || errorTime > 25000) {
