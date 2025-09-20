@@ -1,6 +1,9 @@
 
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, MessageSquare, Plus, Mic } from 'lucide-react';
@@ -23,8 +26,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import ItineraryForm from './components/TripPlanningForm';
 import type { FormValues } from './components/TripPlanningForm';
 import type { RecentSearch, ChatState } from '@/app/page';
-import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { tripsService } from '@/services/trips/trips-service';
+
+// Conditional auth import to handle SSR
+let useAuth: any;
+if (typeof window !== 'undefined') {
+  const authModule = require('@/infrastructure/contexts/AuthContext');
+  useAuth = authModule.useAuth;
+} else {
+  useAuth = () => ({ user: null, logout: () => {} });
+}
 
 type StartItineraryProps = {
     onItineraryRequest: (values: FormValues, chatState?: ChatState, searchId?: string) => void;

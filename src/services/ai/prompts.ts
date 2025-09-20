@@ -75,8 +75,12 @@ CRITICAL RULES:
 5. Walking distance (15 min max) between activities in the same time period
 6. Consider opening hours and days (museums closed Mondays, etc.)
 
-OUTPUT FORMAT:
-- Return ONLY valid JSON matching the schema
+OUTPUT FORMAT REQUIREMENTS:
+- Return ONLY valid JSON - no text before or after the JSON object
+- Start your response with { and end with }
+- No markdown, no explanations, no comments
+- Use double quotes for all strings
+- Ensure all JSON is properly escaped
 - Include specific venue names, not generic descriptions
 - Set all addresses to "Address N/A" (will be enriched later)
 - Include venue_search field with format: "[Venue Name] [City]"`,
@@ -100,9 +104,11 @@ ${preferences.avoid ? `Avoid: ${preferences.avoid.join(', ')}` : ''}
 ${zoneGuidance}
 
 DAILY STRUCTURE REQUIREMENTS:
+- Each day MUST have at least 5-6 activities
 - Morning (9:00 AM - 12:00 PM): Breakfast + 1-2 activities
 - Afternoon (12:00 PM - 5:00 PM): Lunch + 1-2 activities
 - Evening (5:00 PM - 9:00 PM): 1 activity + Dinner
+- IMPORTANT: Generate ALL activities for ALL days
 
 LOGICAL FLOW RULES:
 1. Start each day with breakfast near the first activity
@@ -112,7 +118,9 @@ LOGICAL FLOW RULES:
 5. Shopping and casual activities in afternoons
 6. Scenic viewpoints best at sunset
 
-Return a JSON object with this structure:
+IMPORTANT: Return ONLY the JSON object below. Do not include any text before or after the JSON.
+
+JSON structure to return:
 {
   "title": "X Days in [Destination]",
   "destination": "[destination]",
@@ -126,13 +134,43 @@ Return a JSON object with this structure:
       "activities": [
         {
           "time": "9:00 AM",
-          "description": "[Activity description]",
-          "venue_name": "[Specific venue name]",
-          "venue_search": "[Venue Name] [City]",
-          "category": "breakfast|lunch|dinner|attraction|shopping|entertainment",
-          "address": "Address N/A",
-          "duration": "[estimated time in hours]",
-          "tips": "[helpful tips]"
+          "description": "Breakfast at famous local cafe",
+          "venue_name": "Cafe Central",
+          "venue_search": "Cafe Central [City]",
+          "category": "breakfast",
+          "address": "Address N/A"
+        },
+        {
+          "time": "10:30 AM",
+          "description": "Visit the main cathedral",
+          "venue_name": "Cathedral Name",
+          "venue_search": "Cathedral [City]",
+          "category": "attraction",
+          "address": "Address N/A"
+        },
+        {
+          "time": "12:30 PM",
+          "description": "Lunch at traditional restaurant",
+          "venue_name": "Restaurant Name",
+          "venue_search": "Restaurant [City]",
+          "category": "lunch",
+          "address": "Address N/A"
+        },
+        {
+          "time": "2:30 PM",
+          "description": "Explore historic neighborhood",
+          "venue_name": "Historic Quarter",
+          "venue_search": "Historic Quarter [City]",
+          "category": "attraction",
+          "address": "Address N/A"
+        },
+        {
+          "time": "7:00 PM",
+          "description": "Dinner at local restaurant",
+          "venue_name": "Local Restaurant",
+          "venue_search": "Restaurant [City]",
+          "category": "dinner",
+          "address": "Address N/A"
         }
       ]
     }
@@ -159,7 +197,9 @@ Modify the itinerary based on the feedback while maintaining:
 3. Realistic timing and distances
 4. The same JSON structure
 
-Return ONLY the modified itinerary as valid JSON.`,
+Return ONLY the modified itinerary as valid JSON.
+Do not include any explanatory text, markdown formatting, or comments.
+Start with { and end with }`,
 
     /**
      * Validation prompt for checking venues

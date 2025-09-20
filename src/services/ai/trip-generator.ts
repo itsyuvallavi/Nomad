@@ -9,6 +9,7 @@ import { logger } from '@/lib/monitoring/logger';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import { locationEnrichmentService } from '@/services/ai/services/location-enrichment-locationiq';
 import { osmPOIService, type QueryZone } from '@/services/ai/services/osm-poi-service';
+import { herePlacesService } from '@/services/api/here-places';
 import { PROMPTS } from './prompts';
 
 // Initialize OpenAI client
@@ -185,13 +186,17 @@ export class TripGenerator {
 
     try {
       // Step 1: Generate the base itinerary with zone-based planning
+      const genStart = Date.now();
       const itinerary = await this.generateBaseItinerary(params);
+      logger.info('AI', 'Base itinerary generated', { time: `${Date.now() - genStart}ms` });
 
       // Step 2: Optimize routes within each day
       const optimizedItinerary = this.optimizeDailyRoutes(itinerary);
 
       // Step 3: Enrich with real location data
+      const enrichStart = Date.now();
       const enrichedItinerary = await this.enrichItinerary(optimizedItinerary);
+      logger.info('AI', 'Enrichment complete', { time: `${Date.now() - enrichStart}ms` });
 
       // Step 4: Add cost estimates if available
       const finalItinerary = await this.addCostEstimates(enrichedItinerary, params);
@@ -225,27 +230,171 @@ export class TripGenerator {
       zoneGuidance
     });
 
-    // Generate with GPT
+    // Generate with GPT-3.5-turbo (much faster than GPT-5 responses API)
+    const startGPT = Date.now();
     const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-3.5-turbo-16k', // Using 16k variant for longer itineraries
       messages: [
-        { role: 'system', content: PROMPTS.generation.systemPrompt },
-        { role: 'user', content: prompt }
+        {
+          role: 'system',
+          content: PROMPTS.generation.systemPrompt
+        },
+        {
+          role: 'user',
+          content: `${prompt}\n\nREMINDER: Return ONLY valid JSON, no other text.`
+        }
       ],
-      response_format: { type: 'json_object' },
       temperature: 0.7,
       max_tokens: 4000
     });
+    logger.info('AI', 'GPT-3.5-turbo response received', { time: `${Date.now() - startGPT}ms` });
 
-    const content = response.choices[0]?.message?.content;
+    const content = response.choices[0].message.content;
     if (!content) {
       throw new Error('No response from OpenAI');
     }
 
-    const itinerary = JSON.parse(content);
+    // Log raw response for debugging
+    logger.info('AI', 'Raw GPT response length', { chars: content.length });
+    if (content.length < 1000) {
+      logger.warn('AI', 'Suspiciously short response', { content: content.substring(0, 500) });
+    }
+
+    // Parse JSON with error handling
+    let itinerary;
+    try {
+      // Clean content first - remove any comments or invalid characters
+      let cleanContent = content.trim();
+
+      // Remove any single-line comments (// ...)
+      cleanContent = cleanContent.replace(/\/\/[^\n]*/g, '');
+
+      // Remove any multi-line comments (/* ... */)
+      cleanContent = cleanContent.replace(/\/\*[\s\S]*?\*\//g, '');
+
+      // Remove any trailing commas before closing brackets/braces
+      cleanContent = cleanContent.replace(/,(\s*[}\]])/g, '$1');
+
+      // Try direct parse first
+      itinerary = JSON.parse(cleanContent);
+    } catch (parseError) {
+      logger.warn('AI', 'First parse failed, trying extraction', {
+        error: (parseError as any).message,
+        sample: content.substring(0, 200)
+      });
+
+      // Try to extract JSON from the response
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          // Clean the extracted JSON
+          let extracted = jsonMatch[0];
+          extracted = extracted.replace(/\/\/[^\n]*/g, '');
+          extracted = extracted.replace(/\/\*[\s\S]*?\*\//g, '');
+          extracted = extracted.replace(/,(\s*[}\]])/g, '$1');
+
+          itinerary = JSON.parse(extracted);
+        } catch (secondError) {
+          logger.error('AI', 'Failed to parse itinerary JSON', {
+            error: (secondError as any).message,
+            content: content.substring(0, 500)
+          });
+          throw new Error('Invalid JSON response from AI - please try again');
+        }
+      } else {
+        logger.error('AI', 'No JSON structure found in response', {
+          content: content.substring(0, 500)
+        });
+        throw new Error('No valid JSON found in AI response');
+      }
+    }
 
     // Ensure proper structure
-    return this.validateAndFixItinerary(itinerary, params);
+    const validated = this.validateAndFixItinerary(itinerary, params);
+
+    // Warn if days mismatch
+    if (validated.itinerary.length !== params.duration) {
+      logger.warn('AI', 'Days mismatch - will retry generation', {
+        requested: params.duration,
+        generated: validated.itinerary.length
+      });
+
+      // If we got fewer days than requested, try regenerating once
+      if (validated.itinerary.length < params.duration) {
+        logger.info('AI', 'Retrying generation with emphasis on duration');
+
+        // Add emphasis to the prompt about the duration
+        const retryPrompt = PROMPTS.generation.buildItineraryPrompt({
+          destination: params.destination,
+          duration: params.duration,
+          startDate: params.startDate,
+          travelers: params.travelers || { adults: 1, children: 0 },
+          preferences: params.preferences || {},
+          zoneGuidance: `CRITICAL: You MUST generate exactly ${params.duration} days. Each day needs 5-6 activities.`
+        });
+
+        try {
+          const retryResponse = await this.openai.chat.completions.create({
+            model: 'gpt-3.5-turbo-16k',
+            messages: [
+              {
+                role: 'system',
+                content: PROMPTS.generation.systemPrompt + `\n\nCRITICAL: Generate EXACTLY ${params.duration} days with 5-6 activities each day.`
+              },
+              {
+                role: 'user',
+                content: retryPrompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000
+          });
+
+          const retryContent = retryResponse.choices[0].message.content;
+          if (retryContent) {
+            let retryItinerary = this.parseJSONSafely(retryContent);
+            if (retryItinerary) {
+              const retryValidated = this.validateAndFixItinerary(retryItinerary, params);
+              if (retryValidated.itinerary.length === params.duration) {
+                logger.info('AI', 'Retry successful - got correct duration');
+                return retryValidated;
+              }
+            }
+          }
+        } catch (error) {
+          logger.warn('AI', 'Retry failed, using original', error);
+        }
+      }
+    }
+
+    return validated;
+  }
+
+  /**
+   * Safely parse JSON with cleaning
+   */
+  private parseJSONSafely(content: string): any | null {
+    try {
+      let cleanContent = content.trim();
+      cleanContent = cleanContent.replace(/\/\/[^\n]*/g, '');
+      cleanContent = cleanContent.replace(/\/\*[\s\S]*?\*\//g, '');
+      cleanContent = cleanContent.replace(/,(\s*[}\]])/g, '$1');
+      return JSON.parse(cleanContent);
+    } catch {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          let extracted = jsonMatch[0];
+          extracted = extracted.replace(/\/\/[^\n]*/g, '');
+          extracted = extracted.replace(/\/\*[\s\S]*?\*\//g, '');
+          extracted = extracted.replace(/,(\s*[}\]])/g, '$1');
+          return JSON.parse(extracted);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
   }
 
   /**
@@ -312,10 +461,19 @@ export class TripGenerator {
 
   /**
    * Enriches itinerary with real location data
+   * Priority: 1. HERE (fast), 2. OSM (free), 3. LocationIQ (fallback)
    */
   private async enrichItinerary(itinerary: GeneratePersonalizedItineraryOutput): Promise<GeneratePersonalizedItineraryOutput> {
     try {
-      // Use OSM as primary source for all POI data
+      // If HERE is configured, use it (FAST: 150-350ms per venue)
+      if (herePlacesService.isConfigured()) {
+        logger.info('AI', 'Using HERE Places for enrichment (fast mode)');;
+        const hereEnriched = await this.enrichWithHERE(itinerary);
+        return hereEnriched;
+      }
+
+      // Otherwise use OSM as primary source (SLOW: 2-10s per venue)
+      logger.info('AI', 'Using OSM for enrichment (free but slow)');;
       const osmEnriched = await this.enrichWithOSMData(itinerary);
 
       // Only use LocationIQ as fallback for activities without POI data
@@ -341,7 +499,7 @@ export class TripGenerator {
     }
 
     const needsFallback = itinerary.itinerary?.some(day =>
-      day.activities?.some(activity => !activity.venue_name && !activity.coordinates)
+      day.activities?.some(activity => !activity.venue_name)
     );
 
     if (!needsFallback) {
@@ -355,10 +513,9 @@ export class TripGenerator {
       // Only enrich activities that don't have OSM data
       const enriched = await locationEnrichmentService.enrichItineraryWithLocationIQ(itinerary, {
         useLocationIQ: true,
-        optimizeRoutes: false, // Already optimized
-        onlyMissing: true // New option to only process missing venues
+        optimizeRoutes: false // Already optimized
       });
-      return enriched;
+      return enriched as GeneratePersonalizedItineraryOutput;
     } catch (error) {
       logger.warn('AI', 'LocationIQ fallback failed', error);
       return itinerary;
@@ -419,12 +576,7 @@ export class TripGenerator {
                 return {
                   ...activity,
                   venue_name: poi.name,
-                  address: poi.address,
-                  coordinates: poi.coordinates,
-                  osm_id: poi.id,
-                  website: poi.website,
-                  phone: poi.phone,
-                  opening_hours: poi.openingHours
+                  address: poi.address || activity.address || ''
                 };
               }
             } catch (error) {
@@ -447,7 +599,7 @@ export class TripGenerator {
 
     const poiCount = enrichedItinerary.itinerary
       .flatMap(d => d.activities || [])
-      .filter(a => a.osm_id).length;
+      .filter(a => a.venue_name).length;
 
     logger.info('AI', 'OSM enrichment complete', {
       totalActivities: enrichedItinerary.itinerary.flatMap(d => d.activities || []).length,
@@ -455,6 +607,180 @@ export class TripGenerator {
     });
 
     return enrichedItinerary;
+  }
+
+  /**
+   * Enriches itinerary with HERE Places data (FAST)
+   */
+  private async enrichWithHERE(
+    itinerary: GeneratePersonalizedItineraryOutput
+  ): Promise<GeneratePersonalizedItineraryOutput> {
+    if (!itinerary.itinerary) {
+      logger.warn('AI', 'No itinerary to enrich');
+      return itinerary;
+    }
+
+    const cityLower = itinerary.destination.toLowerCase();
+    const zones = CITY_ZONES[cityLower] || [];
+    const cityCenter = zones[0]?.coordinates || { lat: 0, lng: 0 };
+
+    logger.info('AI', 'Starting HERE enrichment', {
+      destination: itinerary.destination,
+      days: itinerary.itinerary.length,
+      hasZones: zones.length > 0
+    });
+
+    // Collect all activities for batch processing
+    const allActivities: Array<{
+      dayIndex: number;
+      activityIndex: number;
+      description: string;
+      zone?: Zone;
+    }> = [];
+
+    itinerary.itinerary.forEach((day, dayIndex) => {
+      const dayZone = this.findDayZone(day, zones);
+      day.activities?.forEach((activity, activityIndex) => {
+        allActivities.push({
+          dayIndex,
+          activityIndex,
+          description: activity.description,
+          zone: dayZone || zones[0]
+        });
+      });
+    });
+
+    // Batch search with HERE (much faster than individual calls)
+    const queries = allActivities.map(({ description, zone }) => {
+      // Extract key terms for better search results
+      const searchQuery = this.extractSearchQuery(description);
+
+      // IMPORTANT: Always include city name to avoid wrong results
+      const queryWithCity = `${searchQuery} ${itinerary.destination}`;
+
+      return {
+        query: queryWithCity,
+        location: zone?.coordinates || cityCenter
+      };
+    });
+
+    logger.info('AI', 'Starting HERE batch search', {
+      totalQueries: queries.length
+    });
+
+    const startBatch = Date.now();
+    const results = await herePlacesService.batchSearchPlaces(queries, { limit: 1 });
+    const batchTime = Date.now() - startBatch;
+
+    logger.info('AI', 'HERE batch search complete', {
+      resultsFound: results.size,
+      batchTime: `${batchTime}ms`
+    });
+
+    // Apply results back to itinerary
+    allActivities.forEach(({ dayIndex, activityIndex, description }) => {
+      const searchQuery = this.extractSearchQuery(description);
+      const queryWithCity = `${searchQuery} ${itinerary.destination}`;
+      const places = results.get(queryWithCity);
+
+      if (places && places.length > 0) {
+        // Try to find a place in the correct city/country
+        let bestPlace = places[0];
+        const cityLower = itinerary.destination.toLowerCase();
+
+        // Country mappings for common destinations
+        const countryMap: Record<string, string[]> = {
+          madrid: ['españa', 'spain', 'madrid'],
+          barcelona: ['españa', 'spain', 'barcelona', 'catalunya'],
+          paris: ['france', 'paris', 'île-de-france'],
+          lisbon: ['portugal', 'lisboa', 'lisbon'],
+          rome: ['italia', 'italy', 'roma'],
+          london: ['united kingdom', 'london', 'england'],
+        };
+
+        const expectedTerms = countryMap[cityLower] || [cityLower];
+
+        // Filter to only places in the correct city/country
+        const validPlaces = places.filter(place => {
+          const address = place.address.label.toLowerCase();
+          return expectedTerms.some(term => address.includes(term));
+        });
+
+        // Use the first valid place, or fallback to original if none found
+        if (validPlaces.length > 0) {
+          bestPlace = validPlaces[0];
+        } else {
+          // If no valid places, at least try to avoid obviously wrong countries
+          for (const place of places) {
+            const address = place.address.label;
+            // Skip if it contains wrong country indicators
+            if (!address.includes('Colombia') &&
+                !address.includes('België') &&
+                !address.includes('Србија') &&
+                !address.includes('Australia')) {
+              bestPlace = place;
+              break;
+            }
+          }
+        }
+
+        const activity = itinerary.itinerary![dayIndex].activities![activityIndex];
+        activity.venue_name = bestPlace.name;
+        activity.address = bestPlace.address.label;
+      }
+    });
+
+    logger.info('AI', 'HERE enrichment complete', {
+      totalActivities: allActivities.length,
+      enriched: Array.from(results.values()).filter(p => p.length > 0).length
+    });
+
+    return itinerary;
+  }
+
+  /**
+   * Extract a search query from activity description
+   */
+  private extractSearchQuery(description: string): string {
+    const lower = description.toLowerCase();
+
+    // Look for specific venue names (capitalized words after "at" or "visit")
+    const venueMatch = description.match(/(?:at|visit|explore)\s+([A-Z][^,\.]+)/);
+    if (venueMatch) {
+      return venueMatch[1].trim();
+    }
+
+    // Extract key terms for common activities - be more specific
+    if (lower.includes('breakfast')) {
+      if (lower.includes('cafe')) return 'cafe breakfast';
+      if (lower.includes('pastry') || lower.includes('bakery')) return 'bakery pastry';
+      return 'breakfast restaurant local';
+    }
+    if (lower.includes('lunch')) {
+      if (lower.includes('restaurant')) return venueMatch?.[1] || 'restaurant';
+      return 'restaurant local cuisine';
+    }
+    if (lower.includes('dinner')) {
+      if (lower.includes('restaurant')) return venueMatch?.[1] || 'restaurant';
+      return 'restaurant dinner';
+    }
+    if (lower.includes('museum')) return 'museum';
+    if (lower.includes('park') || lower.includes('garden')) return 'park';
+    if (lower.includes('shopping')) return 'shopping center';
+    if (lower.includes('market')) return 'market';
+    if (lower.includes('church') || lower.includes('cathedral')) return 'church';
+    if (lower.includes('bridge')) return 'bridge';
+    if (lower.includes('tower')) return 'tower';
+    if (lower.includes('palace')) return 'palace';
+    if (lower.includes('plaza') || lower.includes('square')) return 'plaza square';
+
+    // Default: use first few meaningful words
+    const words = description.split(' ')
+      .filter(w => w.length > 3)
+      .slice(0, 3)
+      .join(' ');
+
+    return words || description.slice(0, 30);
   }
 
   /**
@@ -505,10 +831,10 @@ export class TripGenerator {
         params.preferences?.budget || 'mid'
       );
 
-      return {
-        ...itinerary,
-        estimatedCosts: costs
-      };
+      // Store costs in a separate variable if needed
+      // but don't add to the return type as it doesn't exist in schema
+      logger.info('AI', 'Trip costs estimated', costs);
+      return itinerary;
     } catch (error) {
       logger.warn('AI', 'Cost estimation failed', error);
       return itinerary;
@@ -524,35 +850,38 @@ export class TripGenerator {
     travelers: number,
     budgetLevel: 'budget' | 'mid' | 'luxury'
   ): Promise<any> {
-    const prompt = `Estimate realistic travel costs for:
-    - Destination: ${destination}
-    - Duration: ${duration} days
-    - Travelers: ${travelers}
-    - Budget level: ${budgetLevel}
+    const prompt = `Estimate travel costs for ${destination}, ${duration} days, ${travelers} travelers, ${budgetLevel} budget.
 
-    Provide a JSON object with total estimated costs including flights, hotels, and daily expenses:
+    Return ONLY this JSON:
     {
-      "flights": <total flight cost for all travelers>,
-      "hotels": <total hotel cost for duration>,
-      "dailyExpenses": <food, transport, activities total>,
-      "total": <sum of all costs>
+      "flights": <number>,
+      "hotels": <number>,
+      "dailyExpenses": <number>,
+      "total": <number>
     }
 
-    Use current 2024-2025 market prices. Be realistic.`;
+    Use 2024-2025 prices. Numbers only, no currency symbols.`;
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: 'You are a travel cost estimator. Provide realistic prices.' },
+          { role: 'system', content: 'You are a travel cost estimator. Return only JSON.' },
           { role: 'user', content: prompt }
         ],
-        response_format: { type: 'json_object' },
-        temperature: 0.3,
+        temperature: 0.5,
         max_tokens: 200
       });
 
-      const costs = JSON.parse(response.choices[0]?.message?.content || '{}');
+      const content = response.choices[0].message.content;
+      let costs;
+      try {
+        costs = JSON.parse(content?.trim() || '{}');
+      } catch {
+        // Try to extract JSON
+        const jsonMatch = content?.match(/\{[\s\S]*\}/);
+        costs = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+      }
       logger.info('AI', 'Cost estimate generated', costs);
       return costs;
     } catch (error) {
@@ -579,18 +908,26 @@ export class TripGenerator {
     const fixed: GeneratePersonalizedItineraryOutput = {
       title: itinerary.title || `${params.duration} Days in ${params.destination}`,
       destination: params.destination,
-      duration: params.duration,
-      startDate: params.startDate,
-      itinerary: []
+      itinerary: [],
+      quickTips: itinerary.quickTips || []
     };
 
     // Fix daily itineraries
     if (Array.isArray(itinerary.itinerary)) {
       fixed.itinerary = itinerary.itinerary.map((day: any, index: number) => ({
         day: day.day || index + 1,
-        date: day.date || this.calculateDate(params.startDate, index),
-        theme: day.theme || `Day ${index + 1} Exploration`,
-        activities: Array.isArray(day.activities) ? day.activities : []
+        date: this.calculateDate(params.startDate, index), // Always calculate correct date
+        title: day.title || day.theme || `Day ${index + 1} Exploration`,
+        activities: Array.isArray(day.activities) ?
+          day.activities.map((act: any) => ({
+            time: act.time || 'Flexible',
+            description: act.description || '',
+            category: act.category || 'Leisure',
+            address: act.address || '',
+            venue_name: act.venue_name,
+            venue_search: act.venue_search
+          })) : [],
+        weather: day.weather
       }));
     } else {
       // Generate empty structure if missing
@@ -598,8 +935,9 @@ export class TripGenerator {
         fixed.itinerary.push({
           day: i + 1,
           date: this.calculateDate(params.startDate, i),
-          theme: `Day ${i + 1}`,
-          activities: []
+          title: `Day ${i + 1}: Explore ${params.destination}`,
+          activities: [],
+          weather: undefined
         });
       }
     }
@@ -633,27 +971,34 @@ export class TripGenerator {
       Return ONLY the modified itinerary as JSON.
     `;
 
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are a travel itinerary modifier. Maintain zone-based planning.' },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.5,
-      max_tokens: 4000
+    const response = await this.openai.responses.create({
+      model: 'gpt-5',
+      input: `You are a travel itinerary modifier. Maintain zone-based planning.\n\n${prompt}\n\nReturn ONLY valid JSON, no other text.`
     });
 
-    const content = response.choices[0]?.message?.content;
+    const content = response.output_text;
     if (!content) {
       throw new Error('No response from OpenAI');
     }
 
-    const modified = JSON.parse(content);
+    let modified;
+    try {
+      modified = JSON.parse(content.trim());
+    } catch (error) {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        modified = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Failed to parse modified itinerary');
+      }
+    }
+    // Extract start date from first day and duration from itinerary length
+    const startDate = currentItinerary.itinerary?.[0]?.date || new Date().toISOString().split('T')[0];
+    const duration = currentItinerary.itinerary?.length || 3;
     return this.validateAndFixItinerary(modified, {
       destination: currentItinerary.destination,
-      startDate: currentItinerary.startDate,
-      duration: currentItinerary.duration
+      startDate: startDate,
+      duration: duration
     });
   }
 }

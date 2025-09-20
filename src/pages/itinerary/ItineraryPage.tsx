@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 import { useState, useEffect, useRef } from 'react';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useSwipeGestures } from '@/hooks/use-swipe-gestures';
@@ -20,17 +23,24 @@ import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas'
 import { ArrowLeft, MessageSquare, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { RecentSearch, ChatState } from '@/app/page';
-import { ChatPanel } from './components/chat/ChatPanel';
-import { ItineraryPanel } from './components/itinerary/ItineraryDisplay';
+import { ChatPanel } from '@/components/itinerary-components/chat/ChatPanel';
+import { ItineraryPanel } from '@/components/itinerary-components/itinerary/ItineraryDisplay';
 import { cn } from '@/lib/helpers/general';
-import { ModernLoadingPanel } from './components/chat/LoadingProgress';
+import { ModernLoadingPanel } from '@/components/itinerary-components/chat/LoadingProgress';
 import { ErrorDialog } from '@/components/ui/error-dialog';
 import { logger } from '@/lib/monitoring/logger';
 import { getDraftManager } from '@/services/trips/draft-manager';
 import { retryApiCall } from '@/lib/utils/retry';
 import { handleError, ErrorCategory } from '@/lib/monitoring/error-handler';
 import { offlineStorage } from '@/services/storage/offline-storage';
-import { useAuth } from '@/infrastructure/contexts/AuthContext';
+// Conditional auth import to handle SSR
+let useAuth: any;
+if (typeof window !== 'undefined') {
+  const authModule = require('@/infrastructure/contexts/AuthContext');
+  useAuth = authModule.useAuth;
+} else {
+  useAuth = () => ({ user: null });
+}
 import { tripsService } from '@/services/trips/trips-service';
 
 type Message = {
@@ -246,8 +256,15 @@ export default function ChatDisplayV2({
                     });
 
                     if (!res.ok) {
-                        const error = await res.json();
-                        throw new Error(error.error || 'Failed to generate itinerary');
+                        // Check if response is JSON or HTML error page
+                        const contentType = res.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const error = await res.json();
+                            throw new Error(error.error || 'Failed to generate itinerary');
+                        } else {
+                            // HTML error page - likely 404 or server error
+                            throw new Error(`Server error: ${res.status} ${res.statusText}`);
+                        }
                     }
 
                     const result = await res.json();

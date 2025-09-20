@@ -20,13 +20,20 @@ export interface ConversationalItineraryOutput {
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
     const body = await request.json();
-    const { prompt, conversationContext, sessionId, attachedFile } = body;
+    const { message, prompt, conversationContext, context, sessionId } = body;
 
-    logger.info('API', 'Processing itinerary request', {
+    // Support both 'message' and 'prompt' fields for backwards compatibility
+    const userMessage = message || prompt;
+
+    logger.info('API', 'Request received', {
       sessionId,
-      hasContext: !!conversationContext
+      message: userMessage,
+      hasContext: !!conversationContext || !!context,
+      timestamp: new Date().toISOString()
     });
 
     // Initialize controllers
@@ -34,7 +41,22 @@ export async function POST(request: NextRequest) {
     const tripGenerator = new TripGenerator();
 
     // Process the message through the conversation controller
-    const response = await aiController.processMessage(prompt, conversationContext);
+    // Support both 'conversationContext' and 'context' fields
+    const contextToUse = conversationContext || context;
+
+    logger.info('API', 'Processing message with AI controller', {
+      hasContext: !!contextToUse
+    });
+
+    const aiStartTime = Date.now();
+    const response = await aiController.processMessage(userMessage, contextToUse);
+    const aiTime = Date.now() - aiStartTime;
+
+    logger.info('API', 'AI controller response', {
+      type: response.type,
+      canGenerate: response.canGenerate,
+      processingTime: `${aiTime}ms`
+    });
 
     // Check if we have enough information to generate
     if (response.type === 'ready' && response.canGenerate && response.intent) {
@@ -46,8 +68,15 @@ export async function POST(request: NextRequest) {
         duration: tripParams.duration
       });
 
-      // Generate the itinerary with OSM enrichment
+      // Generate the itinerary with HERE enrichment
+      const genStartTime = Date.now();
       const itinerary = await tripGenerator.generateItinerary(tripParams);
+      const genTime = Date.now() - genStartTime;
+
+      logger.info('API', 'Itinerary generated', {
+        generationTime: `${genTime}ms`,
+        totalTime: `${Date.now() - startTime}ms`
+      });
 
       // Return the generated itinerary
       return NextResponse.json({
@@ -68,6 +97,11 @@ export async function POST(request: NextRequest) {
 
     // Need more information - return question
     if (response.type === 'question') {
+      logger.info('API', 'Returning question', {
+        missingFields: response.missingFields,
+        totalTime: `${Date.now() - startTime}ms`
+      });
+
       return NextResponse.json({
         success: true,
         data: {
@@ -102,13 +136,41 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    logger.error('API', 'Failed to process itinerary request', error);
+    const errorTime = Date.now() - startTime;
+
+    logger.error('API', 'Request failed', {
+      error: error.message,
+      stack: error.stack,
+      timeToError: `${errorTime}ms`,
+      type: error.name
+    });
+
+    // Check for timeout
+    if (error.name === 'AbortError' || errorTime > 25000) {
+      return NextResponse.json({
+        success: false,
+        error: 'Request timed out. Please try again with a simpler request.',
+        type: 'error',
+        timeElapsed: errorTime
+      }, { status: 504 });
+    }
+
+    // Check for OpenAI errors
+    if (error.message?.includes('OpenAI') || error.message?.includes('API')) {
+      return NextResponse.json({
+        success: false,
+        error: 'AI service temporarily unavailable. Please try again.',
+        type: 'error',
+        details: error.message
+      }, { status: 503 });
+    }
 
     return NextResponse.json(
       {
         success: false,
         error: error.message || 'Failed to process request',
-        type: 'error'
+        type: 'error',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       },
       { status: 500 }
     );

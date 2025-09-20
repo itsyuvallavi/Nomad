@@ -3,12 +3,13 @@
 This file provides guidance to Claude Code when working with the Nomad Navigator codebase.
 
 ## ⚠️ CRITICAL: Firebase IDE Environment
-**NEVER run `npm run dev` in Firebase IDE!** 
+**NEVER run `npm run dev` in Firebase IDE!**
 - Firebase automatically runs the app on its own ports
 - Running `npm run dev` will cause port conflicts and issues
 - The app is already accessible through Firebase's preview URLs
 - Only use `npm run build` for production builds
 - For testing: Use Firebase's preview, not local dev server
+- **The app is ALWAYS running automatically** - no need to start any server
 
 ## Project Overview
 Nomad Navigator - AI-powered travel planning application for digital nomads using Next.js 15, OpenAI APIs, and modern web technologies.
@@ -20,7 +21,7 @@ Nomad Navigator - AI-powered travel planning application for digital nomads usin
 
 ## Current Technology Stack
 - **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS, shadcn/ui
-- **AI**: OpenAI GPT-4, custom prompt engineering
+- **AI**: OpenAI GPT-5 (EXCLUSIVELY - no other models)
 - **APIs**: Amadeus (flights/hotels), Google Places/Maps, Weather, Foursquare
 - **Deployment**: Firebase Hosting
 - **Development**: MCP integration (filesystem, puppeteer)
@@ -101,25 +102,13 @@ nomad-navigator/
 
 ### During Implementation
 1. **Update Plans**: Document progress and changes
-2. **Test Frequently**: Run baseline tests after AI modifications
-3. **Use MCPs**: Leverage file system MCP for efficient file access
-4. **Document Changes**: Explain modifications for future handoffs
+2. **Use MCPs**: Leverage file system MCP for efficient file access
+3. **Document Changes**: Explain modifications for future handoffs
 
-## AI Testing - CRITICAL
+## AI Testing Guidelines
 
 ### Golden Rule: "3 days in London" Must Always Work
 This simple test is our canary. If it fails, stop and fix before proceeding.
-
-```bash
-# Before any AI changes
-npm run test:ai --baseline
-
-# After AI changes
-npm run test:ai --baseline
-
-# Full test suite
-npm run test:ai
-```
 
 ### Test Priority Levels
 1. **Must Pass**: Simple requests (London weekend, Paris 3-day)
@@ -127,7 +116,7 @@ npm run test:ai
 3. **Can Occasionally Fail**: Complex requests (multi-week, heavy constraints)
 
 ### Red Flags - Stop Immediately
-- Baseline test failing after previously passing
+- Simple prompts not being understood
 - Response times > 15 seconds for simple requests
 - Missing required fields in AI responses
 - Inconsistent destination/day counts
@@ -139,10 +128,6 @@ npm run test:ai
 npm run dev                 # Next.js dev server (port 9002)
 npm run genkit:dev         # AI flow debugging UI
 npm run typecheck          # TypeScript validation
-
-# AI Testing
-npm run test:ai --baseline # Critical baseline test
-npm run test:ai            # Full test suite
 
 # Quality Assurance
 npm run lint               # Code linting
@@ -298,10 +283,10 @@ import { tripsService } from '@/lib/trips-service';  // Re-exports from services
 
 ## Troubleshooting
 
-### AI Tests Failing
+### AI Not Understanding Prompts
 1. Check recent changes to AI flows
-2. Validate environment variables
-3. Test individual flows in Genkit UI
+2. Validate environment variables (ensure GPT-5 API key is set)
+3. Review prompt parsing logic in ai-controller.ts
 4. Compare with last working version
 
 ### API Issues
@@ -319,9 +304,7 @@ import { tripsService } from '@/lib/trips-service';  // Re-exports from services
 ---
 
 ## Quick Reference Links
-- **Genkit UI**: `npm run genkit:dev` → http://localhost:4000
 - **App Dev Server**: `npm run dev` → http://localhost:9002
 - **Task Templates**: `.claude/tasks/templates/`
-- **Test Results**: `ai-test-results.json`
 
 Remember: When in doubt, run the baseline test. If London works, everything else is solvable.

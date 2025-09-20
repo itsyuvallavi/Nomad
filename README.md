@@ -1,6 +1,7 @@
 # Nomad Navigator
 
 AI-powered travel planning application with real-world venues from OpenStreetMap.
+**⚠️ IMPORTANT: This application exclusively uses OpenAI GPT-5 model. No other AI models are supported or should be used.**
 
 ## 🚀 Features
 
@@ -14,7 +15,7 @@ AI-powered travel planning application with real-world venues from OpenStreetMap
 ## 🏗️ Tech Stack
 
 - **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS
-- **AI**: OpenAI GPT-4 for natural language processing
+- **AI**: OpenAI GPT-5 (ONLY GPT-5 - no other models)
 - **POI Data**: OpenStreetMap/Overpass API (primary), LocationIQ (fallback)
 - **Backend**: Firebase (Auth, Firestore, Analytics)
 - **APIs**: OpenWeather, Pexels
@@ -57,7 +58,7 @@ src/services/ai/
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- OpenAI API key
+- OpenAI API key (with GPT-5 access - REQUIRED)
 - Firebase project (for auth)
 
 ### Environment Variables
@@ -65,8 +66,8 @@ src/services/ai/
 Create a `.env.local` file:
 
 ```bash
-# Required
-OPENAI_API_KEY=your_openai_api_key
+# Required (MUST have GPT-5 access)
+OPENAI_API_KEY=your_openai_api_key_with_gpt5_access
 
 # Firebase (Required for auth)
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key

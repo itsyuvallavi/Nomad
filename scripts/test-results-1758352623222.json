@@ -1,0 +1,415 @@
+{
+  "timestamp": "2025-09-20T07:17:03.222Z",
+  "summary": {
+    "total": 18,
+    "successful": 14,
+    "failed": 4,
+    "errors": 0
+  },
+  "results": [
+    {
+      "prompt": "plan a 3 day trip to london",
+      "category": "Simple Direct",
+      "success": true,
+      "extracted": {
+        "destination": "london",
+        "duration": 3
+      },
+      "missing": [],
+      "responseTime": 2364
+    },
+    {
+      "prompt": "plan a 5 day trip to paris starting october 15",
+      "category": "Simple with Date",
+      "success": true,
+      "extracted": {
+        "destination": "Paris",
+        "startDate": "2025-10-15",
+        "duration": 5,
+        "endDate": "2025-10-19"
+      },
+      "missing": [],
+      "responseTime": 3
+    },
+    {
+      "prompt": "weekend trip to tokyo",
+      "category": "Weekend Trip",
+      "success": true,
+      "extracted": {
+        "destination": "tokyo",
+        "duration": 2
+      },
+      "missing": [],
+      "responseTime": 2240
+    },
+    {
+      "prompt": "plan a 3 day trip to londn",
+      "category": "Typos",
+      "success": true,
+      "extracted": {
+        "duration": 3,
+        "destination": "london"
+      },
+      "missing": [],
+      "responseTime": 4404
+    },
+    {
+      "prompt": "Paris",
+      "category": "Just Destination",
+      "success": true,
+      "extracted": {
+        "destination": "paris"
+      },
+      "missing": [],
+      "responseTime": 2945
+    },
+    {
+      "prompt": "5 days trip",
+      "category": "Just Duration",
+      "success": true,
+      "extracted": {
+        "duration": 5
+      },
+      "missing": [],
+      "responseTime": 1780
+    },
+    {
+      "prompt": "I want to visit Barcelona for a week in March",
+      "category": "Natural Language",
+      "success": true,
+      "extracted": {
+        "destination": "Barcelona",
+        "startDate": "2026-03-01",
+        "duration": 7,
+        "endDate": "2026-03-07"
+      },
+      "missing": [],
+      "responseTime": 1
+    },
+    {
+      "prompt": "trip to Rome from December 20 to December 27",
+      "category": "Date Range",
+      "success": true,
+      "extracted": {
+        "destination": "Rome",
+        "startDate": "2025-12-20",
+        "endDate": "2025-12-27",
+        "duration": 8
+      },
+      "missing": [],
+      "responseTime": 1
+    },
+    {
+      "prompt": "planning a trip to Dubai for 4 days with my wife and 2 kids",
+      "category": "With Travelers",
+      "success": true,
+      "extracted": {
+        "destination": "dubai",
+        "duration": 4,
+        "travelers": {
+          "adults": 2,
+          "children": 2
+        }
+      },
+      "missing": [],
+      "responseTime": 3840
+    },
+    {
+      "prompt": "quick trip to Amsterdam next month",
+      "category": "Vague Duration",
+      "success": true,
+      "extracted": {
+        "destination": "amsterdam",
+        "startDate": "2025-10-01"
+      },
+      "missing": [],
+      "responseTime": 5895
+    },
+    {
+      "prompt": "I want to visit London and Paris for 7 days total",
+      "category": "Multiple Destinations",
+      "success": true,
+      "extracted": {
+        "destination": "london and paris",
+        "duration": 7
+      },
+      "missing": [],
+      "responseTime": 5439
+    },
+    {
+      "prompt": "5d Paris trip on 15/3",
+      "category": "Mixed Format",
+      "success": true,
+      "extracted": {
+        "destination": "paris",
+        "duration": 5,
+        "startDate": "2026-03-15",
+        "endDate": "2026-03-19"
+      },
+      "missing": [],
+      "responseTime": 7236
+    },
+    {
+      "prompt": "viaje a México for cinco días",
+      "category": "Non-English Mix",
+      "success": true,
+      "extracted": {
+        "destination": "mexico",
+        "duration": 5
+      },
+      "missing": [],
+      "responseTime": 3492
+    },
+    {
+      "prompt": "family vacation to Bali from July 15-22 for 2 adults and 3 children, budget friendly with beach activities",
+      "category": "Full Details",
+      "success": false,
+      "extracted": {
+        "destination": "Bali",
+        "startDate": "2026-07-15",
+        "travelers": {
+          "adults": 2,
+          "children": 3
+        },
+        "endDate": "2026-07-22",
+        "preferences": {
+          "budget": "budget",
+          "interests": [
+            "beach activities"
+          ]
+        }
+      },
+      "missing": [
+        "duration"
+      ],
+      "responseTime": 9841
+    },
+    {
+      "prompt": "We are thinking about going somewhere warm in February, maybe 10 days, could be Caribbean or Southeast Asia",
+      "category": "Conversational",
+      "success": true,
+      "extracted": {
+        "startDate": "2026-02-01",
+        "duration": 10,
+        "endDate": "2026-02-10",
+        "preferences": {
+          "interests": [
+            "warm weather"
+          ]
+        }
+      },
+      "missing": [],
+      "responseTime": 6196
+    },
+    {
+      "prompt": "business trip to Singapore next quarter for conference, need 3 nights hotel near Marina Bay",
+      "category": "Business Trip",
+      "success": false,
+      "extracted": {
+        "destination": "Singapore",
+        "duration": 3
+      },
+      "missing": [
+        "preferences"
+      ],
+      "responseTime": 7980
+    },
+    {
+      "prompt": "somewhere nice for the holidays",
+      "category": "Ambiguous",
+      "success": false,
+      "extracted": {},
+      "missing": [
+        "preferences"
+      ],
+      "responseTime": 2001
+    },
+    {
+      "prompt": "So I was thinking, maybe it would be nice to take a trip, you know, somewhere interesting, perhaps Europe or Asia, I'm not really sure yet, but definitely want to go for about a week or so, maybe 8-9 days if we can manage it, and it should be sometime in the spring, like April or May when the weather is nice",
+      "category": "Very Long",
+      "success": false,
+      "extracted": {
+        "duration": 8
+      },
+      "missing": [
+        "startDate",
+        "preferences"
+      ],
+      "responseTime": 7301
+    }
+  ],
+  "testCases": [
+    {
+      "category": "Simple Direct",
+      "prompt": "plan a 3 day trip to london",
+      "expectedFields": {
+        "destination": true,
+        "duration": true
+      },
+      "complexity": "simple"
+    },
+    {
+      "category": "Simple with Date",
+      "prompt": "plan a 5 day trip to paris starting october 15",
+      "expectedFields": {
+        "destination": true,
+        "duration": true,
+        "startDate": true
+      },
+      "complexity": "simple"
+    },
+    {
+      "category": "Weekend Trip",
+      "prompt": "weekend trip to tokyo",
+      "expectedFields": {
+        "destination": true,
+        "duration": true
+      },
+      "complexity": "simple"
+    },
+    {
+      "category": "Natural Language",
+      "prompt": "I want to visit Barcelona for a week in March",
+      "expectedFields": {
+        "destination": true,
+        "duration": true,
+        "startDate": true
+      },
+      "complexity": "medium"
+    },
+    {
+      "category": "Date Range",
+      "prompt": "trip to Rome from December 20 to December 27",
+      "expectedFields": {
+        "destination": true,
+        "startDate": true,
+        "endDate": true,
+        "duration": true
+      },
+      "complexity": "medium"
+    },
+    {
+      "category": "With Travelers",
+      "prompt": "planning a trip to Dubai for 4 days with my wife and 2 kids",
+      "expectedFields": {
+        "destination": true,
+        "duration": true,
+        "travelers": true
+      },
+      "complexity": "medium"
+    },
+    {
+      "category": "Vague Duration",
+      "prompt": "quick trip to Amsterdam next month",
+      "expectedFields": {
+        "destination": true,
+        "startDate": true
+      },
+      "complexity": "medium"
+    },
+    {
+      "category": "Multiple Destinations",
+      "prompt": "I want to visit London and Paris for 7 days total",
+      "expectedFields": {
+        "destination": true,
+        "duration": true
+      },
+      "complexity": "medium"
+    },
+    {
+      "category": "Full Details",
+      "prompt": "family vacation to Bali from July 15-22 for 2 adults and 3 children, budget friendly with beach activities",
+      "expectedFields": {
+        "destination": true,
+        "startDate": true,
+        "endDate": true,
+        "duration": true,
+        "travelers": true,
+        "preferences": true
+      },
+      "complexity": "complex"
+    },
+    {
+      "category": "Conversational",
+      "prompt": "We are thinking about going somewhere warm in February, maybe 10 days, could be Caribbean or Southeast Asia",
+      "expectedFields": {
+        "duration": true,
+        "startDate": true,
+        "preferences": true
+      },
+      "complexity": "complex"
+    },
+    {
+      "category": "Business Trip",
+      "prompt": "business trip to Singapore next quarter for conference, need 3 nights hotel near Marina Bay",
+      "expectedFields": {
+        "destination": true,
+        "duration": true,
+        "preferences": true
+      },
+      "complexity": "complex"
+    },
+    {
+      "category": "Ambiguous",
+      "prompt": "somewhere nice for the holidays",
+      "expectedFields": {
+        "preferences": true
+      },
+      "complexity": "complex"
+    },
+    {
+      "category": "Typos",
+      "prompt": "plan a 3 day trip to londn",
+      "expectedFields": {
+        "destination": true,
+        "duration": true
+      },
+      "complexity": "simple"
+    },
+    {
+      "category": "Mixed Format",
+      "prompt": "5d Paris trip on 15/3",
+      "expectedFields": {
+        "destination": true,
+        "duration": true,
+        "startDate": true
+      },
+      "complexity": "medium"
+    },
+    {
+      "category": "Non-English Mix",
+      "prompt": "viaje a México for cinco días",
+      "expectedFields": {
+        "destination": true,
+        "duration": true
+      },
+      "complexity": "medium"
+    },
+    {
+      "category": "Very Long",
+      "prompt": "So I was thinking, maybe it would be nice to take a trip, you know, somewhere interesting, perhaps Europe or Asia, I'm not really sure yet, but definitely want to go for about a week or so, maybe 8-9 days if we can manage it, and it should be sometime in the spring, like April or May when the weather is nice",
+      "expectedFields": {
+        "duration": true,
+        "startDate": true,
+        "preferences": true
+      },
+      "complexity": "complex"
+    },
+    {
+      "category": "Just Destination",
+      "prompt": "Paris",
+      "expectedFields": {
+        "destination": true
+      },
+      "complexity": "simple"
+    },
+    {
+      "category": "Just Duration",
+      "prompt": "5 days trip",
+      "expectedFields": {
+        "duration": true
+      },
+      "complexity": "simple"
+    }
+  ]
+}
