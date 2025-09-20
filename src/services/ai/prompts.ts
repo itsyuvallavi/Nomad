@@ -91,7 +91,27 @@ OUTPUT FORMAT REQUIREMENTS:
     buildItineraryPrompt: (params: ItineraryPromptParams): string => {
       const { destination, duration, startDate, travelers, preferences, zoneGuidance } = params;
 
-      return `Create a ${duration}-day itinerary for ${destination} starting on ${startDate}.
+      // Check if this is a multi-city trip
+      const destinations = destination.split(',').map(d => d.trim());
+      const isMultiCity = destinations.length > 1;
+
+      let destinationInstructions = '';
+      if (isMultiCity) {
+        // Calculate days per city (roughly equal distribution)
+        const daysPerCity = Math.floor(duration / destinations.length);
+        const extraDays = duration % destinations.length;
+
+        destinationInstructions = `\nIMPORTANT: This is a multi-city trip. Distribute the ${duration} days as follows:\n`;
+        let currentDay = 1;
+        destinations.forEach((city, index) => {
+          const cityDays = daysPerCity + (index < extraDays ? 1 : 0);
+          destinationInstructions += `- Days ${currentDay}-${currentDay + cityDays - 1}: ${city} (${cityDays} days)\n`;
+          currentDay += cityDays;
+        });
+        destinationInstructions += `\nFor each city segment, mark activities with the city name.`;
+      }
+
+      return `Create a ${duration}-day itinerary for ${destination} starting on ${startDate}.${destinationInstructions}
 
 Travelers: ${travelers.adults} adults${travelers.children > 0 ? `, ${travelers.children} children` : ''}
 

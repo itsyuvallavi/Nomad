@@ -46,13 +46,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
+import { Timestamp } from 'firebase/firestore';
 import { tripsService, type Trip as FirestoreTrip } from '@/services/trips/trips-service';
 import { clearAllTrips } from '@/lib/helpers/clear-all-trips';
 
 // Use Trip type from trips service
-type Trip = Omit<FirestoreTrip, 'userId' | 'createdAt' | 'updatedAt'> & {
+type Trip = Omit<FirestoreTrip, 'userId' | 'createdAt' | 'updatedAt' | 'startDate' | 'endDate'> & {
   createdAt: Date;
   updatedAt: Date;
+  startDate?: Date;
+  endDate?: Date;
 };
 
 export default function TripsPage() {
@@ -84,8 +87,16 @@ export default function TripsPage() {
           ...trip,
           createdAt: trip.createdAt?.toDate() || new Date(),
           updatedAt: trip.updatedAt?.toDate() || new Date(),
-          startDate: trip.startDate ? new Date(trip.startDate) : undefined,
-          endDate: trip.endDate ? new Date(trip.endDate) : undefined
+          startDate: trip.startDate ? (
+            trip.startDate instanceof Timestamp
+              ? trip.startDate.toDate()
+              : new Date(trip.startDate)
+          ) : undefined,
+          endDate: trip.endDate ? (
+            trip.endDate instanceof Timestamp
+              ? trip.endDate.toDate()
+              : new Date(trip.endDate)
+          ) : undefined
         }));
         
         setTrips(convertedTrips);
@@ -225,7 +236,7 @@ export default function TripsPage() {
                 size="sm"
                 onClick={async () => {
                   if (confirm('Are you sure you want to delete ALL trips? This cannot be undone.')) {
-                    await clearAllTrips();
+                    clearAllTrips();
                   }
                 }}
               >
@@ -405,7 +416,7 @@ export default function TripsPage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                          {trip.startDate && trip.endDate && !isNaN(trip.startDate.getTime()) && !isNaN(trip.endDate.getTime()) && (
+                          {trip.startDate && trip.endDate && (
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
                               {format(trip.startDate, 'MMM d, yyyy')} - {format(trip.endDate, 'MMM d, yyyy')}

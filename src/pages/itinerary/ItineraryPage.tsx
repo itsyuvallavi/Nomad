@@ -96,8 +96,26 @@ export default function ChatDisplayV2({
     });
 
     // NEW: Conversation context for maintaining state
-    const [conversationContext, setConversationContext] = useState<string | undefined>(undefined);
-    const [sessionId] = useState<string>(`session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`);
+    // Load from localStorage on mount to persist across page refreshes
+    const [conversationContext, setConversationContext] = useState<string | undefined>(() => {
+        // Check if we're in browser environment
+        if (typeof window !== 'undefined') {
+            const storedContext = localStorage.getItem(`conversation-context-${searchId || currentSearchId.current}`);
+            if (storedContext) {
+                console.log('📚 Restored conversation context from localStorage');
+            }
+            return storedContext || undefined;
+        }
+        return undefined;
+    });
+    const [sessionId] = useState<string>(() => {
+        // Check if we're in browser environment
+        if (typeof window !== 'undefined') {
+            const storedSessionId = localStorage.getItem(`session-id-${searchId || currentSearchId.current}`);
+            return storedSessionId || `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+        }
+        return `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    });
     const [awaitingInput, setAwaitingInput] = useState<string | undefined>(undefined);
 
     // Swipe gestures for mobile tab switching
@@ -121,7 +139,7 @@ export default function ChatDisplayV2({
     });
 
     const currentSearchId = useRef(
-        tripContext?.tripId || searchId || `trip-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        tripContext?.tripId || searchId || `trip-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
     );
     const generationIdRef = useRef<string | null>(null);
     const generationStartTime = useRef<number>(0);
@@ -285,9 +303,15 @@ export default function ChatDisplayV2({
                 awaitingInput: response.awaitingInput
             });
 
-            // Update conversation context
+            // Update conversation context and persist to localStorage
             if (response.conversationContext) {
                 setConversationContext(response.conversationContext);
+                // Save to localStorage for persistence across page refreshes
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem(`conversation-context-${searchId || currentSearchId.current}`, response.conversationContext);
+                    localStorage.setItem(`session-id-${searchId || currentSearchId.current}`, sessionId);
+                    console.log('💾 Saved conversation context to localStorage');
+                }
             }
 
             // Handle different response types

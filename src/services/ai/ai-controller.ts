@@ -114,12 +114,25 @@ export class AIController {
     message: string,
     serializedContext?: string
   ): Promise<AIControllerResponse> {
-    logger.info('AI', 'Processing message', { message: message.slice(0, 100) });
+    logger.info('AI', 'Processing message', {
+      message: message.slice(0, 100),
+      hasContext: !!serializedContext,
+      contextSize: serializedContext?.length || 0
+    });
 
     // Restore or create context
     const context = serializedContext
       ? this.deserializeContext(serializedContext)
       : this.createNewContext();
+
+    // Log context state for debugging
+    console.log('🧠 Conversation Context:', {
+      sessionId: context.sessionId,
+      state: context.state,
+      messageCount: context.messages.length,
+      currentIntent: context.intent,
+      lastUpdated: context.lastUpdated
+    });
 
     // Add user message to history
     context.messages.push({
@@ -127,6 +140,16 @@ export class AIController {
       content: message,
       timestamp: new Date()
     });
+
+    // Limit conversation history to prevent context from growing too large
+    const MAX_MESSAGES = 20; // Keep last 10 exchanges (20 messages total)
+    if (context.messages.length > MAX_MESSAGES) {
+      // Keep the first message (initial prompt) and the most recent messages
+      const firstMessage = context.messages[0];
+      const recentMessages = context.messages.slice(-MAX_MESSAGES + 1);
+      context.messages = [firstMessage, ...recentMessages];
+      console.log(`📚 Trimmed conversation history to ${MAX_MESSAGES} messages`);
+    }
 
     // Analyze user input and update intent
     const updatedIntent = await this.analyzeUserInput(message, context.intent);
@@ -176,7 +199,7 @@ export class AIController {
 
   /**
    * Analyzes user input to extract travel information
-   * Uses pattern matching first, then GPT-5 for complex cases
+   * Uses pattern matching first, then GPT-4o-mini for complex cases
    */
   private async analyzeUserInput(
     message: string,
@@ -192,7 +215,7 @@ export class AIController {
 
     // ALWAYS try pattern-based extraction first (FAST)
     console.log('\n   🔍 PATTERN EXTRACTION:');
-    const patternResult = this.extractWithPatterns(message);
+    const patternResult = this.extractWithPatterns(message, currentIntent);
     console.log(`      Destination: ${patternResult.destination || 'not found'}`);
     console.log(`      Duration: ${patternResult.duration || 'not found'}`);
     console.log(`      Start Date: ${patternResult.startDate || 'not found'}`);
@@ -201,30 +224,36 @@ export class AIController {
     // If patterns got everything we need, return immediately
     if (patternResult.destination && patternResult.duration &&
         (patternResult.startDate || patternResult.endDate)) {
-      console.log('      ✅ Complete extraction via patterns (skipping GPT-5)');
+      console.log('      ✅ Complete extraction via patterns (skipping GPT-4o-mini)');
       this.addToCache(cacheKey, patternResult);
       return patternResult;
     }
-    console.log('      ⚠️  Missing fields, using GPT-5 for completion');
+    console.log('      ⚠️  Missing fields, using GPT-4o-mini for completion');
 
-    // For missing fields or complex cases, use GPT-5 and merge results
+    // For missing fields or complex cases, use GPT-4o-mini and merge results
     const today = new Date().toISOString().split('T')[0];
     const currentYear = new Date().getFullYear();
     const nextYear = currentYear + 1;
+
+    // Check if this is a modification/extension request
+    const isExtensionRequest = /add\s+\d+\s+days?\s+in|extend.*trip|add.*to.*trip|after.*trip/i.test(message);
 
     const prompt = `Extract travel information from the user message and return ONLY valid JSON.
 
 Current date: ${today}
 Current year: ${currentYear}
 User message: "${message}"
+${currentIntent ? `Current trip: ${currentIntent.destination || 'unknown'} for ${currentIntent.duration || 'unknown'} days` : ''}
+${isExtensionRequest ? 'IMPORTANT: This is an EXTENSION to the current trip. Combine destinations.' : ''}
 
 Extract these fields (omit if not mentioned):
-- destination: string (city/country name)
-- duration: number (days, "weekend"=2, "week"=7)
+- destination: string (city/country name${isExtensionRequest && currentIntent?.destination ? ', combine with existing: "' + currentIntent.destination + ', NewCity"' : ''})
+- duration: number (days${isExtensionRequest && currentIntent?.duration ? ', add to existing ' + currentIntent.duration : ''}, "weekend"=2, "week"=7)
 - startDate: string (YYYY-MM-DD format)
 - endDate: string (YYYY-MM-DD format)
 - travelers: {adults: number, children: number}
 - preferences: {budget: "budget"|"mid"|"luxury", interests: string[], pace: "relaxed"|"moderate"|"packed"}
+- modificationRequest: string (if this is modifying/extending an existing trip)
 
 Date parsing rules:
 - "next month" = first day of next month
@@ -245,16 +274,20 @@ Output: {"destination":"tokyo","duration":2}
 RETURN ONLY THE JSON OBJECT, NO OTHER TEXT:`;
 
     try {
-      // Use low reasoning effort for simple extraction
-      const response = await this.openai.responses.create({
-        model: 'gpt-5',
-        reasoning: { effort: 'low' },
-        input: prompt
+      // Use GPT-4o-mini for extraction
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'Extract travel information and return ONLY valid JSON.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 500
       });
 
-      const content = response.output_text;
+      const content = response.choices[0].message.content;
       if (!content) {
-        logger.warn('AI', 'No response from GPT-5');
+        logger.warn('AI', 'No response from GPT-4o-mini');
         return {};
       }
 
@@ -301,14 +334,47 @@ RETURN ONLY THE JSON OBJECT, NO OTHER TEXT:`;
         return await this.analyzeWithSimplePrompt(message);
       }
 
+      // Handle extension/modification requests
+      if (isExtensionRequest && currentIntent && extracted) {
+        console.log('   🔄 EXTENSION REQUEST DETECTED');
+
+        // If this is an extension, combine destinations
+        if (extracted.destination && currentIntent.destination) {
+          // Check if the new destination is already in the list
+          const existingDests = currentIntent.destination.split(',').map(d => d.trim().toLowerCase());
+          const newDest = extracted.destination.trim();
+
+          // Only add if not already in the list (case-insensitive)
+          if (!existingDests.includes(newDest.toLowerCase())) {
+            // Use the existing destination without duplicates
+            const cleanExisting = [...new Set(currentIntent.destination.split(',').map(d => d.trim()))].join(', ');
+            extracted.destination = `${cleanExisting}, ${newDest}`;
+            console.log(`      Combined destinations: ${extracted.destination}`);
+          } else {
+            // Keep existing if trying to add duplicate
+            extracted.destination = currentIntent.destination;
+          }
+        }
+
+        // Add durations if extending
+        if (extracted.duration && currentIntent.duration) {
+          const additionalDays = extracted.duration;
+          extracted.duration = currentIntent.duration + additionalDays;
+          console.log(`      Extended duration: ${currentIntent.duration} + ${additionalDays} = ${extracted.duration} days`);
+        }
+
+        // Mark as modification
+        extracted.modificationRequest = message;
+      }
+
       // Validate and clean extracted data
       const cleaned = this.validateExtractedIntent(extracted);
 
-      // MERGE pattern results with GPT-5 results
-      // IMPORTANT: Only override if GPT-5 actually has a value (not undefined)
+      // MERGE pattern results with GPT-4o-mini results
+      // IMPORTANT: Only override if GPT-4o-mini actually has a value (not undefined)
       const merged: Partial<ParsedIntent> = { ...patternResult };
 
-      // Only copy GPT-5 fields that are actually present
+      // Only copy GPT-4o-mini fields that are actually present
       if (cleaned.destination !== undefined) merged.destination = cleaned.destination;
       if (cleaned.duration !== undefined) merged.duration = cleaned.duration;
       if (cleaned.startDate !== undefined) merged.startDate = cleaned.startDate;
@@ -316,7 +382,7 @@ RETURN ONLY THE JSON OBJECT, NO OTHER TEXT:`;
       if (cleaned.travelers !== undefined) merged.travelers = cleaned.travelers;
       if (cleaned.preferences !== undefined) merged.preferences = cleaned.preferences;
 
-      logger.info('AI', 'Merged pattern and GPT-5 results');
+      logger.info('AI', 'Merged pattern and GPT-4o-mini results');
 
       // Cache the merged result
       this.addToCache(cacheKey, merged);
@@ -487,7 +553,7 @@ RETURN ONLY THE JSON OBJECT, NO OTHER TEXT:`;
         .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')  // Quote keys
         .replace(/'([^']*)'/g, '"$1"');  // Single to double quotes
 
-      // Pass 2: Fix missing commas (common GPT-5 issue)
+      // Pass 2: Fix missing commas (common GPT issue)
       json = json
         .replace(/("[^"]*")\s+("[^"]*":)/g, '$1, $2')  // Between strings
         .replace(/(\d)\s+("[^"]*":)/g, '$1, $2')  // After numbers
@@ -557,13 +623,17 @@ Now extract from: "${message}"
 JSON:`;
 
     try {
-      const response = await this.openai.responses.create({
-        model: 'gpt-5',
-        reasoning: { effort: 'low' }, // Minimal reasoning for retry
-        input: simplePrompt
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'Extract travel information and return ONLY valid JSON.' },
+          { role: 'user', content: simplePrompt }
+        ],
+        temperature: 0.2,
+        max_tokens: 300
       });
 
-      const content = response.output_text?.trim();
+      const content = response.choices[0].message.content?.trim();
       if (!content) return {};
 
       // Try direct parse
@@ -818,15 +888,26 @@ JSON:`;
   /**
    * Pattern-based extraction as last resort
    */
-  private extractWithPatterns(message: string): Partial<ParsedIntent> {
+  private extractWithPatterns(message: string, currentIntent?: ParsedIntent): Partial<ParsedIntent> {
     const result: Partial<ParsedIntent> = {};
     const lower = message.toLowerCase();
 
+    // Check if this is an extension request
+    const isExtensionRequest = /add\s+\d+\s+days?\s+in|extend.*trip|add.*to.*trip|after.*trip/i.test(message);
+
     // Extract destination (common cities)
-    const cities = ['london', 'paris', 'tokyo', 'rome', 'barcelona', 'dubai', 'singapore', 'bali', 'amsterdam', 'lisbon', 'mexico', 'méxico'];
+    const cities = ['london', 'paris', 'tokyo', 'rome', 'barcelona', 'dubai', 'singapore', 'bali', 'amsterdam', 'lisbon', 'mexico', 'méxico', 'athens', 'tel aviv', 'madrid'];
     for (const city of cities) {
       if (lower.includes(city)) {
-        result.destination = city.charAt(0).toUpperCase() + city.slice(1);
+        const foundCity = city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+        // If this is an extension and we already have a destination, combine them
+        if (isExtensionRequest && currentIntent?.destination) {
+          result.destination = `${currentIntent.destination}, ${foundCity}`;
+          result.modificationRequest = message;
+        } else {
+          result.destination = foundCity;
+        }
         break;
       }
     }
@@ -861,7 +942,12 @@ JSON:`;
       if (!result.duration) {
         const duration = this.extractDuration(message);
         if (duration) {
-          result.duration = duration;
+          // If this is an extension, add to existing duration
+          if (isExtensionRequest && currentIntent?.duration) {
+            result.duration = currentIntent.duration + duration;
+          } else {
+            result.duration = duration;
+          }
         }
       }
     }

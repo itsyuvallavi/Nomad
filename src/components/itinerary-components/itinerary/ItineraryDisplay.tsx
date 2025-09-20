@@ -202,7 +202,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
   const locations = Object.keys(daysByLocation);
   const [selectedLocation, setSelectedLocation] = useState(locations[0] || '');
   
-  // Log destination detection for debugging
+  // Log destination detection for debugging (only on destination change)
   useEffect(() => {
     logger.debug('SYSTEM', 'Destination Analysis in ItineraryPanel', {
       rawDestination: itinerary.destination,
@@ -215,7 +215,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
         endDay: data.endDay
       }))
     });
-  }, [itinerary.destination, daysByLocation, locations]);
+  }, [itinerary.destination]); // Only log when destination actually changes
   
   // Fetch images for each destination from Pexels
   useEffect(() => {

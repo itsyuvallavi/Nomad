@@ -114,7 +114,8 @@ export async function withRetry<T>(
           error: error.message,
           attempts: finalConfig.maxAttempts
         });
-        throw error;
+        // Re-throw the last error after all attempts are exhausted
+        throw lastError;
       }
       
       // Calculate backoff delay
@@ -134,6 +135,8 @@ export async function withRetry<T>(
     }
   }
   
+  // This line should not be reachable if the loop always throws on the last attempt,
+  // but it's here as a fallback and to satisfy TypeScript's strict checking.
   throw lastError || new Error('Retry failed without a specific error.');
 }
 

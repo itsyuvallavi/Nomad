@@ -110,11 +110,11 @@ export function ChatPanel({
                 {/* Enhanced metadata display for Phase 3 */}
                 {'metadata' in message && message.metadata && showMetadata && (
                   <div className="mt-2 pt-2 border-t border-border/30 space-y-1">
-                    {message.metadata.classification && (
+                    {message.metadata.responseType && (
                       <div className="flex items-center gap-2 text-xs">
                         <MessageCircle size={10} />
                         <span className="text-muted-foreground">
-                          Type: {message.metadata.classification.type}
+                          Type: {message.metadata.responseType}
                         </span>
                         {message.metadata.confidence && (
                           <Badge variant="secondary" className="text-xs px-1.5 py-0">

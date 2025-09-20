@@ -80,6 +80,10 @@ class HEREPlacesService {
         apiKey: this.apiKey || '',
         q: query,
         limit: String(options.limit || 5),
+        // Force English language for addresses
+        lang: 'en-US',
+        // Show full address details
+        show: 'streetInfo,countryInfo'
       });
 
       // Add location context

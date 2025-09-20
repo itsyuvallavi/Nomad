@@ -187,7 +187,7 @@ export class TripGenerator {
     try {
       // Step 1: Generate the base itinerary with zone-based planning
       const genStart = Date.now();
-      console.log('\n   🏗️  Generating base itinerary with GPT-3.5...');
+      console.log('\n   🏗️  Generating base itinerary with GPT-4o-mini...');
       const itinerary = await this.generateBaseItinerary(params);
       console.log(`      Base generation time: ${Date.now() - genStart}ms`);
       console.log(`      Days created: ${itinerary.itinerary?.length || 0}`);
@@ -236,10 +236,15 @@ export class TripGenerator {
       zoneGuidance
     });
 
-    // Generate with GPT-3.5-turbo (much faster than GPT-5 responses API)
+    // Check if this is a multi-city trip to adjust token limits
+    const destinations = params.destination.split(',').map(d => d.trim());
+    const isMultiCity = destinations.length > 1;
+    const maxTokens = isMultiCity ? 6000 : 4000; // More tokens for multi-city
+
+    // Generate with GPT-4o-mini (better quality and faster than GPT-3.5)
     const startGPT = Date.now();
     const response = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo-16k', // Using 16k variant for longer itineraries
+      model: 'gpt-4o-mini', // Using GPT-4o-mini for better quality
       messages: [
         {
           role: 'system',
@@ -251,9 +256,9 @@ export class TripGenerator {
         }
       ],
       temperature: 0.7,
-      max_tokens: 4000
+      max_tokens: maxTokens
     });
-    logger.info('AI', 'GPT-3.5-turbo response received', { time: `${Date.now() - startGPT}ms` });
+    logger.info('AI', 'GPT-4o-mini response received', { time: `${Date.now() - startGPT}ms` });
 
     const content = response.choices[0].message.content;
     if (!content) {
@@ -341,7 +346,7 @@ export class TripGenerator {
 
         try {
           const retryResponse = await this.openai.chat.completions.create({
-            model: 'gpt-3.5-turbo-16k',
+            model: 'gpt-4o-mini',
             messages: [
               {
                 role: 'system',
@@ -690,49 +695,53 @@ export class TripGenerator {
       const places = results.get(queryWithCity);
 
       if (places && places.length > 0) {
-        // Try to find a place in the correct city/country
-        let bestPlace = places[0];
-        const cityLower = itinerary.destination.toLowerCase();
+        // Get city center coordinates from zones or use a default
+        const cityCenterCoords = zones[0]?.coordinates || { lat: 0, lng: 0 };
 
-        // Country mappings for common destinations
-        const countryMap: Record<string, string[]> = {
-          madrid: ['españa', 'spain', 'madrid'],
-          barcelona: ['españa', 'spain', 'barcelona', 'catalunya'],
-          paris: ['france', 'paris', 'île-de-france'],
-          lisbon: ['portugal', 'lisboa', 'lisbon'],
-          rome: ['italia', 'italy', 'roma'],
-          london: ['united kingdom', 'london', 'england'],
-        };
+        // Calculate distances and filter venues
+        const placesWithDistance = places.map(place => ({
+          place,
+          distance: this.calculateDistance(
+            place.position.lat,
+            place.position.lng,
+            cityCenterCoords.lat,
+            cityCenterCoords.lng
+          )
+        }));
 
-        const expectedTerms = countryMap[cityLower] || [cityLower];
+        // Sort by distance and filter out venues too far away
+        const MAX_DISTANCE_KM = 30; // Maximum 30km from city center
+        const validPlaces = placesWithDistance
+          .filter(({ distance }) => distance < MAX_DISTANCE_KM)
+          .sort((a, b) => a.distance - b.distance);
 
-        // Filter to only places in the correct city/country
-        const validPlaces = places.filter(place => {
-          const address = place.address.label.toLowerCase();
-          return expectedTerms.some(term => address.includes(term));
-        });
-
-        // Use the first valid place, or fallback to original if none found
         if (validPlaces.length > 0) {
-          bestPlace = validPlaces[0];
-        } else {
-          // If no valid places, at least try to avoid obviously wrong countries
-          for (const place of places) {
-            const address = place.address.label;
-            // Skip if it contains wrong country indicators
-            if (!address.includes('Colombia') &&
-                !address.includes('België') &&
-                !address.includes('Србија') &&
-                !address.includes('Australia')) {
-              bestPlace = place;
-              break;
-            }
-          }
-        }
+          const bestPlace = validPlaces[0].place;
+          const activity = itinerary.itinerary![dayIndex].activities![activityIndex];
 
-        const activity = itinerary.itinerary![dayIndex].activities![activityIndex];
-        activity.venue_name = bestPlace.name;
-        activity.address = bestPlace.address.label;
+          // Ensure address is in English and properly formatted
+          let address = bestPlace.address.label;
+
+          // If address doesn't contain city name, add it
+          if (!address.toLowerCase().includes(itinerary.destination.toLowerCase())) {
+            address = `${address}, ${itinerary.destination}`;
+          }
+
+          activity.venue_name = bestPlace.name;
+          activity.address = address;
+
+          logger.info('AI', 'Found valid venue', {
+            venue: bestPlace.name,
+            distance: `${validPlaces[0].distance.toFixed(1)}km`,
+            address: address.substring(0, 50)
+          });
+        } else {
+          logger.warn('AI', 'No valid venues found within city bounds', {
+            query: queryWithCity,
+            totalResults: places.length,
+            destination: itinerary.destination
+          });
+        }
       }
     });
 
@@ -790,6 +799,35 @@ export class TripGenerator {
   }
 
   /**
+   * Calculate distance between two coordinates in kilometers
+   * Using Haversine formula
+   */
+  private calculateDistance(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number
+  ): number {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLng = this.toRadians(lng2 - lng1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) *
+      Math.cos(this.toRadians(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
+  /**
    * Find which zone a day's activities are in
    */
   private findDayZone(day: any, zones: Zone[]): Zone | null {
@@ -837,10 +875,37 @@ export class TripGenerator {
         params.preferences?.budget || 'mid'
       );
 
-      // Store costs in a separate variable if needed
-      // but don't add to the return type as it doesn't exist in schema
-      logger.info('AI', 'Trip costs estimated', costs);
-      return itinerary;
+      // Add cost estimates to the itinerary as a custom property
+      const itineraryWithCosts = {
+        ...itinerary,
+        _costEstimate: {
+          total: costs.total || 0,
+          flights: costs.flights || 0,
+          accommodation: costs.hotels || costs.accommodation || 0,
+          dailyExpenses: costs.dailyExpenses || 0,
+          currency: 'USD',
+          breakdown: [
+            {
+              type: 'flights',
+              description: 'Round-trip flights',
+              amount: costs.flights || 0
+            },
+            {
+              type: 'accommodation',
+              description: `${params.duration} nights accommodation`,
+              amount: costs.hotels || costs.accommodation || 0
+            },
+            {
+              type: 'daily',
+              description: 'Food, transport, activities',
+              amount: costs.dailyExpenses || 0
+            }
+          ]
+        }
+      } as any;
+
+      logger.info('AI', 'Trip costs added to itinerary', costs);
+      return itineraryWithCosts;
     } catch (error) {
       logger.warn('AI', 'Cost estimation failed', error);
       return itinerary;
@@ -870,7 +935,7 @@ export class TripGenerator {
 
     try {
       const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: 'You are a travel cost estimator. Return only JSON.' },
           { role: 'user', content: prompt }

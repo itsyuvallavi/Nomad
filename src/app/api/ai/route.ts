@@ -182,8 +182,8 @@ export async function POST(request: NextRequest) {
     }
     console.log('='.repeat(80) + '\n');
 
-    // Check for timeout
-    if (error.name === 'AbortError' || errorTime > 25000) {
+    // Check for timeout (increased to 45 seconds for multi-city trips)
+    if (error.name === 'AbortError' || errorTime > 45000) {
       return NextResponse.json({
         success: false,
         error: 'Request timed out. Please try again with a simpler request.',
