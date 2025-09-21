@@ -63,10 +63,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     setValue,
     watch
   } = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema)
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      acceptTerms: false
+    }
   });
 
-  const acceptTerms = watch('acceptTerms');
+  const acceptTerms = watch('acceptTerms', false);
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);

@@ -105,21 +105,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createUserDocument = async (user: User, additionalData: any = {}) => {
     const userRef = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userRef);
-    
+
     if (!userSnap.exists()) {
-      const userData: Omit<UserData, 'uid'> = {
+      const userData: any = {
         email: user.email!,
         displayName: user.displayName || additionalData.displayName || '',
-        photoURL: user.photoURL || undefined,
-        createdAt: serverTimestamp() as Timestamp,
-        lastLoginAt: serverTimestamp() as Timestamp,
+        createdAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp(),
         preferences: defaultPreferences,
         stats: {
           totalTripsPlanned: 0,
           favoriteDestinations: []
         }
       };
-      
+
+      // Only add photoURL if it exists
+      if (user.photoURL) {
+        userData.photoURL = user.photoURL;
+      }
+
       await setDoc(userRef, userData);
       console.log('✅ User document created');
     } else {
@@ -148,20 +152,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Sign up with email and password
   const signUp = async (email: string, password: string, displayName: string): Promise<UserCredential> => {
+    console.log('📝 Attempting sign up for:', email);
+    console.log('🔑 Auth configuration:', {
+      projectId: auth.app.options.projectId,
+      authDomain: auth.app.options.authDomain,
+      apiKey: auth.app.options.apiKey ? '✅ Present' : '❌ Missing'
+    });
+
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      
+      console.log('✅ Account created successfully');
+
       // Update the user's display name
       await updateProfile(result.user, { displayName });
-      
+      console.log('✅ Display name updated');
+
       // Create user document
       await createUserDocument(result.user, { displayName });
-      
+
       console.log('✅ User signed up successfully');
       return result;
     } catch (error: any) {
-      console.error('Sign up error:', error);
-      
+      console.error('❌ Sign up error:', {
+        code: error.code,
+        message: error.message,
+        details: error
+      });
+
       if (error.code === 'auth/configuration-not-found') {
         throw new Error('Authentication is not properly configured. Please contact support.');
       } else if (error.code === 'auth/email-already-in-use') {
@@ -173,32 +190,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if (error.code === 'auth/weak-password') {
         throw new Error('Password should be at least 6 characters.');
       }
-      
+
       throw error;
     }
   };
 
   // Sign in with email and password
   const signIn = async (email: string, password: string): Promise<UserCredential> => {
+    console.log('🔐 Attempting sign in for:', email);
+    console.log('🔑 Auth configuration:', {
+      projectId: auth.app.options.projectId,
+      authDomain: auth.app.options.authDomain,
+      apiKey: auth.app.options.apiKey ? '✅ Present' : '❌ Missing'
+    });
+
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      
+      console.log('✅ Sign in successful, user:', result.user.email);
+
       // Update last login time
       await updateDoc(doc(db, 'users', result.user.uid), {
         lastLoginAt: serverTimestamp()
       });
-      
+
       console.log('✅ User signed in successfully');
       return result;
     } catch (error: any) {
-      console.error('Sign in error:', error);
-      
+      console.error('❌ Sign in error:', {
+        code: error.code,
+        message: error.message,
+        details: error
+      });
+
       if (error.code === 'auth/configuration-not-found') {
         throw new Error('Authentication is not properly configured. Please contact support.');
       } else if (error.code === 'auth/user-not-found') {
         throw new Error('No account found with this email address.');
-      } else if (error.code === 'auth/wrong-password') {
-        throw new Error('Incorrect password.');
+      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        throw new Error('Incorrect email or password.');
       } else if (error.code === 'auth/invalid-email') {
         throw new Error('Please enter a valid email address.');
       } else if (error.code === 'auth/user-disabled') {
@@ -206,21 +235,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else if (error.code === 'auth/too-many-requests') {
         throw new Error('Too many failed login attempts. Please try again later.');
       }
-      
+
       throw error;
     }
   };
 
-  // Sign in with Google using Redirect flow
+  // Sign in with Google using Popup flow (better for Firebase IDE)
   const signInWithGoogle = async (): Promise<void> => {
-    console.log('🚀 Starting Google sign-in with redirect...');
+    console.log('🚀 Starting Google sign-in...');
     try {
       await setPersistence(auth, browserLocalPersistence);
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithRedirect(auth, provider);
+
+      // Try popup first (works better in Firebase IDE)
+      try {
+        console.log('📱 Attempting popup sign-in...');
+        const result = await signInWithPopup(auth, provider);
+        console.log('✅ Google sign-in successful via popup');
+
+        // Create/update user document
+        await createUserDocument(result.user);
+        const data = await fetchUserData(result.user.uid);
+        setUserData(data);
+
+        return;
+      } catch (popupError: any) {
+        console.log('⚠️ Popup blocked or failed:', popupError.code);
+
+        // If popup fails, fall back to redirect
+        if (popupError.code === 'auth/popup-blocked' ||
+            popupError.code === 'auth/cancelled-popup-request') {
+          console.log('🔄 Falling back to redirect sign-in...');
+          await signInWithRedirect(auth, provider);
+        } else {
+          throw popupError;
+        }
+      }
     } catch (error: any) {
-      console.error('❌ Google sign-in redirect error:', error);
+      console.error('❌ Google sign-in error:', error);
       throw error;
     }
   };
