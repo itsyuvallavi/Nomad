@@ -631,12 +631,17 @@ export class TripGenerator {
       return itinerary;
     }
 
+    // Handle multi-city trips by parsing destinations
+    const destinations = itinerary.destination.split(',').map(d => d.trim());
+    const isMultiCity = destinations.length > 1;
+
     const cityLower = itinerary.destination.toLowerCase();
     const zones = CITY_ZONES[cityLower] || [];
     const cityCenter = zones[0]?.coordinates || { lat: 0, lng: 0 };
 
     logger.info('AI', 'Starting HERE enrichment', {
       destination: itinerary.destination,
+      destinations: isMultiCity ? destinations : undefined,
       days: itinerary.itinerary.length,
       hasZones: zones.length > 0
     });
@@ -647,27 +652,49 @@ export class TripGenerator {
       activityIndex: number;
       description: string;
       zone?: Zone;
+      city: string;
     }> = [];
 
     itinerary.itinerary.forEach((day, dayIndex) => {
+      // Detect which city this day belongs to
+      let dayCity = itinerary.destination; // Default to full destination
+
+      if (isMultiCity) {
+        // Try to extract city from day title (e.g., "Day 1 - London")
+        const titleMatch = day.title?.match(/Day \d+ - (.+?)(?:\s|$)/);
+        if (titleMatch) {
+          dayCity = titleMatch[1].trim();
+        } else {
+          // Fallback: check activities for city mentions
+          const activityText = day.activities?.map(a => a.description + ' ' + (a.address || '')).join(' ').toLowerCase() || '';
+          for (const dest of destinations) {
+            if (activityText.includes(dest.toLowerCase())) {
+              dayCity = dest;
+              break;
+            }
+          }
+        }
+      }
+
       const dayZone = this.findDayZone(day, zones);
       day.activities?.forEach((activity, activityIndex) => {
         allActivities.push({
           dayIndex,
           activityIndex,
           description: activity.description,
-          zone: dayZone || zones[0]
+          zone: dayZone || zones[0],
+          city: dayCity
         });
       });
     });
 
     // Batch search with HERE (much faster than individual calls)
-    const queries = allActivities.map(({ description, zone }) => {
+    const queries = allActivities.map(({ description, zone, city }) => {
       // Extract key terms for better search results
       const searchQuery = this.extractSearchQuery(description);
 
       // IMPORTANT: Always include city name to avoid wrong results
-      const queryWithCity = `${searchQuery} ${itinerary.destination}`;
+      const queryWithCity = `${searchQuery} ${city}`;
 
       return {
         query: queryWithCity,
@@ -689,9 +716,9 @@ export class TripGenerator {
     });
 
     // Apply results back to itinerary
-    allActivities.forEach(({ dayIndex, activityIndex, description }) => {
+    allActivities.forEach(({ dayIndex, activityIndex, description, city }) => {
       const searchQuery = this.extractSearchQuery(description);
-      const queryWithCity = `${searchQuery} ${itinerary.destination}`;
+      const queryWithCity = `${searchQuery} ${city}`;
       const places = results.get(queryWithCity);
 
       if (places && places.length > 0) {

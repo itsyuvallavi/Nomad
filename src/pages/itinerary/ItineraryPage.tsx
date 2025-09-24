@@ -25,13 +25,13 @@ import { Button } from '@/components/ui/button';
 import type { RecentSearch, ChatState } from '@/app/page';
 import { ChatPanel } from '@/components/itinerary-components/chat/ChatPanel';
 import { ItineraryPanel } from '@/components/itinerary-components/itinerary/ItineraryDisplay';
-import { cn } from '@/lib/helpers/general';
+// import { cn } from '@/lib/helpers/general';  // Commented out - not used
 import { ModernLoadingPanel } from '@/components/itinerary-components/chat/LoadingProgress';
 import { ErrorDialog } from '@/components/ui/error-dialog';
 import { logger } from '@/lib/monitoring/logger';
-import { getDraftManager } from '@/services/trips/draft-manager';
+// import { getDraftManager } from '@/services/trips/draft-manager';  // Commented out - not used
 import { retryApiCall } from '@/lib/utils/retry';
-import { handleError, ErrorCategory } from '@/lib/monitoring/error-handler';
+// import { handleError, ErrorCategory } from '@/lib/monitoring/error-handler';  // Commented out - not used
 import { offlineStorage } from '@/services/storage/offline-storage';
 // Conditional auth import to handle SSR
 let useAuth: any;
@@ -62,10 +62,14 @@ type ChatDisplayProps = {
     tripContext?: TripContext;
 };
 
-type ProgressStage = 'understanding' | 'planning' | 'generating' | 'finalizing';
+// Extended progress stage to include 'analyzing' for streaming
+type ExtendedProgressStage = 'understanding' | 'planning' | 'generating' | 'finalizing' | 'analyzing';
+
+// Map to standard stages for the ModernLoadingPanel component
+type StandardProgressStage = 'understanding' | 'planning' | 'generating' | 'finalizing';
 
 interface GenerationProgress {
-    stage: ProgressStage;
+    stage: ExtendedProgressStage;
     percentage: number;
     message: string;
     estimatedTimeRemaining?: number;
@@ -75,7 +79,7 @@ export default function ChatDisplayV2({
     initialPrompt,
     savedChatState,
     searchId,
-    onError,
+    // onError,  // Commented out - not used
     onReturn,
     tripContext,
 }: ChatDisplayProps) {
@@ -84,23 +88,26 @@ export default function ChatDisplayV2({
     const [userInput, setUserInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentItinerary, setCurrentItinerary] = useState<GeneratePersonalizedItineraryOutput | null>(savedChatState?.itinerary || null);
-    const [firestoreTripId, setFirestoreTripId] = useState<string | null>(tripContext?.tripId || null);
+    const [firestoreTripId] = useState<string | null>(tripContext?.tripId || null);
     const [errorDialogOpen, setErrorDialogOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [mobileActiveTab, setMobileActiveTab] = useState<'chat' | 'itinerary'>('chat');
     const [showShortcuts, setShowShortcuts] = useState(false);
     const [generationProgress, setGenerationProgress] = useState<GenerationProgress>({
-        stage: 'understanding',
+        stage: 'understanding' as ExtendedProgressStage,
         percentage: 0,
         message: 'Understanding your request...'
     });
+    // Track progressive building of itinerary
+    const [partialItinerary, setPartialItinerary] = useState<any>(null);
+    const [, setGenerationMetadata] = useState<any>(null); // Stored for potential future use
 
     // NEW: Conversation context for maintaining state
     // Load from localStorage on mount to persist across page refreshes
     const [conversationContext, setConversationContext] = useState<string | undefined>(() => {
         // Check if we're in browser environment
-        if (typeof window !== 'undefined') {
-            const storedContext = localStorage.getItem(`conversation-context-${searchId || currentSearchId.current}`);
+        if (typeof window !== 'undefined' && searchId) {
+            const storedContext = localStorage.getItem(`conversation-context-${searchId}`);
             if (storedContext) {
                 console.log('📚 Restored conversation context from localStorage');
             }
@@ -110,8 +117,8 @@ export default function ChatDisplayV2({
     });
     const [sessionId] = useState<string>(() => {
         // Check if we're in browser environment
-        if (typeof window !== 'undefined') {
-            const storedSessionId = localStorage.getItem(`session-id-${searchId || currentSearchId.current}`);
+        if (typeof window !== 'undefined' && searchId) {
+            const storedSessionId = localStorage.getItem(`session-id-${searchId}`);
             return storedSessionId || `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
         }
         return `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -212,6 +219,355 @@ export default function ChatDisplayV2({
     };
 
     /**
+     * Handle polling-based progressive response (Firebase-compatible)
+     */
+    const handlePollingResponse = async (
+        message: string,
+        conversationContext: string | undefined,
+        sessionId: string
+    ): Promise<ConversationalItineraryOutput> => {
+        // Start generation
+        const startResponse = await fetch('/api/ai/progressive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message,
+                conversationContext,
+                sessionId
+            })
+        });
+
+        if (!startResponse.ok) {
+            throw new Error('Failed to start generation');
+        }
+
+        const { data } = await startResponse.json();
+        const generationId = data.generationId;
+
+        // Poll for progress
+        let attempts = 0;
+        const maxAttempts = 300; // 5 minutes with 1 second intervals
+
+        // IMPORTANT: Start polling immediately, don't wait
+        console.log('🎯 Starting polling immediately for generation:', generationId);
+
+        while (attempts < maxAttempts) {
+            // First poll should be immediate, then every second
+            if (attempts > 0) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            const progressResponse = await fetch(`/api/ai/progressive?generationId=${generationId}`);
+            if (!progressResponse.ok) {
+                throw new Error('Failed to get progress');
+            }
+
+            const { data: progress } = await progressResponse.json();
+
+            console.log(`🔄 Poll #${attempts + 1} @ ${new Date().toISOString().split('T')[1].slice(0, 8)}:`, {
+                status: progress.status,
+                type: progress.type,
+                progress: progress.progress,
+                hasMetadata: !!progress.metadata,
+                hasCityData: !!progress.cityData,
+                hasItinerary: !!progress.itinerary,
+                currentItineraryDays: currentItinerary?.itinerary?.length || 0
+            });
+
+            // Update UI based on progress
+            if (progress.status === 'understanding') {
+                setGenerationProgress({
+                    stage: 'understanding',
+                    percentage: progress.progress,
+                    message: progress.message,
+                    estimatedTimeRemaining: 30
+                });
+            } else if (progress.status === 'metadata_ready') {
+                console.log('📦 METADATA READY - Building initial itinerary structure');
+                // Metadata is ready - start showing partial itinerary
+                setGenerationMetadata(progress.metadata);
+                setGenerationProgress({
+                    stage: 'generating',
+                    percentage: progress.progress,
+                    message: progress.message,
+                    estimatedTimeRemaining: 25
+                });
+
+                // Initialize partial itinerary with metadata
+                const initialItinerary = {
+                    destination: progress.metadata.destinations.join(', '),
+                    title: progress.metadata.title,
+                    itinerary: [],
+                    quickTips: progress.metadata.quickTips || [],
+                    cost: progress.metadata.estimatedCost
+                };
+                console.log('🏗️ Setting initial itinerary with empty days:', initialItinerary);
+                setPartialItinerary(initialItinerary);
+                setCurrentItinerary(initialItinerary as any);
+                console.log('✅ UI should now show trip overview with no days yet');
+
+            } else if (progress.status === 'city_complete') {
+                console.log(`🏙️ CITY COMPLETE: ${progress.city} - Adding days to itinerary`);
+                // A city's itinerary is complete - add it to the display
+                setGenerationProgress({
+                    stage: 'generating',
+                    percentage: progress.progress,
+                    message: progress.message,
+                    estimatedTimeRemaining: 10
+                });
+
+                // Add this city's days to the partial itinerary
+                if (progress.cityData && partialItinerary) {
+                    console.log(`📅 Adding ${progress.cityData.days?.length || 0} days from ${progress.city}`);
+                    const updatedItinerary = {
+                        ...partialItinerary,
+                        itinerary: [
+                            ...(partialItinerary.itinerary || []),
+                            ...progress.cityData.days.map((day: any) => ({
+                                title: day.title || `Day ${day.day} - ${day.city || progress.city}`,
+                                day: day.day,
+                                date: day.date,
+                                activities: day.activities.map((act: any) => ({
+                                    time: act.time,
+                                    description: act.description,
+                                    category: act.category,
+                                    address: act.address || 'Address not available',
+                                    venue_name: act.venueName,
+                                    rating: undefined,
+                                    _tips: act.tips
+                                })),
+                                weather: day.weather || 'Check local forecast'
+                            }))
+                        ].sort((a, b) => a.day - b.day)
+                    };
+                    console.log(`📊 Updated itinerary now has ${updatedItinerary.itinerary.length} total days`);
+                    setPartialItinerary(updatedItinerary);
+                    setCurrentItinerary(updatedItinerary as any);
+                    console.log(`✅ UI should now show ${updatedItinerary.itinerary.length} days`);
+                } else {
+                    console.warn('⚠️ Cannot add city data:', {
+                        hasCityData: !!progress.cityData,
+                        hasPartialItinerary: !!partialItinerary
+                    });
+                }
+            } else if (progress.status === 'generating') {
+                setGenerationProgress({
+                    stage: 'generating',
+                    percentage: progress.progress,
+                    message: progress.message,
+                    estimatedTimeRemaining: 20
+                });
+            }
+
+            // Check if complete
+            if (progress.type === 'complete') {
+                console.log('🎉 GENERATION COMPLETE - Returning full itinerary');
+                console.log(`   Final itinerary has ${progress.itinerary?.itinerary?.length || 0} days`);
+                return {
+                    type: 'itinerary',
+                    message: progress.message,
+                    itinerary: progress.itinerary,
+                    conversationContext: progress.conversationContext
+                };
+            } else if (progress.type === 'question') {
+                return {
+                    type: 'question',
+                    message: progress.message,
+                    awaitingInput: progress.awaitingInput,
+                    conversationContext: progress.conversationContext
+                };
+            } else if (progress.type === 'error') {
+                throw new Error(progress.message);
+            }
+
+            attempts++;
+        }
+
+        console.error('❌ Polling loop exited after', attempts, 'attempts without completion');
+        throw new Error('Generation timed out');
+    };
+
+    /**
+     * Handle streaming response for complex trips (with polling fallback)
+     */
+    const handleStreamingResponse = async (
+        message: string,
+        conversationContext: string | undefined,
+        sessionId: string
+    ): Promise<ConversationalItineraryOutput> => {
+        // Try polling-based approach for Firebase compatibility
+        try {
+            console.log('📊 Using polling-based progressive generation');
+            return await handlePollingResponse(message, conversationContext, sessionId);
+        } catch (pollingError) {
+            console.error('Polling failed:', pollingError);
+            console.log('📡 Falling back to streaming');
+
+            // Fallback to SSE streaming
+            return new Promise((resolve, reject) => {
+                const eventSource = new EventSource('/api/ai/stream');
+                let finalResponse: ConversationalItineraryOutput | null = null;
+
+                // Send the request data
+                fetch('/api/ai/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: message,
+                        attachedFile: initialPrompt.fileDataUrl,
+                        conversationContext,
+                        sessionId
+                    })
+                }).catch(error => {
+                    eventSource.close();
+                    reject(error);
+                });
+
+                eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                switch (data.type) {
+                    case 'start':
+                        console.log('📡 Stream started:', data.message);
+                        setGenerationProgress({
+                            stage: 'understanding',
+                            percentage: 10,
+                            message: data.message,
+                            estimatedTimeRemaining: 30
+                        });
+                        break;
+
+                    case 'intent_extracted':
+                        console.log('🎯 Intent extracted:', data.intent);
+                        setGenerationProgress({
+                            stage: 'analyzing',
+                            percentage: 20,
+                            message: 'Understanding your requirements...',
+                            estimatedTimeRemaining: 25
+                        });
+                        break;
+
+                    case 'generation_mode':
+                        console.log('🔧 Generation mode:', data.mode);
+                        if (data.mode === 'progressive') {
+                            setGenerationProgress({
+                                stage: 'generating',
+                                percentage: 30,
+                                message: `Planning ${data.destinations.join(' and ')} trip...`,
+                                estimatedTimeRemaining: 20
+                            });
+                        }
+                        break;
+
+                    case 'progress':
+                        console.log('📊 Progress update:', data);
+                        if (data.type === 'metadata') {
+                            // Initialize with metadata
+                            setGenerationMetadata(data.data);
+                            const initialItinerary = {
+                                destination: data.data.destinations.join(', '),
+                                title: data.data.title,
+                                itinerary: [],
+                                quickTips: data.data.quickTips || [],
+                                cost: data.data.estimatedCost
+                            };
+                            setPartialItinerary(initialItinerary);
+                            setCurrentItinerary(initialItinerary as any);
+
+                            setGenerationProgress({
+                                stage: 'generating',
+                                percentage: 40,
+                                message: 'Creating trip overview...',
+                                estimatedTimeRemaining: 15
+                            });
+                        } else if (data.type === 'city_complete') {
+                            // Add city days progressively
+                            if (data.data && partialItinerary) {
+                                const updatedItinerary = {
+                                    ...partialItinerary,
+                                    itinerary: [
+                                        ...(partialItinerary.itinerary || []),
+                                        ...data.data.days.map((day: any) => ({
+                                            title: day.title || `Day ${day.day} - ${day.city || data.city}`,
+                                            day: day.day,
+                                            date: day.date,
+                                            activities: day.activities.map((act: any) => ({
+                                                time: act.time,
+                                                description: act.description,
+                                                category: act.category,
+                                                address: act.address || 'Address not available',
+                                                venue_name: act.venueName,
+                                                rating: undefined,
+                                                _tips: act.tips
+                                            })),
+                                            weather: day.weather || 'Check local forecast'
+                                        }))
+                                    ].sort((a, b) => a.day - b.day)
+                                };
+                                setPartialItinerary(updatedItinerary);
+                                setCurrentItinerary(updatedItinerary as any);
+                            }
+
+                            setGenerationProgress({
+                                stage: 'generating',
+                                percentage: Math.min(40 + data.progress * 0.5, 90),
+                                message: `Generated itinerary for ${data.city}...`,
+                                estimatedTimeRemaining: 10
+                            });
+                        }
+                        break;
+
+                    case 'itinerary':
+                        console.log('✅ Itinerary received');
+                        finalResponse = data;
+                        setGenerationProgress({
+                            stage: 'finalizing',
+                            percentage: 95,
+                            message: 'Finalizing your itinerary...',
+                            estimatedTimeRemaining: 2
+                        });
+                        break;
+
+                    case 'question':
+                        finalResponse = data;
+                        break;
+
+                    case 'error':
+                        console.error('❌ Stream error:', data);
+                        eventSource.close();
+                        reject(new Error(data.message));
+                        break;
+
+                    case 'complete':
+                        console.log('🏁 Stream complete in', data.duration, 'ms');
+                        eventSource.close();
+                        if (finalResponse) {
+                            resolve(finalResponse);
+                        } else {
+                            reject(new Error('No response received'));
+                        }
+                        break;
+                }
+            };
+
+            eventSource.onerror = (error) => {
+                console.error('❌ EventSource error:', error);
+                eventSource.close();
+                reject(new Error('Connection lost'));
+            };
+
+            // Timeout after 5 minutes
+            setTimeout(() => {
+                if (eventSource.readyState !== EventSource.CLOSED) {
+                    eventSource.close();
+                    reject(new Error('Request timed out'));
+                }
+            }, 300000);
+        });
+        }
+    };
+
+    /**
      * Handle user messages in the conversational flow
      * This is the main difference from V1 - we process messages through conversation controller
      */
@@ -241,6 +597,10 @@ export default function ChatDisplayV2({
         setIsGenerating(true);
         generationStartTime.current = Date.now();
 
+        // Reset partial states for new generation
+        setPartialItinerary(null);
+        setGenerationMetadata(null);
+
         // Update progress for questions vs generation
         if (awaitingInput && awaitingInput !== 'confirmation') {
             setGenerationProgress({
@@ -259,43 +619,81 @@ export default function ChatDisplayV2({
         }
 
         try {
-            // Call the conversational API endpoint
-            const response: ConversationalItineraryOutput = await retryApiCall(
-                async () => {
-                    const res = await fetch('/api/ai', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            prompt: message,
-                            attachedFile: initialPrompt.fileDataUrl,
-                            conversationContext: conversationContext,
-                            sessionId: sessionId
-                        })
-                    });
+            // Check if we should use streaming for multi-city or long trips
+            const isComplexTrip = message.toLowerCase().includes('2 week') ||
+                                  message.toLowerCase().includes('2-week') ||
+                                  message.toLowerCase().includes('14 day') ||
+                                  message.toLowerCase().includes('two week') ||
+                                  (message.toLowerCase().includes('week') && message.toLowerCase().includes('and')) ||
+                                  (message.toLowerCase().includes('london') && message.toLowerCase().includes('paris')) ||
+                                  (message.toLowerCase().match(/\d+\s*(days?|weeks?)\s*(in|at)/g)?.length ?? 0) > 1 ||
+                                  message.toLowerCase().includes('one week in') && message.toLowerCase().includes('second week');
 
-                    if (!res.ok) {
-                        // Check if response is JSON or HTML error page
-                        const contentType = res.headers.get('content-type');
-                        if (contentType && contentType.includes('application/json')) {
-                            const error = await res.json();
-                            throw new Error(error.error || 'Failed to generate itinerary');
-                        } else {
-                            // HTML error page - likely 404 or server error
-                            throw new Error(`Server error: ${res.status} ${res.statusText}`);
+            let response: ConversationalItineraryOutput;
+
+            if (isComplexTrip) {
+                // Use streaming endpoint for complex trips
+                console.log('🚀 Using streaming endpoint for complex trip');
+                try {
+                    response = await handleStreamingResponse(message, conversationContext, sessionId);
+                } catch (streamError: any) {
+                    console.error('❌ Streaming failed:', streamError);
+                    throw streamError;
+                }
+            } else {
+                // Use regular endpoint for simple trips
+                const controller = new AbortController();
+                const timeoutMs = 60000;  // 1 minute for normal trips
+
+                // Set up timeout and store the timeout ID so we can clear it
+                const timeoutId = setTimeout(() => {
+                    console.log('⏱️ Request timeout - aborting...');
+                    controller.abort();
+                }, timeoutMs);
+
+                try {
+                    response = await retryApiCall(
+                        async () => {
+                            const res = await fetch('/api/ai', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    prompt: message,
+                                    attachedFile: initialPrompt.fileDataUrl,
+                                    conversationContext: conversationContext,
+                                    sessionId: sessionId
+                                }),
+                                signal: controller.signal
+                            });
+
+                        if (!res.ok) {
+                            // Check if response is JSON or HTML error page
+                            const contentType = res.headers.get('content-type');
+                            if (contentType && contentType.includes('application/json')) {
+                                const error = await res.json();
+                                throw new Error(error.error || 'Failed to generate itinerary');
+                            } else {
+                                // HTML error page - likely 404 or server error
+                                throw new Error(`Server error: ${res.status} ${res.statusText}`);
+                            }
+                        }
+
+                        const result = await res.json();
+                        return result.data;
+                    },
+                    'generateItineraryV2API',
+                    {
+                        maxAttempts: 2,
+                        onRetry: (attempt) => {
+                            logger.info('AI', `Retrying conversation (attempt ${attempt})`);
                         }
                     }
-
-                    const result = await res.json();
-                    return result.data;
-                },
-                'generateItineraryV2API',
-                {
-                    maxAttempts: 2,
-                    onRetry: (attempt) => {
-                        logger.info('AI', `Retrying conversation (attempt ${attempt})`);
-                    }
+                );
+                } finally {
+                    // Clear the timeout to prevent unnecessary abort
+                    clearTimeout(timeoutId);
                 }
-            );
+            }
 
             console.log('🤖 AI Response:', {
                 type: response.type,
@@ -308,8 +706,9 @@ export default function ChatDisplayV2({
                 setConversationContext(response.conversationContext);
                 // Save to localStorage for persistence across page refreshes
                 if (typeof window !== 'undefined') {
-                    localStorage.setItem(`conversation-context-${searchId || currentSearchId.current}`, response.conversationContext);
-                    localStorage.setItem(`session-id-${searchId || currentSearchId.current}`, sessionId);
+                    const storageId = searchId || currentSearchId.current;
+                    localStorage.setItem(`conversation-context-${storageId}`, response.conversationContext);
+                    localStorage.setItem(`session-id-${storageId}`, sessionId);
                     console.log('💾 Saved conversation context to localStorage');
                 }
             }
@@ -554,7 +953,8 @@ export default function ChatDisplayV2({
                             >
                                 {currentItinerary && (
                                     <ItineraryPanel
-                                        itinerary={currentItinerary}
+                                        key="mobile-itinerary-panel"
+                                        itinerary={currentItinerary as GeneratePersonalizedItineraryOutput}
                                     />
                                 )}
                             </motion.div>
@@ -582,19 +982,22 @@ export default function ChatDisplayV2({
                     </div>
 
                     {/* Itinerary Panel */}
-                    {currentItinerary ? (
-                        <div className="w-1/2">
+                    <div className="w-1/2">
+                        {currentItinerary ? (
                             <ItineraryPanel
-                                itinerary={currentItinerary}
+                                key="itinerary-panel"
+                                itinerary={currentItinerary as GeneratePersonalizedItineraryOutput}
                             />
-                        </div>
-                    ) : (
-                        <div className="w-1/2">
+                        ) : (
                             <ModernLoadingPanel
-                                progress={generationProgress}
+                                key="loading-panel"
+                                progress={{
+                                    ...generationProgress,
+                                    stage: (generationProgress.stage === 'analyzing' ? 'planning' : generationProgress.stage) as StandardProgressStage
+                                }}
                             />
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                 </div>
             </div>

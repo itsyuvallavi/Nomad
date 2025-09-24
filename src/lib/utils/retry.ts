@@ -40,7 +40,7 @@ const DEFAULT_CONFIG: Required<RetryConfig> = {
 export function isRetryableError(error: Error | any): boolean {
   const errorString = error.toString().toLowerCase();
   const message = error.message?.toLowerCase() || '';
-  const code = error.code?.toLowerCase() || '';
+  const code = typeof error.code === 'string' ? error.code.toLowerCase() : String(error.code || '').toLowerCase();
   
   // Check for network errors
   if (error.name === 'NetworkError' || error.name === 'FetchError') {

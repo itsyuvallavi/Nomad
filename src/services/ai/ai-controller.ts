@@ -7,6 +7,7 @@
 import OpenAI from 'openai';
 import { logger } from '@/lib/monitoring/logger';
 import { z } from 'zod';
+import { extractMultiCityIntent, formatMultiCityDestination } from './multi-city-fix';
 
 // Initialize OpenAI client
 function getOpenAIClient(): OpenAI {
@@ -268,8 +269,14 @@ Output: {"destination":"london","duration":3}
 Input: "paris for 5 days starting october 15"
 Output: {"destination":"paris","duration":5,"startDate":"${currentYear}-10-15"}
 
-Input: "weekend in tokyo"
-Output: {"destination":"tokyo","duration":2}
+Input: "3 days in London then 2 days in Paris"
+Output: {"destination":"London, Paris","duration":5}
+
+Input: "weekend in Rome and Florence"
+Output: {"destination":"Rome, Florence","duration":2}
+
+Input: "7 days across Tokyo, Kyoto, and Osaka"
+Output: {"destination":"Tokyo, Kyoto, Osaka","duration":7}
 
 RETURN ONLY THE JSON OBJECT, NO OTHER TEXT:`;
 
@@ -895,20 +902,43 @@ JSON:`;
     // Check if this is an extension request
     const isExtensionRequest = /add\s+\d+\s+days?\s+in|extend.*trip|add.*to.*trip|after.*trip/i.test(message);
 
-    // Extract destination (common cities)
-    const cities = ['london', 'paris', 'tokyo', 'rome', 'barcelona', 'dubai', 'singapore', 'bali', 'amsterdam', 'lisbon', 'mexico', 'méxico', 'athens', 'tel aviv', 'madrid'];
-    for (const city of cities) {
-      if (lower.includes(city)) {
-        const foundCity = city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    // Try multi-city extraction first
+    const multiCityIntent = extractMultiCityIntent(message);
 
-        // If this is an extension and we already have a destination, combine them
-        if (isExtensionRequest && currentIntent?.destination) {
-          result.destination = `${currentIntent.destination}, ${foundCity}`;
-          result.modificationRequest = message;
-        } else {
-          result.destination = foundCity;
+    if (multiCityIntent.destinations.length > 0) {
+      // If this is an extension and we already have a destination, combine them
+      if (isExtensionRequest && currentIntent?.destination) {
+        const existingCities = currentIntent.destination.split(',').map(d => d.trim());
+        const newCities = multiCityIntent.destinations.filter(d => !existingCities.includes(d));
+        result.destination = [...existingCities, ...newCities].join(', ');
+        result.modificationRequest = message;
+
+        // Add durations if found
+        if (multiCityIntent.totalDuration > 0 && currentIntent?.duration) {
+          result.duration = currentIntent.duration + multiCityIntent.totalDuration;
         }
-        break;
+      } else {
+        result.destination = formatMultiCityDestination(multiCityIntent);
+        if (multiCityIntent.totalDuration > 0) {
+          result.duration = multiCityIntent.totalDuration;
+        }
+      }
+    } else {
+      // Fallback to single city extraction
+      const cities = ['london', 'paris', 'tokyo', 'rome', 'barcelona', 'dubai', 'singapore', 'bali', 'amsterdam', 'lisbon', 'mexico', 'méxico', 'athens', 'tel aviv', 'madrid'];
+      for (const city of cities) {
+        if (lower.includes(city)) {
+          const foundCity = city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+          // If this is an extension and we already have a destination, combine them
+          if (isExtensionRequest && currentIntent?.destination) {
+            result.destination = `${currentIntent.destination}, ${foundCity}`;
+            result.modificationRequest = message;
+          } else {
+            result.destination = foundCity;
+          }
+          break;
+        }
       }
     }
 
@@ -938,8 +968,8 @@ JSON:`;
         }
       }
 
-      // Extract duration if not already set
-      if (!result.duration) {
+      // Extract duration if not already set (skip if multi-city already set it)
+      if (!result.duration && multiCityIntent.destinations.length === 0) {
         const duration = this.extractDuration(message);
         if (duration) {
           // If this is an extension, add to existing duration

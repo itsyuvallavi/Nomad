@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AIController } from '@/services/ai/ai-controller';
 import { TripGenerator } from '@/services/ai/trip-generator';
+import { ProgressiveGenerator } from '@/services/ai/progressive-generator';
 import { logger } from '@/lib/monitoring/logger';
 
 /**
@@ -21,6 +22,8 @@ export interface ConversationalItineraryOutput {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  const TIMEOUT_WARNING = 240000; // Warn at 4 minutes (240 seconds)
+  const MAX_TIMEOUT = 290000; // Hard stop at 4:50 to leave buffer
 
   try {
     const body = await request.json();
@@ -83,10 +86,47 @@ export async function POST(request: NextRequest) {
         duration: tripParams.duration
       });
 
-      // Generate the itinerary with HERE enrichment
+      // Decide on generation strategy based on trip length
       const genStartTime = Date.now();
       console.log('\n🎯 GENERATING ITINERARY...');
-      const itinerary = await tripGenerator.generateItinerary(tripParams);
+      console.log(`   Duration: ${tripParams.duration} days`);
+      console.log(`   Destinations: ${tripParams.destination}`);
+
+      let itinerary;
+
+      // Use progressive generation for trips > 7 days or multiple cities
+      const destinations = tripParams.destination.split(',').map(d => d.trim());
+      const useProgressive = tripParams.duration > 7 || destinations.length > 1;
+
+      console.log(`   Progressive Mode: ${useProgressive ? 'YES' : 'NO'}`);
+      console.log(`   Reason: Duration=${tripParams.duration}, Cities=${destinations.length}`);
+      console.log(`   Destination String: "${tripParams.destination}"`);
+      console.log(`   Parsed Destinations: ${JSON.stringify(destinations)}`);
+
+      if (useProgressive) {
+        console.log('   📦 Using PROGRESSIVE generation for long/multi-city trip');
+        console.log(`   Starting progressive generation at ${new Date().toISOString()}`);
+        const progressiveGen = new ProgressiveGenerator();
+
+        // Generate progressively
+        console.log('   Calling progressiveGen.generateProgressive...');
+        const result = await progressiveGen.generateProgressive({
+          destinations,
+          duration: tripParams.duration,
+          startDate: tripParams.startDate,
+          preferences: tripParams.preferences,
+          onProgress: (update: any) => {
+            console.log(`   PROGRESS UPDATE: ${update.type} at ${update.progress}%`);
+          }
+        });
+        console.log('   Progressive generation completed');
+
+        itinerary = result.itinerary;
+      } else {
+        console.log('   Using standard generation for short trip');
+        itinerary = await tripGenerator.generateItinerary(tripParams);
+      }
+
       const genTime = Date.now() - genStartTime;
 
       // LOG GENERATION DETAILS
@@ -216,4 +256,6 @@ export async function POST(request: NextRequest) {
 
 // Configuration
 export const runtime = 'nodejs';
-export const maxDuration = 60; // Maximum execution time in seconds
+// Dynamic timeout based on trip complexity
+// Note: Vercel has a max of 300s (5 min) for Pro accounts
+export const maxDuration = 300; // Maximum execution time in seconds (5 minutes for long trips)
