@@ -94,16 +94,48 @@ export function useMessageHandler({
             const existingSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
             const recentSearches = existingSearches.filter((s: any) => s.id !== currentSearchId.current);
 
-            if (initialPrompt) {
+            if (initialPrompt || currentItinerary) {
                 // Build a descriptive title for the search
-                const title = `${initialPrompt.destination}${initialPrompt.duration ? ` - ${initialPrompt.duration} days` : ''}`;
-                const prompt = messages[0]?.content || initialPrompt.destination;
+                // Try to get destination and duration from the itinerary first, then from initialPrompt
+                const actualItinerary = itinerary || currentItinerary;
+                let destination = actualItinerary?.destination || actualItinerary?.title || initialPrompt?.destination;
+                let duration = actualItinerary?.duration || initialPrompt?.duration;
+
+                // If we still don't have destination, try to extract from the prompt
+                const promptText = messages[0]?.content || initialPrompt?.prompt || '';
+                if (!destination && promptText) {
+                    // Try to extract destination from prompt (e.g., "plan a 7 day trip to london")
+                    const destinationMatch = promptText.match(/(?:to|in|visit|explore)\s+([a-zA-Z\s]+?)(?:\s+(?:on|for|in|during)|$)/i);
+                    if (destinationMatch) {
+                        destination = destinationMatch[1].trim();
+                        // Capitalize first letter of each word
+                        destination = destination.split(' ').map((word: string) =>
+                            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        ).join(' ');
+                    }
+                }
+
+                // If we still don't have duration, try to extract from prompt
+                if (!duration && promptText) {
+                    const durationMatch = promptText.match(/(\d+)\s*(?:day|days|night|nights)/i);
+                    if (durationMatch) {
+                        duration = parseInt(durationMatch[1]);
+                    }
+                }
+
+                // Build title with what we have
+                let title = destination || 'Trip';
+                if (duration) {
+                    title += ` - ${duration} days`;
+                }
+
+                const prompt = promptText || initialPrompt?.destination || 'New trip';
 
                 recentSearches.unshift({
                     id: currentSearchId.current,
-                    destination: initialPrompt.destination,
-                    startDate: initialPrompt.startDate,
-                    duration: initialPrompt.duration,
+                    destination: destination || initialPrompt?.destination,
+                    startDate: actualItinerary?.startDate || initialPrompt?.startDate,
+                    duration: duration || initialPrompt?.duration,
                     timestamp: Date.now(),
                     hasItinerary: !!(itinerary || currentItinerary),
                     title: title,
