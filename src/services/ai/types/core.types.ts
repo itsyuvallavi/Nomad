@@ -124,8 +124,8 @@ export interface DayPlan {
 }
 
 export interface ProgressUpdate {
-  type: 'metadata' | 'city_complete' | 'complete';
-  data: any;
+  type: 'metadata' | 'city_complete' | 'complete' | 'routes_optimized' | 'enrichment_complete' | 'costs_complete';
+  data?: any;
   progress: number;
   city?: string;
 }
@@ -135,6 +135,10 @@ export interface GenerationParams {
   duration: number;
   startDate: string;
   preferences?: any;
+  travelers?: {
+    adults: number;
+    children: number;
+  };
   onProgress?: (update: ProgressUpdate) => void | Promise<void>;
 }
 

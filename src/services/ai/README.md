@@ -35,8 +35,7 @@ ai/
 │   ├── metadata-generator.ts # Quick metadata generation
 │   └── city-generator.ts    # City-specific itineraries
 ├── ai-controller.ts         # Main orchestrator for conversations
-├── trip-generator.ts        # Trip generation orchestrator
-├── progressive-generator.ts # Progressive UI generation
+├── trip-generator.ts        # Unified trip generator (progressive by default)
 └── prompts.ts              # Prompt templates
 ```
 
@@ -52,18 +51,14 @@ Main conversation orchestrator that:
 - Formats output using `ResponseFormatter`
 
 #### 2. **Trip Generator** (`trip-generator.ts`)
-Orchestrates complete trip generation:
-- Builds prompts using `PromptBuilder`
-- Validates output with `ItineraryValidator`
-- Optimizes routes via `RouteOptimizer`
-- Estimates costs with `CostEstimator`
-- Enriches data using `ItineraryEnricher`
-
-#### 3. **Progressive Generator** (`progressive-generator.ts`)
-Handles streaming generation for better UX:
+Unified trip generation with progressive updates:
+- Always uses progressive generation for better UX
 - Generates metadata quickly (2-3s)
 - Produces city itineraries progressively
-- Combines results into final format
+- Optimizes routes via `RouteOptimizer`
+- Enriches data using `ItineraryEnricher`
+- Estimates costs with `CostEstimator`
+- Validates output with `ItineraryValidator`
 
 ## 🔧 Key Features
 
@@ -75,11 +70,14 @@ Handles streaming generation for better UX:
 "Plan a budget vacation to Barcelona"
 ```
 
-### Progressive Generation
-Provides immediate feedback with staged generation:
+### Progressive Generation (Default)
+All itineraries now use progressive generation:
 1. **Metadata** (2-3s): Destination, dates, duration
 2. **Per City** (5-10s each): Detailed daily activities
-3. **Final Combination**: Complete itinerary
+3. **Route Optimization**: Groups by zones
+4. **Enrichment**: Real venue data from HERE
+5. **Cost Estimation**: Detailed budget breakdown
+6. **Final Validation**: Complete itinerary
 
 ### Zone-Based Optimization
 Groups activities by geographic zones to minimize travel:
@@ -140,7 +138,7 @@ BaseItinerary     // Basic itinerary structure
 
 ## 📝 Usage Examples
 
-### Basic Trip Generation
+### Basic Trip Generation (Now Progressive by Default)
 ```typescript
 const tripGen = new TripGenerator(apiKey);
 const itinerary = await tripGen.generateItinerary({
@@ -151,15 +149,15 @@ const itinerary = await tripGen.generateItinerary({
 });
 ```
 
-### Progressive Generation
+### With Progress Updates
 ```typescript
-const progressiveGen = new ProgressiveGenerator(apiKey);
-const result = await progressiveGen.generateProgressive({
+const tripGen = new TripGenerator(apiKey);
+const result = await tripGen.generateProgressive({
   destinations: ["London", "Paris"],
   duration: 7,
   startDate: "2025-04-01",
   onProgress: (update) => {
-    console.log(`${update.progress}% complete`);
+    console.log(`${update.type}: ${update.progress}% complete`);
   }
 });
 ```
@@ -195,6 +193,8 @@ Current test coverage:
 3. **Shared Utilities**: Created reusable utility modules
 4. **Module Optimization**: Merged small related modules
 5. **Bug Fixes**: Fixed all TypeScript errors
+6. **Unified Generator**: Made progressive generation the default
+7. **Feature Parity**: Progressive now includes all traditional features
 
 ## 📈 Future Enhancements
 

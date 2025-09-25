@@ -68,6 +68,32 @@ export class AIController {
   }
 
   /**
+   * Convert ParsedIntent to TripParams format for the trip generator
+   */
+  getTripParameters(intent: ParsedIntent): any {
+    // Handle both single and multi-city destinations
+    const destination = intent.destinations
+      ? intent.destinations.join(', ')
+      : intent.destination || 'Unknown';
+
+    return {
+      destination,
+      startDate: intent.startDate || new Date().toISOString().split('T')[0],
+      duration: intent.duration || 3,
+      travelers: intent.travelers,
+      preferences: {
+        budget: intent.budget || intent.preferences?.budget,
+        interests: intent.interests || intent.preferences?.interests,
+        pace: intent.preferences?.pace,
+        mustSee: intent.preferences?.mustSee,
+        avoid: intent.preferences?.avoid
+      },
+      budget: intent.budget || intent.preferences?.budget,
+      interests: intent.interests || intent.preferences?.interests
+    };
+  }
+
+  /**
    * Main entry point - processes user message and returns appropriate response
    * NEVER generates without required information
    */

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AIController } from '@/services/ai/ai-controller';
 import { TripGenerator } from '@/services/ai/trip-generator';
-import { ProgressiveGenerator } from '@/services/ai/progressive-generator';
 import { logger } from '@/lib/monitoring/logger';
 
 // Load environment variables
@@ -130,7 +129,7 @@ async function generateProgressively(
   console.log(`🔑 [generateProgressively] API Key received: ${apiKey ? 'Yes' : 'No'}`);
 
   const aiController = new AIController();
-  const tripGenerator = new TripGenerator();
+  const tripGenerator = new TripGenerator(apiKey);
 
   // Update progress helper
   const updateProgress = (update: any) => {
@@ -169,24 +168,21 @@ async function generateProgressively(
     if (response.type === 'ready' && response.canGenerate && response.intent) {
       const tripParams = aiController.getTripParameters(response.intent);
       const destinations = tripParams.destination.split(',').map(d => d.trim());
-      const useProgressive = tripParams.duration > 7 || destinations.length > 1;
 
-      if (useProgressive) {
-        updateProgress({
-          type: 'processing',
-          status: 'generating',
-          progress: 30,
-          message: `Planning ${destinations.join(' and ')} trip...`,
-          mode: 'progressive'
-        });
+      // Always use progressive generation (it's now the default)
+      updateProgress({
+        type: 'processing',
+        status: 'generating',
+        progress: 30,
+        message: `Planning ${destinations.join(' and ')} trip...`,
+        mode: 'progressive'
+      });
 
-        const progressiveGen = new ProgressiveGenerator(apiKey);
+      let generationError = null;
+      let allCityData = []; // Accumulate city data
+      let generatedMetadata = null;
 
-        let generationError = null;
-        let allCityData = []; // Accumulate city data
-        let generatedMetadata = null;
-
-        const result = await progressiveGen.generateProgressive({
+      const result = await tripGenerator.generateProgressive({
           destinations,
           duration: tripParams.duration,
           startDate: tripParams.startDate,
@@ -245,28 +241,6 @@ async function generateProgressively(
           metadata: generatedMetadata, // Preserve metadata
           conversationContext: response.context
         });
-
-      } else {
-        // Standard generation for simple trips
-        updateProgress({
-          type: 'processing',
-          status: 'generating',
-          progress: 50,
-          message: 'Generating your itinerary...',
-          mode: 'standard'
-        });
-
-        const itinerary = await tripGenerator.generateItinerary(tripParams);
-
-        updateProgress({
-          type: 'complete',
-          status: 'success',
-          progress: 100,
-          message: 'Your itinerary is ready!',
-          itinerary,
-          conversationContext: response.context
-        });
-      }
 
     } else if (response.type === 'question') {
       // Need more information from user

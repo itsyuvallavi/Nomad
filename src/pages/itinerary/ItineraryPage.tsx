@@ -1,8 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
 import { useState, useEffect, useRef } from 'react';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useSwipeGestures } from '@/hooks/use-swipe-gestures';
@@ -19,7 +16,7 @@ type ConversationalItineraryOutput = {
     conversationContext?: string;
 };
 import type { FormValues } from '@/pages/home/components/TripPlanningForm';
-import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/types/core.types';
 import { ArrowLeft, MessageSquare, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { RecentSearch, ChatState } from '@/app/page';
@@ -460,28 +457,20 @@ export default function ChatDisplayV2({
         }
 
         try {
-            // Check if we should use streaming for multi-city or long trips
-            const isComplexTrip = message.toLowerCase().includes('2 week') ||
-                                  message.toLowerCase().includes('2-week') ||
-                                  message.toLowerCase().includes('14 day') ||
-                                  message.toLowerCase().includes('two week') ||
-                                  (message.toLowerCase().includes('week') && message.toLowerCase().includes('and')) ||
-                                  (message.toLowerCase().includes('london') && message.toLowerCase().includes('paris')) ||
-                                  (message.toLowerCase().match(/\d+\s*(days?|weeks?)\s*(in|at)/g)?.length ?? 0) > 1 ||
-                                  message.toLowerCase().includes('one week in') && message.toLowerCase().includes('second week');
-
+            // ALWAYS use progressive generation (it's now the default for all trips)
             let response: ConversationalItineraryOutput;
 
-            if (isComplexTrip) {
-                // Use streaming endpoint for complex trips
-                console.log('🚀 Using streaming endpoint for complex trip');
-                try {
-                    response = await handleStreamingResponse(message, conversationContext, sessionId);
-                } catch (streamError: any) {
-                    console.error('❌ Streaming failed:', streamError);
-                    throw streamError;
-                }
-            } else {
+            // Use progressive/polling endpoint for ALL trips
+            console.log('🚀 Using progressive generation (default for all trips)');
+            try {
+                response = await handleStreamingResponse(message, conversationContext, sessionId);
+            } catch (streamError: any) {
+                console.error('❌ Progressive generation failed:', streamError);
+                throw streamError;
+            }
+
+            // The old non-progressive path is no longer used
+            if (false) {
                 // Use regular endpoint for simple trips
                 const controller = new AbortController();
                 const timeoutMs = 60000;  // 1 minute for normal trips
