@@ -4,258 +4,304 @@ import { TripGenerator } from '@/services/ai/trip-generator';
 import { ProgressiveGenerator } from '@/services/ai/progressive-generator';
 import { logger } from '@/lib/monitoring/logger';
 
+// Load environment variables
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
+// In-memory storage for progress (use Redis/Database in production)
+const progressStore = new Map<string, any>();
+
 /**
  * API Route: /api/ai
- * Handles conversational itinerary generation with OSM enrichment
+ * Unified endpoint for AI-powered itinerary generation with progressive polling
+ * Supports Firebase deployment constraints
  */
 
-// Response type for the API
-export interface ConversationalItineraryOutput {
-  type: 'question' | 'confirmation' | 'itinerary' | 'error';
-  message: string;
-  awaitingInput?: string;
-  suggestedOptions?: string[];
-  itinerary?: any;
-  conversationContext?: string;
-  requiresGeneration?: boolean;
-}
-
 export async function POST(request: NextRequest) {
-  const startTime = Date.now();
-  const TIMEOUT_WARNING = 240000; // Warn at 4 minutes (240 seconds)
-  const MAX_TIMEOUT = 290000; // Hard stop at 4:50 to leave buffer
-
   try {
     const body = await request.json();
-    const { message, prompt, conversationContext, context, sessionId } = body;
+    const { message, prompt, conversationContext, context, sessionId, action } = body;
 
-    // Support both 'message' and 'prompt' fields for backwards compatibility
+    // Support backwards compatibility
     const userMessage = message || prompt;
-
-    // Process the message through the conversation controller
-    // Support both 'conversationContext' and 'context' fields
     const contextToUse = conversationContext || context;
 
+    // Check if this is a status check (backwards compatibility)
+    if (action === 'status' && sessionId) {
+      const progress = progressStore.get(sessionId);
+      if (progress) {
+        return NextResponse.json({
+          success: true,
+          data: progress
+        });
+      }
+      return NextResponse.json({
+        success: false,
+        error: 'No progress found for this session'
+      }, { status: 404 });
+    }
 
-    // DETAILED REQUEST LOGGING
-    console.log('\n' + '='.repeat(80));
-    console.log('🔵 NEW UI REQUEST');
-    console.log('='.repeat(80));
-    console.log(`📝 USER INPUT: "${userMessage}"`);
-    console.log(`🕐 TIME: ${new Date().toISOString()}`);
-    console.log(`🆔 SESSION: ${sessionId || 'new-session'}`);
-    console.log(`📦 HAS CONTEXT: ${!!contextToUse}`);
-    console.log('-'.repeat(80));
+    // Start new generation
+    const generationId = `${sessionId || 'gen'}-${Date.now()}`;
 
-    // Initialize controllers
-    const aiController = new AIController();
-    const tripGenerator = new TripGenerator();
-
-    logger.info('API', 'Processing message with AI controller', {
-      hasContext: !!contextToUse
+    // Initialize progress
+    progressStore.set(generationId, {
+      type: 'processing',
+      status: 'starting',
+      progress: 0,
+      message: 'Processing your request...'
     });
 
-    const aiStartTime = Date.now();
-    const response = await aiController.processMessage(userMessage, contextToUse);
-    const aiTime = Date.now() - aiStartTime;
+    // Start async generation in the background
+    // Capture the API key before the async context
+    const apiKey = process.env.OPENAI_API_KEY;
+    console.log(`🔑 API Key available: ${apiKey ? 'Yes' : 'No'}`);
 
-    // LOG AI RESPONSE DETAILS
-    console.log('\n⚡ INTENT EXTRACTION:');
-    console.log(`   Time: ${aiTime}ms`);
-    console.log(`   Type: ${response.type}`);
-    console.log(`   Message: "${response.message}"`);
-    if (response.intent) {
-      console.log(`   Extracted Intent:`);
-      console.log(`     - Destination: ${response.intent.destination || 'missing'}`);
-      console.log(`     - Duration: ${response.intent.duration || 'missing'}`);
-      console.log(`     - Start Date: ${response.intent.startDate || 'missing'}`);
-      console.log(`     - Travelers: ${JSON.stringify(response.intent.travelers) || 'missing'}`);
-    }
-    if (response.missingFields?.length) {
-      console.log(`   Missing Fields: ${response.missingFields.join(', ')}`);
-    }
-    console.log('-'.repeat(80));
-
-    // Check if we have enough information to generate
-    if (response.type === 'ready' && response.canGenerate && response.intent) {
-      // Extract parameters and generate itinerary
-      const tripParams = aiController.getTripParameters(response.intent);
-
-      logger.info('API', 'Generating itinerary', {
-        destination: tripParams.destination,
-        duration: tripParams.duration
+    // Use process.nextTick to ensure it runs after response is sent but ASAP
+    process.nextTick(() => {
+      console.log(`🚀 Starting background generation for ${generationId}`);
+      generateProgressively(generationId, userMessage, contextToUse, apiKey).catch(error => {
+        logger.error('API', 'Progressive generation failed', error);
+        progressStore.set(generationId, {
+          type: 'error',
+          message: error.message || 'Generation failed',
+          error: true
+        });
       });
+    });
 
-      // Decide on generation strategy based on trip length
-      const genStartTime = Date.now();
-      console.log('\n🎯 GENERATING ITINERARY...');
-      console.log(`   Duration: ${tripParams.duration} days`);
-      console.log(`   Destinations: ${tripParams.destination}`);
+    // Return immediately with generation ID
+    return NextResponse.json({
+      success: true,
+      data: {
+        generationId,
+        message: 'Generation started. Poll for progress.',
+        pollUrl: `/api/ai?generationId=${generationId}`
+      }
+    });
 
-      let itinerary;
+  } catch (error: any) {
+    logger.error('API', 'Failed to start generation', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message || 'Failed to process request'
+    }, { status: 500 });
+  }
+}
 
-      // Use progressive generation for trips > 7 days or multiple cities
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const generationId = searchParams.get('generationId');
+
+  if (!generationId) {
+    return NextResponse.json({
+      success: false,
+      error: 'Generation ID required'
+    }, { status: 400 });
+  }
+
+  const progress = progressStore.get(generationId);
+
+  if (!progress) {
+    return NextResponse.json({
+      success: false,
+      error: 'No progress found'
+    }, { status: 404 });
+  }
+
+  // Clean up completed generations after 5 minutes
+  if (progress.type === 'complete' || progress.type === 'error') {
+    setTimeout(() => progressStore.delete(generationId), 300000);
+  }
+
+  return NextResponse.json({
+    success: true,
+    data: progress
+  });
+}
+
+async function generateProgressively(
+  generationId: string,
+  userMessage: string,
+  contextToUse: string | undefined,
+  apiKey?: string
+) {
+  console.log(`📍 [generateProgressively] Started for ${generationId}`);
+  console.log(`🔑 [generateProgressively] API Key received: ${apiKey ? 'Yes' : 'No'}`);
+
+  const aiController = new AIController();
+  const tripGenerator = new TripGenerator();
+
+  // Update progress helper
+  const updateProgress = (update: any) => {
+    console.log(`📊 Progress Update [${generationId}]:`, {
+      status: update.status,
+      type: update.type,
+      progress: update.progress
+    });
+    progressStore.set(generationId, update);
+  };
+
+  try {
+    // Process message
+    updateProgress({
+      type: 'processing',
+      status: 'understanding',
+      progress: 10,
+      message: 'Understanding your request...'
+    });
+
+    // Add initial delay to ensure UI has time to start polling
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const response = await aiController.processMessage(userMessage, contextToUse);
+
+    updateProgress({
+      type: 'processing',
+      status: 'intent_extracted',
+      progress: 20,
+      message: 'Analyzing travel requirements...',
+      intent: response.intent,
+      missingFields: response.missingFields
+    });
+
+    // Check if we can generate
+    if (response.type === 'ready' && response.canGenerate && response.intent) {
+      const tripParams = aiController.getTripParameters(response.intent);
       const destinations = tripParams.destination.split(',').map(d => d.trim());
       const useProgressive = tripParams.duration > 7 || destinations.length > 1;
 
-      console.log(`   Progressive Mode: ${useProgressive ? 'YES' : 'NO'}`);
-      console.log(`   Reason: Duration=${tripParams.duration}, Cities=${destinations.length}`);
-      console.log(`   Destination String: "${tripParams.destination}"`);
-      console.log(`   Parsed Destinations: ${JSON.stringify(destinations)}`);
-
       if (useProgressive) {
-        console.log('   📦 Using PROGRESSIVE generation for long/multi-city trip');
-        console.log(`   Starting progressive generation at ${new Date().toISOString()}`);
-        const progressiveGen = new ProgressiveGenerator();
+        updateProgress({
+          type: 'processing',
+          status: 'generating',
+          progress: 30,
+          message: `Planning ${destinations.join(' and ')} trip...`,
+          mode: 'progressive'
+        });
 
-        // Generate progressively
-        console.log('   Calling progressiveGen.generateProgressive...');
+        const progressiveGen = new ProgressiveGenerator(apiKey);
+
+        let generationError = null;
+        let allCityData = []; // Accumulate city data
+        let generatedMetadata = null;
+
         const result = await progressiveGen.generateProgressive({
           destinations,
           duration: tripParams.duration,
           startDate: tripParams.startDate,
           preferences: tripParams.preferences,
           onProgress: (update: any) => {
-            console.log(`   PROGRESS UPDATE: ${update.type} at ${update.progress}%`);
+            console.log(`📡 Progress callback received: ${update.type}`, {
+              city: update.city,
+              hasData: !!update.data
+            });
+
+            if (update.type === 'metadata') {
+              generatedMetadata = update.data;
+              updateProgress({
+                type: 'processing',
+                status: 'metadata_ready',
+                progress: 40,
+                message: 'Trip overview ready',
+                metadata: update.data,
+                allCities: [] // Initialize empty
+              });
+              console.log('✅ Metadata update stored, continuing to city generation...');
+            } else if (update.type === 'city_complete') {
+              console.log(`🏙️ City complete: ${update.city}, days: ${update.data?.days?.length}`);
+
+              // Add this city's data to accumulated list
+              allCityData.push({ city: update.city, data: update.data });
+
+              // Store ALL cities generated so far
+              const progress = progressStore.get(generationId);
+              updateProgress({
+                type: 'processing',
+                status: 'city_complete',
+                progress: Math.min(40 + update.progress * 0.5, 90),
+                message: `Generated ${update.city} itinerary`,
+                city: update.city,
+                cityData: update.data,
+                allCities: allCityData, // Include all cities so far
+                metadata: generatedMetadata || progress?.metadata // Keep metadata
+              });
+              console.log(`✅ City update stored for: ${update.city}, total cities: ${allCityData.length}`);
+            }
           }
+        }).catch(err => {
+          console.error('❌ Progressive generation error:', err);
+          generationError = err;
+          throw err;
         });
-        console.log('   Progressive generation completed');
 
-        itinerary = result.itinerary;
+        updateProgress({
+          type: 'complete',
+          status: 'success',
+          progress: 100,
+          message: 'Your itinerary is ready!',
+          itinerary: result.itinerary,
+          allCities: allCityData, // Preserve all cities data
+          metadata: generatedMetadata, // Preserve metadata
+          conversationContext: response.context
+        });
+
       } else {
-        console.log('   Using standard generation for short trip');
-        itinerary = await tripGenerator.generateItinerary(tripParams);
-      }
+        // Standard generation for simple trips
+        updateProgress({
+          type: 'processing',
+          status: 'generating',
+          progress: 50,
+          message: 'Generating your itinerary...',
+          mode: 'standard'
+        });
 
-      const genTime = Date.now() - genStartTime;
+        const itinerary = await tripGenerator.generateItinerary(tripParams);
 
-      // LOG GENERATION DETAILS
-      console.log(`   Generation Time: ${genTime}ms`);
-      console.log(`   Days Generated: ${itinerary.itinerary?.length || 0}`);
-      console.log(`   Total Activities: ${itinerary.itinerary?.reduce((sum, day) => sum + (day.activities?.length || 0), 0) || 0}`);
-      if (itinerary.itinerary?.length > 0) {
-        console.log(`   First Day: ${itinerary.itinerary[0].date}`);
-        console.log(`   Last Day: ${itinerary.itinerary[itinerary.itinerary.length - 1].date}`);
-      }
-
-      console.log('\n✅ COMPLETE RESPONSE SUMMARY:');
-      console.log(`   Total Time: ${Date.now() - startTime}ms`);
-      console.log(`   Intent Extraction: ${aiTime}ms`);
-      console.log(`   Itinerary Generation: ${genTime}ms`);
-      console.log('='.repeat(80) + '\n');
-
-      // Return the generated itinerary
-      return NextResponse.json({
-        success: true,
-        data: {
-          type: 'itinerary',
+        updateProgress({
+          type: 'complete',
+          status: 'success',
+          progress: 100,
           message: 'Your itinerary is ready!',
           itinerary,
           conversationContext: response.context
-        }
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Conversation-Session': sessionId || 'new'
-        }
-      });
-    }
+        });
+      }
 
-    // Need more information - return question
-    if (response.type === 'question') {
-      console.log('\n❓ ASKING FOLLOW-UP QUESTION:');
-      console.log(`   Question: "${response.message}"`);
-      console.log(`   Missing Fields: ${response.missingFields?.join(', ') || 'none'}`);
-      console.log(`   Total Time: ${Date.now() - startTime}ms`);
-      console.log('='.repeat(80) + '\n');
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          type: 'question',
-          message: response.message,
-          awaitingInput: response.missingFields?.[0],
-          suggestedOptions: undefined,
-          conversationContext: response.context
-        }
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Conversation-Session': sessionId || 'new'
-        }
-      });
-    }
-
-    // Handle other response types
-    console.log('\n💬 OTHER RESPONSE TYPE:');
-    console.log(`   Type: ${response.type}`);
-    console.log(`   Message: "${response.message}"`);
-    console.log(`   Total Time: ${Date.now() - startTime}ms`);
-    console.log('='.repeat(80) + '\n');
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        type: 'confirmation',
+    } else if (response.type === 'question') {
+      // Need more information from user
+      updateProgress({
+        type: 'question',
+        status: 'awaiting_input',
+        progress: 100,
         message: response.message,
-        requiresGeneration: false,
+        awaitingInput: response.missingFields?.[0],
         conversationContext: response.context
-      }
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Conversation-Session': sessionId || 'new'
-      }
-    });
+      });
+
+    } else {
+      // Need confirmation from user
+      updateProgress({
+        type: 'confirmation',
+        status: 'awaiting_confirmation',
+        progress: 100,
+        message: response.message,
+        conversationContext: response.context
+      });
+    }
 
   } catch (error: any) {
-    const errorTime = Date.now() - startTime;
-
-    // LOG ERROR DETAILS
-    console.log('\n❌ ERROR OCCURRED:');
-    console.log(`   Error Type: ${error.name}`);
-    console.log(`   Error Message: ${error.message}`);
-    console.log(`   Time to Error: ${errorTime}ms`);
-    if (error.stack) {
-      console.log(`   Stack Trace:`);
-      console.log(error.stack.split('\n').slice(0, 5).map((l: string) => `     ${l}`).join('\n'));
-    }
-    console.log('='.repeat(80) + '\n');
-
-    // Check for timeout (increased to 45 seconds for multi-city trips)
-    if (error.name === 'AbortError' || errorTime > 45000) {
-      return NextResponse.json({
-        success: false,
-        error: 'Request timed out. Please try again with a simpler request.',
-        type: 'error',
-        timeElapsed: errorTime
-      }, { status: 504 });
-    }
-
-    // Check for OpenAI errors
-    if (error.message?.includes('OpenAI') || error.message?.includes('API')) {
-      return NextResponse.json({
-        success: false,
-        error: 'AI service temporarily unavailable. Please try again.',
-        type: 'error',
-        details: error.message
-      }, { status: 503 });
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'Failed to process request',
-        type: 'error',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      },
-      { status: 500 }
-    );
+    console.error(`❌ Generation failed [${generationId}]:`, error);
+    updateProgress({
+      type: 'error',
+      status: 'failed',
+      progress: 0,
+      message: error.message || 'Generation failed',
+      error: true,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 }
 
-// Configuration
 export const runtime = 'nodejs';
-// Dynamic timeout based on trip complexity
-// Note: Vercel has a max of 300s (5 min) for Pro accounts
-export const maxDuration = 300; // Maximum execution time in seconds (5 minutes for long trips)
+export const maxDuration = 300;

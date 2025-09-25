@@ -227,7 +227,7 @@ export default function ChatDisplayV2({
         sessionId: string
     ): Promise<ConversationalItineraryOutput> => {
         // Start generation
-        const startResponse = await fetch('/api/ai/progressive', {
+        const startResponse = await fetch('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -257,7 +257,7 @@ export default function ChatDisplayV2({
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
 
-            const progressResponse = await fetch(`/api/ai/progressive?generationId=${generationId}`);
+            const progressResponse = await fetch(`/api/ai?generationId=${generationId}`);
             if (!progressResponse.ok) {
                 throw new Error('Failed to get progress');
             }
@@ -403,167 +403,8 @@ export default function ChatDisplayV2({
             console.error('Polling failed:', pollingError);
             console.log('📡 Falling back to streaming');
 
-            // Fallback to SSE streaming
-            return new Promise((resolve, reject) => {
-                const eventSource = new EventSource('/api/ai/stream');
-                let finalResponse: ConversationalItineraryOutput | null = null;
-
-                // Send the request data
-                fetch('/api/ai/stream', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt: message,
-                        attachedFile: initialPrompt.fileDataUrl,
-                        conversationContext,
-                        sessionId
-                    })
-                }).catch(error => {
-                    eventSource.close();
-                    reject(error);
-                });
-
-                eventSource.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-
-                switch (data.type) {
-                    case 'start':
-                        console.log('📡 Stream started:', data.message);
-                        setGenerationProgress({
-                            stage: 'understanding',
-                            percentage: 10,
-                            message: data.message,
-                            estimatedTimeRemaining: 30
-                        });
-                        break;
-
-                    case 'intent_extracted':
-                        console.log('🎯 Intent extracted:', data.intent);
-                        setGenerationProgress({
-                            stage: 'analyzing',
-                            percentage: 20,
-                            message: 'Understanding your requirements...',
-                            estimatedTimeRemaining: 25
-                        });
-                        break;
-
-                    case 'generation_mode':
-                        console.log('🔧 Generation mode:', data.mode);
-                        if (data.mode === 'progressive') {
-                            setGenerationProgress({
-                                stage: 'generating',
-                                percentage: 30,
-                                message: `Planning ${data.destinations.join(' and ')} trip...`,
-                                estimatedTimeRemaining: 20
-                            });
-                        }
-                        break;
-
-                    case 'progress':
-                        console.log('📊 Progress update:', data);
-                        if (data.type === 'metadata') {
-                            // Initialize with metadata
-                            setGenerationMetadata(data.data);
-                            const initialItinerary = {
-                                destination: data.data.destinations.join(', '),
-                                title: data.data.title,
-                                itinerary: [],
-                                quickTips: data.data.quickTips || [],
-                                cost: data.data.estimatedCost
-                            };
-                            setPartialItinerary(initialItinerary);
-                            setCurrentItinerary(initialItinerary as any);
-
-                            setGenerationProgress({
-                                stage: 'generating',
-                                percentage: 40,
-                                message: 'Creating trip overview...',
-                                estimatedTimeRemaining: 15
-                            });
-                        } else if (data.type === 'city_complete') {
-                            // Add city days progressively
-                            if (data.data && partialItinerary) {
-                                const updatedItinerary = {
-                                    ...partialItinerary,
-                                    itinerary: [
-                                        ...(partialItinerary.itinerary || []),
-                                        ...data.data.days.map((day: any) => ({
-                                            title: day.title || `Day ${day.day} - ${day.city || data.city}`,
-                                            day: day.day,
-                                            date: day.date,
-                                            activities: day.activities.map((act: any) => ({
-                                                time: act.time,
-                                                description: act.description,
-                                                category: act.category,
-                                                address: act.address || 'Address not available',
-                                                venue_name: act.venueName,
-                                                rating: undefined,
-                                                _tips: act.tips
-                                            })),
-                                            weather: day.weather || 'Check local forecast'
-                                        }))
-                                    ].sort((a, b) => a.day - b.day)
-                                };
-                                setPartialItinerary(updatedItinerary);
-                                setCurrentItinerary(updatedItinerary as any);
-                            }
-
-                            setGenerationProgress({
-                                stage: 'generating',
-                                percentage: Math.min(40 + data.progress * 0.5, 90),
-                                message: `Generated itinerary for ${data.city}...`,
-                                estimatedTimeRemaining: 10
-                            });
-                        }
-                        break;
-
-                    case 'itinerary':
-                        console.log('✅ Itinerary received');
-                        finalResponse = data;
-                        setGenerationProgress({
-                            stage: 'finalizing',
-                            percentage: 95,
-                            message: 'Finalizing your itinerary...',
-                            estimatedTimeRemaining: 2
-                        });
-                        break;
-
-                    case 'question':
-                        finalResponse = data;
-                        break;
-
-                    case 'error':
-                        console.error('❌ Stream error:', data);
-                        eventSource.close();
-                        reject(new Error(data.message));
-                        break;
-
-                    case 'complete':
-                        console.log('🏁 Stream complete in', data.duration, 'ms');
-                        eventSource.close();
-                        if (finalResponse) {
-                            resolve(finalResponse);
-                        } else {
-                            reject(new Error('No response received'));
-                        }
-                        break;
-                }
-            };
-
-            eventSource.onerror = (error) => {
-                console.error('❌ EventSource error:', error);
-                eventSource.close();
-                reject(new Error('Connection lost'));
-            };
-
-            // Timeout after 5 minutes
-            setTimeout(() => {
-                if (eventSource.readyState !== EventSource.CLOSED) {
-                    eventSource.close();
-                    reject(new Error('Request timed out'));
-                }
-            }, 300000);
-        });
+            // Fallback - should not be reached with unified endpoint
+            throw new Error('Streaming not supported - please use polling');
         }
     };
 

@@ -6,7 +6,7 @@
 
 import OpenAI from 'openai';
 import { logger } from '@/lib/monitoring/logger';
-import { GeneratePersonalizedItineraryOutput } from './types/core.types';
+import { GeneratePersonalizedItineraryOutput } from './types/itinerary.types';
 
 // Import specialized modules
 import { getCityZones } from './data/city-zones';
@@ -98,12 +98,8 @@ export class TripGenerator {
 
       // Step 4: Add cost estimates
       console.log(`   💰 Calculating costs...`);
-      const budgetLevel = params.budget ||
-        (params.preferences?.budget === 'mid' ? 'medium' : params.preferences?.budget) ||
-        'medium';
-
       const withCosts = await this.costEstimator.addCostEstimates(enriched, {
-        budget: budgetLevel as 'budget' | 'medium' | 'luxury',
+        budget: params.budget || params.preferences?.budget || 'medium',
         travelers: params.travelers
       });
 
@@ -130,7 +126,7 @@ export class TripGenerator {
     const zoneGuidance = this.promptBuilder.buildZoneGuidance(zones, params.duration);
 
     // Build prompts
-    const systemPrompt = PROMPTS.generation?.systemPrompt || this.getDefaultSystemPrompt();
+    const systemPrompt = PROMPTS.generateItinerary || this.getDefaultSystemPrompt();
     const userPrompt = this.promptBuilder.buildItineraryPrompt(params, zoneGuidance);
 
     try {

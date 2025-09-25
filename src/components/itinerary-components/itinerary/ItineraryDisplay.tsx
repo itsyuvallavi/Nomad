@@ -9,7 +9,7 @@ import { motion, useInView } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
 import { LazyImage } from '@/components/ui/lazy-image';
-import { searchPexelsImages, type PexelsImage } from '@/services/api/pexels';
+import { searchPexelsImages, type PexelsImage } from '@/services/api/media/pexels';
 import { logger } from '@/lib/monitoring/logger';
 import { Button } from '@/components/ui/button';
 import { getIconicImageSearch } from '@/lib/constants/city-landmarks';
