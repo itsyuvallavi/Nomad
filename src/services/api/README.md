@@ -2,6 +2,8 @@
 
 External API integrations for Nomad Navigator.
 
+**Last Updated**: January 25, 2025
+
 ## Active APIs
 
 ### Places API
@@ -61,9 +63,10 @@ const BASE_URL = 'https://discover.search.hereapi.com/v1';
 ### Usage Example
 ```typescript
 import { herePlacesService } from '@/services/api/places/here-places';
+import { HEREPlace } from '@/services/api/places/here-places'; // Type import
 
 // Single search
-const places = await herePlacesService.searchPlaces('Eiffel Tower', {
+const places: HEREPlace[] = await herePlacesService.searchPlaces('Eiffel Tower', {
   limit: 5,
   at: { lat: 48.8566, lng: 2.3522 }
 });
@@ -73,7 +76,7 @@ const queries = [
   { query: 'Louvre Museum Paris' },
   { query: 'Arc de Triomphe Paris' }
 ];
-const results = await herePlacesService.batchSearchPlaces(queries);
+const results: Map<string, HEREPlace[]> = await herePlacesService.batchSearchPlaces(queries);
 ```
 
 ## Pexels Media API
@@ -140,3 +143,11 @@ PEXELS_API_KEY=your_pexels_api_key
 - Weather API removed (not used in current features)
 - Static places removed (replaced with dynamic HERE data)
 - LocationIQ removed (redundant with HERE)
+
+## Recent Updates (Jan 25, 2025)
+
+- ✅ Cleaned up unused API services
+- ✅ Consolidated place search to HERE Places only
+- ✅ Fixed type issues with HEREPlace interface
+- ✅ Improved batch search performance
+- ✅ Updated documentation with proper type annotations

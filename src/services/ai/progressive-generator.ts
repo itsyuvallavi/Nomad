@@ -6,7 +6,7 @@
 import { logger } from '@/lib/monitoring/logger';
 import { MetadataGenerator } from './progressive/metadata-generator';
 import { CityGenerator } from './progressive/city-generator';
-import { ItineraryCombiner } from './progressive/itinerary-combiner';
+import { getNextDate } from './utils/date.utils';
 import {
   TripMetadata,
   CityItinerary,
@@ -27,12 +27,10 @@ export type {
 export class ProgressiveGenerator {
   private metadataGenerator: MetadataGenerator;
   private cityGenerator: CityGenerator;
-  private itineraryCombiner: ItineraryCombiner;
 
   constructor(apiKey?: string) {
     this.metadataGenerator = new MetadataGenerator();
     this.cityGenerator = new CityGenerator(apiKey);
-    this.itineraryCombiner = new ItineraryCombiner();
   }
 
   /**
@@ -66,7 +64,7 @@ export class ProgressiveGenerator {
 
     // Step 3: Combine into final itinerary
     console.log('📦 [ProgressiveGenerator] Combining all city itineraries...');
-    const finalItinerary = this.itineraryCombiner.combine(
+    const finalItinerary = this.combineItineraries(
       metadata,
       cityItineraries.itineraries
     );
@@ -145,7 +143,7 @@ export class ProgressiveGenerator {
       }
 
       // Move to next city's dates
-      currentDate = this.getNextDate(currentDate, daysForCity);
+      currentDate = getNextDate(currentDate, daysForCity);
       currentDay += daysForCity;
       console.log(`🔄 [ProgressiveGenerator] Moving to next city. Next date: ${currentDate}, Next day: ${currentDay}`);
     }
@@ -167,14 +165,6 @@ export class ProgressiveGenerator {
     console.log(`✅ [ProgressiveGenerator] ${update.type} callback triggered, continuing...`);
   }
 
-  /**
-   * Helper: Get next date
-   */
-  private getNextDate(currentDate: string, daysToAdd: number): string {
-    const date = new Date(currentDate);
-    date.setDate(date.getDate() + daysToAdd);
-    return date.toISOString().split('T')[0];
-  }
 
   // Legacy methods for backward compatibility
 
@@ -207,6 +197,69 @@ export class ProgressiveGenerator {
    * @deprecated Use generateProgressive instead
    */
   combineCityItineraries(metadata: TripMetadata, cityItineraries: CityItinerary[]) {
-    return this.itineraryCombiner.combine(metadata, cityItineraries);
+    return this.combineItineraries(metadata, cityItineraries);
+  }
+
+  // ========================================
+  // Itinerary Combining Logic (merged from itinerary-combiner.ts)
+  // ========================================
+
+  /**
+   * Combine all city itineraries into final format
+   */
+  private combineItineraries(metadata: TripMetadata, cityItineraries: CityItinerary[]) {
+    console.log(`📊 [ProgressiveGenerator] Combining ${cityItineraries.length} cities`);
+
+    cityItineraries.forEach(city => {
+      console.log(`  - ${city.city}: ${city.days.length} days (day ${city.startDay} to ${city.endDay})`);
+    });
+
+    const allDays = this.mergeAndSortDays(cityItineraries);
+    console.log(`📊 [ProgressiveGenerator] Total days after combining: ${allDays.length}`);
+
+    return {
+      destination: metadata.destinations.join(', '),
+      title: metadata.title,
+      itinerary: this.formatDaysForOutput(allDays),
+      quickTips: metadata.quickTips || [],
+      cost: metadata.estimatedCost
+    };
+  }
+
+  /**
+   * Merge and sort days from all cities
+   */
+  private mergeAndSortDays(cityItineraries: CityItinerary[]) {
+    return cityItineraries
+      .flatMap(city => city.days)
+      .sort((a, b) => a.day - b.day);
+  }
+
+  /**
+   * Format days for final output
+   */
+  private formatDaysForOutput(days: any[]) {
+    return days.map(day => ({
+      title: day.title || `Day ${day.day} - ${day.city}`,
+      day: day.day,
+      date: day.date,
+      activities: this.formatActivities(day.activities || []),
+      weather: day.weather || 'Check local forecast'
+    }));
+  }
+
+  /**
+   * Format activities for output
+   */
+  private formatActivities(activities: any[]) {
+    return activities.map(act => ({
+      time: act.time,
+      description: act.description,
+      category: act.category,
+      address: act.address || 'Address not available',
+      venue_name: act.venueName,
+      rating: undefined,
+      _tips: act.tips
+    }));
   }
 }

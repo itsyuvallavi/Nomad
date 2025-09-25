@@ -15,8 +15,8 @@ interface CacheEntry<T> {
 
 export class CacheManager<T = any> {
   private cache: Map<string, CacheEntry<T>>;
-  private readonly ttl: number;
-  private readonly maxSize: number;
+  protected readonly ttl: number;
+  protected readonly maxSize: number;
 
   constructor(ttlMs: number = 3600000, maxSize: number = 100) {
     this.cache = new Map();

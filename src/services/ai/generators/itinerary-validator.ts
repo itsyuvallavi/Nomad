@@ -11,6 +11,8 @@ import {
 } from '../types/core.types';
 import { TripParams } from '../trip-generator';
 import { logger } from '@/lib/monitoring/logger';
+import { safeJsonParse } from '../utils/validation.utils';
+import { calculateDate, calculateEndDate } from '../utils/date.utils';
 
 export class ItineraryValidator {
   /**
@@ -55,7 +57,7 @@ export class ItineraryValidator {
     const itinerary: GeneratePersonalizedItineraryOutput = {
       destination: converted.destination || params.destination,
       startDate: converted.startDate || params.startDate,
-      endDate: converted.endDate || this.calculateEndDate(params.startDate, params.duration),
+      endDate: converted.endDate || calculateEndDate(params.startDate, params.duration),
       duration: converted.duration || params.duration,
       travelers: converted.travelers || params.travelers || { adults: 1, children: 0 },
       dailyItineraries: converted.dailyItineraries || [],
@@ -77,7 +79,7 @@ export class ItineraryValidator {
       itinerary.dailyItineraries = itinerary.dailyItineraries.map((day, index) => ({
         ...day,
         dayNumber: day.dayNumber || index + 1,
-        date: day.date || this.calculateDate(params.startDate, index),
+        date: day.date || calculateDate(params.startDate, index),
         activities: day.activities || [],
         meals: day.meals || {}
       }));
@@ -102,7 +104,7 @@ export class ItineraryValidator {
         for (let i = actualDays; i < expectedDays; i++) {
           itinerary.dailyItineraries.push({
             dayNumber: i + 1,
-            date: this.calculateDate(itinerary.startDate!, i),
+            date: calculateDate(itinerary.startDate!, i),
             activities: [],
             meals: {}
           });
@@ -122,7 +124,7 @@ export class ItineraryValidator {
     // Ensure dates are correct
     if (itinerary.dailyItineraries && itinerary.startDate) {
       itinerary.dailyItineraries.forEach((day, index) => {
-        day.date = this.calculateDate(itinerary.startDate!, index);
+        day.date = calculateDate(itinerary.startDate!, index);
         day.dayNumber = index + 1;
       });
     }
@@ -149,23 +151,6 @@ export class ItineraryValidator {
     return itinerary;
   }
 
-  /**
-   * Calculate date for a specific day
-   */
-  calculateDate(startDate: string, dayOffset: number): string {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + dayOffset);
-    return date.toISOString().split('T')[0];
-  }
-
-  /**
-   * Calculate end date from start date and duration
-   */
-  calculateEndDate(startDate: string, duration: number): string {
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + duration - 1);
-    return date.toISOString().split('T')[0];
-  }
 
   /**
    * Count total activities in itinerary

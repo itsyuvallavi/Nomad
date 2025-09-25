@@ -2,6 +2,8 @@
 
 Supporting modules for the ProgressiveGenerator that enable step-by-step itinerary generation with real-time updates.
 
+**Last Updated**: January 25, 2025
+
 ## Modules
 
 ### metadata-generator.ts (148 lines)
@@ -19,8 +21,11 @@ Supporting modules for the ProgressiveGenerator that enable step-by-step itinera
 
 **Example**:
 ```typescript
+import { MetadataGenerator } from './metadata-generator';
+import { ProgressiveMetadata } from '../types/core.types';
+
 const generator = new MetadataGenerator();
-const metadata = await generator.generate({
+const metadata: ProgressiveMetadata = await generator.generate({
   destinations: ['Paris', 'London'],
   duration: 7,
   startDate: '2025-03-01'
@@ -47,8 +52,11 @@ const metadata = await generator.generate({
 
 **Example**:
 ```typescript
+import { CityGenerator } from './city-generator';
+import { BaseItinerary } from '../types/core.types';
+
 const generator = new CityGenerator();
-const cityPlan = await generator.generateCityItinerary({
+const cityPlan: BaseItinerary = await generator.generateCityItinerary({
   city: 'Barcelona',
   days: 3,
   startDate: '2025-04-01',
@@ -57,33 +65,22 @@ const cityPlan = await generator.generateCityItinerary({
 // Returns 3 days of Barcelona activities
 ```
 
-### itinerary-combiner.ts (66 lines)
-**Purpose**: Combines multiple city itineraries into a cohesive trip plan
+### ~~itinerary-combiner.ts~~ (Merged into progressive-generator.ts)
+**Note**: This functionality has been consolidated into the main `progressive-generator.ts` file as part of the January 2025 optimization.
 
-**Combination Tasks**:
+**Combination Tasks** (now in progressive-generator):
 - Merge city itineraries
 - Sort days chronologically
 - Format for output
 - Standardize structure
 
-**Example**:
-```typescript
-const combiner = new ItineraryCombiner();
-const fullTrip = combiner.combine(metadata, [
-  londonItinerary,
-  parisItinerary,
-  romeItinerary
-]);
-// Returns unified multi-city itinerary
-```
+### ~~types.ts~~ (Moved to core.types.ts)
+**Note**: All types have been centralized in `../types/core.types.ts` for single source of truth.
 
-### types.ts (68 lines)
-**Purpose**: TypeScript type definitions for progressive generation
-
-**Key Types**:
-- `TripMetadata` - Trip overview information
-- `CityItinerary` - Single city plan
-- `DayPlan` - Daily activities
+**Key Types** (now in core.types.ts):
+- `ProgressiveMetadata` - Trip overview information
+- `BaseItinerary` - Single city plan
+- `DailyItinerary` - Daily activities
 - `Activity` - Individual activity details
 - `ProgressUpdate` - Progress callback data
 - `GenerationParams` - Generation parameters
@@ -114,18 +111,22 @@ Complete Itinerary
 ## Integration with ProgressiveGenerator
 
 ```typescript
+import { MetadataGenerator } from './progressive/metadata-generator';
+import { CityGenerator } from './progressive/city-generator';
+import { GenerationParams, ProgressiveMetadata, BaseItinerary } from './types/core.types';
+
 export class ProgressiveGenerator {
   private metadataGenerator: MetadataGenerator;
   private cityGenerator: CityGenerator;
-  private itineraryCombiner: ItineraryCombiner;
+  // Note: itinerary combination logic is now internal to this class
 
   async generateProgressive(params: GenerationParams) {
     // Step 1: Quick metadata
-    const metadata = await this.metadataGenerator.generate(params);
+    const metadata: ProgressiveMetadata = await this.metadataGenerator.generate(params);
     params.onProgress?.({ type: 'metadata', data: metadata, progress: 20 });
 
     // Step 2: Generate each city
-    const cityItineraries = [];
+    const cityItineraries: BaseItinerary[] = [];
     for (let i = 0; i < params.destinations.length; i++) {
       const city = await this.cityGenerator.generateCityItinerary({...});
       cityItineraries.push(city);
@@ -134,8 +135,8 @@ export class ProgressiveGenerator {
       params.onProgress?.({ type: 'city_complete', data: city, progress });
     }
 
-    // Step 3: Combine
-    const final = this.itineraryCombiner.combine(metadata, cityItineraries);
+    // Step 3: Combine (now internal method)
+    const final = this.combineItineraries(metadata, cityItineraries);
     params.onProgress?.({ type: 'complete', data: final, progress: 100 });
 
     return final;
@@ -213,8 +214,16 @@ The metadata generator provides destination-specific tips:
 ## Error Handling
 
 Each module includes robust error handling:
-- JSON parsing recovery
+- JSON parsing recovery (using shared `safeJsonParse` utility)
 - Missing data defaults
 - API failure fallbacks
 - Validation and fixes
 - Graceful degradation
+
+## Recent Updates (Jan 25, 2025)
+
+- ✅ Consolidated `itinerary-combiner.ts` into `progressive-generator.ts`
+- ✅ Moved all types to centralized `core.types.ts`
+- ✅ Integrated shared utilities from `utils/` folder
+- ✅ Improved type safety with single source of truth
+- ✅ Reduced module count while maintaining functionality

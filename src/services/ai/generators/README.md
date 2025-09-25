@@ -2,6 +2,8 @@
 
 Supporting modules for the TripGenerator that handle itinerary generation, optimization, and enrichment.
 
+**Last Updated**: January 25, 2025
+
 ## Modules
 
 ### route-optimizer.ts (309 lines)
@@ -19,8 +21,11 @@ Supporting modules for the TripGenerator that handle itinerary generation, optim
 
 **Example**:
 ```typescript
+import { RouteOptimizer } from './route-optimizer';
+import { GeneratePersonalizedItineraryOutput } from '../types/core.types';
+
 const optimizer = new RouteOptimizer();
-const optimized = optimizer.optimizeDailyRoutes(itinerary);
+const optimized: GeneratePersonalizedItineraryOutput = optimizer.optimizeDailyRoutes(itinerary);
 // Activities now grouped by zone to minimize travel
 ```
 
@@ -72,8 +77,8 @@ const optimized = optimizer.optimizeDailyRoutes(itinerary);
 - `validateAndFixItinerary()` - Main validation entry
 - `ensureItineraryStructure()` - Structural consistency
 - `validateParams()` - Input parameter validation
-- `calculateDate()` - Date calculations
-- `parseJSONSafely()` - Safe JSON parsing with recovery
+- Uses shared `calculateDate()` from `../utils/date.utils.ts`
+- Uses shared `safeJsonParse()` from `../utils/validation.utils.ts`
 
 ### itinerary-enricher.ts (204 lines)
 **Purpose**: Enriches itineraries with real venue data from HERE Places API
@@ -87,8 +92,11 @@ const optimized = optimizer.optimizeDailyRoutes(itinerary);
 
 **API Integration**:
 ```typescript
+import { ItineraryEnricher } from './itinerary-enricher';
+import { GeneratePersonalizedItineraryOutput } from '../types/core.types';
+
 const enricher = new ItineraryEnricher();
-const enriched = await enricher.enrichItinerary(itinerary);
+const enriched: GeneratePersonalizedItineraryOutput = await enricher.enrichItinerary(itinerary);
 // Activities now have real venue data, coordinates, addresses
 ```
 
@@ -125,12 +133,19 @@ Final Validation
 ## Integration Example
 
 ```typescript
+import { GeneratePersonalizedItineraryOutput } from './types/core.types';
+import { PromptBuilder } from './generators/prompt-builder';
+import { RouteOptimizer } from './generators/route-optimizer';
+import { ItineraryEnricher } from './generators/itinerary-enricher';
+import { CostEstimator } from './generators/cost-estimator';
+import { ItineraryValidator } from './generators/itinerary-validator';
+
 export class TripGenerator {
-  async generateItinerary(params: TripParams) {
-    // 1. Build prompt
+  async generateItinerary(params: TripParams): Promise<GeneratePersonalizedItineraryOutput> {
+    // 1. Build prompt with zone guidance
     const prompt = this.promptBuilder.buildItineraryPrompt(params);
 
-    // 2. Generate with GPT
+    // 2. Generate with GPT-3.5-Turbo
     const baseItinerary = await this.generateBaseItinerary(params);
 
     // 3. Optimize routes
@@ -186,3 +201,11 @@ The enricher uses HERE Places API for:
 - Business hours (when available)
 - Ratings and reviews
 - Category classification
+
+## Recent Updates (Jan 25, 2025)
+
+- ✅ Updated all modules to use centralized types from `core.types.ts`
+- ✅ Integrated shared utilities (`date.utils.ts`, `validation.utils.ts`)
+- ✅ Fixed HEREPlace type issues in itinerary-enricher
+- ✅ Removed duplicate utility functions
+- ✅ Improved type safety across all generators

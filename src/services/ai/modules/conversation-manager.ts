@@ -66,7 +66,7 @@ export class ConversationManager {
     };
 
     this.contexts.set(id, context);
-    logger.debug('Created new conversation context', { sessionId: id });
+    logger.debug('AI', 'Created new conversation context', { sessionId: id });
 
     return context;
   }
@@ -82,7 +82,7 @@ export class ConversationManager {
     } else {
       // Check if context is expired
       if (Date.now() - context.lastUpdated.getTime() > this.contextTTL) {
-        logger.debug('Context expired, creating new one', { sessionId });
+        logger.debug('AI', 'Context expired, creating new one', { sessionId });
         context = this.createContext(sessionId);
       }
     }
@@ -111,7 +111,7 @@ export class ConversationManager {
     }
 
     this.contexts.set(sessionId, context);
-    logger.debug('Updated conversation context', {
+    logger.debug('AI', 'Updated conversation context', {
       sessionId,
       state: context.state,
       messageCount: context.messageCount
@@ -162,7 +162,7 @@ export class ConversationManager {
 
     this.contexts.set(sessionId, context);
 
-    logger.debug('State transition', {
+    logger.debug('AI', 'State transition', {
       sessionId,
       from: oldState,
       to: newState
@@ -188,7 +188,7 @@ export class ConversationManager {
 
     this.contexts.set(sessionId, context);
 
-    logger.debug('Updated intent', {
+    logger.debug('AI', 'Updated intent', {
       sessionId,
       intent: context.currentIntent
     });
@@ -272,7 +272,7 @@ export class ConversationManager {
         generationId: context.generationId
       });
     } catch (error) {
-      logger.error('Failed to serialize context', { error });
+      logger.error('AI', 'Failed to serialize context', { error });
       return '{}';
     }
   }
@@ -309,7 +309,7 @@ export class ConversationManager {
 
       return context;
     } catch (error) {
-      logger.error('Failed to deserialize context', { error });
+      logger.error('AI', 'Failed to deserialize context', { error });
       return null;
     }
   }
@@ -329,7 +329,7 @@ export class ConversationManager {
     }
 
     if (removed > 0) {
-      logger.debug('Cleaned up expired contexts', { removed });
+      logger.debug('AI', 'Cleaned up expired contexts', { removed });
     }
 
     return removed;
@@ -373,7 +373,7 @@ export class ConversationManager {
    * Reset conversation context
    */
   resetContext(sessionId: string): ConversationContext {
-    logger.debug('Resetting conversation context', { sessionId });
+    logger.debug('AI', 'Resetting conversation context', { sessionId });
     return this.createContext(sessionId);
   }
 

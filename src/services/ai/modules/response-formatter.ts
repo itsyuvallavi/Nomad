@@ -85,7 +85,7 @@ export class ResponseFormatter {
   ): AIResponse {
     const errorMessage = error instanceof Error ? error.message : error;
 
-    logger.error('Formatting error response', { error: errorMessage });
+    logger.error('AI', 'Formatting error response', { error: errorMessage });
 
     return {
       type: 'error',

@@ -2,6 +2,8 @@
 
 Supporting modules for the AIController that handle conversation management and intent extraction.
 
+**Last Updated**: January 25, 2025
+
 ## Modules
 
 ### intent-parser.ts (497 lines)
@@ -16,8 +18,11 @@ Supporting modules for the AIController that handle conversation management and 
 
 **Example**:
 ```typescript
+import { IntentParser } from './intent-parser';
+import { UserIntent } from '../types/core.types'; // Centralized types
+
 const parser = new IntentParser();
-const intent = await parser.parseIntent('3 days in Paris next month');
+const intent: UserIntent = await parser.parseIntent('3 days in Paris next month');
 // Returns: { destination: 'Paris', duration: 3, startDate: '2025-02-01' }
 ```
 
@@ -100,6 +105,12 @@ CacheManager (throughout)
 The AIController orchestrates these modules:
 
 ```typescript
+import { IntentParser } from './modules/intent-parser';
+import { ConversationManager } from './modules/conversation-manager';
+import { CacheManager } from './modules/cache-manager';
+import { ResponseFormatter } from './modules/response-formatter';
+import { UserIntent, ConversationContext } from './types/core.types';
+
 export class AIController {
   private intentParser: IntentParser;
   private conversationManager: ConversationManager;
@@ -112,10 +123,10 @@ export class AIController {
     if (cached) return cached;
 
     // 2. Parse intent
-    const intent = await this.intentParser.parseIntent(message);
+    const intent: UserIntent = await this.intentParser.parseIntent(message);
 
     // 3. Update conversation
-    const conversation = this.conversationManager.updateContext(intent);
+    const conversation: ConversationContext = this.conversationManager.updateContext(intent);
 
     // 4. Format response
     const response = this.responseFormatter.formatResponse(conversation);
@@ -135,3 +146,10 @@ export class AIController {
 - **Cache Hit**: <5ms
 - **Session Operations**: <10ms
 - **Response Formatting**: <20ms
+
+## Recent Updates (Jan 25, 2025)
+
+- ✅ Fixed all TypeScript errors in ConversationManager (LogCategory types)
+- ✅ Updated to use centralized types from `core.types.ts`
+- ✅ Improved error handling and logging consistency
+- ✅ Enhanced cache manager with better type safety

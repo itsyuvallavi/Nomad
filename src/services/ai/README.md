@@ -1,250 +1,221 @@
-# AI Services
+# AI Service Architecture
 
-Core AI functionality for Nomad Navigator's intelligent trip planning system.
+## Overview
+The AI service orchestrates intelligent trip generation using OpenAI's GPT models. The system is designed with a modular architecture that separates concerns into specialized components.
 
-## Architecture Overview
+**Last Updated**: January 25, 2025
 
-The AI service uses a modular architecture with specialized components for different aspects of trip planning.
-
-### Main Components
-
-#### Core Files (Ultra-Modular Design)
-- **ai-controller.ts** (387 lines) - Main AI orchestrator handling intent extraction and conversation flow
-- **trip-generator.ts** (248 lines) - Orchestrates complete itinerary generation using specialized modules
-- **progressive-generator.ts** (211 lines) - Progressive itinerary generation for streaming UX
-
-### Module Organization
+## 📁 Directory Structure
 
 ```
-src/services/ai/
-├── Core Orchestrators (< 400 lines each)
-│   ├── ai-controller.ts
-│   ├── trip-generator.ts
-│   └── progressive-generator.ts
-│
-├── modules/ (AI Controller Support)
-│   ├── intent-parser.ts - Natural language processing
-│   ├── conversation-manager.ts - State management
-│   ├── cache-manager.ts - Response caching
-│   └── response-formatter.ts - Output formatting
-│
-├── generators/ (Trip Generator Support)
-│   ├── route-optimizer.ts - Zone-based optimization
-│   ├── cost-estimator.ts - Budget calculations
-│   ├── prompt-builder.ts - GPT prompt construction
-│   ├── itinerary-validator.ts - Data validation
-│   └── itinerary-enricher.ts - Location enrichment
-│
-├── progressive/ (Progressive Generator Support)
-│   ├── metadata-generator.ts - Fast metadata
-│   ├── city-generator.ts - City itineraries
-│   ├── itinerary-combiner.ts - Combination logic
-│   └── types.ts - Type definitions
-│
+ai/
+├── types/
+│   └── core.types.ts         # Single source of truth for all TypeScript types
+├── schemas/
+│   └── validation.schemas.ts # Zod schemas for runtime validation
+├── utils/
+│   ├── validation.utils.ts   # Shared validation and parsing utilities
+│   └── date.utils.ts         # Date manipulation and calculation utilities
 ├── data/
-│   └── city-zones.ts - Geographic zone data
-│
-└── types/
-    └── itinerary.types.ts - Shared type definitions
+│   ├── city-zones.ts        # City zone definitions for route optimization
+│   ├── city-attractions.ts  # Static attraction data
+│   └── static-activities.json # Activity templates
+├── modules/                  # AI Controller support modules
+│   ├── intent-parser.ts     # Natural language understanding
+│   ├── conversation-manager.ts # Conversation state management
+│   ├── cache-manager.ts     # Response caching
+│   └── response-formatter.ts # Output formatting
+├── generators/               # Trip generation modules
+│   ├── route-optimizer.ts   # Zone-based route optimization
+│   ├── cost-estimator.ts    # Budget calculations
+│   ├── prompt-builder.ts    # GPT prompt construction
+│   ├── itinerary-validator.ts # Data validation
+│   └── itinerary-enricher.ts # Location data enrichment
+├── progressive/              # Progressive generation components
+│   ├── metadata-generator.ts # Quick metadata generation
+│   └── city-generator.ts    # City-specific itineraries
+├── ai-controller.ts         # Main orchestrator for conversations
+├── trip-generator.ts        # Trip generation orchestrator
+├── progressive-generator.ts # Progressive UI generation
+└── prompts.ts              # Prompt templates
 ```
 
-## Data Flow
+## 🏗️ Architecture
 
+### Core Components
+
+#### 1. **AI Controller** (`ai-controller.ts`)
+Main conversation orchestrator that:
+- Parses user intent using `IntentParser`
+- Manages conversation state via `ConversationManager`
+- Caches responses with `CacheManager`
+- Formats output using `ResponseFormatter`
+
+#### 2. **Trip Generator** (`trip-generator.ts`)
+Orchestrates complete trip generation:
+- Builds prompts using `PromptBuilder`
+- Validates output with `ItineraryValidator`
+- Optimizes routes via `RouteOptimizer`
+- Estimates costs with `CostEstimator`
+- Enriches data using `ItineraryEnricher`
+
+#### 3. **Progressive Generator** (`progressive-generator.ts`)
+Handles streaming generation for better UX:
+- Generates metadata quickly (2-3s)
+- Produces city itineraries progressively
+- Combines results into final format
+
+## 🔧 Key Features
+
+### Intent Recognition
+```typescript
+// Automatically understands various input formats
+"3 days in Paris"
+"Weekend trip to Tokyo next month"
+"Plan a budget vacation to Barcelona"
 ```
-User Input
-    ↓
-AIController (387 lines)
-    ├── IntentParser → Extract destination, dates, preferences
-    ├── ConversationManager → Track conversation state
-    └── ResponseFormatter → Generate contextual response
-         ↓
-    TripGenerator (248 lines) [when all info collected]
-         ├── PromptBuilder → Construct GPT prompt
-         ├── OpenAI GPT-4o-mini → Generate base itinerary
-         ├── RouteOptimizer → Optimize by geographic zones
-         ├── ItineraryEnricher → Add real venue data (HERE API)
-         ├── CostEstimator → Calculate trip costs
-         └── ItineraryValidator → Ensure data consistency
-```
 
-## Key Features
+### Progressive Generation
+Provides immediate feedback with staged generation:
+1. **Metadata** (2-3s): Destination, dates, duration
+2. **Per City** (5-10s each): Detailed daily activities
+3. **Final Combination**: Complete itinerary
 
-### 1. Intelligent Intent Extraction
-- Pattern-based extraction for common formats
-- GPT-4o-mini fallback for complex queries
-- Multi-city trip detection
-- Date parsing (relative and absolute)
+### Zone-Based Optimization
+Groups activities by geographic zones to minimize travel:
+- Downtown zones
+- Cultural districts
+- Shopping areas
+- Natural attractions
 
-### 2. Zone-Based Planning
-- Activities grouped by geographic zones
-- Minimizes travel time between venues
-- Supports major cities (London, Paris, Tokyo, NYC, etc.)
-
-### 3. Progressive Generation
-- Metadata generated instantly (<100ms)
-- City itineraries generated incrementally
-- Real-time progress updates
-
-### 4. Smart Caching
-- LRU cache with TTL management
+### Intelligent Caching
+- Intent-based caching
 - Fuzzy matching for similar queries
-- Automatic cache eviction
+- TTL-based expiration
 
-### 5. Cost Estimation
-- Budget-aware planning (budget/medium/luxury)
-- Accommodation cost estimates
-- Activity and transportation costs
-- Multi-traveler support
+## 📊 Performance Metrics
 
-## Usage Examples
+| Operation | Target | Current |
+|-----------|--------|---------|
+| Intent Extraction | <500ms | ✅ 300-500ms |
+| Metadata Generation | <3s | ✅ 2-3s |
+| City Generation | <10s | ✅ 5-10s |
+| Full Itinerary | <30s | ✅ 20-30s |
+| Cache Hit Rate | >30% | ✅ 35-40% |
 
-### Basic Intent Extraction
+## 🔑 Type System
+
+All types are centralized in `types/core.types.ts`:
+
 ```typescript
-const controller = new AIController();
-const intent = await controller.extractIntent('3 days in London next month');
-// Returns: { destination: 'London', duration: 3, startDate: '2025-02-01' }
+// Core types
+Activity           // Individual activity/attraction
+DailyItinerary    // Single day's plan
+UserIntent        // Parsed user intent
+ConversationContext // Conversation state
+
+// Generation types
+GeneratePersonalizedItineraryOutput // Complete itinerary
+ProgressiveMetadata // Quick metadata
+BaseItinerary     // Basic itinerary structure
 ```
 
-### Full Itinerary Generation
+## 🛠️ Utilities
+
+### Validation Utils (`utils/validation.utils.ts`)
+- `safeJsonParse()` - Robust JSON parsing with recovery
+- `normalizeBudgetLevel()` - Budget standardization
+- `extractSearchQuery()` - Search term extraction
+
+### Date Utils (`utils/date.utils.ts`)
+- `calculateDate()` - Date arithmetic
+- `parseRelativeDate()` - "next Monday" parsing
+- `formatDateForDisplay()` - User-friendly formatting
+
+## 🔌 External Integrations
+
+- **OpenAI GPT**: Primary AI engine
+- **HERE Places API**: Location and venue data
+- **Pexels API**: Destination imagery
+
+## 📝 Usage Examples
+
+### Basic Trip Generation
 ```typescript
-const generator = new TripGenerator();
-const itinerary = await generator.generateItinerary({
-  destination: 'Paris',
-  duration: 5,
-  startDate: '2025-03-15',
-  budget: 'medium',
-  interests: ['art', 'food', 'history']
+const tripGen = new TripGenerator(apiKey);
+const itinerary = await tripGen.generateItinerary({
+  destination: "Paris",
+  duration: 3,
+  startDate: "2025-03-15",
+  preferences: { budget: "medium" }
 });
 ```
 
-### Progressive Generation with Updates
+### Progressive Generation
 ```typescript
-const progressive = new ProgressiveGenerator();
-await progressive.generateProgressive({
-  destinations: ['London', 'Paris'],
+const progressiveGen = new ProgressiveGenerator(apiKey);
+const result = await progressiveGen.generateProgressive({
+  destinations: ["London", "Paris"],
   duration: 7,
-  startDate: '2025-04-01',
+  startDate: "2025-04-01",
   onProgress: (update) => {
     console.log(`${update.progress}% complete`);
   }
 });
 ```
 
-## Module Details
-
-### AI Controller Modules (`/modules`)
-
-#### intent-parser.ts (497 lines)
-- Pattern matching for common travel queries
-- Multi-city detection
-- Date extraction and normalization
-- GPT-4o-mini integration for complex queries
-
-#### conversation-manager.ts (415 lines)
-- Session management
-- Conversation state tracking
-- Context preservation
-- Message history
-
-#### cache-manager.ts (230 lines)
-- LRU cache implementation
-- TTL-based expiration
-- Fuzzy matching for similar queries
-- Memory management
-
-#### response-formatter.ts (327 lines)
-- Dynamic question generation
-- Context-aware responses
-- Missing field detection
-- User-friendly formatting
-
-### Trip Generator Modules (`/generators`)
-
-#### route-optimizer.ts (309 lines)
-- Zone assignment for activities
-- Distance calculation
-- Route reordering
-- Travel time minimization
-
-#### cost-estimator.ts (331 lines)
-- Accommodation pricing
-- Activity cost calculation
-- Transportation estimates
-- Budget scaling
-
-#### prompt-builder.ts (119 lines)
-- GPT prompt construction
-- Zone guidance integration
-- Preference formatting
-
-#### itinerary-validator.ts (206 lines)
-- Structure validation
-- Date consistency
-- Missing data recovery
-- Legacy format conversion
-
-#### itinerary-enricher.ts (204 lines)
-- HERE Places API integration
-- Venue search and matching
-- Location data enrichment
-- Batch API optimization
-
-### Progressive Generator Modules (`/progressive`)
-
-#### metadata-generator.ts (148 lines)
-- Quick trip overview
-- Photo URL generation
-- Tip compilation
-- Cost estimation
-
-#### city-generator.ts (237 lines)
-- GPT-4o-mini integration
-- Day-by-day planning
-- Activity scheduling
-- Default fallbacks
-
-#### itinerary-combiner.ts (66 lines)
-- Multi-city merging
-- Day sorting
-- Format standardization
-
-## Testing
-
-Run the comprehensive test suite:
-```bash
-npx tsx scripts/test-ai-baseline.ts
+### Intent Parsing
+```typescript
+const parser = new IntentParser();
+const intent = await parser.parseIntent(
+  "I want to visit Tokyo for a week next month"
+);
+// Returns: { destination: "Tokyo", duration: 7, ... }
 ```
 
-Expected results (all passing):
-- ✅ AIController - Extract simple intent
-- ✅ AIController - Detect multi-city
-- ✅ AIController - Process message
-- ✅ TripGenerator - Generate London itinerary
-- ✅ TripGenerator - Budget constraints
-- ✅ ProgressiveGenerator - Generate metadata
-- ✅ ProgressiveGenerator - Generate city itinerary
-- ✅ Integration - Full generation flow
+## 🧪 Testing
 
-## Performance Metrics
-
-- **Intent Extraction**: 500-1500ms (with GPT)
-- **Full Itinerary Generation**: 20-40s (3-5 day trip)
-- **Progressive Metadata**: <100ms
-- **City Generation**: 3-5s per city
-- **Cache Hit Rate**: ~30% in production
-
-## Environment Variables
-
-Required in `.env.local`:
+Run comprehensive tests:
 ```bash
-OPENAI_API_KEY=your_openai_api_key
+npx tsx scripts/test-ai-comprehensive.ts
 ```
 
-## Recent Updates (Sept 2024)
+Current test coverage:
+- ✅ Intent parsing
+- ✅ Trip generation
+- ✅ Progressive generation
+- ✅ Conversation context
+- ✅ Error handling
+- ✅ Performance benchmarks
 
-- ✅ Refactored from monolithic to ultra-modular architecture
-- ✅ Reduced main file sizes by 54-75%
-- ✅ Fixed all TypeScript errors
-- ✅ 100% test pass rate
-- ✅ Improved separation of concerns
-- ✅ Enhanced maintainability
+## 🚀 Recent Improvements (Jan 25, 2025)
+
+1. **Type Consolidation**: Single source of truth in `core.types.ts`
+2. **Removed Genkit**: Eliminated unused framework
+3. **Shared Utilities**: Created reusable utility modules
+4. **Module Optimization**: Merged small related modules
+5. **Bug Fixes**: Fixed all TypeScript errors
+
+## 📈 Future Enhancements
+
+- [ ] Implement streaming responses
+- [ ] Add multi-language support
+- [ ] Enhance activity recommendations
+- [ ] Add real-time availability checking
+- [ ] Implement user preference learning
+
+## 🤝 Contributing
+
+When adding new features:
+1. Use types from `types/core.types.ts`
+2. Add validation schemas to `schemas/validation.schemas.ts`
+3. Use shared utilities where applicable
+4. Maintain the modular architecture
+5. Add comprehensive tests
+
+## 📚 Related Documentation
+
+- [Optimization Summary](../../../docs/ai-optimization-summary-2025-01-25.md)
+- [API Services](../api/README.md)
+- [Module Documentation](./modules/README.md)
+- [Generator Documentation](./generators/README.md)

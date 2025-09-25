@@ -125,16 +125,29 @@ export class ItineraryEnricher {
             activity.venue_name = place.name;
           }
 
-          if (place.coordinates) {
-            activity.coordinates = place.coordinates;
+          if (place.position) {
+            activity.coordinates = {
+              lat: place.position.lat,
+              lng: place.position.lng
+            };
           }
 
           if (place.address) {
-            activity.address = place.address;
+            activity.address = place.address.label;
           }
 
-          if (place.category) {
-            activity.category = place.category;
+          if (place.categories && place.categories.length > 0) {
+            // Map HERE category to our category enum
+            const categoryName = place.categories[0].name.toLowerCase();
+            if (categoryName.includes('food') || categoryName.includes('restaurant')) {
+              activity.category = 'Food';
+            } else if (categoryName.includes('hotel') || categoryName.includes('accommodation')) {
+              activity.category = 'Accommodation';
+            } else if (categoryName.includes('museum') || categoryName.includes('attraction')) {
+              activity.category = 'Attraction';
+            } else {
+              activity.category = 'Leisure';
+            }
           }
 
           if (place.rating) {

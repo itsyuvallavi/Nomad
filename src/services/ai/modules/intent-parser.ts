@@ -241,7 +241,10 @@ export class IntentParser {
 
     // Try to extract individual start date if no range found
     if (!result.startDate) {
-      result.startDate = this.extractStartDate(text);
+      const startDate = this.extractStartDate(text);
+      if (startDate) {
+        result.startDate = startDate;
+      }
     }
 
     return result;
