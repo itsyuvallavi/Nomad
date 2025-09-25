@@ -15,7 +15,10 @@ export class ItineraryEnricher {
   async enrichItinerary(
     itinerary: GeneratePersonalizedItineraryOutput
   ): Promise<GeneratePersonalizedItineraryOutput> {
-    if (!itinerary.dailyItineraries) return itinerary;
+    if (!itinerary.dailyItineraries) {
+      console.log('🤖 [AI] No dailyItineraries to enrich');
+      return itinerary;
+    }
 
     const destination = itinerary.destination || '';
     const zones = getCityZones(destination);
@@ -23,7 +26,8 @@ export class ItineraryEnricher {
     console.log('🤖 [AI] Starting enrichment', {
       destination,
       days: itinerary.dailyItineraries.length,
-      hasZones: zones.length > 0
+      hasZones: zones.length > 0,
+      firstDayActivities: itinerary.dailyItineraries[0]?.activities?.length || 0
     });
 
     // Collect activities needing enrichment
@@ -60,19 +64,34 @@ export class ItineraryEnricher {
 
     itinerary.dailyItineraries?.forEach((day, dayIndex) => {
       day.activities?.forEach((activity, activityIndex) => {
-        if (!activity.coordinates && (activity.venue_name || activity.description)) {
-          const searchQuery = this.extractSearchQuery(
-            activity.venue_name || activity.description
-          );
+        // Always enrich if address is missing or is placeholder
+        const needsEnrichment = !activity.address ||
+          activity.address === 'Address N/A' ||
+          activity.address === 'Address not available' ||
+          !activity.coordinates;
 
-          activities.push({
-            dayIndex,
-            activityIndex,
-            activity,
-            searchQuery
-          });
+        if (needsEnrichment && (activity.venue_name || activity.venue_search || activity.description)) {
+          // Use venue_search if available (it's specifically formatted for search)
+          // Otherwise use venue_name, falling back to description
+          const searchQuery = activity.venue_search ||
+            activity.venue_name ||
+            this.extractSearchQuery(activity.description || '');
+
+          if (searchQuery && searchQuery.trim()) {
+            activities.push({
+              dayIndex,
+              activityIndex,
+              activity,
+              searchQuery: searchQuery.trim()
+            });
+          }
         }
       });
+    });
+
+    console.log('🤖 [AI] Activities to enrich:', {
+      total: activities.length,
+      queries: activities.slice(0, 5).map(a => a.searchQuery)
     });
 
     return activities;
@@ -98,33 +117,52 @@ export class ItineraryEnricher {
     const startTime = Date.now();
 
     try {
-      // Prepare search queries
-      const searchQueries = activitiesToEnrich.map(item => ({
-        query: `${item.searchQuery} ${destination}`
-      }));
+      // Prepare search queries - don't add destination if it's already in the query
+      const searchQueries = activitiesToEnrich.map(item => {
+        // Check if destination is already in the search query
+        const queryLower = item.searchQuery.toLowerCase();
+        const destLower = destination.toLowerCase();
+
+        // Only add destination if it's not already included
+        const finalQuery = queryLower.includes(destLower)
+          ? item.searchQuery
+          : `${item.searchQuery} ${destination}`;
+
+        return { query: finalQuery };
+      });
 
       // Batch search
       const resultsMap = await herePlacesService.batchSearchPlaces(searchQueries);
 
       console.log('🤖 [AI] HERE search complete', {
         resultsFound: Array.from(resultsMap.values()).filter(r => r && r.length > 0).length,
-        time: `${Date.now() - startTime}ms`
+        time: `${Date.now() - startTime}ms`,
+        sampleResults: Array.from(resultsMap.entries()).slice(0, 3).map(([q, r]) => ({
+          query: q,
+          found: r?.length || 0
+        }))
       });
 
       // Apply results
       let enrichedCount = 0;
-      activitiesToEnrich.forEach((item, index) => {
-        const query = `${item.searchQuery} ${destination}`;
-        const searchResult = resultsMap.get(query);
+      activitiesToEnrich.forEach((item) => {
+        const queryLower = item.searchQuery.toLowerCase();
+        const destLower = destination.toLowerCase();
+        const finalQuery = queryLower.includes(destLower)
+          ? item.searchQuery
+          : `${item.searchQuery} ${destination}`;
+
+        const searchResult = resultsMap.get(finalQuery);
         if (searchResult && searchResult.length > 0) {
           const place = searchResult[0];
           const activity = itinerary.dailyItineraries![item.dayIndex].activities![item.activityIndex];
 
-          // Update activity with real data
-          if (!activity.venue_name && place.name) {
+          // Always update venue name if we found a place
+          if (place.name) {
             activity.venue_name = place.name;
           }
 
+          // Always update coordinates if available
           if (place.position) {
             activity.coordinates = {
               lat: place.position.lat,
@@ -132,8 +170,10 @@ export class ItineraryEnricher {
             };
           }
 
-          if (place.address) {
+          // Always update address if available
+          if (place.address && place.address.label) {
             activity.address = place.address.label;
+            console.log('🤖 [AI] Updated address for', item.searchQuery, '→', place.address.label);
           }
 
           if (place.categories && place.categories.length > 0) {
@@ -155,6 +195,14 @@ export class ItineraryEnricher {
           }
 
           enrichedCount++;
+        } else {
+          // Fallback: If no search result found, at least remove the placeholder
+          const activity = itinerary.dailyItineraries![item.dayIndex].activities![item.activityIndex];
+          if (activity.address === 'Address N/A' || activity.address === 'Address not available') {
+            // For debugging: set a test address to see if it appears
+            activity.address = `Near ${destination} city center`;
+            console.log('🤖 [AI] No result for', item.searchQuery, '- using fallback address');
+          }
         }
       });
 

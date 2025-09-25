@@ -399,6 +399,7 @@ export class TripGenerator {
         time: act.time,
         description: act.description,
         venue_name: act.venueName || act.venue_name,
+        venue_search: act.venue_search,  // Add venue_search field
         category: act.category,
         address: act.address,
         coordinates: act.coordinates,

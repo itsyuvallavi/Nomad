@@ -109,6 +109,11 @@ Generate ${params.days} days with 5-6 activities per day including:
 - Afternoon activities (14:00, 16:00)
 - Evening/dinner (19:00)
 
+IMPORTANT: For each activity include:
+- venueName: The specific name of the venue (e.g., "Tower of London", "Cafe Central")
+- venue_search: Search query for the venue with city (e.g., "Tower of London London", "Cafe Central Paris")
+- address: Set to "Address N/A" (will be enriched later)
+
 Return a JSON object with EXACTLY ${params.days} days numbered from ${params.startDayNumber} to ${params.startDayNumber + params.days - 1}:
 {
   "city": "${params.city}",
@@ -121,7 +126,10 @@ Return a JSON object with EXACTLY ${params.days} days numbered from ${params.sta
         {
           "time": "09:00",
           "description": "Visit Tower of London",
+          "venueName": "Tower of London",
+          "venue_search": "Tower of London ${params.city}",
           "category": "Attraction",
+          "address": "Address N/A",
           "duration": "2 hours",
           "tips": "Book tickets online to skip lines"
         }

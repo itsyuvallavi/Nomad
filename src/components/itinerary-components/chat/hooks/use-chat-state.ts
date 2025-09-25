@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/types/core.types';
 
 export type Message = {
   role: 'user' | 'assistant';
