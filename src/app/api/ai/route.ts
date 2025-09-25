@@ -43,29 +43,45 @@ export async function POST(request: NextRequest) {
     // Start new generation
     const generationId = `${sessionId || 'gen'}-${Date.now()}`;
 
-    // Initialize progress
+    // Initialize progress with complete structure
     progressStore.set(generationId, {
       type: 'processing',
       status: 'starting',
       progress: 0,
-      message: 'Processing your request...'
+      message: 'Processing your request...',
+      awaitingInput: undefined,
+      hasItinerary: false
     });
 
     // Start async generation in the background
     // Capture the API key before the async context
     const apiKey = process.env.OPENAI_API_KEY;
-    console.log(`🔑 API Key available: ${apiKey ? 'Yes' : 'No'}`);
+    console.log(`🔑 API Key check:`, {
+      hasKey: !!apiKey,
+      keyLength: apiKey?.length || 0,
+      keyPrefix: apiKey?.substring(0, 7) || 'missing'
+    });
 
-    // Use process.nextTick to ensure it runs after response is sent but ASAP
-    process.nextTick(() => {
-      console.log(`🚀 Starting background generation for ${generationId}`);
-      generateProgressively(generationId, userMessage, contextToUse, apiKey).catch(error => {
-        logger.error('API', 'Progressive generation failed', error);
-        progressStore.set(generationId, {
-          type: 'error',
-          message: error.message || 'Generation failed',
-          error: true
-        });
+    if (!apiKey) {
+      console.error('❌ CRITICAL: No OpenAI API key found!');
+      progressStore.set(generationId, {
+        type: 'error',
+        message: 'OpenAI API key not configured',
+        error: true
+      });
+      return NextResponse.json({
+        success: false,
+        error: 'OpenAI API key not configured'
+      }, { status: 500 });
+    }
+
+    // Start generation immediately
+    generateProgressively(generationId, userMessage, contextToUse, apiKey).catch(error => {
+      logger.error('API', 'Progressive generation failed', error);
+      progressStore.set(generationId, {
+        type: 'error',
+        message: error.message || 'Generation failed',
+        error: true
       });
     });
 
@@ -104,7 +120,12 @@ export async function GET(request: NextRequest) {
   if (!progress) {
     return NextResponse.json({
       success: false,
-      error: 'No progress found'
+      error: 'No progress found',
+      data: {
+        type: 'error',
+        message: 'Generation not found',
+        status: 'error'
+      }
     }, { status: 404 });
   }
 
@@ -127,8 +148,9 @@ async function generateProgressively(
 ) {
   console.log(`📍 [generateProgressively] Started for ${generationId}`);
   console.log(`🔑 [generateProgressively] API Key received: ${apiKey ? 'Yes' : 'No'}`);
+  console.log(`📬 [generateProgressively] Message: ${userMessage}`);
 
-  const aiController = new AIController();
+  const aiController = new AIController(apiKey);
   const tripGenerator = new TripGenerator(apiKey);
 
   // Update progress helper
@@ -150,10 +172,17 @@ async function generateProgressively(
       message: 'Understanding your request...'
     });
 
-    // Add initial delay to ensure UI has time to start polling
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Small delay to ensure progress is stored before first poll
+    await new Promise(resolve => setTimeout(resolve, 100));
 
+    console.log('🎯 Processing message with AI Controller...');
     const response = await aiController.processMessage(userMessage, contextToUse);
+    console.log('✅ AI Controller response:', {
+      type: response.type,
+      canGenerate: response.canGenerate,
+      hasIntent: !!response.intent,
+      missingFields: response.missingFields
+    });
 
     updateProgress({
       type: 'processing',
@@ -182,7 +211,13 @@ async function generateProgressively(
       let allCityData = []; // Accumulate city data
       let generatedMetadata = null;
 
-      const result = await tripGenerator.generateProgressive({
+      console.log('🚀 [generateProgressively] Starting progressive generation with:', {
+        destinations,
+        duration: tripParams.duration,
+        startDate: tripParams.startDate
+      });
+
+      const generationResult = await tripGenerator.generateProgressive({
           destinations,
           duration: tripParams.duration,
           startDate: tripParams.startDate,
@@ -204,6 +239,8 @@ async function generateProgressively(
                 allCities: [] // Initialize empty
               });
               console.log('✅ Metadata update stored, continuing to city generation...');
+            } else if (update.type === 'generating') {
+              console.log('🔧 Generating update:', update);
             } else if (update.type === 'city_complete') {
               console.log(`🏙️ City complete: ${update.city}, days: ${update.data?.days?.length}`);
 
@@ -227,8 +264,20 @@ async function generateProgressively(
           }
         }).catch(err => {
           console.error('❌ Progressive generation error:', err);
+          console.error('Stack trace:', err.stack);
           generationError = err;
           throw err;
+        });
+
+        // Extract the itinerary from the result (it returns { itinerary, updates })
+        const result = generationResult.itinerary;
+
+        console.log('✅ [generateProgressively] Generation completed successfully');
+        console.log('📊 Final result:', {
+          hasItinerary: !!result,
+          hasDailyItineraries: !!result?.dailyItineraries,
+          days: result?.dailyItineraries?.length || 0,
+          firstDay: result?.dailyItineraries?.[0]
         });
 
         updateProgress({
@@ -236,7 +285,7 @@ async function generateProgressively(
           status: 'success',
           progress: 100,
           message: 'Your itinerary is ready!',
-          itinerary: result.itinerary,
+          itinerary: result, // This is now the extracted itinerary
           allCities: allCityData, // Preserve all cities data
           metadata: generatedMetadata, // Preserve metadata
           conversationContext: response.context

@@ -64,6 +64,14 @@ export class IntentParser {
       .replace(/\band\b/g, ' ')
       .replace(/\s+/g, ' ');
 
+    // Date-related words to exclude from city detection
+    const dateWords = [
+      'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+      'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august',
+      'september', 'october', 'november', 'december',
+      'tomorrow', 'today', 'yesterday', 'weekend', 'weekday'
+    ];
+
     // Extract destinations (simple pattern matching)
     const locationPattern = /(?:visit|tour|explore|see|go to)\s+([^0-9]+?)(?:\s+for|\s+in|\s+\d+|$)/i;
     const multiCityPattern = /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:,|and|then)?\s*/g;
@@ -72,14 +80,33 @@ export class IntentParser {
     if (matches && matches.length > 1) {
       result.destinations = matches
         .map(m => m.replace(/,|and|then/gi, '').trim())
-        .filter(d => d.length > 2 && /^[A-Z]/.test(d));
+        .filter(d => {
+          // Filter out date-related words and short words
+          const dLower = d.toLowerCase();
+          return d.length > 2 &&
+                 /^[A-Z]/.test(d) &&
+                 !dateWords.includes(dLower) &&
+                 !dLower.includes('next') &&
+                 !dLower.includes('this') &&
+                 !dLower.includes('last');
+        });
     }
 
     // Extract duration
-    const durationMatch = message.match(/(\d+)\s*(?:days?|nights?|weeks?)/i);
+    const durationMatch = message.match(/(\d+|a|one)\s*(?:days?|nights?|weeks?)/i);
     if (durationMatch) {
-      let duration = parseInt(durationMatch[1]);
-      if (message.includes('week')) {
+      let duration = 0;
+      const numPart = durationMatch[1].toLowerCase();
+
+      // Handle "a" or "one" as 1
+      if (numPart === 'a' || numPart === 'one') {
+        duration = 1;
+      } else {
+        duration = parseInt(numPart);
+      }
+
+      // Convert weeks to days
+      if (message.toLowerCase().includes('week')) {
         duration *= 7;
       }
       result.totalDuration = duration;
@@ -127,12 +154,16 @@ export class IntentParser {
       }
       console.log('🗺️  Multi-city trip detected:', multiCityIntent);
     } else {
-      // Single destination extraction
+      // Single destination extraction - be more careful with word boundaries
       const destinationPatterns = [
-        /(?:trip to|visit|going to|travel to|fly to|head to|explore|tour)\s+([A-Z][a-zA-Z\s]+?)(?:\s+for|\s+from|\s+on|\s+in|\s+next|\s+this|,|$)/i,
-        /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)\s+(?:for\s+)?(\d+)\s+(?:days?|nights?)/i,
-        /(\d+)\s+(?:days?|nights?)\s+in\s+([A-Z][a-zA-Z\s]+)/i,
-        /^([A-Z][a-zA-Z\s]+?)(?:\s+for|\s+\d+|,|$)/i
+        // "trip to London starting tomorrow" -> extract "London"
+        /(?:trip to|visit|going to|travel to|fly to|head to|explore|tour)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:for|from|starting|beginning|on|in|next|this|tomorrow|today)|[,.]|$)/i,
+        // "London for 3 days" -> extract "London"
+        /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:for\s+)?(\d+)\s+(?:days?|nights?)/i,
+        // "3 days in London" -> extract "London"
+        /(\d+)\s+(?:days?|nights?)\s+(?:in|to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:starting|from|on|tomorrow|today)|$)/i,
+        // "London starting tomorrow" at beginning -> extract "London"
+        /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:for|starting|from|tomorrow|today)|\s+\d+|,|$)/i
       ];
 
       for (const pattern of destinationPatterns) {

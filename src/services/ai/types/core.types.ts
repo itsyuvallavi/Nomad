@@ -105,6 +105,7 @@ export interface TripMetadata {
   };
   quickTips?: string[];
   photos?: string[];
+  photoUrl?: string; // Main photo URL for the trip
 }
 
 export interface CityItinerary {

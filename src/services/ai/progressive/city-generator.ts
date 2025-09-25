@@ -39,7 +39,14 @@ export class CityGenerator {
     const prompt = this.buildPrompt(params);
 
     try {
-      const response = await this.getOpenAI().chat.completions.create({
+      console.log(`🤖 [CityGenerator] Calling OpenAI for ${params.city}...`);
+
+      // Add timeout to prevent hanging - increased to 60s for complex requests
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Failed to generate itinerary for ${params.city}: OpenAI request timeout after 60s`)), 60000)
+      );
+
+      const apiPromise = this.getOpenAI().chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
@@ -51,6 +58,9 @@ export class CityGenerator {
         temperature: 0.8,
         max_tokens: 4000
       });
+
+      const response = await Promise.race([apiPromise, timeoutPromise]) as any;
+      console.log(`✅ [CityGenerator] OpenAI response received for ${params.city}`);
 
       const content = response.choices[0].message.content?.trim();
       if (!content) throw new Error('No response from AI');
@@ -77,6 +87,7 @@ export class CityGenerator {
 
     } catch (error) {
       logger.error('AI', 'Failed to generate city itinerary', error);
+      console.error(`❌ [CityGenerator] Error generating ${params.city}:`, error);
       throw error;
     }
   }

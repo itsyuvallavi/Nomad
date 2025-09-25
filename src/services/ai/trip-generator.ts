@@ -100,24 +100,27 @@ export class TripGenerator {
 
     // Step 1: Generate metadata (fast)
     console.log('📊 [ProgressiveGenerator] Generating metadata...');
-    const metadata = await this.metadataGenerator.generate(params);
-    console.log('✅ [ProgressiveGenerator] Metadata generated:', {
-      title: metadata.title,
-      days: metadata.daysPerCity
-    });
-
-    // Send metadata update
-    if (params.onProgress) {
-      this.sendProgress(params.onProgress, {
-        type: 'metadata',
-        data: metadata,
-        progress: 20
+    try {
+      const metadata = await this.metadataGenerator.generate(params);
+      console.log('✅ [ProgressiveGenerator] Metadata generated:', {
+        title: metadata.title,
+        days: metadata.daysPerCity
       });
-    }
-    updates.push({ type: 'metadata', data: metadata });
 
-    // Step 2: Generate each city with zone guidance
-    const cityItineraries = await this.generateAllCities(params, metadata);
+      // Send metadata update
+      if (params.onProgress) {
+        this.sendProgress(params.onProgress, {
+          type: 'metadata',
+          data: metadata,
+          progress: 20
+        });
+      }
+      updates.push({ type: 'metadata', data: metadata });
+
+      console.log('🌆 [ProgressiveGenerator] Starting city generation...');
+      // Step 2: Generate each city with zone guidance
+      const cityItineraries = await this.generateAllCities(params, metadata);
+      console.log('✅ [ProgressiveGenerator] All cities generated');
     updates.push(...cityItineraries.updates);
 
     // Step 3: Combine into structured itinerary
@@ -174,11 +177,15 @@ export class TripGenerator {
       });
     }
 
-    console.log(`\n   ✅ Generation complete (${Date.now() - startTime}ms)`);
-    return {
-      itinerary: validated,
-      updates
-    };
+      console.log(`\n   ✅ Generation complete (${Date.now() - startTime}ms)`);
+      return {
+        itinerary: validated,
+        updates
+      };
+    } catch (error) {
+      console.error('❌ [ProgressiveGenerator] Error during generation:', error);
+      throw error;
+    }
   }
 
   /**
@@ -383,11 +390,11 @@ export class TripGenerator {
   ): GeneratePersonalizedItineraryOutput {
     const allDays = this.mergeAndSortDays(cityItineraries);
 
-    // Convert to the format expected by generators
+    // Convert to the format expected by generators (new format)
     const dailyItineraries = allDays.map(day => ({
-      day: day.day,
+      dayNumber: day.day,
       date: day.date,
-      city: day.city,
+      title: day.title || `Day ${day.day} - ${day.city}`,
       activities: day.activities.map((act: any) => ({
         time: act.time,
         description: act.description,
@@ -398,7 +405,25 @@ export class TripGenerator {
         neighborhood: act.neighborhood,
         zone: act.zone,
         rating: act.rating
-      }))
+      })),
+      weather: day.weather || 'Check local forecast'
+    }));
+
+    // Create legacy format for backward compatibility
+    const legacyItinerary = allDays.map(day => ({
+      day: day.day,
+      date: day.date,
+      title: day.title || `Day ${day.day} - ${day.city}`,
+      activities: day.activities.map((act: any) => ({
+        time: act.time,
+        description: act.description,
+        venue_name: act.venueName || act.venue_name,
+        category: act.category,
+        address: act.address || 'Address not available',
+        rating: act.rating,
+        _tips: act.tips
+      })),
+      weather: day.weather || 'Check local forecast'
     }));
 
     // Calculate end date
@@ -410,11 +435,14 @@ export class TripGenerator {
       duration: params.duration,
       startDate: params.startDate,
       endDate: endDate,
-      dailyItineraries,
+      dailyItineraries,  // New format
+      itinerary: legacyItinerary,  // Legacy format for UI compatibility
       estimatedCost: metadata.estimatedCost,
       travelTips: metadata.quickTips,
-      photoUrl: metadata.photoUrl
-    };
+      photoUrl: metadata.photoUrl,
+      quickTips: metadata.quickTips,  // Add for UI compatibility
+      cost: metadata.estimatedCost  // Add for UI compatibility
+    } as any;
   }
 
   /**

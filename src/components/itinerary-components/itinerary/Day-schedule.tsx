@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { EventCard } from './Activity-card';
 import { z } from 'genkit';
-import { ActivitySchema } from '@/services/ai/schemas';
+import { ActivitySchema } from '@/services/ai/schemas/validation.schemas';
 
 type Activity = z.infer<typeof ActivitySchema>;
 
@@ -11,9 +11,10 @@ interface DayItineraryProps {
   date: string;
   activities: Activity[];
   dayIndex: number;
+  isLoading?: boolean;
 }
 
-export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryProps) {
+export function DayItinerary({ day, date, activities, dayIndex, isLoading = false }: DayItineraryProps) {
   const [isExpanded, setIsExpanded] = useState(dayIndex === 0); // First day expanded by default
   
   const getCategoryFromActivity = (activity: Activity): 'work' | 'activity' | 'food' | 'transport' => {
@@ -34,6 +35,34 @@ export function DayItinerary({ day, date, activities, dayIndex }: DayItineraryPr
     }
     return 'activity';
   };
+
+  // Show skeleton loading state
+  if (isLoading) {
+    return (
+      <motion.div
+        className="mb-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: dayIndex * 0.05 }}
+      >
+        <div className="flex items-center gap-3 mb-3 py-2">
+          <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+          <div className="flex-1">
+            <div className="h-5 bg-gray-200 rounded w-32 animate-pulse mb-1" />
+            <div className="h-3 bg-gray-200 rounded w-24 animate-pulse" />
+          </div>
+        </div>
+        <div className="space-y-3 ml-5 pl-8 border-l-2 border-gray-100">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-gray-50 rounded-lg p-4">
+              <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse mb-2" />
+              <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

@@ -26,6 +26,7 @@ export class MetadataGenerator {
     const endDate = this.calculateEndDate(params.startDate, params.duration);
     const daysPerCity = this.distributeDays(params.duration, params.destinations.length);
 
+    const photos = this.generatePhotoUrls(params.destinations);
     const metadata: TripMetadata = {
       title: this.generateTitle(params.destinations),
       destinations: params.destinations,
@@ -35,7 +36,8 @@ export class MetadataGenerator {
       daysPerCity: daysPerCity,
       estimatedCost: this.estimateCost(params.duration, params.preferences?.budget),
       quickTips: this.getQuickTips(params.destinations),
-      photos: this.generatePhotoUrls(params.destinations)
+      photos: photos,
+      photoUrl: photos[0] // Add the first photo as the main photoUrl
     };
 
     const elapsed = Date.now() - startTime;
@@ -48,13 +50,12 @@ export class MetadataGenerator {
    * Generate a trip title
    */
   private generateTitle(destinations: string[]): string {
-    if (destinations.length === 1) {
-      return `${destinations[0]} Adventure`;
-    } else if (destinations.length === 2) {
-      return `${destinations.join(' & ')} Journey`;
-    } else {
-      return `${destinations.join(' & ')} Tour`;
-    }
+    // Return only city names, properly capitalized
+    return destinations.map(city =>
+      city.split(' ').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ')
+    ).join(' & ');
   }
 
   /**
@@ -130,11 +131,11 @@ export class MetadataGenerator {
 
   /**
    * Generate photo URLs for destinations
+   * Note: These are placeholder URLs - actual images are fetched from Pexels API
    */
   private generatePhotoUrls(destinations: string[]): string[] {
-    return destinations.map(dest =>
-      `https://source.unsplash.com/1200x800/?${encodeURIComponent(dest)}+tourism`
-    );
+    // Return empty array - Pexels images will be fetched separately in the UI
+    return [];
   }
 
   /**

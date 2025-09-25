@@ -1,0 +1,58 @@
+{
+  "timestamp": 1758825816818,
+  "results": [
+    {
+      "test": "AI Endpoint Basic",
+      "status": "pass",
+      "time": 3212,
+      "details": {
+        "generationId": "gen-1758825787490"
+      }
+    },
+    {
+      "test": "Progressive Generation",
+      "status": "pass",
+      "time": 26949,
+      "details": {
+        "destination": "Paris",
+        "days": 0,
+        "totalActivities": 0
+      }
+    },
+    {
+      "test": "Complex Multi-City",
+      "status": "pass",
+      "time": 41,
+      "details": {
+        "generationId": "gen-1758825814504"
+      }
+    },
+    {
+      "test": "Conversation Context",
+      "status": "pass",
+      "time": 2064,
+      "details": {
+        "firstGen": "gen-1758825814553",
+        "secondGen": "gen-1758825816575"
+      }
+    },
+    {
+      "test": "Error Handling",
+      "status": "pass",
+      "time": 22
+    },
+    {
+      "test": "Performance",
+      "status": "pass",
+      "time": 51.5,
+      "details": {
+        "successRate": 100,
+        "avgTime": 51.5
+      }
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0
+  }
+}

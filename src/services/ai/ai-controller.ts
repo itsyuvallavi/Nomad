@@ -34,12 +34,13 @@ export interface AIControllerResponse {
 }
 
 // Initialize OpenAI client
-function getOpenAIClient(): OpenAI {
-  if (!process.env.OPENAI_API_KEY) {
+function getOpenAIClient(apiKey?: string): OpenAI {
+  const key = apiKey || process.env.OPENAI_API_KEY;
+  if (!key) {
     throw new Error('OpenAI API key not configured');
   }
   return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: key,
   });
 }
 
@@ -50,8 +51,8 @@ export class AIController {
   private conversationManager: ConversationManager;
   private responseFormatter: ResponseFormatter;
 
-  constructor() {
-    this.openai = getOpenAIClient();
+  constructor(apiKey?: string) {
+    this.openai = getOpenAIClient(apiKey);
     this.intentParser = new IntentParser();
     this.intentCache = new IntentCache();
     this.conversationManager = new ConversationManager();

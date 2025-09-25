@@ -23,8 +23,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import ItineraryForm from './components/TripPlanningForm';
-import type { FormValues } from './components/TripPlanningForm';
+import ItineraryForm from '@/components/home/TripPlanningForm';
+import type { FormValues } from '@/components/home/TripPlanningForm';
 import type { RecentSearch, ChatState } from '@/app/page';
 import { tripsService } from '@/services/trips/trips-service';
 
@@ -82,7 +82,15 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
           // Fall back to localStorage for non-authenticated users
           const storedSearches = localStorage.getItem('recentSearches');
           if (storedSearches) {
-            setRecentSearches(JSON.parse(storedSearches));
+            const searches = JSON.parse(storedSearches);
+            // Fix old format that might not have title/prompt
+            const fixedSearches = searches.map((search: any) => ({
+              ...search,
+              title: search.title || `${search.destination || 'Trip'}${search.duration ? ` - ${search.duration} days` : ''}`,
+              prompt: search.prompt || search.destination || 'New trip',
+              lastUpdated: search.lastUpdated || search.timestamp ? new Date(search.timestamp).toISOString() : new Date().toISOString()
+            }));
+            setRecentSearches(fixedSearches);
           }
         }
       } catch (e) {

@@ -4,7 +4,7 @@ import { CoworkingSection } from './Coworking-spots';
 import { ExportMenu } from './Export-menu';
 import { ItineraryLoadingSkeleton } from './Loading-skeleton';
 import { EmptyState } from '@/components/common/EmptyState';
-import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/types/core.types';
 import { motion, useInView } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MapPin, Calendar, Clock, DollarSign, Plane, Home, Utensils, Car } from 'lucide-react';
@@ -17,6 +17,10 @@ import { fadeInUp, staggerContainer, countAnimation } from '@/lib/utils/animatio
 
 interface ItineraryPanelProps {
   itinerary: GeneratePersonalizedItineraryOutput & {
+    cost?: {
+      total: number;
+      currency: string;
+    };
     _costEstimate?: {
       total: number;
       flights: number;
@@ -46,11 +50,11 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
     );
   }
 
-  // Show empty state if no itinerary
-  if (!itinerary || !itinerary.itinerary || itinerary.itinerary.length === 0) {
+  // Show empty state only if no itinerary object at all
+  if (!itinerary) {
     return (
       <div className="h-full overflow-y-auto bg-background">
-        <EmptyState 
+        <EmptyState
           type="no-itinerary"
           title="Your Journey Awaits"
           description="Start a conversation to create your personalized travel itinerary."
@@ -58,21 +62,41 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
       </div>
     );
   }
+
+  // Check if we have metadata but no days yet (progressive loading)
+  const hasDays = itinerary.itinerary && itinerary.itinerary.length > 0;
+  const isGenerating = itinerary.title && !hasDays;
+  const hasMetadata = !!(itinerary.title && itinerary.startDate && itinerary.endDate);
   const [destinationImages, setDestinationImages] = useState<Record<string, PexelsImage[]>>({});
   const [selectedDayInTimeline, setSelectedDayInTimeline] = useState(1);
   
   // Extract all activities for coworking section
-  const allActivities = itinerary.itinerary.flatMap(day => day.activities);
-  
+  const allActivities = hasDays && itinerary.itinerary ? itinerary.itinerary.flatMap((day: any) => day.activities) : [];
+
   // Calculate trip duration - parse dates in local timezone to avoid off-by-one
   const parseLocalDate = (dateStr: string) => {
+    if (!dateStr) return new Date();
     const [year, month, day] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day);
   };
 
-  const startDate = itinerary.itinerary[0]?.date ? parseLocalDate(itinerary.itinerary[0].date) : new Date();
-  const endDate = itinerary.itinerary[itinerary.itinerary.length - 1]?.date ? parseLocalDate(itinerary.itinerary[itinerary.itinerary.length - 1].date) : new Date();
-  const tripDuration = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  const startDate = hasDays && itinerary.itinerary && itinerary.itinerary[0]?.date
+    ? parseLocalDate(itinerary.itinerary[0].date)
+    : itinerary.startDate
+    ? parseLocalDate(itinerary.startDate)
+    : new Date();
+
+  const endDate = hasDays && itinerary.itinerary && itinerary.itinerary[itinerary.itinerary.length - 1]?.date
+    ? parseLocalDate(itinerary.itinerary[itinerary.itinerary.length - 1].date)
+    : itinerary.endDate
+    ? parseLocalDate(itinerary.endDate)
+    : new Date();
+
+  const tripDuration = hasMetadata
+    ? `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+    : 'Loading dates...';
+
+  const dayCount = itinerary.duration || (itinerary.itinerary?.length) || 0;
   
   // Extract budget info (using quickTips or default)
   const budgetLevel = 'Budget-friendly';
@@ -102,8 +126,8 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
     countryMapping[destination] = [destination, destination.toLowerCase()];
   }
   
-  // First pass: identify country for each day based on content  
-  const dayCountries = itinerary.itinerary.map((day: any, index) => {
+  // First pass: identify country for each day based on content
+  const dayCountries = (itinerary.itinerary || []).map((day: any, index) => {
     // Check if day has destination metadata from chunked generation
     if (day._destination) {
       // Skip "Travel Day" entries - they should be merged with the destination
@@ -112,8 +136,8 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
         const titleMatch = day.title?.match(/→\s*(.+)$/);
         if (titleMatch) {
           const destination = titleMatch[1].trim();
-          const matchedDest = mainDestinations.find(d => 
-            destination.toLowerCase().includes(d.toLowerCase()) || 
+          const matchedDest = mainDestinations.find((d: string) =>
+            destination.toLowerCase().includes(d.toLowerCase()) ||
             d.toLowerCase().includes(destination.toLowerCase())
           ) || destination;
           
@@ -127,8 +151,8 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
       }
       
       // Use the destination metadata directly - most reliable!
-      const destination = mainDestinations.find(d => 
-        day._destination.toLowerCase().includes(d.toLowerCase()) || 
+      const destination = mainDestinations.find((d: string) =>
+        day._destination.toLowerCase().includes(d.toLowerCase()) ||
         d.toLowerCase().includes(day._destination.toLowerCase().replace(' copenhagen', ''))
       ) || day._destination;
       
@@ -146,11 +170,11 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
       // Check for partial matches (e.g., "Korea" in "South Korea")
       // Split destination into words and check if any significant word appears
       const destWords = destination.toLowerCase().split(/\s+/);
-      const significantWords = destWords.filter(word => word.length > 3); // Skip short words like "the", "and"
-      
+      const significantWords = destWords.filter((word: string) => word.length > 3); // Skip short words like "the", "and"
+
       // Check if destination name or any significant part appears in content
-      const isMatch = dayText.includes(destination.toLowerCase()) || 
-                      significantWords.some(word => dayText.includes(word));
+      const isMatch = dayText.includes(destination.toLowerCase()) ||
+                      significantWords.some((word: string) => dayText.includes(word));
       
       if (isMatch) {
         // Found the country for this day
@@ -168,7 +192,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
       // ⚠️ NO HARDCODED LOGIC! Use dynamic detection based on day ranges
       // Assume roughly equal distribution of days across destinations
       const dayNum = day.day;
-      const avgDaysPerDestination = Math.ceil(itinerary.itinerary.length / mainDestinations.length);
+      const avgDaysPerDestination = Math.ceil((itinerary.itinerary || []).length / mainDestinations.length);
       const destinationIndex = Math.floor((dayNum - 1) / avgDaysPerDestination);
       
       currentCountry = mainDestinations[Math.min(destinationIndex, mainDestinations.length - 1)] || 'Unknown';
@@ -182,7 +206,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
   });
   
   // Second pass: group consecutive days by country
-  const daysByLocation = itinerary.itinerary.reduce((acc, day, index) => {
+  const daysByLocation = (itinerary.itinerary || []).reduce((acc: any, day: any, index: number) => {
     const country = dayCountries[index];
     
     if (!acc[country]) {
@@ -207,12 +231,12 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
     logger.debug('SYSTEM', 'Destination Analysis in ItineraryPanel', {
       rawDestination: itinerary.destination,
       parsedLocations: locations,
-      daysByLocation: Object.entries(daysByLocation).map(([loc, data]) => ({
+      daysByLocation: Object.entries(daysByLocation).map(([loc, data]: [string, any]) => ({
         location: loc,
-        days: data.days.length,
-        dayNumbers: data.days.map(d => d.day),
-        startDay: data.startDay,
-        endDay: data.endDay
+        days: (data as any).days.length,
+        dayNumbers: (data as any).days.map((d: any) => d.day),
+        startDay: (data as any).startDay,
+        endDay: (data as any).endDay
       }))
     });
   }, [itinerary.destination]); // Only log when destination actually changes
@@ -220,10 +244,17 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
   // Fetch images for each destination from Pexels
   useEffect(() => {
     const fetchImages = async () => {
-      logger.info('IMAGE', 'Starting Pexels image fetch', { locations });
+      // Use destinations from metadata if available, otherwise use locations from days
+      const destinationsToFetch = itinerary.destination
+        ? itinerary.destination.split(',').map(d => d.trim())
+        : locations;
+
+      if (destinationsToFetch.length === 0) return;
+
+      logger.info('IMAGE', 'Starting Pexels image fetch', { destinations: destinationsToFetch });
       const newImages: Record<string, PexelsImage[]> = {};
-      
-      for (const location of locations) {
+
+      for (const location of destinationsToFetch) {
         try {
           const images = await searchPexelsImages(location, 3);
           newImages[location] = images;
@@ -233,17 +264,15 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
           newImages[location] = [];
         }
       }
-      
+
       setDestinationImages(newImages);
     };
-    
-    if (locations.length > 0) {
-      fetchImages();
-    }
-  }, [locations.join(',')]); // Use locations string as dependency
+
+    fetchImages();
+  }, [itinerary.destination, locations.join(',')]); // Fetch when destination changes
   
   // Generate image search terms based on destination
-  const destinationName = selectedLocation || itinerary.destination.split(',')[0].trim();
+  const destinationName = selectedLocation || itinerary.destination?.split(',')[0]?.trim() || 'destination';
 
   
   return (
@@ -259,8 +288,12 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
           {/* Header Section - Mobile Responsive */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3 sm:mb-4">
             <div className="space-y-1">
-              <h1 className="text-lg sm:text-xl tracking-tight text-foreground font-medium">{itinerary.title}</h1>
-              <p className="text-xs text-muted-foreground">{tripDuration}</p>
+              <h1 className="text-lg sm:text-xl tracking-tight text-foreground font-medium">
+                {itinerary.title || <span className="animate-pulse bg-muted rounded w-48 h-6 inline-block"/>}
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {hasMetadata ? tripDuration : <span className="animate-pulse bg-muted rounded w-32 h-4 inline-block"/>}
+              </p>
             </div>
             <div className="flex gap-1.5 sm:gap-2">
               <ExportMenu itinerary={itinerary} className="self-start" />
@@ -278,21 +311,30 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                     <Calendar className="w-3 h-3" />
                     <span>Duration</span>
                   </div>
-                  <p className="text-foreground font-medium">{itinerary.itinerary.length} days</p>
+                  <p className="text-foreground font-medium">
+                    {dayCount > 0 ? `${dayCount} days` : <span className="animate-pulse bg-muted rounded w-12 h-4 inline-block"/>}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {hasMetadata ? tripDuration : <span className="animate-pulse bg-muted rounded w-24 h-3 inline-block"/>}
+                  </p>
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <MapPin className="w-3 h-3" />
                     <span>Location</span>
                   </div>
-                  <p className="text-foreground font-medium truncate">{itinerary.destination}</p>
+                  <p className="text-foreground font-medium truncate">
+                    {itinerary.destination || <span className="animate-pulse bg-muted rounded w-20 h-4 inline-block"/>}
+                  </p>
                 </div>
               </div>
               
               {/* Cost Breakdown - Compact */}
-              {itinerary._costEstimate && (
+              {(itinerary._costEstimate || itinerary.cost || isGenerating) && (
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium text-foreground">Cost breakdown</h3>
+                  {(itinerary._costEstimate || itinerary.cost) ? (
+                  <>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between py-0.5">
                       <div className="flex items-center gap-2">
@@ -302,7 +344,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                         <span className="text-xs text-foreground">Flights</span>
                       </div>
                       <span className="text-xs text-foreground font-medium">
-                        ${itinerary._costEstimate.flights.toLocaleString()}
+                        ${(itinerary._costEstimate?.flights || (itinerary.cost?.total ? Math.round(itinerary.cost.total * 0.4) : 0)).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between py-0.5">
@@ -313,7 +355,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                         <span className="text-xs text-foreground">Stay</span>
                       </div>
                       <span className="text-xs text-foreground font-medium">
-                        ${itinerary._costEstimate.accommodation.toLocaleString()}
+                        ${(itinerary._costEstimate?.accommodation || (itinerary.cost?.total ? Math.round(itinerary.cost.total * 0.35) : 0)).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center justify-between py-0.5">
@@ -324,7 +366,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                         <span className="text-xs text-foreground">Food & Daily</span>
                       </div>
                       <span className="text-xs text-foreground font-medium">
-                        ${itinerary._costEstimate.dailyExpenses.toLocaleString()}
+                        ${(itinerary._costEstimate?.dailyExpenses || (itinerary.cost?.total ? Math.round(itinerary.cost.total * 0.25) : 0)).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -332,11 +374,21 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-foreground">Total estimated</span>
                       <span className="text-sm text-foreground font-bold">
-                        ${itinerary._costEstimate.total.toLocaleString()}
+                        ${(itinerary._costEstimate?.total || itinerary.cost?.total || 0).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Per person • {itinerary.itinerary.length} days</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Per person • {dayCount} days</p>
                   </div>
+                  </>
+                  ) : (
+                    // Loading skeleton for cost breakdown
+                    <div className="space-y-2 animate-pulse">
+                      <div className="h-8 bg-muted rounded-lg"/>
+                      <div className="h-8 bg-muted rounded-lg"/>
+                      <div className="h-8 bg-muted rounded-lg"/>
+                      <div className="h-10 bg-muted rounded-lg mt-2"/>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -345,15 +397,24 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
             <div className="w-full sm:w-1/2 order-first sm:order-last">
               {(() => {
                 // Get iconic landmark search for this destination
-                const { searchTerm, fallbackEmoji } = getIconicImageSearch(destinationName);
+                const { fallbackEmoji } = getIconicImageSearch(destinationName);
                 
                 // Use first Pexels image if available
                 const pexelsImages = destinationImages[destinationName] || [];
                 const pexelsImage = pexelsImages[0];
                 
-                // Use iconic landmark search term for better results
-                const imageUrl = pexelsImage?.src?.large || 
-                  `https://source.unsplash.com/1200x800/?${encodeURIComponent(searchTerm)}&sig=${Date.now()}-iconic`;
+                // Try to get image from various sources
+                // 1. Selected destination images
+                // 2. First destination if no selection
+                // 3. Any available destination image
+                let imageUrl: string | null = pexelsImage?.src?.large || null;
+
+                if (!imageUrl && itinerary.destination) {
+                  // Try to get image for the main destination
+                  const mainDest = itinerary.destination.split(',')[0].trim();
+                  const mainDestImages = destinationImages[mainDest] || [];
+                  imageUrl = mainDestImages[0]?.src?.large || null;
+                }
                 
                 return (
                   <div className="relative w-full h-[150px] sm:h-[200px] bg-muted rounded-lg sm:rounded-xl overflow-hidden group shadow-md sm:shadow-lg">
@@ -363,17 +424,21 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                     </div>
                     
                     {/* Actual image on top with lazy loading */}
-                    <LazyImage 
-                      src={imageUrl}
-                      alt={`${destinationName} - Iconic view`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 50vw"
-                      className="object-cover"
-                      quality={90}
-                      fallback={`https://source.unsplash.com/1200x800/?${encodeURIComponent(destinationName + ' city tourism')}&sig=${Date.now()}-fallback`}
-                      threshold={0.1}
-                      rootMargin="100px"
-                    />
+                    {imageUrl ? (
+                      <LazyImage
+                        src={imageUrl}
+                        alt={`${destinationName} - Iconic view`}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 50vw"
+                        className="object-cover"
+                        quality={90}
+                        threshold={0.1}
+                        rootMargin="100px"
+                      />
+                    ) : (
+                      // Loading skeleton while fetching images
+                      <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-muted to-muted/60" />
+                    )}
                     
                     {/* Subtle hover effect */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -448,23 +513,34 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
               </div>
             )}
             
-            {/* Horizontal Timeline - Directly integrated */}
-            <DayTimelineV2 
-              totalDays={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).length}
-              selectedDay={selectedDayInTimeline}
-              onDaySelect={(day) => {
-                setSelectedDayInTimeline(day);
-              }}
-              location={locations.length > 1 ? selectedLocation : undefined}
-              dates={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map(d => d.date)}
-            />
+            {/* Horizontal Timeline - Show loading skeleton if days not ready */}
+            {hasDays ? (
+              <DayTimelineV2
+                totalDays={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).length}
+                selectedDay={selectedDayInTimeline}
+                onDaySelect={(day) => {
+                  setSelectedDayInTimeline(day);
+                }}
+                location={locations.length > 1 ? selectedLocation : undefined}
+                dates={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map((d: any) => d.date)}
+              />
+            ) : (
+              <div className="py-4">
+                <div className="flex gap-2 animate-pulse">
+                  {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <div key={i} className="flex-1 h-16 bg-muted rounded-lg"></div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          
+
           {/* Selected Day Activities - Responsive padding */}
+          {hasDays ? (
           <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
             {(() => {
               const days = daysByLocation[selectedLocation]?.days || itinerary.itinerary;
-              const selectedDay = days.find(d => d.day === selectedDayInTimeline) || days[0];
+              const selectedDay = days.find((d: any) => d.day === selectedDayInTimeline) || days[0];
               
               return (
                 <motion.div
@@ -499,7 +575,7 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
                   
                   {/* Activities Grid - Responsive spacing */}
                   <div className="space-y-2 sm:space-y-3">
-                    {selectedDay.activities.map((activity, index) => (
+                    {selectedDay.activities.map((activity: any, index: number) => (
                       <motion.div
                         key={`activity-${index}`}
                         initial={{ opacity: 0, x: -20 }}
@@ -569,6 +645,27 @@ export function ItineraryPanel({ itinerary, isRefining, onRefine }: ItineraryPan
               );
             })()}
           </div>
+          ) : (
+            /* Show loading skeleton for activities when days aren't ready */
+            <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-8 bg-muted rounded w-1/3"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bg-background border border-border rounded-lg p-4">
+                      <div className="flex gap-3">
+                        <div className="w-12 h-4 bg-muted rounded"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-muted rounded w-3/4"></div>
+                          <div className="h-3 bg-muted rounded w-1/2 opacity-50"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

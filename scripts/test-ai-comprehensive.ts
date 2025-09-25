@@ -148,7 +148,11 @@ async function testProgressiveGeneration() {
 
         if (pollData.data.itinerary) {
           itinerary = pollData.data.itinerary;
-          console.log(`   ✓ Full itinerary received: ${itinerary.days?.length || 0} days`);
+          const dayCount = itinerary.dailyItineraries?.length ||
+                          itinerary.itinerary?.length ||
+                          itinerary.days?.length || 0;
+          console.log(`   ✓ Full itinerary received: ${dayCount} days`);
+          console.log(`     Structure: dailyItineraries=${!!itinerary.dailyItineraries}, itinerary=${!!itinerary.itinerary}, days=${!!itinerary.days}`);
           break;
         }
 
