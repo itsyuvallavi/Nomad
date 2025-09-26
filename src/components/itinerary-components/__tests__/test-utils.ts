@@ -5,13 +5,17 @@
 
 import type {
   GeneratePersonalizedItineraryOutput,
-  Destination,
   Activity,
-  Day,
-  FlightInfo,
-  AccommodationInfo,
-  TransportationInfo
+  DailyItinerary,
+  Accommodation,
+  TransportationOption
 } from '@/services/ai/types/core.types';
+
+// Type aliases for backward compatibility
+type Day = DailyItinerary;
+type FlightInfo = TransportationOption;
+type AccommodationInfo = Accommodation;
+type TransportationInfo = TransportationOption;
 
 /**
  * Create a mock activity with customizable properties

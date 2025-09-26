@@ -10,7 +10,7 @@ import { logger } from '@/lib/monitoring/logger';
 import { z } from 'zod';
 
 // Import our new modules
-import { IntentParser, ParsedIntent } from './modules/intent-parser';
+import { IntentParser } from './modules/intent-parser';
 import { IntentCache } from './modules/cache-manager';
 import {
   ConversationManager,
@@ -18,6 +18,10 @@ import {
   ConversationContext
 } from './modules/conversation-manager';
 import { ResponseFormatter, AIResponse } from './modules/response-formatter';
+import { GPTAnalyzer } from './modules/gpt-analyzer';
+import { JSONUtils } from './modules/json-utils';
+import { ParsedIntent } from './types/core.types';
+import { getTokenConfig, tokenTracker, calculateTokenCost } from './config/token-limits';
 
 // Re-export types for backward compatibility
 export { ConversationState };
@@ -50,6 +54,7 @@ export class AIController {
   private intentCache: IntentCache;
   private conversationManager: ConversationManager;
   private responseFormatter: ResponseFormatter;
+  private gptAnalyzer: GPTAnalyzer;
 
   constructor(apiKey?: string) {
     this.openai = getOpenAIClient(apiKey);
@@ -57,6 +62,7 @@ export class AIController {
     this.intentCache = new IntentCache();
     this.conversationManager = new ConversationManager();
     this.responseFormatter = new ResponseFormatter();
+    this.gptAnalyzer = new GPTAnalyzer(this.openai);
 
     logger.debug('AI', 'Controller initialized with modular components');
   }
@@ -242,7 +248,7 @@ export class AIController {
       // Pattern extraction incomplete, use GPT-4o-mini to fill gaps
       console.log('      ⚠️  Missing fields, using GPT-4o-mini for completion');
 
-      const gptResult = await this.analyzeWithGPT(message, patternResult);
+      const gptResult = await this.gptAnalyzer.analyzeWithGPT(message, patternResult);
 
       // Merge results (pattern results take precedence as they're more reliable)
       const merged = {
@@ -274,52 +280,6 @@ export class AIController {
     }
   }
 
-  /**
-   * Analyze with GPT-4o-mini
-   * This is a simplified version - the full implementation would be more complex
-   */
-  private async analyzeWithGPT(
-    message: string,
-    _existingIntent: Partial<ParsedIntent>
-  ): Promise<Partial<ParsedIntent>> {
-    const systemPrompt = `You are a travel intent extraction AI. Extract ONLY explicitly mentioned information from the user's message.
-    Return a JSON object with these fields (only include fields that are explicitly mentioned):
-    - destination: string (city or region name)
-    - destinations: array of strings (for multi-city trips)
-    - startDate: string (ISO format YYYY-MM-DD)
-    - endDate: string (ISO format YYYY-MM-DD)
-    - duration: number (days)
-    - travelers: { adults: number, children: number }
-    - budget: "budget" | "medium" | "luxury"
-    - interests: array of strings
-
-    DO NOT make assumptions or add default values. Only extract what is explicitly stated.`;
-
-    try {
-      const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ],
-        temperature: 0.1,
-        max_tokens: 500,
-        response_format: { type: 'json_object' }
-      });
-
-      const content = completion.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error('No response from GPT-4o-mini');
-      }
-
-      const parsed = JSON.parse(content);
-      return this.intentParser.validateExtractedIntent(parsed);
-
-    } catch (error) {
-      logger.error('AI', 'GPT-4o-mini analysis failed', { error });
-      throw error;
-    }
-  }
 
   /**
    * Check what required fields are missing
@@ -360,36 +320,10 @@ export class AIController {
   }
 
   /**
-   * Repair malformed JSON strings
-   * Currently unused but kept for potential future use
+   * Repair malformed JSON strings (delegated to JSONUtils)
    */
   private _repairJSON(text: string): string | null {
-    try {
-      // Remove any markdown code blocks
-      text = text.replace(/```json\n?/gi, '').replace(/```\n?/gi, '');
-
-      // Fix common JSON issues
-      text = text
-        .replace(/,\s*}/g, '}')  // Remove trailing commas
-        .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
-        .replace(/'/g, '"')      // Replace single quotes with double quotes
-        .replace(/(\w+):/g, '"$1":')  // Add quotes to unquoted keys
-        .replace(/:\s*'([^']*)'/g, ': "$1"')  // Fix single-quoted values
-        .replace(/:\s*([^",\[\{\s][^,\]\}]*)/g, (match, value) => {
-          // Add quotes to unquoted string values
-          if (value === 'true' || value === 'false' || value === 'null' || !isNaN(value)) {
-            return match;
-          }
-          return `: "${value}"`;
-        });
-
-      // Try to parse it
-      JSON.parse(text);
-      return text;
-    } catch (error) {
-      logger.error('AI', 'Failed to repair JSON', { error, text: text.slice(0, 200) });
-      return null;
-    }
+    return JSONUtils.repairJSON(text);
   }
 
   /**

@@ -1,532 +1,117 @@
 /**
- * Intent Parser Module
- * Extracts and parses user intent from natural language input
- * Handles date parsing, duration extraction, and multi-city detection
+ * Intent Parser Module - Refactored Version
+ * Main orchestrator that delegates to specialized parser modules
+ * Maintains backward compatibility while improving code organization
  */
 
+import { IntentExtractor, ParsedIntent } from '../parsers/intent-extractor';
+import { DateParser } from '../parsers/date-parser';
+import { DestinationParser, MultiCityIntent } from '../parsers/destination-parser';
+import { PreferenceParser } from '../parsers/preference-parser';
 import { logger } from '@/lib/monitoring/logger';
 
-// Multi-city intent structure
-export interface MultiCityIntent {
-  destinations: string[];
-  totalDuration: number;
-  daysPerCity?: number[];
-  startDate?: string;
-  endDate?: string;
-}
+// Re-export types for backward compatibility
+export type { ParsedIntent, MultiCityIntent };
 
-// Parsed user intent
-export interface ParsedIntent {
-  destination?: string;
-  destinations?: string[];  // For multi-city trips
-  startDate?: string;
-  endDate?: string;
-  duration?: number;
-  travelers?: {
-    adults?: number;
-    children?: number;
-  };
-  budget?: 'budget' | 'medium' | 'luxury';
-  interests?: string[];
-  preferences?: {
-    budget?: 'budget' | 'mid' | 'luxury';
-    interests?: string[];
-    pace?: 'relaxed' | 'moderate' | 'packed';
-    mustSee?: string[];
-    avoid?: string[];
-  };
-  modificationRequest?: string;
-}
-
+/**
+ * Main IntentParser class - maintains original API while using new modular structure
+ */
 export class IntentParser {
-  private today: Date;
-  private currentYear: number;
-  private nextYear: number;
+  private extractor: IntentExtractor;
+  private dateParser: DateParser;
+  private destinationParser: DestinationParser;
+  private preferenceParser: PreferenceParser;
 
   constructor() {
-    this.today = new Date();
-    this.currentYear = this.today.getFullYear();
-    this.nextYear = this.currentYear + 1;
+    this.extractor = new IntentExtractor();
+    this.dateParser = new DateParser();
+    this.destinationParser = new DestinationParser();
+    this.preferenceParser = new PreferenceParser();
   }
 
   /**
    * Extract multi-city intent from message
+   * Delegates to DestinationParser
    */
   extractMultiCityIntent(message: string): MultiCityIntent {
-    const result: MultiCityIntent = {
-      destinations: [],
-      totalDuration: 0
-    };
-
-    // Clean up message for parsing
-    const cleanMsg = message.toLowerCase()
-      .replace(/[,]/g, ' ')
-      .replace(/\band\b/g, ' ')
-      .replace(/\s+/g, ' ');
-
-    // Date-related words to exclude from city detection
-    const dateWords = [
-      'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
-      'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august',
-      'september', 'october', 'november', 'december',
-      'tomorrow', 'today', 'yesterday', 'weekend', 'weekday'
-    ];
-
-    // Extract destinations (simple pattern matching)
-    const locationPattern = /(?:visit|tour|explore|see|go to)\s+([^0-9]+?)(?:\s+for|\s+in|\s+\d+|$)/i;
-    const multiCityPattern = /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:,|and|then)?\s*/g;
-
-    const matches = message.match(multiCityPattern);
-    if (matches && matches.length > 1) {
-      result.destinations = matches
-        .map(m => m.replace(/,|and|then/gi, '').trim())
-        .filter(d => {
-          // Filter out date-related words and short words
-          const dLower = d.toLowerCase();
-          return d.length > 2 &&
-                 /^[A-Z]/.test(d) &&
-                 !dateWords.includes(dLower) &&
-                 !dLower.includes('next') &&
-                 !dLower.includes('this') &&
-                 !dLower.includes('last');
-        });
-    }
-
-    // Extract duration
-    const durationMatch = message.match(/(\d+|a|one)\s*(?:days?|nights?|weeks?)/i);
-    if (durationMatch) {
-      let duration = 0;
-      const numPart = durationMatch[1].toLowerCase();
-
-      // Handle "a" or "one" as 1
-      if (numPart === 'a' || numPart === 'one') {
-        duration = 1;
-      } else {
-        duration = parseInt(numPart);
-      }
-
-      // Convert weeks to days
-      if (message.toLowerCase().includes('week')) {
-        duration *= 7;
-      }
-      result.totalDuration = duration;
-    }
-
-    // Extract per-city days if specified
-    const perCityMatch = message.match(/(\d+)\s*days?\s*(?:in\s*)?each/i);
-    if (perCityMatch && result.destinations.length > 0) {
-      const daysEach = parseInt(perCityMatch[1]);
-      result.daysPerCity = result.destinations.map(() => daysEach);
-      result.totalDuration = daysEach * result.destinations.length;
-    }
-
-    // Extract dates
-    const startDatePattern = this.extractStartDate(message);
-    if (startDatePattern) {
-      result.startDate = startDatePattern;
-    }
-
-    return result;
+    return this.destinationParser.extractMultiCityIntent(message);
   }
 
   /**
    * Format multi-city destination for display
+   * Delegates to DestinationParser
    */
   formatMultiCityDestination(intent: MultiCityIntent): string {
-    if (intent.destinations.length === 0) return '';
-    if (intent.destinations.length === 1) return intent.destinations[0];
-    return intent.destinations.join(', ');
+    return this.destinationParser.formatMultiCityDestination(intent);
   }
 
   /**
    * Extract dates, duration, and other intent from patterns
+   * Main extraction method - delegates to IntentExtractor
    */
   extractWithPatterns(message: string, currentIntent?: ParsedIntent): Partial<ParsedIntent> {
-    const extracted: Partial<ParsedIntent> = currentIntent ? { ...currentIntent } : {};
-
-    // Check for multi-city first
-    const multiCityIntent = this.extractMultiCityIntent(message);
-    if (multiCityIntent.destinations.length > 1) {
-      extracted.destinations = multiCityIntent.destinations;
-      extracted.destination = this.formatMultiCityDestination(multiCityIntent);
-      if (multiCityIntent.totalDuration > 0) {
-        extracted.duration = multiCityIntent.totalDuration;
-      }
-      console.log('🗺️  Multi-city trip detected:', multiCityIntent);
-    } else {
-      // Single destination extraction - be more careful with word boundaries
-      const destinationPatterns = [
-        // "trip to London starting tomorrow" -> extract "London"
-        /(?:trip to|visit|going to|travel to|fly to|head to|explore|tour)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:for|from|starting|beginning|on|in|next|this|tomorrow|today)|[,.]|$)/i,
-        // "London for 3 days" -> extract "London"
-        /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:for\s+)?(\d+)\s+(?:days?|nights?)/i,
-        // "3 days in London" -> extract "London"
-        /(\d+)\s+(?:days?|nights?)\s+(?:in|to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:starting|from|on|tomorrow|today)|$)/i,
-        // "London starting tomorrow" at beginning -> extract "London"
-        /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:for|starting|from|tomorrow|today)|\s+\d+|,|$)/i
-      ];
-
-      for (const pattern of destinationPatterns) {
-        const match = message.match(pattern);
-        if (match) {
-          const destination = (match[1] || match[2] || '').trim();
-          if (destination && destination.length > 2) {
-            extracted.destination = destination;
-            break;
-          }
-        }
-      }
-    }
-
-    // Duration extraction
-    const duration = this.extractDuration(message);
-    if (duration) {
-      extracted.duration = duration;
-    }
-
-    // Date extraction
-    const dateRange = this.extractDateRange(message);
-    if (dateRange.startDate) extracted.startDate = dateRange.startDate;
-    if (dateRange.endDate) extracted.endDate = dateRange.endDate;
-    if (dateRange.duration && !extracted.duration) {
-      extracted.duration = dateRange.duration;
-    }
-
-    // Traveler extraction
-    const adultMatch = message.match(/(\d+)\s*(?:adults?|people|persons?|pax)/i);
-    const childMatch = message.match(/(\d+)\s*(?:children|kids?|child)/i);
-
-    if (adultMatch || childMatch) {
-      extracted.travelers = {
-        adults: adultMatch ? parseInt(adultMatch[1]) : 1,
-        children: childMatch ? parseInt(childMatch[1]) : 0
-      };
-    }
-
-    // Budget extraction
-    const budgetMatch = message.match(/\b(budget|cheap|affordable|mid-range|moderate|luxury|luxurious|premium|high-end)\b/i);
-    if (budgetMatch) {
-      const budgetWord = budgetMatch[1].toLowerCase();
-      if (['budget', 'cheap', 'affordable'].includes(budgetWord)) {
-        extracted.budget = 'budget';
-      } else if (['mid-range', 'moderate'].includes(budgetWord)) {
-        extracted.budget = 'medium';
-      } else if (['luxury', 'luxurious', 'premium', 'high-end'].includes(budgetWord)) {
-        extracted.budget = 'luxury';
-      }
-    }
-
-    // Interest extraction
-    const interestKeywords = [
-      'culture', 'history', 'food', 'adventure', 'relaxation', 'nightlife',
-      'shopping', 'nature', 'architecture', 'museums', 'beaches', 'hiking',
-      'photography', 'local cuisine', 'wine', 'art', 'music', 'festivals'
-    ];
-
-    const foundInterests: string[] = [];
-    for (const interest of interestKeywords) {
-      if (message.toLowerCase().includes(interest)) {
-        foundInterests.push(interest);
-      }
-    }
-
-    if (foundInterests.length > 0) {
-      extracted.interests = foundInterests;
-    }
-
-    console.log('   🔍 PATTERN EXTRACTION:');
-    console.log(`      Destination: ${extracted.destination || 'not found'}`);
-    console.log(`      Duration: ${extracted.duration || 'not found'}`);
-    console.log(`      Start Date: ${extracted.startDate || 'not found'}`);
-    console.log(`      End Date: ${extracted.endDate || 'not found'}`);
-
-    return extracted;
-  }
-
-  /**
-   * Extract date range from text
-   */
-  private extractDateRange(text: string): { startDate?: string; endDate?: string; duration?: number } {
-    const result: { startDate?: string; endDate?: string; duration?: number } = {};
-
-    // Check for date range patterns (e.g., "Oct 15-20", "15-20 October")
-    const rangePatterns = [
-      /(\w+)\s+(\d{1,2})\s*[-–]\s*(\d{1,2})/i,  // Oct 15-20
-      /(\d{1,2})\s*[-–]\s*(\d{1,2})\s+(\w+)/i,  // 15-20 Oct
-      /(\w+)\s+(\d{1,2})\s+to\s+(\w+)?\s*(\d{1,2})/i,  // Oct 15 to Oct 20
-    ];
-
-    for (const pattern of rangePatterns) {
-      const match = text.match(pattern);
-      if (match) {
-        // Parse and format dates based on pattern
-        // Simplified for brevity - would include full month parsing
-        const startDay = parseInt(match[2]);
-        const endDay = parseInt(match[3] || match[4]);
-        if (startDay && endDay && endDay > startDay) {
-          result.duration = endDay - startDay + 1;
-        }
-        break;
-      }
-    }
-
-    // Try to extract individual start date if no range found
-    if (!result.startDate) {
-      const startDate = this.extractStartDate(text);
-      if (startDate) {
-        result.startDate = startDate;
-      }
-    }
-
-    return result;
+    return this.extractor.extract(message, currentIntent);
   }
 
   /**
    * Extract start date from text
+   * Delegates to DateParser
    */
   extractStartDate(text: string): string | null {
-    // Try relative date first
-    const relativeDate = this.extractRelativeDate(text);
-    if (relativeDate) return relativeDate;
-
-    // Try month-based date
-    const monthDate = this.extractMonthDate(text);
-    if (monthDate) return monthDate;
-
-    // Try ISO date pattern
-    const isoMatch = text.match(/(\d{4})-(\d{2})-(\d{2})/);
-    if (isoMatch) {
-      return isoMatch[0];
-    }
-
-    return null;
+    return this.dateParser.extractStartDate(text);
   }
 
   /**
-   * Extract relative dates (next week, tomorrow, etc.)
+   * Validate extracted intent
+   * Delegates to IntentExtractor
    */
-  private extractRelativeDate(text: string): string | null {
-    const lower = text.toLowerCase();
-    const today = new Date();
-
-    if (lower.includes('today')) {
-      return this.formatDate(today);
-    }
-
-    if (lower.includes('tomorrow')) {
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      return this.formatDate(tomorrow);
-    }
-
-    // Next/this week logic
-    const weekMatch = lower.match(/(next|this)\s+(\w+day)/);
-    if (weekMatch) {
-      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-      const targetDay = days.findIndex(d => weekMatch[2].includes(d));
-
-      if (targetDay !== -1) {
-        const currentDay = today.getDay();
-        let daysToAdd = targetDay - currentDay;
-
-        if (weekMatch[1] === 'next' || daysToAdd <= 0) {
-          daysToAdd += 7;
-        }
-
-        const targetDate = new Date(today);
-        targetDate.setDate(today.getDate() + daysToAdd);
-        return this.formatDate(targetDate);
-      }
-    }
-
-    // Next month
-    if (lower.includes('next month')) {
-      const nextMonth = new Date(today);
-      nextMonth.setMonth(today.getMonth() + 1);
-      nextMonth.setDate(1);
-      return this.formatDate(nextMonth);
-    }
-
-    // In X days/weeks/months
-    const inMatch = lower.match(/in\s+(\d+)\s+(days?|weeks?|months?)/);
-    if (inMatch) {
-      const amount = parseInt(inMatch[1]);
-      const unit = inMatch[2];
-      const targetDate = new Date(today);
-
-      if (unit.startsWith('day')) {
-        targetDate.setDate(today.getDate() + amount);
-      } else if (unit.startsWith('week')) {
-        targetDate.setDate(today.getDate() + (amount * 7));
-      } else if (unit.startsWith('month')) {
-        targetDate.setMonth(today.getMonth() + amount);
-      }
-
-      return this.formatDate(targetDate);
-    }
-
-    return null;
+  validateExtractedIntent(data: any): Partial<ParsedIntent> {
+    return this.extractor.validate(data);
   }
 
   /**
-   * Extract month-based dates
+   * Additional utility methods for backward compatibility
    */
-  private extractMonthDate(text: string): string | null {
-    const months = [
-      'january', 'february', 'march', 'april', 'may', 'june',
-      'july', 'august', 'september', 'october', 'november', 'december'
-    ];
-
-    const monthsShort = [
-      'jan', 'feb', 'mar', 'apr', 'may', 'jun',
-      'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
-    ];
-
-    // Try full month names
-    for (let i = 0; i < months.length; i++) {
-      const pattern = new RegExp(`\\b${months[i]}\\s+(\\d{1,2})(?:\\w{0,2})?(?:\\s+|,\\s*)(\\d{4})?`, 'i');
-      const match = text.match(pattern);
-
-      if (match) {
-        const day = parseInt(match[1]);
-        const year = match[2] ? parseInt(match[2]) : this.determineYear(i, day);
-        return `${year}-${String(i + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      }
-    }
-
-    // Try short month names
-    for (let i = 0; i < monthsShort.length; i++) {
-      const pattern = new RegExp(`\\b${monthsShort[i]}\\w*\\s+(\\d{1,2})(?:\\w{0,2})?(?:\\s+|,\\s*)(\\d{4})?`, 'i');
-      const match = text.match(pattern);
-
-      if (match) {
-        const day = parseInt(match[1]);
-        const year = match[2] ? parseInt(match[2]) : this.determineYear(i, day);
-        return `${year}-${String(i + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      }
-    }
-
-    return null;
-  }
 
   /**
    * Extract duration from text
    */
-  private extractDuration(text: string): number | null {
-    // Look for patterns like "3 days", "1 week", "2 weeks", "5 nights"
-    const patterns = [
-      /(\d+)\s*(?:days?|nights?)/i,
-      /(\d+)\s*weeks?/i,
-      /a\s+week/i,  // "a week" = 7 days
-      /weekend/i,    // "weekend" = 2-3 days
-    ];
-
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      if (match) {
-        if (pattern.source.includes('weekend')) {
-          return 3; // Default weekend to 3 days
-        }
-        if (pattern.source.includes('a\\s+week')) {
-          return 7;
-        }
-
-        const num = parseInt(match[1]);
-        if (pattern.source.includes('week')) {
-          return num * 7;
-        }
-        return num;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Determine year for a given month and day
-   */
-  private determineYear(month: number, day: number): number {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentDay = today.getDate();
-
-    // If the month is in the past this year, use next year
-    if (month < currentMonth || (month === currentMonth && day < currentDay)) {
-      return this.nextYear;
-    }
-
-    return this.currentYear;
+  extractDuration(text: string): number | null {
+    return this.dateParser.extractDuration(text);
   }
 
   /**
    * Format date to ISO string
    */
-  private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  formatDate(date: Date): string {
+    return this.dateParser.formatDate(date);
   }
 
   /**
-   * Validate extracted intent
+   * Extract all destinations from text
    */
-  validateExtractedIntent(data: any): Partial<ParsedIntent> {
-    const validated: Partial<ParsedIntent> = {};
+  extractDestinations(text: string): string[] {
+    return this.destinationParser.extractAllDestinations(text);
+  }
 
-    // Validate destination
-    if (data.destination && typeof data.destination === 'string') {
-      validated.destination = data.destination.trim();
-    }
+  /**
+   * Extract user preferences
+   */
+  extractPreferences(text: string) {
+    return this.preferenceParser.extractPreferences(text);
+  }
 
-    // Validate destinations (multi-city)
-    if (data.destinations && Array.isArray(data.destinations)) {
-      validated.destinations = data.destinations
-        .filter((d: any) => typeof d === 'string')
-        .map((d: string) => d.trim());
-    }
+  /**
+   * Extract traveler information
+   */
+  extractTravelers(text: string) {
+    return this.preferenceParser.extractTravelers(text);
+  }
 
-    // Validate dates
-    if (data.startDate) {
-      const date = new Date(data.startDate);
-      if (!isNaN(date.getTime())) {
-        validated.startDate = this.formatDate(date);
-      }
-    }
-
-    if (data.endDate) {
-      const date = new Date(data.endDate);
-      if (!isNaN(date.getTime())) {
-        validated.endDate = this.formatDate(date);
-      }
-    }
-
-    // Validate duration
-    if (data.duration && typeof data.duration === 'number' && data.duration > 0 && data.duration <= 365) {
-      validated.duration = data.duration;
-    }
-
-    // Validate travelers
-    if (data.travelers) {
-      validated.travelers = {
-        adults: Math.max(1, Math.min(20, data.travelers.adults || 1)),
-        children: Math.max(0, Math.min(20, data.travelers.children || 0))
-      };
-    }
-
-    // Validate budget
-    if (data.budget && ['budget', 'medium', 'luxury'].includes(data.budget)) {
-      validated.budget = data.budget;
-    }
-
-    // Validate interests
-    if (data.interests && Array.isArray(data.interests)) {
-      validated.interests = data.interests
-        .filter((i: any) => typeof i === 'string')
-        .map((i: string) => i.toLowerCase().trim())
-        .slice(0, 10); // Limit to 10 interests
-    }
-
-    return validated;
+  /**
+   * Format intent for logging
+   */
+  formatIntent(intent: ParsedIntent): string {
+    return this.extractor.formatIntent(intent);
   }
 }

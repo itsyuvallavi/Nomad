@@ -12,7 +12,15 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "logs:ai": "tsx scripts/view-ai-logs.ts",
-    "logs:production": "tsx scripts/view-production-logs.ts"
+    "logs:production": "tsx scripts/view-production-logs.ts",
+    "test": "tsx scripts/run-comprehensive-tests.ts",
+    "test:ui": "tsx scripts/run-comprehensive-tests.ts --ui-only",
+    "test:ai": "tsx scripts/run-comprehensive-tests.ts --ai-only",
+    "test:integration": "tsx scripts/run-comprehensive-tests.ts --no-stress",
+    "test:stress": "tsx scripts/run-comprehensive-tests.ts --stress",
+    "test:verbose": "tsx scripts/run-comprehensive-tests.ts --verbose",
+    "test:fix": "tsx scripts/test-and-fix.ts",
+    "test:fix:dry": "tsx scripts/test-and-fix.ts --dry-run"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

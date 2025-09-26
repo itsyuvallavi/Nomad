@@ -196,7 +196,7 @@ async function generateProgressively(
     // Check if we can generate
     if (response.type === 'ready' && response.canGenerate && response.intent) {
       const tripParams = aiController.getTripParameters(response.intent);
-      const destinations = tripParams.destination.split(',').map(d => d.trim());
+      const destinations = tripParams.destination.split(',').map((d: string) => d.trim());
 
       // Always use progressive generation (it's now the default)
       updateProgress({
@@ -208,8 +208,8 @@ async function generateProgressively(
       });
 
       let generationError = null;
-      let allCityData = []; // Accumulate city data
-      let generatedMetadata = null;
+      let allCityData: any[] = []; // Accumulate city data
+      let generatedMetadata: any = null;
 
       console.log('🚀 [generateProgressively] Starting progressive generation with:', {
         destinations,

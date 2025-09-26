@@ -6,10 +6,19 @@
 import OpenAI from 'openai';
 import { logger } from '@/lib/monitoring/logger';
 import { CityItinerary, DayPlan, CityGenerationParams } from '../types/core.types';
+import { getTokenConfig, tokenTracker, calculateTokenCost } from '../config/token-limits';
+
+interface CityCache {
+  key: string;
+  result: CityItinerary;
+  timestamp: number;
+}
 
 export class CityGenerator {
   private openai: OpenAI | null = null;
   private apiKey: string | undefined;
+  private cache: Map<string, CityCache> = new Map();
+  private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.OPENAI_API_KEY;
@@ -31,9 +40,24 @@ export class CityGenerator {
   async generateCityItinerary(params: CityGenerationParams): Promise<CityItinerary> {
     const startTime = Date.now();
 
+    // Generate cache key
+    const cacheKey = this.generateCacheKey(params);
+
+    // Check cache first
+    const cached = this.getFromCache(cacheKey);
+    if (cached) {
+      logger.info('AI', 'City itinerary served from cache', {
+        city: params.city,
+        days: params.days,
+        cacheHit: true
+      });
+      return cached;
+    }
+
     logger.info('AI', 'Generating city itinerary', {
       city: params.city,
-      days: params.days
+      days: params.days,
+      cacheHit: false
     });
 
     const prompt = this.buildPrompt(params);
@@ -46,8 +70,9 @@ export class CityGenerator {
         setTimeout(() => reject(new Error(`Failed to generate itinerary for ${params.city}: OpenAI request timeout after 120s`)), 120000)
       );
 
+      const tokenConfig = getTokenConfig('CITY_GENERATION');
       const apiPromise = this.getOpenAI().chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: tokenConfig.model,
         messages: [
           {
             role: 'system',
@@ -55,12 +80,33 @@ export class CityGenerator {
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.8,
-        max_tokens: 4000
+        temperature: tokenConfig.temperature || 0.8,
+        max_tokens: tokenConfig.maxTokens
       });
 
-      const response = await Promise.race([apiPromise, timeoutPromise]) as any;
+      const response = await Promise.race([apiPromise, timeoutPromise]) as OpenAI.Chat.Completions.ChatCompletion;
       console.log(`✅ [CityGenerator] OpenAI response received for ${params.city}`);
+
+      // Track token usage
+      if (response.usage) {
+        const cost = calculateTokenCost(
+          tokenConfig.model,
+          response.usage.prompt_tokens,
+          response.usage.completion_tokens
+        );
+        tokenTracker.track('CITY_GENERATION', {
+          prompt: response.usage.prompt_tokens,
+          completion: response.usage.completion_tokens,
+          total: response.usage.total_tokens,
+          estimatedCost: cost
+        });
+        logger.debug('AI', 'City generation tokens', {
+          city: params.city,
+          model: tokenConfig.model,
+          tokens: response.usage.total_tokens,
+          cost: cost.toFixed(4)
+        });
+      }
 
       const content = response.choices[0].message.content?.trim();
       if (!content) throw new Error('No response from AI');
@@ -83,6 +129,9 @@ export class CityGenerator {
         time: `${elapsed}ms`
       });
 
+      // Cache the result
+      this.saveToCache(cacheKey, cityItinerary);
+
       return cityItinerary;
 
     } catch (error) {
@@ -90,6 +139,63 @@ export class CityGenerator {
       console.error(`❌ [CityGenerator] Error generating ${params.city}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Generate cache key for city parameters
+   */
+  private generateCacheKey(params: CityGenerationParams): string {
+    const key = `${params.city}-${params.days}-${params.startDayNumber}`;
+    const interests = params.interests?.sort().join(',') || '';
+    const budget = params.budget || '';
+    return `city:${key}:${interests}:${budget}`.toLowerCase();
+  }
+
+  /**
+   * Get from cache if valid
+   */
+  private getFromCache(key: string): CityItinerary | null {
+    const cached = this.cache.get(key);
+    if (!cached) return null;
+
+    const age = Date.now() - cached.timestamp;
+    if (age > this.CACHE_TTL) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    console.log(`🎯 [CityGenerator] Cache hit for key: ${key}`);
+    return cached.result;
+  }
+
+  /**
+   * Save to cache
+   */
+  private saveToCache(key: string, result: CityItinerary): void {
+    this.cache.set(key, {
+      key,
+      result,
+      timestamp: Date.now()
+    });
+    console.log(`💾 [CityGenerator] Cached result for key: ${key}`);
+
+    // Clean old entries if cache grows too large
+    if (this.cache.size > 100) {
+      const now = Date.now();
+      for (const [k, v] of this.cache.entries()) {
+        if (now - v.timestamp > this.CACHE_TTL) {
+          this.cache.delete(k);
+        }
+      }
+    }
+  }
+
+  /**
+   * Clear cache (for testing or manual refresh)
+   */
+  public clearCache(): void {
+    this.cache.clear();
+    logger.info('AI', 'City generator cache cleared');
   }
 
   /**
@@ -140,7 +246,7 @@ Categories: Attraction, Food, Leisure, Work, Travel, Accommodation`;
   /**
    * Parse AI response with error handling
    */
-  private parseResponse(content: string): any {
+  private parseResponse(content: string): Partial<CityItinerary> {
     try {
       return JSON.parse(content);
     } catch (e) {
@@ -156,10 +262,10 @@ Categories: Attraction, Food, Leisure, Work, Travel, Accommodation`;
   /**
    * Validate and fix city itinerary
    */
-  private validateAndFix(parsed: any, params: CityGenerationParams): any {
+  private validateAndFix(parsed: Partial<CityItinerary>, params: CityGenerationParams): { days: DayPlan[] } {
     // Ensure all days have the city field
     if (parsed.days) {
-      parsed.days = parsed.days.map((day: any) => ({
+      parsed.days = parsed.days.map((day: Partial<DayPlan>) => ({
         ...day,
         city: day.city || params.city
       }));
