@@ -1,15 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { 
-  Share2, 
-  Download, 
-  Calendar, 
-  Copy, 
-  Link, 
+import { useState, useRef, useEffect } from 'react';
+import {
+  Share2,
+  Calendar,
+  Copy,
+  Link,
   FileText,
   Check,
-  X,
   FileDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,143 +18,79 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
-import jsPDF from 'jspdf';
+import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/types/core.types';
+import {
+  formatAsText,
+  formatAsMarkdown,
+  formatAsICS,
+  formatAsPDF,
+  type FormatterResult
+} from '../utils/exportFormatters';
+import { ExportErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface ExportMenuProps {
   itinerary: GeneratePersonalizedItineraryOutput;
   className?: string;
 }
 
-export function ExportMenu({ itinerary, className = '' }: ExportMenuProps) {
+function ExportMenuComponent({ itinerary, className = '' }: ExportMenuProps) {
   const [copiedType, setCopiedType] = useState<string | null>(null);
   const [exportingType, setExportingType] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const showFeedback = (type: string) => {
     setCopiedType(type);
     setTimeout(() => setCopiedType(null), 2000);
   };
 
-  const formatItineraryAsText = (): string => {
-    let text = `${itinerary.title}\n`;
-    text += `${itinerary.destination}\n`;
-    text += `${itinerary.itinerary.length} days\n\n`;
-    
-    itinerary.itinerary.forEach((day) => {
-      text += `Day ${day.day} - ${day.date}\n`;
-      text += `${day.title}\n\n`;
-      
-      day.activities.forEach((activity) => {
-        text += `  ${activity.time}: ${activity.description}\n`;
-        if (activity.address) {
-          text += `  📍 ${activity.address}\n`;
-        }
-        text += '\n';
-      });
-    });
-    
-    if (itinerary.quickTips && itinerary.quickTips.length > 0) {
-      text += '\nTravel Tips:\n';
-      itinerary.quickTips.forEach((tip) => {
-        text += `• ${tip}\n`;
-      });
+  // Focus management for menu open/close
+  useEffect(() => {
+    if (isOpen) {
+      // Store the currently focused element
+      previousFocusRef.current = document.activeElement as HTMLElement;
+    } else if (previousFocusRef.current) {
+      // Restore focus when menu closes
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
     }
-    
-    return text;
-  };
+  }, [isOpen]);
 
-  const formatItineraryAsMarkdown = (): string => {
-    let md = `# ${itinerary.title}\n\n`;
-    md += `**Destination:** ${itinerary.destination}\n`;
-    md += `**Duration:** ${itinerary.itinerary.length} days\n\n`;
-    
-    itinerary.itinerary.forEach((day) => {
-      md += `## Day ${day.day} - ${day.date}\n`;
-      md += `### ${day.title}\n\n`;
-      
-      day.activities.forEach((activity) => {
-        md += `- **${activity.time}:** ${activity.description}\n`;
-        if (activity.address) {
-          md += `  - 📍 *${activity.address}*\n`;
-        }
-      });
-      md += '\n';
-    });
-    
-    if (itinerary.quickTips && itinerary.quickTips.length > 0) {
-      md += '## Travel Tips\n\n';
-      itinerary.quickTips.forEach((tip) => {
-        md += `- ${tip}\n`;
-      });
+  const handleDownload = (result: FormatterResult) => {
+    if (result.content instanceof Blob) {
+      const url = URL.createObjectURL(result.content);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = result.filename || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
-    
-    return md;
   };
 
   const copyToClipboard = async (format: 'text' | 'markdown') => {
     try {
-      const content = format === 'markdown' 
-        ? formatItineraryAsMarkdown() 
-        : formatItineraryAsText();
-      
-      await navigator.clipboard.writeText(content);
-      showFeedback(format);
+      const result = format === 'markdown'
+        ? formatAsMarkdown({ itinerary })
+        : formatAsText({ itinerary });
+
+      if (typeof result.content === 'string') {
+        await navigator.clipboard.writeText(result.content);
+        showFeedback(format);
+      }
     } catch (err) {
       console.error('Failed to copy:', err);
     }
   };
 
-  const generateICS = (): string => {
-    const events: string[] = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Nomad Navigator//EN'];
-    
-    itinerary.itinerary.forEach((day) => {
-      // Parse date in local timezone to avoid off-by-one error
-      const [year, month, dayNum] = day.date.split('-').map(Number);
-      const date = new Date(year, month - 1, dayNum);
-      const dateStr = `${year}${String(month).padStart(2, '0')}${String(dayNum).padStart(2, '0')}`;
-      
-      day.activities.forEach((activity, index) => {
-        events.push('BEGIN:VEVENT');
-        events.push(`UID:${dateStr}-${index}@nomadnavigator`);
-        events.push(`DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
-        
-        // Parse time and create proper datetime
-        const [time, period] = activity.time.split(' ');
-        const [hours, minutes] = time.split(':').map(Number);
-        const adjustedHours = period === 'PM' && hours !== 12 ? hours + 12 : hours;
-        
-        events.push(`DTSTART:${dateStr}T${String(adjustedHours).padStart(2, '0')}${String(minutes || 0).padStart(2, '0')}00`);
-        events.push(`DTEND:${dateStr}T${String(adjustedHours + 1).padStart(2, '0')}${String(minutes || 0).padStart(2, '0')}00`);
-        events.push(`SUMMARY:${activity.description}`);
-        
-        if (activity.address) {
-          events.push(`LOCATION:${activity.address}`);
-        }
-        
-        events.push(`DESCRIPTION:${activity.description}\\nCategory: ${activity.category}`);
-        events.push('END:VEVENT');
-      });
-    });
-    
-    events.push('END:VCALENDAR');
-    return events.join('\r\n');
-  };
-
-  const exportToCalendar = () => {
+  const exportToCalendar = async () => {
     setExportingType('calendar');
-    
+
     try {
-      const icsContent = generateICS();
-      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${itinerary.title.replace(/\s+/g, '_')}.ics`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
+      const result = formatAsICS({ itinerary });
+      handleDownload(result);
       showFeedback('calendar');
     } catch (err) {
       console.error('Failed to export calendar:', err);
@@ -165,106 +99,12 @@ export function ExportMenu({ itinerary, className = '' }: ExportMenuProps) {
     }
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     setExportingType('pdf');
-    
+
     try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 20;
-      const lineHeight = 7;
-      let yPosition = margin;
-      
-      // Add title
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text(itinerary.title, margin, yPosition);
-      yPosition += 15;
-      
-      // Add destination and duration
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Destination: ${itinerary.destination}`, margin, yPosition);
-      yPosition += lineHeight;
-      doc.text(`Duration: ${itinerary.itinerary.length} days`, margin, yPosition);
-      yPosition += 15;
-      
-      // Add days
-      itinerary.itinerary.forEach((day) => {
-        // Check if we need a new page
-        if (yPosition > pageHeight - 40) {
-          doc.addPage();
-          yPosition = margin;
-        }
-        
-        // Day header
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Day ${day.day} - ${day.date}`, margin, yPosition);
-        yPosition += lineHeight;
-        
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'italic');
-        doc.text(day.title, margin, yPosition);
-        yPosition += 10;
-        
-        // Activities
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        
-        day.activities.forEach((activity) => {
-          if (yPosition > pageHeight - 20) {
-            doc.addPage();
-            yPosition = margin;
-          }
-          
-          doc.text(`${activity.time}: ${activity.description}`, margin + 5, yPosition);
-          yPosition += lineHeight - 1;
-          
-          if (activity.address) {
-            doc.setFontSize(9);
-            doc.text(`Location: ${activity.address}`, margin + 10, yPosition);
-            doc.setFontSize(10);
-            yPosition += lineHeight - 1;
-          }
-        });
-        
-        yPosition += 5;
-      });
-      
-      // Add travel tips if available
-      if (itinerary.quickTips && itinerary.quickTips.length > 0) {
-        if (yPosition > pageHeight - 40) {
-          doc.addPage();
-          yPosition = margin;
-        }
-        
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Travel Tips', margin, yPosition);
-        yPosition += lineHeight;
-        
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        
-        itinerary.quickTips.forEach((tip) => {
-          if (yPosition > pageHeight - 20) {
-            doc.addPage();
-            yPosition = margin;
-          }
-          
-          // Wrap long text
-          const lines = doc.splitTextToSize(`• ${tip}`, pageWidth - margin * 2);
-          lines.forEach((line: string) => {
-            doc.text(line, margin, yPosition);
-            yPosition += lineHeight - 1;
-          });
-        });
-      }
-      
-      // Save the PDF
-      doc.save(`${itinerary.title.replace(/\s+/g, '_')}.pdf`);
+      const result = await formatAsPDF({ itinerary });
+      handleDownload(result);
       showFeedback('pdf');
     } catch (err) {
       console.error('Failed to generate PDF:', err);
@@ -276,8 +116,9 @@ export function ExportMenu({ itinerary, className = '' }: ExportMenuProps) {
   const shareLink = async () => {
     // For MVP, we'll copy a formatted version to clipboard
     // In production, this would generate an actual shareable URL
-    const shareText = `Check out my trip itinerary: ${itinerary.title}\n\n${formatItineraryAsText()}`;
-    
+    const textResult = formatAsText({ itinerary });
+    const shareText = `Check out my trip itinerary: ${itinerary.title}\n\n${textResult.content}`;
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -297,72 +138,87 @@ export function ExportMenu({ itinerary, className = '' }: ExportMenuProps) {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            ref={triggerRef}
+            variant="outline"
+            size="sm"
             className={`min-h-[44px] px-4 ${className}`}
+            aria-label="Export itinerary options"
+            aria-haspopup="true"
+            aria-expanded={isOpen}
           >
-            <Share2 className="h-4 w-4 mr-2" />
+            <Share2 className="h-4 w-4 mr-2" aria-hidden="true" />
             Export
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700">
-          <DropdownMenuItem 
+        <DropdownMenuContent
+          align="end"
+          className="w-56 bg-slate-800 border-slate-700"
+          onEscapeKeyDown={() => setIsOpen(false)}
+        >
+          <DropdownMenuItem
             onClick={() => copyToClipboard('text')}
-            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer"
+            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer focus:bg-slate-700 focus:text-white focus:outline-none"
+            aria-label="Copy itinerary as plain text"
           >
-            <Copy className="h-4 w-4" />
+            <Copy className="h-4 w-4" aria-hidden="true" />
             <span>Copy as Text</span>
             {copiedType === 'text' && (
-              <Check className="h-4 w-4 ml-auto text-green-500" />
+              <Check className="h-4 w-4 ml-auto text-green-500" aria-label="Copied successfully" />
             )}
           </DropdownMenuItem>
-          
-          <DropdownMenuItem 
+
+          <DropdownMenuItem
             onClick={() => copyToClipboard('markdown')}
-            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer"
+            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer focus:bg-slate-700 focus:text-white focus:outline-none"
+            aria-label="Copy itinerary as markdown"
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4" aria-hidden="true" />
             <span>Copy as Markdown</span>
             {copiedType === 'markdown' && (
-              <Check className="h-4 w-4 ml-auto text-green-500" />
+              <Check className="h-4 w-4 ml-auto text-green-500" aria-label="Copied successfully" />
             )}
           </DropdownMenuItem>
-          
-          <DropdownMenuItem 
+
+          <DropdownMenuItem
             onClick={exportToCalendar}
             disabled={exportingType === 'calendar'}
-            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer"
+            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer focus:bg-slate-700 focus:text-white focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Export itinerary to calendar file"
+            aria-disabled={exportingType === 'calendar'}
           >
-            <Calendar className="h-4 w-4" />
-            <span>Add to Calendar</span>
+            <Calendar className="h-4 w-4" aria-hidden="true" />
+            <span>{exportingType === 'calendar' ? 'Exporting...' : 'Add to Calendar'}</span>
             {copiedType === 'calendar' && (
-              <Check className="h-4 w-4 ml-auto text-green-500" />
+              <Check className="h-4 w-4 ml-auto text-green-500" aria-label="Downloaded successfully" />
             )}
           </DropdownMenuItem>
-          
-          <DropdownMenuItem 
+
+          <DropdownMenuItem
             onClick={exportToPDF}
             disabled={exportingType === 'pdf'}
-            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer"
+            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer focus:bg-slate-700 focus:text-white focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Export itinerary as PDF"
+            aria-disabled={exportingType === 'pdf'}
           >
-            <FileDown className="h-4 w-4" />
-            <span>Export as PDF</span>
+            <FileDown className="h-4 w-4" aria-hidden="true" />
+            <span>{exportingType === 'pdf' ? 'Generating PDF...' : 'Export as PDF'}</span>
             {copiedType === 'pdf' && (
-              <Check className="h-4 w-4 ml-auto text-green-500" />
+              <Check className="h-4 w-4 ml-auto text-green-500" aria-label="Downloaded successfully" />
             )}
           </DropdownMenuItem>
-          
-          <DropdownMenuItem 
+
+          <DropdownMenuItem
             onClick={shareLink}
-            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer"
+            className="flex items-center gap-2 text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer focus:bg-slate-700 focus:text-white focus:outline-none"
+            aria-label="Share itinerary link"
           >
-            <Link className="h-4 w-4" />
+            <Link className="h-4 w-4" aria-hidden="true" />
             <span>Share Link</span>
             {copiedType === 'share' && (
-              <Check className="h-4 w-4 ml-auto text-green-500" />
+              <Check className="h-4 w-4 ml-auto text-green-500" aria-label="Shared successfully" />
             )}
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -376,8 +232,11 @@ export function ExportMenu({ itinerary, className = '' }: ExportMenuProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="fixed bottom-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
           >
-            <Check className="h-4 w-4" />
+            <Check className="h-4 w-4" aria-hidden="true" />
             <span>
               {copiedType === 'text' && 'Copied as text!'}
               {copiedType === 'markdown' && 'Copied as markdown!'}
@@ -389,5 +248,14 @@ export function ExportMenu({ itinerary, className = '' }: ExportMenuProps) {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+// Export the component wrapped with error boundary
+export function ExportMenu(props: ExportMenuProps) {
+  return (
+    <ExportErrorBoundary>
+      <ExportMenuComponent {...props} />
+    </ExportErrorBoundary>
   );
 }

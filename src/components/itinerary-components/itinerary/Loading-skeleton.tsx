@@ -2,9 +2,17 @@ import { motion } from 'framer-motion';
 
 export function ItineraryLoadingSkeleton() {
   return (
-    <div className="space-y-6 p-6">
+    <div
+      className="space-y-6 p-6"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading itinerary content"
+    >
+      {/* Screen reader announcement */}
+      <span className="sr-only">Loading your travel itinerary. Please wait.</span>
+
       {/* Header Skeleton */}
-      <div className="space-y-3">
+      <div className="space-y-3" aria-hidden="true">
         <motion.div 
           className="h-8 bg-gradient-to-r from-slate-700 to-slate-600 rounded-lg w-3/4"
           animate={{ opacity: [0.5, 0.8, 0.5] }}
@@ -22,6 +30,7 @@ export function ItineraryLoadingSkeleton() {
         <motion.div
           key={day}
           className="space-y-4"
+          aria-hidden="true"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
@@ -118,6 +127,7 @@ export function ItineraryLoadingSkeleton() {
       {/* Shimmer Effect Overlay */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
+        aria-hidden="true"
         animate={{ x: ["-100%", "100%"] }}
         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
         style={{ width: "200%" }}

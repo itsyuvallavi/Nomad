@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { MapPin, Sparkles, Calendar, Globe, Plane, Mountain, Coffee } from 'lucide-react';
+import { memo } from 'react';
 
 interface EmptyStateProps {
   type: 'no-messages' | 'no-itinerary' | 'no-results' | 'loading';
@@ -7,7 +8,7 @@ interface EmptyStateProps {
   description?: string;
 }
 
-export function EmptyState({ type, title, description }: EmptyStateProps) {
+function EmptyStateComponent({ type, title, description }: EmptyStateProps) {
   const getIllustration = () => {
     switch (type) {
       case 'no-messages':
@@ -208,3 +209,5 @@ export function EmptyState({ type, title, description }: EmptyStateProps) {
     </motion.div>
   );
 }
+
+export const EmptyState = memo(EmptyStateComponent);

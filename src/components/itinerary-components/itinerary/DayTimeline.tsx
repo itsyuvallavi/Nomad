@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
+import { parseLocalDate } from '@/lib/utils/date-helpers';
 
 interface DayTimelineProps {
   totalDays: number;
@@ -10,10 +11,11 @@ interface DayTimelineProps {
   dates?: string[];
 }
 
-export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, dates }: DayTimelineProps) {
+function DayTimelineV2Component({ totalDays, selectedDay, onDaySelect, location, dates }: DayTimelineProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Check scroll position for arrow visibility
   const checkScroll = () => {
@@ -66,12 +68,54 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
 
   const getDateLabel = (day: number) => {
     if (dates && dates[day - 1]) {
-      // Parse date in local timezone to avoid off-by-one error
-      const [year, month, dayNum] = dates[day - 1].split('-').map(Number);
-      const date = new Date(year, month - 1, dayNum);
+      const date = parseLocalDate(dates[day - 1]);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     return '';
+  };
+
+  // Handle keyboard navigation for day selection
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, day: number) => {
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault();
+        if (day < totalDays) {
+          onDaySelect(day + 1);
+          buttonsRef.current[day]?.focus();
+        }
+        break;
+
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (day > 1) {
+          onDaySelect(day - 1);
+          buttonsRef.current[day - 2]?.focus();
+        }
+        break;
+
+      case 'Home':
+        e.preventDefault();
+        onDaySelect(1);
+        buttonsRef.current[0]?.focus();
+        break;
+
+      case 'End':
+        e.preventDefault();
+        onDaySelect(totalDays);
+        buttonsRef.current[totalDays - 1]?.focus();
+        break;
+
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        onDaySelect(day);
+        // Scroll to the selected day in the itinerary
+        const daySection = document.getElementById(`day-${day}`);
+        if (daySection) {
+          daySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        break;
+    }
   };
 
   return (
@@ -80,7 +124,9 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
         {/* Location Header - show current destination */}
         {location && (
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">{location}</span>
+            <span className="text-sm font-medium text-muted-foreground" aria-label={`Current location: ${location}`}>
+              {location}
+            </span>
           </div>
         )}
 
@@ -97,8 +143,9 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
                 whileHover={{ opacity: 1 }}
                 onClick={() => scroll('left')}
                 className="absolute -left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-background border border-border rounded-full flex items-center justify-center transition-opacity shadow-sm"
+                aria-label="Scroll days left"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
               </motion.button>
             )}
             {canScrollRight && (
@@ -110,21 +157,24 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
                 whileHover={{ opacity: 1 }}
                 onClick={() => scroll('right')}
                 className="absolute -right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-background border border-border rounded-full flex items-center justify-center transition-opacity shadow-sm"
+                aria-label="Scroll days right"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </motion.button>
             )}
           </AnimatePresence>
 
           {/* Days Container - fixed height to prevent vertical scroll, adequate height for content */}
-          <div 
+          <div
             ref={scrollRef}
             data-scrollable="horizontal"
             className="flex items-center gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide-mobile momentum-scroll py-2"
             onScroll={checkScroll}
-            style={{ 
-              scrollbarWidth: 'none', 
-              msOverflowStyle: 'none', 
+            role="tablist"
+            aria-label={`Select day from ${totalDays} days`}
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
               minHeight: '90px',
               maxHeight: '90px'
@@ -137,9 +187,16 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
               return (
                 <motion.button
                   key={day}
+                  ref={(el) => { buttonsRef.current[day - 1] = el; }}
                   data-day={day}
                   onClick={() => onDaySelect(day)}
-                  className="relative flex-shrink-0 group"
+                  onKeyDown={(e) => handleKeyDown(e, day)}
+                  className="relative flex-shrink-0 group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-xl"
+                  role="tab"
+                  aria-selected={isSelected}
+                  aria-controls={`day-panel-${day}`}
+                  aria-label={`Day ${day}${getDateLabel(day) ? `, ${getDateLabel(day)}` : ''}${isSelected ? ', currently selected' : ''}`}
+                  tabIndex={isSelected ? 0 : -1}
                   whileTap={{ scale: 0.95 }}
                 >
                   {/* Minimal day indicator */}
@@ -164,12 +221,13 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
                       }}
                       transition={{ duration: 0.2 }}
                     >
-                      {day}
+                      <span aria-hidden="true">{day}</span>
                       {/* Glow effect on hover for non-selected days */}
                       {!isSelected && (
                         <motion.div
                           className="absolute inset-0 rounded-full bg-gray-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                           style={{ filter: 'blur(8px)' }}
+                          aria-hidden="true"
                         />
                       )}
                     </motion.div>
@@ -204,16 +262,16 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
         </div>
 
         {/* Minimal progress indicator */}
-        <div className="mt-4">
-          <div className="h-px bg-gray-200 relative">
-            <motion.div 
+        <div className="mt-4" aria-label={`Progress: Day ${selectedDay} of ${totalDays}`}>
+          <div className="h-px bg-gray-200 relative" role="progressbar" aria-valuenow={selectedDay} aria-valuemin={1} aria-valuemax={totalDays}>
+            <motion.div
               className="absolute top-0 left-0 h-px bg-gray-900"
               initial={{ width: 0 }}
               animate={{ width: `${((selectedDay - 1) / (totalDays - 1)) * 100}%` }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
             />
           </div>
-          <div className="flex justify-between mt-1">
+          <div className="flex justify-between mt-1" aria-hidden="true">
             <span className="text-[9px] text-gray-400">Day 1</span>
             <span className="text-[9px] text-gray-600 font-medium">
               {selectedDay} / {totalDays}
@@ -225,3 +283,5 @@ export function DayTimelineV2({ totalDays, selectedDay, onDaySelect, location, d
     </div>
   );
 }
+
+export const DayTimelineV2 = memo(DayTimelineV2Component);

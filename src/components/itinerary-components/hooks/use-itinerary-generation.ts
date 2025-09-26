@@ -198,12 +198,33 @@ export function useItineraryGeneration({
                     console.log(`📅 Rebuilding itinerary from ${progress.allCities.length} cities`);
 
                     // Build complete itinerary from all cities data
-                    const allDays = progress.allCities.flatMap((cityInfo: any) =>
-                        (cityInfo.data.days || []).map((day: any) => ({
+                    interface CityInfo {
+                        city: string;
+                        data: {
+                            days: Array<{
+                                title?: string;
+                                day: number;
+                                date: string;
+                                city?: string;
+                                activities: Array<{
+                                    time: string;
+                                    description: string;
+                                    category: string;
+                                    address?: string;
+                                    venueName?: string;
+                                    tips?: string[];
+                                }>;
+                                weather?: string;
+                            }>;
+                        };
+                    }
+
+                    const allDays = progress.allCities.flatMap((cityInfo: CityInfo) =>
+                        (cityInfo.data.days || []).map((day) => ({
                             title: day.title || `Day ${day.day} - ${day.city || cityInfo.city}`,
                             day: day.day,
                             date: day.date,
-                            activities: day.activities.map((act: any) => ({
+                            activities: day.activities.map((act) => ({
                                 time: act.time,
                                 description: act.description,
                                 category: act.category,
@@ -214,7 +235,7 @@ export function useItineraryGeneration({
                             })),
                             weather: day.weather || 'Check local forecast'
                         }))
-                    ).sort((a, b) => a.day - b.day);
+                    ).sort((a: { day: number }, b: { day: number }) => a.day - b.day);
 
                     const updatedItinerary = {
                         ...partialItinerary.current,
