@@ -109,22 +109,29 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
     try {
       await signInWithGoogle();
-      router.push(redirectTo);
+      // On mobile or when using redirect, the page will redirect
+      // So we keep the loading state to avoid confusion
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) {
+        // Only push route on desktop when popup succeeds
+        router.push(redirectTo);
+      }
+      // Keep loading state on mobile as page will redirect
     } catch (error: any) {
       console.error('Google sign in error:', error);
-      
+      setIsGoogleLoading(false);
+
       switch (error.code) {
         case 'auth/popup-closed-by-user':
           setError('Sign-in was cancelled.');
           break;
         case 'auth/popup-blocked':
-          setError('Pop-up blocked. Please allow pop-ups for this site.');
+          // This shouldn't happen now with our fallback, but keep it just in case
+          setError('Authentication in progress. If the page doesn\'t redirect, please try again.');
           break;
         default:
           setError('Failed to sign in with Google. Please try again.');
       }
-    } finally {
-      setIsGoogleLoading(false);
     }
   };
 

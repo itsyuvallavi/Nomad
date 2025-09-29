@@ -53,10 +53,44 @@ export function useServiceWorker() {
             if (newWorker.state === 'activated') {
               setState(prev => ({ ...prev, isUpdating: false }));
               logger.info('SYSTEM', 'Service Worker updated');
-              
-              // Optionally reload the page for new content
-              if (window.confirm('A new version is available. Would you like to refresh?')) {
-                window.location.reload();
+
+              // Don't show update notifications on first load
+              const isFirstVisit = !localStorage.getItem('app-visited');
+              if (isFirstVisit) {
+                localStorage.setItem('app-visited', 'true');
+                logger.info('SYSTEM', 'First visit - skipping update notification');
+                return;
+              }
+
+              // Check if we recently showed an update notification
+              const lastNotified = localStorage.getItem('sw-update-last-notified');
+              const now = Date.now();
+              const thirtyMinutes = 30 * 60 * 1000;
+
+              // Skip notification if we showed one recently
+              if (lastNotified && (now - parseInt(lastNotified)) < thirtyMinutes) {
+                logger.info('SYSTEM', 'Skipping update notification (shown recently)');
+                return;
+              }
+
+              // Mobile handling: More subtle approach
+              const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+              if (isMobile) {
+                // On mobile, just log the update, don't show popup
+                localStorage.setItem('sw-update-last-notified', now.toString());
+                logger.info('SYSTEM', 'App updated in background. Changes will apply on next visit.');
+              } else {
+                // On desktop, show a less intrusive notification
+                localStorage.setItem('sw-update-last-notified', now.toString());
+
+                // Use a timeout to avoid showing immediately
+                setTimeout(() => {
+                  // Only show if the page has been open for at least 10 seconds
+                  if (window.confirm('A new version is available. Would you like to refresh?')) {
+                    window.location.reload();
+                  }
+                }, 10000); // Wait 10 seconds before showing
               }
             }
           });

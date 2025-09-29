@@ -20,11 +20,49 @@ Nomad Navigator - AI-powered travel planning application for digital nomads usin
 **Project Number**: 476100182115
 
 ## Current Technology Stack
-- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS, shadcn/ui
+- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui
 - **AI**: OpenAI GPT-5 (EXCLUSIVELY - no other models)
 - **APIs**: Amadeus (flights/hotels), Google Places/Maps, Weather, Foursquare
 - **Deployment**: Firebase Hosting
-- **Development**: MCP integration (filesystem, puppeteer)
+- **Development**: MCP integration (filesystem, puppeteer, context7)
+
+## Modern Framework Guidelines (Next.js 15 & React 19)
+
+### Next.js 15 App Router Best Practices
+- **Server Components by Default**: Pages and layouts are Server Components unless marked with `'use client'`
+- **Data Fetching**: Use `async/await` directly in Server Components, no need for `getServerSideProps`
+- **Routing Hooks**: Import from `next/navigation` (not `next/router`):
+  - `useRouter()` for programmatic navigation
+  - `usePathname()` for current path
+  - `useSearchParams()` for query parameters
+- **Layouts**: Use for shared UI and partial rendering during navigation
+- **Streaming & Suspense**: Leverage React 19's improved streaming capabilities
+- **Server Actions**: Handle forms and mutations server-side
+- **Route Handlers**: Use for API routes in `app/api/` directory
+
+### React 19 Patterns & Hooks
+- **Custom Hooks**: Extract reusable logic (prefix with `use`)
+- **Context Optimization**: Use `useCallback` and `useMemo` to prevent unnecessary re-renders
+- **State Management**: 
+  - `useState` for simple state
+  - `useReducer` for complex state logic
+  - `useContext` with custom hooks for global state
+- **Effects**: Use `useEffect` sparingly, prefer data fetching in Server Components
+- **Refs**: `useRef` for DOM references and mutable values
+- **Rules of Hooks**: Always call hooks at top level, never in loops or conditions
+
+### shadcn/ui Component Integration
+- **Installation**: Use `npx shadcn@latest add [component]`
+- **Core Components**:
+  - Form handling: `form`, `input`, `select`
+  - Feedback: `toast` (with Sonner), `alert`, `alert-dialog`
+  - Layout: `card`, `dialog`, `sheet`
+  - Navigation: `button`, `navigation-menu`
+  - Display: `badge`, `hover-card`
+- **Theming**: Components use CSS variables for easy customization
+- **Accessibility**: All components follow ARIA guidelines
+- **Composition**: Use `asChild` prop for component composition
+- **Manual Setup**: Components can be manually installed by copying files and installing dependencies
 
 ## Development Workflow
 

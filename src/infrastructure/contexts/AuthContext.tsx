@@ -240,40 +240,79 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign in with Google using Popup flow (better for Firebase IDE)
+  // Sign in with Google using redirect flow (works with popup blockers)
   const signInWithGoogle = async (): Promise<void> => {
     console.log('🚀 Starting Google sign-in...');
     try {
+      // Set persistence BEFORE any auth operations
       await setPersistence(auth, browserLocalPersistence);
+
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
 
-      // Try popup first (works better in Firebase IDE)
-      try {
-        console.log('📱 Attempting popup sign-in...');
-        const result = await signInWithPopup(auth, provider);
-        console.log('✅ Google sign-in successful via popup');
+      // Add scopes for profile and email
+      provider.addScope('profile');
+      provider.addScope('email');
 
-        // Create/update user document
-        await createUserDocument(result.user);
-        const data = await fetchUserData(result.user.uid);
-        setUserData(data);
+      // Check if we're on mobile or if popup might be blocked
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-        return;
-      } catch (popupError: any) {
-        console.log('⚠️ Popup blocked or failed:', popupError.code);
+      if (isMobile) {
+        // On mobile, always use redirect to avoid popup blocker issues
+        console.log('📱 Mobile detected, using redirect sign-in...');
+        localStorage.setItem('pendingGoogleAuth', 'true');
 
-        // If popup fails, fall back to redirect
-        if (popupError.code === 'auth/popup-blocked' ||
-            popupError.code === 'auth/cancelled-popup-request') {
+        // Store the current URL to redirect back after auth
+        sessionStorage.setItem('authRedirectUrl', window.location.href);
+
+        await signInWithRedirect(auth, provider);
+        // This line won't execute as the page redirects
+      } else {
+        // On desktop, try popup first but have better fallback
+        try {
+          console.log('💻 Attempting popup sign-in...');
+
+          // Mark that we're using popup to prevent redirect check
+          sessionStorage.setItem('googleAuthMethod', 'popup');
+
+          const result = await signInWithPopup(auth, provider);
+          console.log('✅ Google sign-in successful via popup');
+
+          // Clear ALL auth flags after successful popup to prevent redirect checks
+          sessionStorage.removeItem('googleAuthMethod');
+          localStorage.removeItem('pendingGoogleAuth');
+          sessionStorage.removeItem('authRedirectUrl');
+
+          // Create/update user document
+          await createUserDocument(result.user);
+          const data = await fetchUserData(result.user.uid);
+          setUserData(data);
+
+          return;
+        } catch (popupError: any) {
+          console.log('⚠️ Popup failed:', popupError.code, popupError.message);
+
+          // Clear popup flag since it failed
+          sessionStorage.removeItem('googleAuthMethod');
+
+          // Always fall back to redirect on any popup error
           console.log('🔄 Falling back to redirect sign-in...');
+          localStorage.setItem('pendingGoogleAuth', 'true');
+
+          // Store the current URL to redirect back after auth
+          sessionStorage.setItem('authRedirectUrl', window.location.href);
+
           await signInWithRedirect(auth, provider);
-        } else {
-          throw popupError;
+          // This line won't execute as the page redirects
         }
       }
     } catch (error: any) {
       console.error('❌ Google sign-in error:', error);
+      localStorage.removeItem('pendingGoogleAuth');
+      sessionStorage.removeItem('authRedirectUrl');
+      sessionStorage.removeItem('googleAuthMethod');
       throw error;
     }
   };
@@ -329,46 +368,100 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Handle auth state changes and redirect results
   useEffect(() => {
+    let mounted = true;
+
+    // ONLY check for redirect result if we're actually coming back from a redirect
+    // This is CRITICAL - do not call getRedirectResult unless absolutely necessary
+    const pendingAuth = localStorage.getItem('pendingGoogleAuth');
+
+    if (pendingAuth === 'true') {
+      console.log('🔍 Found pending auth flag, checking for redirect result...');
+
+      // Clear flag immediately to prevent any duplicate checks
+      localStorage.removeItem('pendingGoogleAuth');
+
+      // Set persistence and check for redirect result
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => getRedirectResult(auth))
+        .then(async (result) => {
+          if (!mounted) return;
+
+          if (result && result.user) {
+            console.log('✅ Google sign-in redirect successful');
+
+            // Create/update user document
+            await createUserDocument(result.user);
+            const data = await fetchUserData(result.user.uid);
+
+            if (mounted) {
+              setUser(result.user);
+              setUserData(data);
+
+              // Sync local trips
+              if (data) {
+                try {
+                  await tripsService.syncLocalStorageToFirestore(result.user.uid);
+                  console.log('✅ Local trips synced to Firestore');
+                } catch (syncError) {
+                  console.error('Error syncing local trips:', syncError);
+                }
+              }
+            }
+          } else {
+            console.log('ℹ️ No redirect result found');
+          }
+
+          setLoading(false);
+        })
+        .catch((error: any) => {
+          if (!mounted) return;
+
+          if (error.code && error.code !== 'auth/redirect-cancelled-by-user') {
+            console.error('Redirect result error:', error);
+          }
+          setLoading(false);
+        });
+    }
+
+    // Set up auth state listener
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
+      if (!mounted) return;
+
+      // Check if we're currently handling a redirect
+      const pendingAuth = localStorage.getItem('pendingGoogleAuth');
+
       if (user) {
         setUser(user);
         const data = await fetchUserData(user.uid);
-        setUserData(data);
-        if (data) {
-          try {
-            await tripsService.syncLocalStorageToFirestore(user.uid);
-            console.log('✅ Local trips synced to Firestore on auth');
-          } catch (syncError) {
-            console.error('Error syncing local trips:', syncError);
+
+        if (mounted) {
+          setUserData(data);
+
+          // Only sync trips if not handling redirect (to avoid duplicate syncs)
+          if (data && !pendingAuth) {
+            try {
+              await tripsService.syncLocalStorageToFirestore(user.uid);
+              console.log('✅ Local trips synced to Firestore on auth');
+            } catch (syncError) {
+              console.error('Error syncing local trips:', syncError);
+            }
           }
         }
       } else {
         setUser(null);
         setUserData(null);
       }
-      setLoading(false);
+
+      // Only set loading to false if we're not waiting for a redirect
+      if (!pendingAuth) {
+        setLoading(false);
+      }
     });
 
-    // Handle redirect result
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result && result.user) {
-          console.log('✅ Google sign-in redirect result received');
-          const user = result.user;
-          setUser(user);
-          await createUserDocument(user);
-          const data = await fetchUserData(user.uid);
-          setUserData(data);
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.error('❌ Google sign-in getRedirectResult error:', error);
-        setLoading(false);
-      });
-
-    return unsubscribe;
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const value: AuthContextType = {
