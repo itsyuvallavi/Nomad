@@ -1,0 +1,175 @@
+/**
+ * Metadata Generator Module
+ * Generates trip metadata quickly without AI calls
+ */
+
+import { logger } from '@/lib/monitoring/logger';
+import { TripMetadata } from '../types/core.types';
+import { searchPexelsImages } from '@/services/api/media/pexels';
+
+export class MetadataGenerator {
+  /**
+   * Generate trip metadata (fast - no AI needed)
+   */
+  async generate(params: {
+    destinations: string[];
+    duration: number;
+    startDate: string;
+    preferences?: any;
+  }): Promise<TripMetadata> {
+    const startTime = Date.now();
+
+    logger.info('AI', 'Generating trip metadata', {
+      destinations: params.destinations,
+      duration: params.duration
+    });
+
+    const endDate = this.calculateEndDate(params.startDate, params.duration);
+    const daysPerCity = this.distributeDays(params.duration, params.destinations.length);
+
+    const photos = await this.generatePhotoUrls(params.destinations);
+    const metadata: TripMetadata = {
+      title: this.generateTitle(params.destinations),
+      destinations: params.destinations,
+      startDate: params.startDate,
+      endDate: endDate,
+      duration: params.duration,
+      daysPerCity: daysPerCity,
+      estimatedCost: this.estimateCost(params.duration, params.preferences?.budget),
+      quickTips: this.getQuickTips(params.destinations),
+      photos: photos,
+      photoUrl: photos[0] // Add the first photo as the main photoUrl
+    };
+
+    const elapsed = Date.now() - startTime;
+    logger.info('AI', 'Metadata generated instantly', { time: `${elapsed}ms` });
+
+    return metadata;
+  }
+
+  /**
+   * Generate a trip title
+   */
+  private generateTitle(destinations: string[]): string {
+    // Return only city names, properly capitalized
+    return destinations.map(city =>
+      city.split(' ').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ).join(' ')
+    ).join(' & ');
+  }
+
+  /**
+   * Distribute days evenly across cities
+   */
+  private distributeDays(totalDays: number, cityCount: number): number[] {
+    const baseDays = Math.floor(totalDays / cityCount);
+    const remainder = totalDays % cityCount;
+    const distribution = Array(cityCount).fill(baseDays);
+
+    // Add remainder days to first cities
+    for (let i = 0; i < remainder; i++) {
+      distribution[i]++;
+    }
+
+    return distribution;
+  }
+
+  /**
+   * Estimate trip cost based on duration and budget level
+   */
+  private estimateCost(duration: number, budget?: string): { total: number; currency: string } {
+    const dailyCosts = {
+      budget: 150,
+      medium: 250,
+      luxury: 500
+    };
+
+    const dailyCost = dailyCosts[budget as keyof typeof dailyCosts] || 250;
+
+    return {
+      total: Math.round(duration * dailyCost),
+      currency: 'USD'
+    };
+  }
+
+  /**
+   * Get destination-specific tips
+   */
+  private getQuickTips(destinations: string[]): string[] {
+    const tips: string[] = [];
+    const destinationTips: Record<string, string> = {
+      london: 'Get an Oyster card for London transport',
+      paris: 'Book Eiffel Tower tickets in advance',
+      brussels: 'Try authentic Belgian waffles and chocolate',
+      rome: 'Book Vatican tickets online to skip lines',
+      barcelona: 'Visit Sagrada Familia early morning',
+      amsterdam: 'Rent bikes to explore like a local',
+      berlin: 'Get the Berlin Welcome Card for transport',
+      prague: 'Exchange money - many places don\'t accept cards',
+      vienna: 'Try the famous Sachertorte cake',
+      budapest: 'Visit the thermal baths for relaxation'
+    };
+
+    // Add specific tips based on destinations
+    destinations.forEach(dest => {
+      const destLower = dest.toLowerCase();
+      Object.entries(destinationTips).forEach(([key, tip]) => {
+        if (destLower.includes(key)) {
+          tips.push(tip);
+        }
+      });
+    });
+
+    // Add general tips if we don't have enough specific ones
+    if (tips.length < 2) {
+      tips.push('Check visa requirements for your nationality');
+      tips.push('Get travel insurance before departure');
+    }
+
+    return tips.slice(0, 4); // Return max 4 tips
+  }
+
+  /**
+   * Generate photo URLs for destinations using Pexels API
+   */
+  private async generatePhotoUrls(destinations: string[]): Promise<string[]> {
+    const photoUrls: string[] = [];
+
+    try {
+      // Fetch image for the first destination (main hero image)
+      if (destinations.length > 0) {
+        const images = await searchPexelsImages(destinations[0], 1);
+        if (images.length > 0) {
+          photoUrls.push(images[0].src.large);
+          logger.info('IMAGE', `Fetched Pexels image for ${destinations[0]}`);
+        }
+      }
+
+      // Optionally fetch images for additional destinations
+      if (destinations.length > 1) {
+        for (let i = 1; i < Math.min(destinations.length, 3); i++) {
+          const images = await searchPexelsImages(destinations[i], 1);
+          if (images.length > 0) {
+            photoUrls.push(images[0].src.large);
+          }
+        }
+      }
+    } catch (error) {
+      logger.error('IMAGE', 'Error fetching Pexels images', error);
+      // Continue without images - they're not critical
+    }
+
+    return photoUrls;
+  }
+
+  /**
+   * Calculate end date from start date and duration
+   */
+  private calculateEndDate(startDate: string, duration: number): string {
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setDate(end.getDate() + duration - 1);
+    return end.toISOString().split('T')[0];
+  }
+}

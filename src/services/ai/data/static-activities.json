@@ -1,0 +1,464 @@
+{
+  "London": {
+    "Food": [
+      {
+        "description": "Breakfast at local cafe",
+        "category": "Food",
+        "venue_name": "Kennington Lane Cafe",
+        "address": "383 Kennington Ln, London SE11 5QY",
+        "rating": 4.9,
+        "tips": "Try local specialties"
+      },
+      {
+        "description": "Lunch at recommended restaurant",
+        "category": "Food",
+        "venue_name": "Fallow",
+        "address": "52 Haymarket, London SW1Y 4RP",
+        "rating": 4.7,
+        "tips": "Make reservations"
+      },
+      {
+        "description": "Dinner and evening activities",
+        "category": "Food",
+        "venue_name": "Tattu London",
+        "address": "The Now Building Rooftop, Outernet, Denmark St, London WC2H 0LA",
+        "rating": 4.7,
+        "tips": "Enjoy local cuisine"
+      },
+      {
+        "description": "Breakfast at local cafe",
+        "category": "Food",
+        "venue_name": "Regency Cafe",
+        "address": "17-19 Regency St, London SW1P 4BY",
+        "rating": 4.7,
+        "tips": "Try local specialties"
+      },
+      {
+        "description": "Lunch at recommended restaurant",
+        "category": "Food",
+        "venue_name": "Riviera",
+        "address": "23 St James's St, London SW1A 1HA",
+        "rating": 4.8,
+        "tips": "Make reservations"
+      },
+      {
+        "description": "Dinner and evening activities",
+        "category": "Food",
+        "venue_name": "Mount St. Restaurant",
+        "address": "First Floor, 41-43 Mount St, London W1K 2RX",
+        "rating": 4.7,
+        "tips": "Enjoy local cuisine"
+      },
+      {
+        "description": "Breakfast at local cafe",
+        "category": "Food",
+        "venue_name": "SO Café London",
+        "address": "Forecourt, Maida Vale Station, Randolph Ave., London W9 1JS",
+        "rating": 4.9,
+        "tips": "Try local specialties"
+      },
+      {
+        "description": "Lunch at recommended restaurant",
+        "category": "Food",
+        "venue_name": "Evelyn's Table",
+        "address": "28 Rupert St, London W1D 6DJ",
+        "rating": 4.8,
+        "tips": "Make reservations"
+      },
+      {
+        "description": "Dinner and evening activities",
+        "category": "Food",
+        "venue_name": "HIDE",
+        "address": "85 Piccadilly, London W1J 7NB",
+        "rating": 4.5,
+        "tips": "Enjoy local cuisine"
+      }
+    ],
+    "Attraction": [
+      {
+        "description": "Visit main attraction",
+        "category": "Attraction",
+        "venue_name": "Tower of London",
+        "address": "London EC3N 4AB",
+        "rating": 4.7,
+        "tips": "Book tickets in advance"
+      },
+      {
+        "description": "Explore local area",
+        "category": "Attraction",
+        "venue_name": "Hyde Park",
+        "address": "London",
+        "rating": 4.7,
+        "tips": "Wear comfortable shoes"
+      },
+      {
+        "description": "Visit main attraction",
+        "category": "Attraction",
+        "venue_name": "London Eye",
+        "address": "Riverside Building, County Hall, Westminster Bridge Rd, London SE1 7PB",
+        "rating": 4.5,
+        "tips": "Book tickets in advance"
+      },
+      {
+        "description": "Explore local area",
+        "category": "Attraction",
+        "venue_name": "The View from The Shard",
+        "address": "32 London Bridge St, London SE1 9SG",
+        "rating": 4.6,
+        "tips": "Wear comfortable shoes"
+      },
+      {
+        "description": "Visit main attraction",
+        "category": "Attraction",
+        "venue_name": "St. Paul's Cathedral",
+        "address": "St. Paul's Churchyard, London EC4M 8AD",
+        "rating": 4.7,
+        "tips": "Book tickets in advance"
+      },
+      {
+        "description": "Explore local area",
+        "category": "Attraction",
+        "venue_name": "Buckingham Palace",
+        "address": "London SW1A 1AA",
+        "rating": 4.5,
+        "tips": "Wear comfortable shoes"
+      }
+    ]
+  },
+  "Paris": {
+    "Attraction": [
+      {
+        "description": "Visit the Louvre Museum",
+        "category": "Attraction",
+        "venue_name": "Carnavalet Museum",
+        "address": "23 Rue de Sévigné, 75003 Paris",
+        "rating": 4.7,
+        "tips": "Get the museum map for easy navigation"
+      },
+      {
+        "description": "Explore Montmartre neighborhood",
+        "category": "Attraction",
+        "venue_name": "A2Z Art Gallery",
+        "address": "24 Rue de l'Echaudé, 75006 Paris",
+        "rating": 4.6,
+        "tips": "Visit Sacré-Cœur for a panoramic view of the city"
+      },
+      {
+        "description": "Visit Notre Dame Cathedral",
+        "category": "Attraction",
+        "venue_name": "Jardin d'Acclimatation",
+        "address": "Bois de Boulogne, Rte de la Prte Dauphine à la Prte des Sablons, 75116 Paris",
+        "rating": 4.3,
+        "tips": "Learn about the cathedral's architecture"
+      },
+      {
+        "description": "Explore the Palace of Versailles",
+        "category": "Attraction",
+        "venue_name": "Promenade Jean-Paul Belmondo",
+        "address": "Pont de Bir-Hakeim, 75015 Paris",
+        "rating": 4.8,
+        "tips": "Visit the Hall of Mirrors for a grand experience"
+      },
+      {
+        "description": "Evening walk at Champs-Élysées",
+        "category": "Attraction",
+        "venue_name": "Pinky Tour - Paris",
+        "address": "75008 Paris",
+        "rating": 5,
+        "tips": "Experience the vibrant nightlife"
+      },
+      {
+        "description": "Explore Musée d'Orsay",
+        "category": "Attraction",
+        "venue_name": "Paris TUKTUK",
+        "address": "15 Av. Winston Churchill, 75008 Paris",
+        "rating": 4.8,
+        "tips": "Discover Impressionist masterpieces"
+      },
+      {
+        "description": "Discover street art in Le Marais",
+        "category": "Attraction",
+        "venue_name": "Galerie Arts Factory",
+        "address": "27 Rue de Charonne, 75011 Paris",
+        "rating": 4.6,
+        "tips": "Walk around and spot unique artworks"
+      }
+    ],
+    "Food": [
+      {
+        "description": "Lunch at a local bistro",
+        "category": "Food",
+        "venue_name": "Le Cinq",
+        "address": "31 Av. George V, 75008 Paris",
+        "rating": 4.7,
+        "tips": "Try the traditional French dishes"
+      },
+      {
+        "description": "Dinner at a charming café",
+        "category": "Food",
+        "venue_name": "Sphère",
+        "address": "18 Rue La Boétie, 75008 Paris",
+        "rating": 4.8,
+        "tips": "Try the French pastries for dessert"
+      },
+      {
+        "description": "Lunch at a cozy brasserie",
+        "category": "Food",
+        "venue_name": "Le Marais Restaurant Paris",
+        "address": "47 R. de Turbigo, 75003 Paris",
+        "rating": 4.6,
+        "tips": "Try the French onion soup"
+      },
+      {
+        "description": "Dinner at a Michelin-starred restaurant",
+        "category": "Food",
+        "venue_name": "Les Parisiens",
+        "address": "1 Rue du Pré aux Clercs, 75007 Paris",
+        "rating": 4.7,
+        "tips": "Indulge in a gourmet French meal"
+      },
+      {
+        "description": "Farewell dinner with a view of Eiffel Tower",
+        "category": "Food",
+        "venue_name": "L'Orangerie",
+        "address": "31 Av. George V, 75008 Paris",
+        "rating": 4.8,
+        "tips": "Book a table in advance for the best view"
+      }
+    ],
+    "Leisure": [
+      {
+        "description": "Stroll along the Seine River",
+        "category": "Leisure",
+        "venue_name": "Tuileries Garden",
+        "address": "75001 Paris",
+        "rating": 4.6,
+        "tips": "Enjoy the evening lights of the city"
+      },
+      {
+        "description": "Picnic at Luxembourg Gardens",
+        "category": "Leisure",
+        "venue_name": "Parc des Buttes-Chaumont",
+        "address": "75019 Paris",
+        "rating": 4.6,
+        "tips": "Relax and enjoy the beautiful surroundings"
+      },
+      {
+        "description": "Shopping at Galeries Lafayette",
+        "category": "Leisure",
+        "venue_name": "Centre Commercial Beaugrenelle",
+        "address": "12 Rue Linois, 75015 Paris",
+        "rating": 4.2,
+        "tips": "Find designer items and souvenirs"
+      }
+    ]
+  },
+  "Tokyo": {
+    "Attraction": [
+      {
+        "description": "Visit Senso-ji Temple",
+        "category": "Attraction",
+        "venue_name": "Tokyo Tower",
+        "address": "4 Chome-2-8 Shibakoen, Minato City, Tokyo 105-0011",
+        "rating": 4.5,
+        "tips": "Arrive early to avoid crowds"
+      },
+      {
+        "description": "Tokyo Skytree Observation Deck",
+        "category": "Attraction",
+        "venue_name": "Tokyo Skytree",
+        "address": "1 Chome-1-2 Oshiage, Sumida City, Tokyo 131-0045",
+        "rating": 4.4,
+        "tips": "Great views of the city"
+      },
+      {
+        "description": "Visit teamLab Borderless",
+        "category": "Attraction",
+        "venue_name": "Café 1894",
+        "address": "〒100-0005 Tokyo, Chiyoda City, Marunouchi, 2 Chome−6−2 三菱一号館美術館 1F",
+        "rating": 3.9,
+        "tips": "Interactive digital art experience"
+      },
+      {
+        "description": "Night stroll in Shinjuku",
+        "category": "Attraction",
+        "venue_name": "Momiji Waterfall",
+        "address": "4 Chome-3-25 Shibakoen, Minato City, Tokyo 105-0011",
+        "rating": 4.1,
+        "tips": "Enjoy the neon lights"
+      },
+      {
+        "description": "Visit Meiji Shrine",
+        "category": "Attraction",
+        "venue_name": "TOKYO Word Mark Monument",
+        "address": "1 Chome Aomi, Koto City, Tokyo 135-0064",
+        "rating": 3.9,
+        "tips": "Experience traditional Japanese culture"
+      },
+      {
+        "description": "Explore Edo-Tokyo Museum",
+        "category": "Attraction",
+        "venue_name": "Tokyo National Museum",
+        "address": "13-9 Uenokoen, Taito City, Tokyo 110-8712",
+        "rating": 4.5,
+        "tips": "Learn about Tokyo's history"
+      },
+      {
+        "description": "Walk around Asakusa",
+        "category": "Attraction",
+        "venue_name": "Lookout",
+        "address": "2 Chome-6 Aomi, Koto City, Tokyo 135-0064",
+        "rating": 4.4,
+        "tips": "Don't miss Nakamise Shopping Street"
+      },
+      {
+        "description": "Night at Tokyo Tower",
+        "category": "Attraction",
+        "venue_name": "Remains of Tokyo Prefectural Office",
+        "address": "3 Chome-5-1 Marunouchi, Chiyoda City, Tokyo 100-0005",
+        "rating": 3.8,
+        "tips": "Stunning night views of the city"
+      },
+      {
+        "description": "Night at Odaiba",
+        "category": "Attraction",
+        "venue_name": "Water and Greenery Promenade",
+        "address": "2 Higashiyashio, 品川区 Shinagawa City, Tokyo 135-0092",
+        "rating": 3.9,
+        "tips": "Enjoy the illuminated Rainbow Bridge"
+      }
+    ],
+    "Food": [
+      {
+        "description": "Lunch at Tsukiji Fish Market",
+        "category": "Food",
+        "venue_name": "L’Effervescence",
+        "address": "2 Chome-26-4 Nishiazabu, Minato City, Tokyo 106-0031",
+        "rating": 4.6,
+        "tips": "Try the fresh sushi"
+      },
+      {
+        "description": "Dinner at Ramen Street",
+        "category": "Food",
+        "venue_name": "Narisawa",
+        "address": "〒107-0062 Tokyo, Minato City, Minamiaoyama, 2 Chome−6−15 南青山ガーデンコート",
+        "rating": 4.6,
+        "tips": "Try different ramen shops"
+      },
+      {
+        "description": "Lunch at Kawaii Monster Cafe",
+        "category": "Food",
+        "venue_name": "ANAKUMA CAFE Harajuku",
+        "address": "1 Chome-23-28 Jingumae, Shibuya, Tokyo 150-0001",
+        "rating": 4.8,
+        "tips": "Colorful and fun dining experience"
+      },
+      {
+        "description": "Dinner at Robot Restaurant",
+        "category": "Food",
+        "venue_name": "NOBU Tokyo",
+        "address": "〒105-0001 Tokyo, Minato City, Toranomon, 4 Chome−1−28 １Ｆ",
+        "rating": 4.3,
+        "tips": "Unique entertainment while dining"
+      },
+      {
+        "description": "Lunch at Omoide Yokocho",
+        "category": "Food",
+        "venue_name": "Den",
+        "address": "〒150-0001 Tokyo, Shibuya, Jingumae, 2 Chome−3−18 建築家会館ＪＩＡ館",
+        "rating": 4.4,
+        "tips": "Try the yakitori skewers"
+      },
+      {
+        "description": "Dinner at Yakatabune Cruise",
+        "category": "Food",
+        "venue_name": "Tapas Molecular Bar",
+        "address": "2 Chome-1-1 Nihonbashimuromachi, Chuo City, Tokyo 103-8328",
+        "rating": 4.6,
+        "tips": "Enjoy dining on a traditional boat"
+      },
+      {
+        "description": "Lunch at Gonpachi Nishi-Azabu",
+        "category": "Food",
+        "venue_name": "Fish Bank TOKYO",
+        "address": "〒105-7108 Tokyo, Minato City, Higashishinbashi, 1 Chome−5−2 汐留シティセンタ ４１F",
+        "rating": 4.5,
+        "tips": "Inspiration for Kill Bill restaurant"
+      },
+      {
+        "description": "Dinner at Kagari Ramen",
+        "category": "Food",
+        "venue_name": "Yamamoto no Hamburg Shibuya Shokudo",
+        "address": "〒150-0002 Tokyo, Shibuya, 3 Chome−6−18 第４矢木ビル 1F",
+        "rating": 4.3,
+        "tips": "Famous for its rich chicken broth"
+      },
+      {
+        "description": "Lunch at Sushi Dai",
+        "category": "Food",
+        "venue_name": "Tofu Ukai",
+        "address": "4 Chome-4-13 Shibakoen, Minato City, Tokyo 105-0011",
+        "rating": 4.5,
+        "tips": "Queues can be long, but worth it"
+      },
+      {
+        "description": "Dinner at Tsuta Ramen",
+        "category": "Food",
+        "venue_name": "CENSU TOKYO",
+        "address": "2 Chome-12-9 Jingumae, Shibuya, Tokyo 150-0001",
+        "rating": 4.7,
+        "tips": "Michelin-starred ramen"
+      }
+    ],
+    "Leisure": [
+      {
+        "description": "Explore Ueno Park",
+        "category": "Leisure",
+        "venue_name": "Inokashira Park",
+        "address": "1 Chome-18-31 Gotenyama, Musashino, Tokyo 180-0005",
+        "rating": 4.4,
+        "tips": "Don't miss the zoo"
+      },
+      {
+        "description": "Shopping in Harajuku",
+        "category": "Leisure",
+        "venue_name": "Tokyo Midtown",
+        "address": "9 Chome-7-1 Akasaka, Minato City, Tokyo 107-0052",
+        "rating": 4.1,
+        "tips": "Visit Takeshita Street"
+      },
+      {
+        "description": "Explore Yoyogi Park",
+        "category": "Leisure",
+        "venue_name": "Shinjuku Gyoen National Garden",
+        "address": "11 Naitomachi, Shinjuku City, Tokyo 160-0014",
+        "rating": 4.6,
+        "tips": "Great for picnics and people-watching"
+      },
+      {
+        "description": "Visit Shinjuku Gyoen National Garden",
+        "category": "Leisure",
+        "venue_name": "Ueno Park",
+        "address": "Uenokoen, Taito City, Tokyo 110-0007",
+        "rating": 4.3,
+        "tips": "Beautiful landscapes and wide lawns"
+      },
+      {
+        "description": "Shopping in Ginza",
+        "category": "Leisure",
+        "venue_name": "Tokyo Solamachi",
+        "address": "1 Chome-1-2 Oshiage, Sumida City, Tokyo 131-0045",
+        "rating": 4.2,
+        "tips": "Luxury brands and department stores"
+      },
+      {
+        "description": "Explore Akihabara",
+        "category": "Leisure",
+        "venue_name": "Ponta Square",
+        "address": "Ponta Square, 1 Chome-12 Yurakucho, Chiyoda City, Tokyo 100-0006",
+        "rating": 3.7,
+        "tips": "Electronics and anime paradise"
+      }
+    ]
+  }
+}

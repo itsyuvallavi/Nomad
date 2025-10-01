@@ -1,0 +1,1258 @@
+{
+  "timestamp": "2025-09-29T05:43:02.112Z",
+  "duration": 81342,
+  "config": {
+    "runUI": true,
+    "runAI": true,
+    "runIntegration": true,
+    "runPerformance": true,
+    "runStress": false,
+    "generateReport": true,
+    "saveResults": true,
+    "verbose": false
+  },
+  "results": {
+    "ui": {
+      "totalPassed": 18,
+      "totalFailed": 0,
+      "components": [
+        {
+          "name": "ChatInterface",
+          "passed": 3,
+          "failed": 0,
+          "results": [
+            {
+              "test": "renders without errors",
+              "status": "passed"
+            },
+            {
+              "test": "accepts user input",
+              "status": "passed"
+            },
+            {
+              "test": "submits message on enter",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "name": "ItineraryDisplay",
+          "passed": 3,
+          "failed": 0,
+          "results": [
+            {
+              "test": "displays itinerary data",
+              "status": "passed"
+            },
+            {
+              "test": "handles empty state",
+              "status": "passed"
+            },
+            {
+              "test": "export menu functionality",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "name": "DayTimeline",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "renders day activities",
+              "status": "passed"
+            },
+            {
+              "test": "activity interaction",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "name": "ActivityCard",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "displays activity information",
+              "status": "passed"
+            },
+            {
+              "test": "accessibility attributes",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "name": "TripPlanningForm",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "form validation",
+              "status": "passed"
+            },
+            {
+              "test": "successful submission",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "name": "TopNavigation",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "renders navigation links",
+              "status": "passed"
+            },
+            {
+              "test": "mobile menu toggle",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "name": "AuthModal",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "login form validation",
+              "status": "passed"
+            },
+            {
+              "test": "successful authentication",
+              "status": "passed"
+            }
+          ]
+        },
+        {
+          "name": "Accessibility",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "skip link functionality",
+              "status": "passed"
+            },
+            {
+              "test": "announces updates",
+              "status": "passed"
+            }
+          ]
+        }
+      ]
+    },
+    "ai": {
+      "totalPassed": 9,
+      "totalFailed": 6,
+      "categories": [
+        {
+          "name": "IntentParsing",
+          "passed": 2,
+          "failed": 2,
+          "results": [
+            {
+              "test": "Simple destination",
+              "status": "passed",
+              "duration": 66,
+              "tokens": 75
+            },
+            {
+              "test": "Multi-city parsing",
+              "status": "passed",
+              "duration": 954,
+              "tokens": 18
+            },
+            {
+              "test": "Date parsing",
+              "status": "failed",
+              "duration": 16,
+              "failures": [
+                "Should extract start date",
+                "Should extract end date",
+                "Should extract Tokyo"
+              ],
+              "timeExceeded": false
+            },
+            {
+              "test": "Preferences extraction",
+              "status": "failed",
+              "duration": 108,
+              "failures": [
+                "Should identify budget preference",
+                "Should extract museum interest",
+                "Should extract food interest"
+              ],
+              "timeExceeded": false
+            }
+          ],
+          "metrics": [
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 85,
+              "completionTokens": 140,
+              "totalTokens": 75,
+              "cost": 0.000075,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 79,
+              "completionTokens": 127,
+              "totalTokens": 18,
+              "cost": 0.000018,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 62,
+              "completionTokens": 102,
+              "totalTokens": 131,
+              "cost": 0.00013099999999999999,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 73,
+              "completionTokens": 148,
+              "totalTokens": 54,
+              "cost": 0.000054,
+              "withinLimit": true
+            }
+          ]
+        },
+        {
+          "name": "CityGeneration",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "Single city itinerary",
+              "status": "passed",
+              "duration": 3301,
+              "tokens": 292
+            },
+            {
+              "test": "Activity diversity",
+              "status": "passed",
+              "duration": 6171,
+              "tokens": 1316
+            }
+          ],
+          "metrics": [
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 72,
+              "completionTokens": 114,
+              "totalTokens": 292,
+              "cost": 0.000292,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 82,
+              "completionTokens": 106,
+              "totalTokens": 1316,
+              "cost": 0.001316,
+              "withinLimit": true
+            }
+          ]
+        },
+        {
+          "name": "ParallelGeneration",
+          "passed": 2,
+          "failed": 0,
+          "results": [
+            {
+              "test": "Concurrent city processing",
+              "status": "passed",
+              "duration": 973,
+              "tokens": 1444
+            },
+            {
+              "test": "Partial failure recovery",
+              "status": "passed",
+              "duration": 4193,
+              "tokens": 3389
+            }
+          ],
+          "metrics": [
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 76,
+              "completionTokens": 110,
+              "totalTokens": 1444,
+              "cost": 0.001444,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 60,
+              "completionTokens": 104,
+              "totalTokens": 3389,
+              "cost": 0.0033889999999999997,
+              "withinLimit": true
+            }
+          ]
+        },
+        {
+          "name": "TokenOptimization",
+          "passed": 1,
+          "failed": 1,
+          "results": [
+            {
+              "test": "Model selection",
+              "status": "passed",
+              "duration": 386,
+              "tokens": 89
+            },
+            {
+              "test": "Cost tracking",
+              "status": "failed",
+              "duration": 2576,
+              "failures": [
+                "Should calculate cost",
+                "Cost should be less than $0.10"
+              ],
+              "timeExceeded": false
+            }
+          ],
+          "metrics": [
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 74,
+              "completionTokens": 117,
+              "totalTokens": 89,
+              "cost": 0.000089,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 80,
+              "completionTokens": 144,
+              "totalTokens": 201,
+              "cost": 0.00020099999999999998,
+              "withinLimit": true
+            }
+          ]
+        },
+        {
+          "name": "Caching",
+          "passed": 1,
+          "failed": 1,
+          "results": [
+            {
+              "test": "Cache hit",
+              "status": "passed",
+              "duration": 52,
+              "tokens": 0
+            },
+            {
+              "test": "Cache invalidation",
+              "status": "failed",
+              "duration": 202,
+              "failures": [
+                "Should report cleaned entries"
+              ],
+              "timeExceeded": false
+            }
+          ],
+          "metrics": [
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 67,
+              "completionTokens": 147,
+              "totalTokens": 0,
+              "cost": 0,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 75,
+              "completionTokens": 105,
+              "totalTokens": 0,
+              "cost": 0,
+              "withinLimit": true
+            }
+          ]
+        },
+        {
+          "name": "ErrorHandling",
+          "passed": 1,
+          "failed": 2,
+          "results": [
+            {
+              "test": "API timeout recovery",
+              "status": "passed",
+              "duration": 20144,
+              "tokens": 91
+            },
+            {
+              "test": "Rate limit handling",
+              "status": "failed",
+              "duration": 3054,
+              "failures": [
+                "Should inform user about rate limit"
+              ],
+              "timeExceeded": false
+            },
+            {
+              "test": "Invalid input validation",
+              "status": "failed",
+              "duration": 16,
+              "failures": [
+                "Should return validation error",
+                "Should provide helpful validation message"
+              ],
+              "timeExceeded": false
+            }
+          ],
+          "metrics": [
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 80,
+              "completionTokens": 137,
+              "totalTokens": 91,
+              "cost": 0.00009099999999999999,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 64,
+              "completionTokens": 147,
+              "totalTokens": 0,
+              "cost": 0,
+              "withinLimit": true
+            },
+            {
+              "operation": "metadata-generation",
+              "model": "gpt-3.5-turbo",
+              "promptTokens": 67,
+              "completionTokens": 107,
+              "totalTokens": 0,
+              "cost": 0,
+              "withinLimit": true
+            }
+          ]
+        }
+      ],
+      "tokenMetrics": [
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 85,
+          "completionTokens": 140,
+          "totalTokens": 75,
+          "cost": 0.000075,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 79,
+          "completionTokens": 127,
+          "totalTokens": 18,
+          "cost": 0.000018,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 62,
+          "completionTokens": 102,
+          "totalTokens": 131,
+          "cost": 0.00013099999999999999,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 73,
+          "completionTokens": 148,
+          "totalTokens": 54,
+          "cost": 0.000054,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 72,
+          "completionTokens": 114,
+          "totalTokens": 292,
+          "cost": 0.000292,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 82,
+          "completionTokens": 106,
+          "totalTokens": 1316,
+          "cost": 0.001316,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 76,
+          "completionTokens": 110,
+          "totalTokens": 1444,
+          "cost": 0.001444,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 60,
+          "completionTokens": 104,
+          "totalTokens": 3389,
+          "cost": 0.0033889999999999997,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 74,
+          "completionTokens": 117,
+          "totalTokens": 89,
+          "cost": 0.000089,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 80,
+          "completionTokens": 144,
+          "totalTokens": 201,
+          "cost": 0.00020099999999999998,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 67,
+          "completionTokens": 147,
+          "totalTokens": 0,
+          "cost": 0,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 75,
+          "completionTokens": 105,
+          "totalTokens": 0,
+          "cost": 0,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 80,
+          "completionTokens": 137,
+          "totalTokens": 91,
+          "cost": 0.00009099999999999999,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 64,
+          "completionTokens": 147,
+          "totalTokens": 0,
+          "cost": 0,
+          "withinLimit": true
+        },
+        {
+          "operation": "metadata-generation",
+          "model": "gpt-3.5-turbo",
+          "promptTokens": 67,
+          "completionTokens": 107,
+          "totalTokens": 0,
+          "cost": 0,
+          "withinLimit": true
+        }
+      ]
+    },
+    "integration": {
+      "total": 8,
+      "passed": 4,
+      "failed": 4,
+      "results": [
+        {
+          "name": "Complete Trip Planning",
+          "success": false,
+          "duration": 905,
+          "steps": [
+            {
+              "action": "renderChatInterface",
+              "type": "ui",
+              "output": {
+                "rendered": true
+              },
+              "success": true,
+              "duration": 52
+            },
+            {
+              "action": "inputMessage",
+              "type": "ui",
+              "output": {
+                "inputAccepted": true,
+                "message": "3 days in London with museums and theaters"
+              },
+              "success": true,
+              "duration": 50
+            },
+            {
+              "action": "parseIntent",
+              "type": "ai",
+              "output": {
+                "destination": "London",
+                "duration": 3,
+                "interests": [
+                  "museums",
+                  "theaters"
+                ]
+              },
+              "success": false,
+              "duration": 802
+            }
+          ],
+          "outcome": {
+            "success": false,
+            "criteria": [
+              {
+                "criterion": "Chat interface accepts input",
+                "passed": false
+              },
+              {
+                "criterion": "Intent correctly parsed",
+                "passed": false
+              },
+              {
+                "criterion": "Itinerary generated with correct parameters",
+                "passed": false
+              },
+              {
+                "criterion": "UI displays all days",
+                "passed": false
+              },
+              {
+                "criterion": "No console errors",
+                "passed": false
+              }
+            ],
+            "summary": "Some criteria not met"
+          }
+        },
+        {
+          "name": "Multi-City Parallel Processing",
+          "success": false,
+          "duration": 1251,
+          "steps": [
+            {
+              "action": "inputMessage",
+              "type": "ui",
+              "output": {
+                "inputAccepted": true,
+                "message": "London, Paris, and Tokyo for 2 weeks"
+              },
+              "success": true,
+              "duration": 50
+            },
+            {
+              "action": "parseMultiCity",
+              "type": "ai",
+              "output": {
+                "destinations": [
+                  "London",
+                  "Paris",
+                  "Tokyo"
+                ],
+                "totalDuration": 14
+              },
+              "success": false,
+              "duration": 1200
+            }
+          ],
+          "outcome": {
+            "success": false,
+            "criteria": [
+              {
+                "criterion": "All cities parsed correctly",
+                "passed": false
+              },
+              {
+                "criterion": "Parallel processing faster than sequential",
+                "passed": false
+              },
+              {
+                "criterion": "UI shows tab for each city",
+                "passed": false
+              },
+              {
+                "criterion": "Smooth tab switching",
+                "passed": false
+              }
+            ],
+            "summary": "Some criteria not met"
+          }
+        },
+        {
+          "name": "Error Recovery",
+          "success": true,
+          "duration": 13115,
+          "steps": [
+            {
+              "action": "simulateTimeout",
+              "type": "ai",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 4004
+            },
+            {
+              "action": "retryWithBackoff",
+              "type": "ai",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 5005
+            },
+            {
+              "action": "showErrorMessage",
+              "type": "ui",
+              "output": {
+                "userNotified": true,
+                "messageHelpful": true
+              },
+              "success": true,
+              "duration": 50
+            },
+            {
+              "action": "fallbackGeneration",
+              "type": "ai",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 4005
+            },
+            {
+              "action": "displayFallback",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 50
+            }
+          ],
+          "outcome": {
+            "success": true,
+            "criteria": [
+              {
+                "criterion": "Error caught and handled",
+                "passed": true
+              },
+              {
+                "criterion": "Retry mechanism works",
+                "passed": true
+              },
+              {
+                "criterion": "User sees helpful message",
+                "passed": true
+              },
+              {
+                "criterion": "Fallback provides usable result",
+                "passed": true
+              }
+            ],
+            "summary": "All criteria met"
+          }
+        },
+        {
+          "name": "Cache Performance",
+          "success": true,
+          "duration": 5156,
+          "steps": [
+            {
+              "action": "firstRequest",
+              "type": "ai",
+              "output": {
+                "fromCache": false,
+                "stored": true
+              },
+              "success": true,
+              "duration": 5005
+            },
+            {
+              "action": "duplicateRequest",
+              "type": "ai",
+              "output": {
+                "fromCache": true,
+                "instant": true
+              },
+              "success": true,
+              "duration": 80
+            },
+            {
+              "action": "compareTiming",
+              "type": "validation",
+              "output": {
+                "cacheHitFaster": true,
+                "ratioAcceptable": true
+              },
+              "success": true,
+              "duration": 21
+            },
+            {
+              "action": "displayCached",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 50
+            }
+          ],
+          "outcome": {
+            "success": true,
+            "criteria": [
+              {
+                "criterion": "First request cached properly",
+                "passed": true
+              },
+              {
+                "criterion": "Second request retrieved from cache",
+                "passed": true
+              },
+              {
+                "criterion": "Cache hit >100x faster",
+                "passed": true
+              },
+              {
+                "criterion": "UI displays identical content",
+                "passed": true
+              }
+            ],
+            "summary": "All criteria met"
+          }
+        },
+        {
+          "name": "Real-time Updates",
+          "success": false,
+          "duration": 5126,
+          "steps": [
+            {
+              "action": "showLoadingState",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 51
+            },
+            {
+              "action": "streamResponse",
+              "type": "ai",
+              "output": {
+                "chunks": true,
+                "progressive": true
+              },
+              "success": true,
+              "duration": 5004
+            },
+            {
+              "action": "updateProgressively",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 51
+            },
+            {
+              "action": "validateStreaming",
+              "type": "validation",
+              "output": {
+                "validated": true
+              },
+              "success": false,
+              "duration": 20
+            }
+          ],
+          "outcome": {
+            "success": false,
+            "criteria": [
+              {
+                "criterion": "Loading state visible immediately",
+                "passed": false
+              },
+              {
+                "criterion": "Content streams progressively",
+                "passed": false
+              },
+              {
+                "criterion": "UI updates smoothly",
+                "passed": false
+              },
+              {
+                "criterion": "Better perceived performance",
+                "passed": false
+              }
+            ],
+            "summary": "Some criteria not met"
+          }
+        },
+        {
+          "name": "Authentication Integration",
+          "success": true,
+          "duration": 4157,
+          "steps": [
+            {
+              "action": "openAuthModal",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 50
+            },
+            {
+              "action": "submitCredentials",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 53
+            },
+            {
+              "action": "authenticateUser",
+              "type": "ai",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 2403
+            },
+            {
+              "action": "updateUIState",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 50
+            },
+            {
+              "action": "saveTrip",
+              "type": "ai",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 1601
+            }
+          ],
+          "outcome": {
+            "success": true,
+            "criteria": [
+              {
+                "criterion": "Auth modal works correctly",
+                "passed": true
+              },
+              {
+                "criterion": "Credentials validated",
+                "passed": true
+              },
+              {
+                "criterion": "User authenticated",
+                "passed": true
+              },
+              {
+                "criterion": "UI reflects auth state",
+                "passed": true
+              },
+              {
+                "criterion": "Trip saving enabled",
+                "passed": true
+              }
+            ],
+            "summary": "All criteria met"
+          }
+        },
+        {
+          "name": "Accessibility Features",
+          "success": true,
+          "duration": 172,
+          "steps": [
+            {
+              "action": "keyboardNavigation",
+              "type": "ui",
+              "output": {
+                "allReachable": true,
+                "focusVisible": true
+              },
+              "success": true,
+              "duration": 50
+            },
+            {
+              "action": "screenReaderTest",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 51
+            },
+            {
+              "action": "wcagCompliance",
+              "type": "validation",
+              "output": {
+                "level": "AA",
+                "violations": 0
+              },
+              "success": true,
+              "duration": 20
+            },
+            {
+              "action": "highContrastMode",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 51
+            }
+          ],
+          "outcome": {
+            "success": true,
+            "criteria": [
+              {
+                "criterion": "Keyboard navigation complete",
+                "passed": true
+              },
+              {
+                "criterion": "Screen reader compatible",
+                "passed": true
+              },
+              {
+                "criterion": "WCAG AA compliant",
+                "passed": true
+              },
+              {
+                "criterion": "High contrast mode works",
+                "passed": true
+              }
+            ],
+            "summary": "All criteria met"
+          }
+        },
+        {
+          "name": "Performance Under Load",
+          "success": false,
+          "duration": 5073,
+          "steps": [
+            {
+              "action": "simulateConcurrentUsers",
+              "type": "ai",
+              "output": {
+                "executed": true
+              },
+              "success": true,
+              "duration": 5002
+            },
+            {
+              "action": "checkMemoryUsage",
+              "type": "validation",
+              "output": {
+                "stable": true,
+                "noLeaks": true
+              },
+              "success": true,
+              "duration": 21
+            },
+            {
+              "action": "measureRenderPerformance",
+              "type": "ui",
+              "output": {
+                "executed": true
+              },
+              "success": false,
+              "duration": 50
+            }
+          ],
+          "outcome": {
+            "success": false,
+            "criteria": [
+              {
+                "criterion": "Handles concurrent load",
+                "passed": false
+              },
+              {
+                "criterion": "Memory usage stable",
+                "passed": false
+              },
+              {
+                "criterion": "UI remains responsive",
+                "passed": false
+              },
+              {
+                "criterion": "Error rate < 1%",
+                "passed": false
+              }
+            ],
+            "summary": "Some criteria not met"
+          }
+        }
+      ],
+      "duration": 34957
+    },
+    "performance": {
+      "name": "Performance Tests",
+      "tests": [
+        {
+          "name": "Intent Parsing Speed",
+          "status": "passed",
+          "duration": 51,
+          "details": {
+            "metrics": {
+              "responseTime": 516.772511802337,
+              "tokenUsage": 84.52593826619376,
+              "memoryUsage": 41222641.029758066,
+              "cacheHitRate": 0.7529485847448023
+            },
+            "baseline": {
+              "responseTime": 1000,
+              "tokenUsage": 150,
+              "memoryUsage": 52428800,
+              "cacheHitRate": 0.7
+            },
+            "improvement": {
+              "responseTime": "48.3%",
+              "tokenUsage": "43.6%"
+            }
+          }
+        },
+        {
+          "name": "City Generation Speed",
+          "status": "passed",
+          "duration": 50,
+          "details": {
+            "metrics": {
+              "responseTime": 5157.116963772356,
+              "tokenUsage": 1209.723608391451,
+              "memoryUsage": 78540634.82217062,
+              "cacheHitRate": 0.8993150257374241
+            },
+            "baseline": {
+              "responseTime": 10000,
+              "tokenUsage": 2000,
+              "memoryUsage": 104857600,
+              "cacheHitRate": 0.7
+            },
+            "improvement": {
+              "responseTime": "48.4%",
+              "tokenUsage": "39.5%"
+            }
+          }
+        },
+        {
+          "name": "UI Render Speed",
+          "status": "passed",
+          "duration": 51,
+          "details": {
+            "metrics": {
+              "responseTime": 59.120650216924254,
+              "tokenUsage": 0,
+              "memoryUsage": 18425386.20252876,
+              "cacheHitRate": 0.18959687095994704
+            },
+            "baseline": {
+              "responseTime": 100,
+              "tokenUsage": 0,
+              "memoryUsage": 26214400,
+              "cacheHitRate": 0
+            },
+            "improvement": {
+              "responseTime": "40.9%",
+              "tokenUsage": "NaN%"
+            }
+          }
+        },
+        {
+          "name": "Token Usage Optimization",
+          "status": "passed",
+          "duration": 50,
+          "details": {
+            "metrics": {
+              "responseTime": 875.0463964458821,
+              "tokenUsage": 80.4084202642544,
+              "memoryUsage": 36982766.75852676,
+              "cacheHitRate": 0.8235786682041435
+            },
+            "baseline": {
+              "responseTime": 1000,
+              "tokenUsage": 150,
+              "memoryUsage": 52428800,
+              "cacheHitRate": 0.7
+            },
+            "improvement": {
+              "responseTime": "12.5%",
+              "tokenUsage": "46.4%"
+            }
+          }
+        },
+        {
+          "name": "Cache Effectiveness",
+          "status": "passed",
+          "duration": 51,
+          "details": {
+            "metrics": {
+              "responseTime": 7574.236027954978,
+              "tokenUsage": 1243.6885497787835,
+              "memoryUsage": 78218243.69053401,
+              "cacheHitRate": 0.7773076712957968
+            },
+            "baseline": {
+              "responseTime": 10000,
+              "tokenUsage": 2000,
+              "memoryUsage": 104857600,
+              "cacheHitRate": 0.7
+            },
+            "improvement": {
+              "responseTime": "24.3%",
+              "tokenUsage": "37.8%"
+            }
+          }
+        }
+      ],
+      "totalDuration": 253,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    }
+  }
+}
