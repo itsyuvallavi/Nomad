@@ -56,7 +56,7 @@ export class ParallelCityGenerator {
     const startTime = Date.now();
     const tasks = this.prepareCityTasks(params, metadata);
 
-    logger.info('🚀 Starting parallel city generation', {
+    logger.info('CityGenerator', `🚀 Starting parallel city generation for ${params.destinations.length} cities`, {
       cities: params.destinations,
       totalTasks: tasks.length,
       maxConcurrency: this.maxConcurrency
@@ -71,7 +71,7 @@ export class ParallelCityGenerator {
 
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex];
-      logger.debug(`Processing batch ${batchIndex + 1}/${batches.length}`, {
+      logger.debug('CityGenerator', `Processing batch ${batchIndex + 1}/${batches.length}`, {
         cities: batch.map(t => t.city)
       });
 
@@ -102,7 +102,7 @@ export class ParallelCityGenerator {
             });
           }
 
-          logger.info(`✅ Successfully generated ${task.city}`, {
+          logger.info('CityGenerator', `✅ Successfully generated ${task.city}`, {
             days: task.days
           });
         } else {
@@ -113,7 +113,7 @@ export class ParallelCityGenerator {
           };
           failures.push(failure);
 
-          logger.error(`❌ Failed to generate ${task.city}`, {
+          logger.error('CityGenerator', `❌ Failed to generate ${task.city}`, {
             error: result.reason.message
           });
 
@@ -128,7 +128,7 @@ export class ParallelCityGenerator {
     }
 
     const executionTime = Date.now() - startTime;
-    logger.info('✨ Parallel city generation complete', {
+    logger.info('CityGenerator', '✨ Parallel city generation complete', {
       successfulCities: results.length,
       failedCities: failures.length,
       executionTimeMs: executionTime
@@ -195,7 +195,7 @@ export class ParallelCityGenerator {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         if (attempt > 0) {
-          logger.info(`🔄 Retry attempt ${attempt}/${maxRetries} for ${task.city}`);
+          logger.info('CityGenerator', `🔄 Retry attempt ${attempt}/${maxRetries} for ${task.city}`);
           // Add exponential backoff
           await this.delay(Math.pow(2, attempt) * 1000);
         }
@@ -204,7 +204,7 @@ export class ParallelCityGenerator {
         return result;
       } catch (error) {
         lastError = error as Error;
-        logger.warn(`Attempt ${attempt + 1} failed for ${task.city}`, {
+        logger.warn('CityGenerator', `Attempt ${attempt + 1} failed for ${task.city}`, {
           error: lastError.message
         });
 
@@ -223,7 +223,7 @@ export class ParallelCityGenerator {
    */
   private async generateFallback(task: CityGenerationTask): Promise<CityItinerary | null> {
     try {
-      logger.info(`🛡️ Attempting fallback generation for ${task.city}`);
+      logger.info('CityGenerator', `🛡️ Attempting fallback generation for ${task.city}`);
 
       // Create a simplified itinerary structure
       const days = [];
@@ -243,10 +243,12 @@ export class ParallelCityGenerator {
 
       return {
         city: task.city,
+        startDay: task.startDayNumber,
+        endDay: task.startDayNumber + task.days - 1,
         days
       };
     } catch (error) {
-      logger.error(`Fallback generation failed for ${task.city}`, { error });
+      logger.error('CityGenerator', `Fallback generation failed for ${task.city}`, { error });
       return null;
     }
   }

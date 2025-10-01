@@ -58,7 +58,7 @@ export class TripOrchestrator {
     const updates: StreamUpdate[] = [];
     const startTime = Date.now();
 
-    logger.info('🚀 Starting trip orchestration', { destinations: params.destinations });
+    logger.info('AI', `🚀 Starting trip orchestration for ${params.destinations.join(', ')}`, { destinations: params.destinations });
 
     try {
       // Step 1: Generate metadata
@@ -83,14 +83,14 @@ export class TripOrchestrator {
       );
 
       const elapsedTime = Date.now() - startTime;
-      logger.info('✅ Trip orchestration complete', { elapsedMs: elapsedTime });
+      logger.info('AI', `✅ Trip orchestration complete in ${elapsedTime}ms`, { elapsedMs: elapsedTime });
 
       return {
         itinerary: finalItinerary,
         updates
       };
     } catch (error) {
-      logger.error('❌ Orchestration failed', { error });
+      logger.error('AI', '❌ Orchestration failed', { error });
       throw error;
     }
   }
@@ -102,7 +102,7 @@ export class TripOrchestrator {
     params: GenerationParams,
     updates: StreamUpdate[]
   ): Promise<TripMetadata> {
-    logger.debug('📊 Generating metadata...');
+    logger.debug('AI', '📊 Generating metadata...');
 
     const metadata = await this.metadataGenerator.generate(params);
 
@@ -140,7 +140,7 @@ export class TripOrchestrator {
       const daysForCity = metadata.daysPerCity?.[i] ||
         Math.floor(params.duration / params.destinations.length);
 
-      logger.debug(`🏙️ Generating ${city} itinerary`, { days: daysForCity });
+      logger.debug('AI', `🏙️ Generating ${city} itinerary for ${daysForCity} days`, { days: daysForCity });
 
       const cityItinerary = await this.cityGenerator.generateCityItinerary({
         city,
@@ -188,7 +188,7 @@ export class TripOrchestrator {
     params: GenerationParams,
     updates: StreamUpdate[]
   ): Promise<GeneratePersonalizedItineraryOutput> {
-    logger.debug('📦 Combining city itineraries...');
+    logger.debug('AI', '📦 Combining city itineraries...');
 
     // Flatten all days from all cities
     const allDays: DayPlan[] = [];
@@ -240,7 +240,7 @@ export class TripOrchestrator {
     updates: StreamUpdate[]
   ): Promise<GeneratePersonalizedItineraryOutput> {
     // Optimize routes
-    logger.debug('🛣️ Optimizing routes...');
+    logger.debug('AI', '🛣️ Optimizing routes...');
     const optimized = this.routeOptimizer.optimizeDailyRoutes(itinerary);
 
     if (params.onProgress) {
@@ -251,7 +251,7 @@ export class TripOrchestrator {
     }
 
     // Enrich with location data
-    logger.debug('🏢 Enriching locations...');
+    logger.debug('AI', '🏢 Enriching locations...');
     const enriched = await this.enricher.enrichItinerary(optimized);
 
     if (params.onProgress) {
@@ -262,7 +262,7 @@ export class TripOrchestrator {
     }
 
     // Add cost estimates
-    logger.debug('💰 Calculating costs...');
+    logger.debug('AI', '💰 Calculating costs...');
     const withCosts = await this.costEstimator.addCostEstimates(enriched, {
       budget: (params.preferences?.budget || 'medium') as 'budget' | 'medium' | 'luxury',
       travelers: params.travelers
@@ -299,7 +299,7 @@ export class TripOrchestrator {
     try {
       onProgress(update);
     } catch (error) {
-      logger.warn('Progress callback error', { error });
+      logger.warn('AI', 'Progress callback error', { error });
     }
   }
 }

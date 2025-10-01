@@ -8,6 +8,7 @@ import { logger } from '@/lib/monitoring/logger';
 import { getTokenConfig, tokenTracker, calculateTokenCost } from '../config/token-limits';
 import { IntentParser } from './intent-parser';
 import { ParsedIntent } from '../types/core.types';
+import { openAIBackoff } from '@/lib/middleware/rate-limiter';
 
 export class GPTAnalyzer {
   private openai: OpenAI;
@@ -29,16 +30,26 @@ export class GPTAnalyzer {
 
     try {
       const tokenConfig = getTokenConfig('INTENT_EXTRACTION');
-      const completion = await this.openai.chat.completions.create({
-        model: tokenConfig.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ],
-        temperature: tokenConfig.temperature || 0.1,
-        max_tokens: tokenConfig.maxTokens,
-        response_format: { type: 'json_object' }
-      });
+
+      // Use exponential backoff for OpenAI API calls
+      const completion = await openAIBackoff.execute(
+        () => this.openai.chat.completions.create({
+          model: tokenConfig.model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
+          ],
+          temperature: tokenConfig.temperature || 0.1,
+          max_tokens: tokenConfig.maxTokens,
+          response_format: { type: 'json_object' }
+        }),
+        (attempt, delay, error) => {
+          logger.warn('GPT', `Retrying OpenAI call (attempt ${attempt})`, {
+            delay,
+            error: error.message
+          });
+        }
+      );
 
       const content = completion.choices[0]?.message?.content;
       if (!content) {

@@ -3,7 +3,7 @@
  * Tests all AI services, flows, and token optimization
  */
 
-import { TokenTracker } from '@/services/ai/config/token-limits';
+import { TokenUsageTracker } from '@/services/ai/config/token-limits';
 
 export interface AITestCase {
   name: string;
@@ -34,7 +34,7 @@ export interface TokenMetrics {
  */
 export class AITestSuite {
   private testCases: Map<string, AITestCase[]> = new Map();
-  private tokenTracker = new TokenTracker();
+  private tokenTracker = new TokenUsageTracker();
   private baselineMetrics: Map<string, TokenMetrics> = new Map();
 
   constructor() {

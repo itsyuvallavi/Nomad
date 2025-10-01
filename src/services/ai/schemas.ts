@@ -38,4 +38,4 @@ export type {
 } from './types/core.types';
 
 // Re-export validation schemas if needed
-export { itinerarySchema, activitySchema } from './schemas/validation.schemas';
+export { ItinerarySchema as itinerarySchema, ActivitySchema as activitySchema } from './schemas/validation.schemas';

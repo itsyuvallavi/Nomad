@@ -5,13 +5,14 @@
  * Beautiful, accessible login form with validation
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/infrastructure/contexts/AuthContext';
+import { useGoogleAuth } from '@/hooks/use-google-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,10 +39,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   redirectTo = '/'
 }) => {
   const router = useRouter();
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn } = useAuth();
+  const { signInWithGoogle, isGoogleLoading, googleError } = useGoogleAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
   const {
@@ -87,37 +88,30 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
+  const handleGoogleSignIn = useCallback(async () => {
     setError('');
 
-    try {
-      await signInWithGoogle();
-      // On mobile or when using redirect, the page will redirect
-      // So we keep the loading state to avoid confusion
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      if (!isMobile) {
-        // Only push route on desktop when popup succeeds
-        router.push(redirectTo);
-      }
-      // Keep loading state on mobile as page will redirect
-    } catch (error: any) {
-      console.error('Google sign in error:', error);
-      setIsGoogleLoading(false);
-
-      switch (error.code) {
-        case 'auth/popup-closed-by-user':
+    await signInWithGoogle(
+      () => {
+        // On success - navigate to redirect URL
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (!isMobile) {
+          router.push(redirectTo);
+        }
+      },
+      (error: any) => {
+        // On error - show error message
+        console.error('Google sign in error:', error);
+        if (error.code === 'auth/popup-closed-by-user') {
           setError('Sign-in was cancelled.');
-          break;
-        case 'auth/popup-blocked':
-          // This shouldn't happen now with our fallback, but keep it just in case
+        } else if (error.code === 'auth/popup-blocked') {
           setError('Authentication in progress. If the page doesn\'t redirect, please try again.');
-          break;
-        default:
-          setError('Failed to sign in with Google. Please try again.');
+        } else {
+          setError(error.message || 'Failed to sign in with Google. Please try again.');
+        }
       }
-    }
-  };
+    );
+  }, [signInWithGoogle, router, redirectTo]);
 
   return (
     <Card className="w-full max-w-md mx-auto">

@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AIController } from '@/services/ai/ai-controller';
 import { TripGenerator } from '@/services/ai/trip-generator';
 import { logger } from '@/lib/monitoring/logger';
+import { progressStore, type ProgressData } from '@/services/firebase/progress-store';
+import { aiCache } from '@/services/ai/cache-service';
+import { aiGenerationLimiter, openAIBackoff } from '@/lib/middleware/rate-limiter';
 
 // Load environment variables
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
-
-// In-memory storage for progress (use Redis/Database in production)
-const progressStore = new Map<string, any>();
 
 /**
  * API Route: /api/ai
@@ -17,6 +17,24 @@ const progressStore = new Map<string, any>();
  */
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = await aiGenerationLimiter.check(request);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Rate limit exceeded. Please wait before trying again.',
+        retryAfter: rateLimitResult.retryAfter
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': rateLimitResult.retryAfter?.toString() || '60'
+        }
+      }
+    );
+  }
+
   try {
     const body = await request.json();
     const { message, prompt, conversationContext, context, sessionId, action } = body;
@@ -27,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Check if this is a status check (backwards compatibility)
     if (action === 'status' && sessionId) {
-      const progress = progressStore.get(sessionId);
+      const progress = await progressStore.get(sessionId);
       if (progress) {
         return NextResponse.json({
           success: true,
@@ -44,7 +62,7 @@ export async function POST(request: NextRequest) {
     const generationId = `${sessionId || 'gen'}-${Date.now()}`;
 
     // Initialize progress with complete structure
-    progressStore.set(generationId, {
+    await progressStore.set(generationId, {
       type: 'processing',
       status: 'starting',
       progress: 0,
@@ -64,8 +82,10 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey) {
       console.error('❌ CRITICAL: No OpenAI API key found!');
-      progressStore.set(generationId, {
+      await progressStore.set(generationId, {
         type: 'error',
+        status: 'error',
+        progress: 0,
         message: 'OpenAI API key not configured',
         error: true
       });
@@ -76,10 +96,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Start generation immediately
-    generateProgressively(generationId, userMessage, contextToUse, apiKey).catch(error => {
+    generateProgressively(generationId, userMessage, contextToUse, apiKey).catch(async error => {
       logger.error('API', 'Progressive generation failed', error);
-      progressStore.set(generationId, {
+      await progressStore.set(generationId, {
         type: 'error',
+        status: 'error',
+        progress: 0,
         message: error.message || 'Generation failed',
         error: true
       });
@@ -115,7 +137,7 @@ export async function GET(request: NextRequest) {
     }, { status: 400 });
   }
 
-  const progress = progressStore.get(generationId);
+  const progress = await progressStore.get(generationId);
 
   if (!progress) {
     return NextResponse.json({
@@ -130,7 +152,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Clean up completed generations after 5 minutes
-  if (progress.type === 'complete' || progress.type === 'error') {
+  if (progress && (progress.type === 'complete' || progress.type === 'error')) {
     setTimeout(() => progressStore.delete(generationId), 300000);
   }
 
@@ -154,18 +176,18 @@ async function generateProgressively(
   const tripGenerator = new TripGenerator(apiKey);
 
   // Update progress helper
-  const updateProgress = (update: any) => {
+  const updateProgress = async (update: any) => {
     console.log(`📊 Progress Update [${generationId}]:`, {
       status: update.status,
       type: update.type,
       progress: update.progress
     });
-    progressStore.set(generationId, update);
+    await progressStore.set(generationId, update);
   };
 
   try {
     // Process message
-    updateProgress({
+    await updateProgress({
       type: 'processing',
       status: 'understanding',
       progress: 10,
@@ -184,7 +206,7 @@ async function generateProgressively(
       missingFields: response.missingFields
     });
 
-    updateProgress({
+    await updateProgress({
       type: 'processing',
       status: 'intent_extracted',
       progress: 20,
@@ -198,8 +220,33 @@ async function generateProgressively(
       const tripParams = aiController.getTripParameters(response.intent);
       const destinations = tripParams.destination.split(',').map((d: string) => d.trim());
 
+      // Check cache first for common requests
+      const cacheParams = {
+        destination: tripParams.destination,
+        duration: tripParams.duration,
+        startDate: tripParams.startDate,
+        preferences: tripParams.preferences
+      };
+
+      const cacheResult = await aiCache.get(cacheParams);
+      if (cacheResult.hit) {
+        logger.info('API', `Cache HIT - saved ${cacheResult.tokensSaved} tokens`);
+
+        await updateProgress({
+          type: 'complete',
+          status: 'success',
+          progress: 100,
+          message: 'Your itinerary is ready! (from cache)',
+          itinerary: cacheResult.data,
+          conversationContext: response.context,
+          tokensSaved: cacheResult.tokensSaved
+        });
+
+        return; // Exit early with cached result
+      }
+
       // Always use progressive generation (it's now the default)
-      updateProgress({
+      await updateProgress({
         type: 'processing',
         status: 'generating',
         progress: 30,
@@ -222,7 +269,7 @@ async function generateProgressively(
           duration: tripParams.duration,
           startDate: tripParams.startDate,
           preferences: tripParams.preferences,
-          onProgress: (update: any) => {
+          onProgress: async (update: any) => {
             console.log(`📡 Progress callback received: ${update.type}`, {
               city: update.city,
               hasData: !!update.data
@@ -230,7 +277,7 @@ async function generateProgressively(
 
             if (update.type === 'metadata') {
               generatedMetadata = update.data;
-              updateProgress({
+              await updateProgress({
                 type: 'processing',
                 status: 'metadata_ready',
                 progress: 40,
@@ -248,8 +295,8 @@ async function generateProgressively(
               allCityData.push({ city: update.city, data: update.data });
 
               // Store ALL cities generated so far
-              const progress = progressStore.get(generationId);
-              updateProgress({
+              const progress = await progressStore.get(generationId);
+              await updateProgress({
                 type: 'processing',
                 status: 'city_complete',
                 progress: Math.min(40 + update.progress * 0.5, 90),
@@ -276,11 +323,14 @@ async function generateProgressively(
         console.log('📊 Final result:', {
           hasItinerary: !!result,
           hasDailyItineraries: !!result?.dailyItineraries,
+          hasLegacyItinerary: !!result?.itinerary,
           days: result?.dailyItineraries?.length || 0,
-          firstDay: result?.dailyItineraries?.[0]
+          legacyDays: result?.itinerary?.length || 0,
+          firstDay: result?.dailyItineraries?.[0],
+          resultKeys: Object.keys(result || {})
         });
 
-        updateProgress({
+        await updateProgress({
           type: 'complete',
           status: 'success',
           progress: 100,
@@ -291,9 +341,15 @@ async function generateProgressively(
           conversationContext: response.context
         });
 
+        // Cache the successful generation for future use
+        // Estimate tokens used (approximately 3000-5000 for a typical generation)
+        const estimatedTokens = 4000;
+        await aiCache.set(cacheParams, result, estimatedTokens);
+        logger.info('API', 'Cached new generation for future use');
+
     } else if (response.type === 'question') {
       // Need more information from user
-      updateProgress({
+      await updateProgress({
         type: 'question',
         status: 'awaiting_input',
         progress: 100,
@@ -304,7 +360,7 @@ async function generateProgressively(
 
     } else {
       // Need confirmation from user
-      updateProgress({
+      await updateProgress({
         type: 'confirmation',
         status: 'awaiting_confirmation',
         progress: 100,
@@ -315,7 +371,7 @@ async function generateProgressively(
 
   } catch (error: any) {
     console.error(`❌ Generation failed [${generationId}]:`, error);
-    updateProgress({
+    await updateProgress({
       type: 'error',
       status: 'failed',
       progress: 0,

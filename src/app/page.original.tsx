@@ -6,7 +6,17 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useMotion } from '@/infrastructure/providers/motion';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
-import type { FormValues } from '@/pages/home/components/TripPlanningForm';
+// Note: TripPlanningForm types have been moved
+// import type { FormValues } from '@/components/trip-planning/TripPlanningForm';
+interface FormValues {
+  destination?: string;
+  startDate?: string;
+  endDate?: string;
+  adults?: number;
+  children?: number;
+  budget?: string;
+  preferences?: string[];
+}
 import { Header } from '@/components/navigation/Header';
 import { tripsService } from '@/services/trips/trips-service';
 import { useAuth } from '@/infrastructure/contexts/AuthContext';

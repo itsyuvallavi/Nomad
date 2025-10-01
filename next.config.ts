@@ -23,10 +23,9 @@ const nextConfig: NextConfig = {
   // Optimize package imports
   experimental: {
     optimizePackageImports: ['lucide-react', 'react-icons', '@radix-ui/*'],
-    optimizeCss: true, // Enable CSS optimization
+    // Note: optimizeCss removed in Next.js 15, using built-in optimizations
     scrollRestoration: true, // Better scroll restoration
-    // Allow cross-origin requests from Firebase Studio dev environment
-    allowedDevOrigins: ["*.cloudworkstations.dev"],
+    // Note: allowedDevOrigins removed in Next.js 15, use headers() for CORS instead
   },
   
   // Compiler optimizations
@@ -98,4 +97,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(nextConfig)

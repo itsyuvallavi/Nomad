@@ -4,7 +4,9 @@
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogCategory = 'AI' | 'API' | 'IMAGE' | 'WEATHER' | 'PLACES' | 'SYSTEM' | 'USER' | 'DRAFT' | 'RETRY' | 'ERROR' | 'CIRCUIT' | 'Transport' | 'Amadeus' | 'Polygon' | 'Chat Conversation' | 'Dialog Generator' | 'Modification Handler' | 'Foursquare API' | 'Unified Places' | 'Radar API' | 'Static Places' | 'DIAGNOSTICS' | 'ConversationState' | 'AI Parser' | 'Hybrid Parser' | 'Enhanced Chat';
+export type LogCategory = 'AI' | 'API' | 'IMAGE' | 'WEATHER' | 'PLACES' | 'SYSTEM' | 'USER' | 'DRAFT' | 'RETRY' | 'ERROR' | 'CIRCUIT' | 'Transport' | 'Amadeus' | 'Polygon' | 'Chat Conversation' | 'Dialog Generator' | 'Modification Handler' | 'Foursquare API' | 'Unified Places' | 'Radar API' | 'Static Places' | 'DIAGNOSTICS' | 'ConversationState' | 'AI Parser' | 'Hybrid Parser' | 'Enhanced Chat' |
+  // New categories for refactored services
+  'RateLimiter' | 'ExponentialBackoff' | 'Performance' | 'AICache' | 'GPT' | 'JSONUtils' | 'ProgressStore' | 'TripSanitizer' | 'TripSync' | 'TripsService' | 'CityGenerator' | string;
 
 interface LogEntry {
   timestamp: string;

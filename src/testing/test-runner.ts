@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@/lib/monitoring/logger';
-import { TokenTracker } from '@/services/ai/config/token-limits';
+import { TokenUsageTracker } from '@/services/ai/config/token-limits';
 
 export interface TestResult {
   name: string;
@@ -36,7 +36,7 @@ export interface PerformanceMetrics {
  */
 export class NomadTestRunner {
   private suites: Map<string, TestSuite> = new Map();
-  private tokenTracker = new TokenTracker();
+  private tokenTracker = new TokenUsageTracker();
   private performanceBaseline: Map<string, PerformanceMetrics> = new Map();
 
   constructor() {

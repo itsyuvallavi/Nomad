@@ -6,7 +6,8 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 import { TripGenerator } from '../src/services/ai/trip-generator';
-import { ProgressiveGenerator } from '../src/services/ai/progressive-generator';
+// Note: ProgressiveGenerator functionality has been merged into TripGenerator
+// Using TripGenerator for both traditional and progressive generation now
 
 async function compareGenerators() {
   console.log('🧪 Testing Feature Parity Between Generators\n');

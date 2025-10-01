@@ -65,7 +65,9 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
   }
 
   // Check if we have metadata but no days yet (progressive loading)
-  const hasDays = itinerary.itinerary && itinerary.itinerary.length > 0;
+  // Support both legacy 'itinerary' and new 'dailyItineraries' formats
+  const daysArray = itinerary.itinerary || itinerary.dailyItineraries || [];
+  const hasDays = daysArray.length > 0;
   const isGenerating = itinerary.title && !hasDays;
   const hasMetadata = !!(itinerary.title && itinerary.startDate && itinerary.endDate);
 
@@ -77,22 +79,22 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
   const destinationImages = usePexelsImages(itinerary.destination, locations);
 
   // Extract all activities for coworking section
-  const allActivities = hasDays && itinerary.itinerary ? itinerary.itinerary.flatMap((day: any) => day.activities) : [];
+  const allActivities = hasDays ? daysArray.flatMap((day: any) => day.activities) : [];
 
   // Calculate trip duration using shared date helpers
-  const startDateStr = hasDays && itinerary.itinerary && itinerary.itinerary[0]?.date
-    ? itinerary.itinerary[0].date
+  const startDateStr = hasDays && daysArray[0]?.date
+    ? daysArray[0].date
     : itinerary.startDate || '';
 
-  const endDateStr = hasDays && itinerary.itinerary && itinerary.itinerary[itinerary.itinerary.length - 1]?.date
-    ? itinerary.itinerary[itinerary.itinerary.length - 1].date
+  const endDateStr = hasDays && daysArray[daysArray.length - 1]?.date
+    ? daysArray[daysArray.length - 1].date
     : itinerary.endDate || '';
 
   const tripDuration = hasMetadata && startDateStr && endDateStr
     ? getDateRange(startDateStr, endDateStr)
     : 'Loading dates...';
 
-  const dayCount = itinerary.duration || (itinerary.itinerary?.length) || 0;
+  const dayCount = itinerary.duration || daysArray.length || 0;
 
   return (
     <div className="h-full overflow-y-auto bg-background">
@@ -127,13 +129,13 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
             {/* Horizontal Timeline - Show loading skeleton if days not ready */}
             {hasDays ? (
               <DayTimelineV2
-                totalDays={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).length}
+                totalDays={(daysByLocation[selectedLocation]?.days || daysArray).length}
                 selectedDay={selectedDayInTimeline}
                 onDaySelect={(day) => {
                   setSelectedDayInTimeline(day);
                 }}
                 location={locations.length > 1 ? selectedLocation : undefined}
-                dates={(daysByLocation[selectedLocation]?.days || itinerary.itinerary).map((d: any) => d.date)}
+                dates={(daysByLocation[selectedLocation]?.days || daysArray).map((d: any) => d.date)}
               />
             ) : (
               <div className="py-4">
@@ -149,8 +151,8 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
           {/* Selected Day Activities */}
           {hasDays ? (
             (() => {
-              const days = daysByLocation[selectedLocation]?.days || itinerary.itinerary;
-              const selectedDay = days.find((d: any) => d.day === selectedDayInTimeline) || days[0];
+              const days = daysByLocation[selectedLocation]?.days || daysArray;
+              const selectedDay = days.find((d: any) => (d.day || d.dayNumber) === selectedDayInTimeline) || days[0];
 
               return <DayActivities selectedDay={selectedDay} />;
             })()

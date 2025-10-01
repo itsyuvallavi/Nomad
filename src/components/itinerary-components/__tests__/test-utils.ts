@@ -24,7 +24,7 @@ type TransportationInfo = TransportationOption;
  */
 export function createMockActivity(overrides?: Partial<Activity>): Activity {
   return {
-    title: 'Mock Activity',
+    name: overrides?.name || 'Mock Activity',
     time: '10:00 AM',
     duration: '2 hours',
     location: 'Mock Location',
@@ -49,7 +49,7 @@ export function createMockDay(
 ): Day {
   const activities = Array.from({ length: activityCount }, (_, index) =>
     createMockActivity({
-      title: `Activity ${index + 1}`,
+      name: `Activity ${index + 1}`,
       time: `${9 + index * 3}:00 ${index < 4 ? 'AM' : 'PM'}`
     })
   );

@@ -7,6 +7,8 @@ import OpenAI from 'openai';
 import { logger } from '@/lib/monitoring/logger';
 import { CityItinerary, DayPlan, CityGenerationParams } from '../types/core.types';
 import { getTokenConfig, tokenTracker, calculateTokenCost } from '../config/token-limits';
+import { openAIBackoff } from '@/lib/middleware/rate-limiter';
+import { getNextDate } from '../utils/date.utils';
 
 interface CityCache {
   key: string;
@@ -71,18 +73,29 @@ export class CityGenerator {
       );
 
       const tokenConfig = getTokenConfig('CITY_GENERATION');
-      const apiPromise = this.getOpenAI().chat.completions.create({
-        model: tokenConfig.model,
-        messages: [
-          {
-            role: 'system',
-            content: 'Generate detailed day-by-day itinerary. Return only valid JSON.'
-          },
-          { role: 'user', content: prompt }
-        ],
-        temperature: tokenConfig.temperature || 0.8,
-        max_tokens: tokenConfig.maxTokens
-      });
+
+      // Use exponential backoff for OpenAI API calls
+      const apiPromise = openAIBackoff.execute(
+        () => this.getOpenAI().chat.completions.create({
+          model: tokenConfig.model,
+          messages: [
+            {
+              role: 'system',
+              content: 'Generate detailed day-by-day itinerary. Return only valid JSON.'
+            },
+            { role: 'user', content: prompt }
+          ],
+          temperature: tokenConfig.temperature || 0.8,
+          max_tokens: tokenConfig.maxTokens,
+          response_format: { type: 'json_object' }
+        }),
+        (attempt, delay, error) => {
+          logger.warn('CityGenerator', `Retrying OpenAI call for ${params.city} (attempt ${attempt})`, {
+            delay,
+            error: error.message
+          });
+        }
+      );
 
       const response = await Promise.race([apiPromise, timeoutPromise]) as OpenAI.Chat.Completions.ChatCompletion;
       console.log(`✅ [CityGenerator] OpenAI response received for ${params.city}`);
@@ -250,12 +263,79 @@ Categories: Attraction, Food, Leisure, Work, Travel, Accommodation`;
     try {
       return JSON.parse(content);
     } catch (e) {
+      console.log('⚠️ Initial JSON parse failed, attempting repair...');
+
       // Try to extract JSON from the response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
+        let jsonStr = jsonMatch[0];
+
+        // Common JSON fixes
+        // 1. Remove trailing commas before closing brackets/braces
+        jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
+
+        // 2. Fix unquoted property names (common in malformed JSON)
+        jsonStr = jsonStr.replace(/(\{|,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+
+        // 3. Find the last valid position before error
+        try {
+          JSON.parse(jsonStr);
+        } catch (parseError: any) {
+          // Extract position from error message
+          const posMatch = parseError.message.match(/position (\d+)/);
+          if (posMatch) {
+            const errorPos = parseInt(posMatch[1]);
+            console.log(`🔍 Error at position ${errorPos}, attempting truncation...`);
+
+            // Find the last complete object before the error
+            // Strategy: truncate at the last valid closing of an array element
+            let truncatePos = errorPos - 1;
+            let depth = 0;
+
+            // Walk backwards to find a safe truncation point
+            for (let i = errorPos - 1; i >= 0; i--) {
+              const char = jsonStr[i];
+              if (char === '}') depth++;
+              if (char === '{') depth--;
+
+              // Found a complete object at the right depth
+              if (char === '}' && depth === 1) {
+                truncatePos = i + 1;
+                break;
+              }
+            }
+
+            // Truncate and close structures
+            jsonStr = jsonStr.substring(0, truncatePos);
+          }
+        }
+
+        // 4. Fix incomplete arrays or objects at the end
+        const openBraces = (jsonStr.match(/\{/g) || []).length;
+        const closeBraces = (jsonStr.match(/\}/g) || []).length;
+        const openBrackets = (jsonStr.match(/\[/g) || []).length;
+        const closeBrackets = (jsonStr.match(/\]/g) || []).length;
+
+        // Add missing closing brackets/braces
+        for (let i = 0; i < openBrackets - closeBrackets; i++) {
+          jsonStr += ']';
+        }
+        for (let i = 0; i < openBraces - closeBraces; i++) {
+          jsonStr += '}';
+        }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          console.log('✅ JSON successfully repaired');
+          return parsed;
+        } catch (e2) {
+          console.error('❌ JSON repair failed:', e2);
+          console.error('Malformed JSON (first 500 chars):', jsonStr.substring(0, 500));
+          console.error('Malformed JSON (last 500 chars):', jsonStr.substring(Math.max(0, jsonStr.length - 500)));
+          throw new Error(`Could not parse AI response: ${(e2 as Error).message}`);
+        }
       }
-      throw new Error('Could not parse AI response');
+      throw new Error('Could not extract JSON from AI response');
     }
   }
 
@@ -263,12 +343,16 @@ Categories: Attraction, Food, Leisure, Work, Travel, Accommodation`;
    * Validate and fix city itinerary
    */
   private validateAndFix(parsed: Partial<CityItinerary>, params: CityGenerationParams): { days: DayPlan[] } {
-    // Ensure all days have the city field
+    // Ensure all days have required fields
     if (parsed.days) {
-      parsed.days = parsed.days.map((day: Partial<DayPlan>) => ({
-        ...day,
-        city: day.city || params.city
-      }));
+      parsed.days = parsed.days.map((day: Partial<DayPlan>, index: number) => ({
+        day: day.day ?? (params.startDayNumber + index),
+        date: day.date ?? getNextDate(params.startDate, index),
+        title: day.title ?? `Day ${params.startDayNumber + index} - ${params.city}`,
+        city: day.city || params.city,
+        activities: day.activities || [],
+        weather: day.weather
+      })) as DayPlan[];
     }
 
     // Validate we got the right number of days
@@ -280,7 +364,7 @@ Categories: Attraction, Food, Leisure, Work, Travel, Accommodation`;
       this.addMissingDays(parsed.days, params);
     }
 
-    return parsed;
+    return { days: parsed.days || [] };
   }
 
   /**

@@ -102,7 +102,7 @@ export class TripGenerator {
     currentItinerary: GeneratePersonalizedItineraryOutput,
     userFeedback: string
   ): Promise<GeneratePersonalizedItineraryOutput> {
-    logger.info('🔄 Modifying itinerary based on feedback');
+    logger.info('AI', '🔄 Modifying itinerary based on feedback');
 
     // For now, we'll need to regenerate with modifications
     // In future, could make this more granular

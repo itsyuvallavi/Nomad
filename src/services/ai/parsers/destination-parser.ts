@@ -38,7 +38,7 @@ export class DestinationParser {
 
     // Extract destinations (simple pattern matching)
     const locationPattern = /(?:visit|tour|explore|see|go to)\s+([^0-9]+?)(?:\s+for|\s+in|\s+\d+|$)/i;
-    const multiCityPattern = /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:,|and|then)?\s*/g;
+    const multiCityPattern = /([a-z]+(?:\s+[a-z]+)*)\s*(?:,|and|then)?\s*/gi;
 
     const matches = message.match(multiCityPattern);
     if (matches && matches.length > 1) {
@@ -83,14 +83,16 @@ export class DestinationParser {
    */
   extractSingleDestination(message: string): string | null {
     const destinationPatterns = [
+      // "3 days in London" or "14 day trip to lisbon"
+      /(?:\d+\s+(?:day|night)s?\s+(?:trip\s+)?(?:to|in))\s+([a-z]+(?:\s+[a-z]+)?)(?=\s+(?:starting|from|on|in|for|tomorrow|today|next|this)|[,.]|$)/i,
       // "trip to London starting tomorrow" -> extract "London"
-      /(?:trip to|visit|going to|travel to|fly to|head to|explore|tour)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:for|from|starting|beginning|on|in|next|this|tomorrow|today)|[,.]|$)/i,
+      /(?:trip to|visit|going to|travel to|fly to|head to|explore|tour)\s+([a-z]+(?:\s+[a-z]+)?)(?=\s+(?:for|from|starting|beginning|on|in|next|this|tomorrow|today)|[,.]|$)/i,
       // "London for 3 days" -> extract "London"
-      /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:for\s+)?(\d+)\s+(?:days?|nights?)/i,
+      /\b([a-z]+(?:\s+[a-z]+)?)\s+(?:for\s+)?(\d+)\s+(?:days?|nights?)/i,
       // "3 days in London" -> extract "London"
-      /(\d+)\s+(?:days?|nights?)\s+(?:in|to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:starting|from|on|tomorrow|today)|$)/i,
+      /(\d+)\s+(?:days?|nights?)\s+(?:in|to)\s+([a-z]+(?:\s+[a-z]+)?)(?=\s+(?:starting|from|on|tomorrow|today)|$)/i,
       // "London starting tomorrow" at beginning -> extract "London"
-      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s+(?:for|starting|from|tomorrow|today)|\s+\d+|,|$)/i
+      /^([a-z]+(?:\s+[a-z]+)?)(?=\s+(?:for|starting|from|tomorrow|today)|\s+\d+|,|$)/i
     ];
 
     for (const pattern of destinationPatterns) {
@@ -121,7 +123,7 @@ export class DestinationParser {
   private isValidDestination(destination: string): boolean {
     const dLower = destination.toLowerCase();
     return destination.length > 2 &&
-           /^[A-Z]/.test(destination) &&
+           /^[a-z]/i.test(destination) &&
            !this.dateWords.includes(dLower) &&
            !dLower.includes('next') &&
            !dLower.includes('this') &&
@@ -149,16 +151,17 @@ export class DestinationParser {
   extractAllDestinations(text: string): string[] {
     const destinations: string[] = [];
 
-    // Check for multi-city first
-    const multiCity = this.extractMultiCityIntent(text);
-    if (multiCity.destinations.length > 0) {
-      return multiCity.destinations.map(d => this.normalizeDestination(d));
-    }
-
-    // Try single destination
+    // Try single destination first (more reliable for simple cases)
     const single = this.extractSingleDestination(text);
     if (single) {
       destinations.push(this.normalizeDestination(single));
+      return destinations;
+    }
+
+    // Check for multi-city if single didn't work
+    const multiCity = this.extractMultiCityIntent(text);
+    if (multiCity.destinations.length > 0) {
+      return multiCity.destinations.map(d => this.normalizeDestination(d));
     }
 
     return destinations;

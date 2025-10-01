@@ -54,6 +54,84 @@ export interface Accommodation {
 }
 
 // ========================================
+// Additional Types for AI Processing
+// ========================================
+
+export interface ParsedIntent extends UserIntent {
+  confidence: number;
+  rawInput?: string;
+  travelers?: {
+    adults: number;
+    children: number;
+  };
+  budget?: string;
+  preferences?: {
+    budget?: string;
+    interests?: string[];
+    pace?: 'relaxed' | 'moderate' | 'packed';
+    mustSee?: string[];
+    avoid?: string[];
+  };
+}
+
+export interface LocalInsight {
+  type: string;
+  description: string;
+  location?: string;
+}
+
+export interface Destination {
+  name: string;
+  country?: string;
+  coordinates?: { lat: number; lng: number };
+  description?: string;
+}
+
+export interface UserPreferences {
+  activities?: string[];
+  pace?: 'relaxed' | 'moderate' | 'packed';
+  budget?: 'budget' | 'medium' | 'premium' | 'luxury';
+  interests?: string[];
+  dietary?: string[];
+  accessibility?: boolean;
+}
+
+export interface BudgetBreakdown {
+  accommodation: number;
+  food: number;
+  activities: number;
+  transport: number;
+  total: number;
+  currency: string;
+}
+
+export interface DestinationInfo {
+  name: string;
+  description?: string;
+  highlights?: string[];
+  bestTimeToVisit?: string;
+  localCurrency?: string;
+  language?: string;
+  timezone?: string;
+}
+
+export interface ExtractedDates {
+  startDate?: string;
+  endDate?: string;
+  duration?: number;
+  flexibility?: string;
+}
+
+export type ParsedUserIntent = ParsedIntent;
+
+export interface UserQuery {
+  text: string;
+  timestamp?: string;
+  userId?: string;
+  sessionId?: string;
+}
+
+// ========================================
 // Intent & Context Types
 // ========================================
 
@@ -149,6 +227,8 @@ export interface CityGenerationParams {
   startDate: string;
   startDayNumber: number;
   preferences?: any;
+  interests?: string[];
+  budget?: string;
 }
 
 export interface BaseItinerary {

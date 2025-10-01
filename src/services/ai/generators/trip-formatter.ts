@@ -44,14 +44,19 @@ export class TripFormatter {
     // Flatten all days from all cities
     const allDays: DayPlan[] = [];
     for (const cityIt of cityItineraries) {
+      console.log(`📦 [Formatter] Processing city: ${cityIt.city}, days count: ${cityIt.days?.length || 0}`);
       allDays.push(...cityIt.days);
     }
+
+    console.log(`📦 [Formatter] Total days collected: ${allDays.length}`);
 
     // Convert to standard format
     const dailyItineraries = this.formatDailyItineraries(allDays);
 
     // Create legacy format for backward compatibility
     const legacyItinerary = this.formatLegacyItinerary(allDays);
+
+    console.log(`📦 [Formatter] Created legacy itinerary with ${legacyItinerary.length} days`);
 
     // Calculate end date
     const endDate = getNextDate(params.startDate, params.duration - 1);

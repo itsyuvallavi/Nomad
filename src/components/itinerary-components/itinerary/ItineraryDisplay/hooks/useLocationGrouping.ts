@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { logger } from '@/lib/monitoring/logger';
 
 interface Day {
-  day: number;
+  day?: number;  // Legacy format
+  dayNumber?: number;  // New format
   date: string;
   title: string;
   activities: any[];
@@ -24,10 +25,14 @@ export function useLocationGrouping(
   itinerary: {
     destination: string;
     itinerary?: Day[];
+    dailyItineraries?: Day[];
   }
 ): LocationGroupingResult {
   return useMemo(() => {
-    if (!itinerary.itinerary || itinerary.itinerary.length === 0) {
+    // Support both legacy 'itinerary' and new 'dailyItineraries' formats
+    const daysArray = itinerary.itinerary || itinerary.dailyItineraries || [];
+
+    if (daysArray.length === 0) {
       return {
         daysByLocation: {},
         locations: [],
@@ -57,7 +62,7 @@ export function useLocationGrouping(
     const countryOrder: string[] = [];
 
     // First pass: identify country for each day based on content
-    const dayCountries = itinerary.itinerary.map((day: Day, index) => {
+    const dayCountries = daysArray.map((day: Day, index) => {
       // Check if day has destination metadata from chunked generation
       if (day._destination) {
         // Skip "Travel Day" entries - they should be merged with the destination
@@ -121,8 +126,8 @@ export function useLocationGrouping(
       if (!currentCountry) {
         // Use dynamic detection based on day ranges
         // Assume roughly equal distribution of days across destinations
-        const dayNum = day.day;
-        const avgDaysPerDestination = Math.ceil(itinerary.itinerary.length / mainDestinations.length);
+        const dayNum = day.day || day.dayNumber || (index + 1);  // Support both formats
+        const avgDaysPerDestination = Math.ceil(daysArray.length / mainDestinations.length);
         const destinationIndex = Math.floor((dayNum - 1) / avgDaysPerDestination);
 
         currentCountry = mainDestinations[Math.min(destinationIndex, mainDestinations.length - 1)] || 'Unknown';
@@ -136,7 +141,7 @@ export function useLocationGrouping(
     });
 
     // Second pass: group consecutive days by country
-    const daysByLocation = itinerary.itinerary.reduce((acc: any, day: Day, index: number) => {
+    const daysByLocation = daysArray.reduce((acc: any, day: Day, index: number) => {
       const country = dayCountries[index];
 
       if (!acc[country]) {
@@ -147,7 +152,12 @@ export function useLocationGrouping(
         };
       }
 
-      acc[country].days.push(day);
+      // Normalize day to always have 'day' field for consistency
+      const normalizedDay = {
+        ...day,
+        day: day.day || day.dayNumber || (index + 1)
+      };
+      acc[country].days.push(normalizedDay);
       acc[country].endDay = index + 1;
 
       return acc;
@@ -162,7 +172,7 @@ export function useLocationGrouping(
       daysByLocation: Object.entries(daysByLocation).map(([loc, data]: [string, any]) => ({
         location: loc,
         days: data.days.length,
-        dayNumbers: data.days.map((d: any) => d.day),
+        dayNumbers: data.days.map((d: any) => d.day || d.dayNumber),
         startDay: data.startDay,
         endDay: data.endDay
       }))
@@ -173,5 +183,5 @@ export function useLocationGrouping(
       locations,
       dayCountries
     };
-  }, [itinerary.destination, itinerary.itinerary]);
+  }, [itinerary.destination, itinerary.itinerary, itinerary.dailyItineraries]);
 }

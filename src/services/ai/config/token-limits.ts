@@ -65,7 +65,7 @@ export const TOKEN_LIMITS: Record<string, TokenConfig> = {
   // City and itinerary generation - complex tasks need better models
   CITY_GENERATION: {
     model: 'gpt-4o-mini',
-    maxTokens: 2000,
+    maxTokens: 8000,
     temperature: 0.7,
     description: 'Generate detailed city itinerary (per city)'
   },

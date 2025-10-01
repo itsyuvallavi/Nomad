@@ -161,7 +161,7 @@ export class DateParser {
 
     // Try full month names
     for (let i = 0; i < months.length; i++) {
-      const pattern = new RegExp(`\\b${months[i]}\\s+(\\d{1,2})(?:\\w{0,2})?(?:\\s+|,\\s*)(\\d{4})?`, 'i');
+      const pattern = new RegExp(`\\b${months[i]}\\s+(\\d{1,2})(?:\\w{0,2})?(?:[\\s,]+)?(\\d{4})?`, 'i');
       const match = text.match(pattern);
 
       if (match) {
@@ -173,7 +173,7 @@ export class DateParser {
 
     // Try short month names
     for (let i = 0; i < monthsShort.length; i++) {
-      const pattern = new RegExp(`\\b${monthsShort[i]}\\w*\\s+(\\d{1,2})(?:\\w{0,2})?(?:\\s+|,\\s*)(\\d{4})?`, 'i');
+      const pattern = new RegExp(`\\b${monthsShort[i]}\\w*\\s+(\\d{1,2})(?:\\w{0,2})?(?:[\\s,]+)?(\\d{4})?`, 'i');
       const match = text.match(pattern);
 
       if (match) {

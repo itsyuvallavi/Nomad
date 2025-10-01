@@ -85,7 +85,7 @@ export class PerformanceMonitor {
     }
 
     // Log performance data
-    logger.debug('Performance', {
+    logger.debug('Performance', `${metric.operation} completed in ${metric.duration}ms`, {
       operation: metric.operation,
       duration: metric.duration,
       success: metric.success,
@@ -111,7 +111,7 @@ export class PerformanceMonitor {
 
     // Log high-cost operations
     if (usage.cost > 0.5) {
-      logger.warn('High token cost operation', usage);
+      logger.warn('AI', 'High token cost operation detected', usage);
     }
   }
 
@@ -204,7 +204,7 @@ export class PerformanceMonitor {
    * Log slow operations
    */
   private logSlowOperation(metric: PerformanceMetric): void {
-    logger.warn('Slow operation detected', {
+    logger.warn('Performance', `Slow operation detected: ${metric.operation}`, {
       operation: metric.operation,
       duration: metric.duration,
       threshold: this.slowOperationThreshold,
@@ -354,7 +354,7 @@ export class PerformanceBenchmark {
     const meetsTarget = actualMs <= target;
 
     if (!meetsTarget) {
-      logger.warn('Benchmark exceeded', {
+      logger.warn('Performance', `Benchmark exceeded: ${name}`, {
         benchmark: name,
         target: target,
         actual: actualMs,
