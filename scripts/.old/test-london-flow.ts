@@ -5,9 +5,9 @@
  * Tests the core functionality of the Nomad Navigator app
  */
 
-import { AIController } from '../src/services/ai/ai-controller';
-import { TripGenerator } from '../src/services/ai/trip-generator';
-import { logger } from '../src/lib/monitoring/logger';
+import { AIController } from '../../src/services/ai/ai-controller';
+import { TripGenerator } from '../../src/services/ai/trip-generator';
+import { logger } from '../../src/lib/monitoring/logger';
 
 async function testLondonFlow() {
   console.log('\n🏙️ Testing "3 days in London" Flow\n');

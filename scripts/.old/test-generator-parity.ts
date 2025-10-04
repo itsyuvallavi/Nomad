@@ -5,7 +5,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-import { TripGenerator } from '../src/services/ai/trip-generator';
+import { TripGenerator } from '../../src/services/ai/trip-generator';
 // Note: ProgressiveGenerator functionality has been merged into TripGenerator
 // Using TripGenerator for both traditional and progressive generation now
 

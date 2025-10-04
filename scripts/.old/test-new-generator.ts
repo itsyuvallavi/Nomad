@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-import { TripGenerator } from '../src/services/ai/trip-generator';
+import { TripGenerator } from '../../src/services/ai/trip-generator';
 
 async function testGenerator() {
   console.log('🧪 Testing New Unified Trip Generator\n');

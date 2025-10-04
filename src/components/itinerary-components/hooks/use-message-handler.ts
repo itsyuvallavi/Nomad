@@ -5,8 +5,10 @@
 import { useState, useRef, useCallback } from 'react';
 import { logger } from '@/lib/monitoring/logger';
 import { offlineStorage } from '@/services/storage/offline-storage';
+import { tripsService } from '@/services/trips/trips-service';
 import { useItineraryGeneration } from './use-itinerary-generation';
 import type { ConversationalItineraryOutput } from './use-itinerary-generation';
+import type { User } from 'firebase/auth';
 
 type Message = {
     role: 'user' | 'assistant';
@@ -29,6 +31,7 @@ interface UseMessageHandlerParams {
     setGenerationProgress: (progress: any) => void;
     setPartialItinerary: (itinerary: any) => void;
     setGenerationMetadata: (metadata: any) => void;
+    user: User | null;
 }
 
 export function useMessageHandler({
@@ -43,7 +46,8 @@ export function useMessageHandler({
     generationProgress,
     setGenerationProgress,
     setPartialItinerary,
-    setGenerationMetadata
+    setGenerationMetadata,
+    user
 }: UseMessageHandlerParams) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -278,7 +282,63 @@ export function useMessageHandler({
                             content: "✨ Your personalized itinerary is ready! You can see it on the right. Would you like to make any changes?",
                             messageType: 'itinerary'
                         }]);
+
+                        // Cache to offline storage
                         await offlineStorage.cacheItinerary(response.itinerary.destination, response.itinerary);
+
+                        // Save to Firestore if user is authenticated
+                        if (user) {
+                            try {
+                                logger.info('MessageHandler', 'Saving trip to Firestore', {
+                                    userId: user.uid,
+                                    destination: response.itinerary.destination
+                                });
+
+                                // Extract dates from itinerary
+                                const dailyItineraries = response.itinerary.dailyItineraries || response.itinerary.itinerary || [];
+                                const firstDay = dailyItineraries[0];
+                                const lastDay = dailyItineraries[dailyItineraries.length - 1];
+
+                                // Generate dates if not available
+                                const now = new Date();
+                                const startDate = firstDay?.date ? new Date(firstDay.date) : now;
+                                const duration = dailyItineraries.length || 0;
+                                const endDate = lastDay?.date ? new Date(lastDay.date) : new Date(now.getTime() + duration * 24 * 60 * 60 * 1000);
+
+                                const tripData: any = {
+                                    userId: user.uid,
+                                    title: response.itinerary.title || `Trip to ${response.itinerary.destination}`,
+                                    destination: response.itinerary.destination,
+                                    prompt: messages.find(m => m.role === 'user')?.content || '',
+                                    startDate,
+                                    endDate,
+                                    duration,
+                                    currency: 'USD',
+                                    travelStyle: 'mid-range',
+                                    itinerary: response.itinerary,
+                                    chatState: {
+                                        messages,
+                                        itinerary: response.itinerary,
+                                        conversationContext
+                                    }
+                                };
+
+                                // Only include budget if it has a valid value (Firestore doesn't accept undefined)
+                                if (response.itinerary.budget && typeof response.itinerary.budget === 'number') {
+                                    tripData.budget = response.itinerary.budget;
+                                }
+
+                                await tripsService.createTrip(tripData);
+
+                                logger.info('MessageHandler', 'Trip saved successfully to Firestore');
+                            } catch (error) {
+                                logger.error('MessageHandler', 'Failed to save trip to Firestore', error);
+                                // Don't fail the user experience if trip saving fails
+                            }
+                        } else {
+                            logger.info('MessageHandler', 'User not authenticated, trip saved to memory only');
+                        }
+
                         if (window.innerWidth < 768) {
                             setMobileActiveTab('itinerary');
                         }
@@ -324,7 +384,9 @@ export function useMessageHandler({
         setGenerationProgress,
         setPartialItinerary,
         setGenerationMetadata,
-        handleStreamingResponse
+        handleStreamingResponse,
+        user,
+        messages
     ]);
 
     return {

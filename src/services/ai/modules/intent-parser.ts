@@ -2,6 +2,10 @@
  * Intent Parser Module - Refactored Version
  * Main orchestrator that delegates to specialized parser modules
  * Maintains backward compatibility while improving code organization
+ *
+ * @deprecated extractWithPatterns() is now deprecated as fallback only.
+ * Primary intent extraction uses AI (GPT-4o-mini) via GPTAnalyzer.
+ * This pattern-based approach had issues with edge cases like "Lisbon For".
  */
 
 import { IntentExtractor, ParsedIntent } from '../parsers/intent-extractor';

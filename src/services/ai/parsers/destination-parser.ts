@@ -2,6 +2,10 @@
  * Destination Parser Module
  * Handles extraction of destinations and multi-city trip parsing
  * Includes city name validation and formatting
+ *
+ * @deprecated This pattern-based parser is kept as fallback only.
+ * Primary intent extraction now uses AI (GPT-4o-mini) for better accuracy.
+ * Pattern-based extraction had issues with temporal words like "Lisbon For".
  */
 
 export interface MultiCityIntent {

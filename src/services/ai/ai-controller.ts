@@ -215,7 +215,7 @@ export class AIController {
 
   /**
    * Analyzes user input to extract travel information
-   * Uses both pattern matching and GPT-4o-mini
+   * UPDATED: Always uses AI (GPT-4o-mini) for accurate intent extraction
    */
   private async analyzeUserInput(
     message: string,
@@ -230,50 +230,25 @@ export class AIController {
         return { ...currentIntent, ...cached };
       }
 
-      // Try pattern extraction first using IntentParser
-      const patternResult = this.intentParser.extractWithPatterns(message, currentIntent);
+      // ALWAYS use AI for intent extraction (no more pattern-first logic)
+      console.log('🤖 [AI] Using GPT-4o-mini for intent extraction');
 
-      // Check if pattern extraction got all required fields
-      const hasDestination = !!(patternResult.destination || patternResult.destinations);
-      const hasDuration = !!(patternResult.duration || (patternResult.startDate && patternResult.endDate));
-      const hasStartDate = !!patternResult.startDate;
-
-      if (hasDestination && hasDuration && hasStartDate) {
-        console.log('      ✅ Complete extraction via patterns (skipping GPT-4o-mini)');
-        // Cache the result
-        this.intentCache.setIntent(message, patternResult);
-        return patternResult;
-      }
-
-      // Pattern extraction incomplete, use GPT-4o-mini to fill gaps
-      console.log('      ⚠️  Missing fields, using GPT-4o-mini for completion');
-
-      const gptResult = await this.gptAnalyzer.analyzeWithGPT(message, patternResult);
-
-      // Merge results (pattern results take precedence as they're more reliable)
-      const merged = {
-        ...gptResult,
-        ...patternResult,
-        // Ensure arrays are properly merged
-        destinations: patternResult.destinations || gptResult.destinations,
-        interests: [...(patternResult.interests || []), ...(gptResult.interests || [])]
-          .filter((v, i, a) => a.indexOf(v) === i) // Remove duplicates
-      };
+      const gptResult = await this.gptAnalyzer.analyzeWithGPT(message, currentIntent || {});
 
       // Validate using IntentParser
-      const validated = this.intentParser.validateExtractedIntent(merged);
+      const validated = this.intentParser.validateExtractedIntent(gptResult);
 
       // Cache the result
       this.intentCache.setIntent(message, validated);
 
-      console.log('🤖 [AI] Merged pattern and GPT-4o-mini results', validated);
+      console.log('🤖 [AI] GPT-4o-mini extraction complete', validated);
       return validated;
 
     } catch (error) {
       logger.error('AI', 'Failed to analyze input', { error });
       console.log('🤖 [AI] Failed to analyze input', error);
 
-      // Fallback to pattern extraction only
+      // Fallback to pattern extraction only as last resort
       const fallback = this.intentParser.extractWithPatterns(message, currentIntent);
       console.log('🤖 [AI] Using pattern results as fallback', fallback);
       return fallback;

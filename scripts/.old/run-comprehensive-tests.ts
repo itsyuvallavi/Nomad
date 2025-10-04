@@ -5,11 +5,11 @@
  * Runs all UI, AI, and Integration tests with detailed reporting
  */
 
-import { testRunner } from '../src/testing/test-runner';
-import { uiTestSuite } from '../src/testing/ui-tests';
-import { aiTestSuite } from '../src/testing/ai-tests';
-import { integrationTestSuite } from '../src/testing/integration-tests';
-import { logger } from '../src/lib/monitoring/logger';
+import { testRunner } from '../../src/testing/test-runner';
+import { uiTestSuite } from '../../src/testing/ui-tests';
+import { aiTestSuite } from '../../src/testing/ai-tests';
+import { integrationTestSuite } from '../../src/testing/integration-tests';
+import { logger } from '../../src/lib/monitoring/logger';
 import * as fs from 'fs';
 import * as path from 'path';
 

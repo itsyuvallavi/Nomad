@@ -4,8 +4,8 @@
  * Quick test for itinerary generation
  */
 
-import { AIController } from '../src/services/ai/ai-controller';
-import { TripGenerator } from '../src/services/ai/trip-generator';
+import { AIController } from '../../src/services/ai/ai-controller';
+import { TripGenerator } from '../../src/services/ai/trip-generator';
 
 async function quickTest() {
   console.log('\n🧪 Quick Itinerary Generation Test\n');

@@ -112,6 +112,38 @@ export const CITY_ZONES: Record<string, Zone[]> = {
       priority: 4
     }
   ],
+  lisbon: [
+    {
+      name: 'Baixa/Chiado',
+      neighborhoods: ['Baixa', 'Chiado', 'Rossio', 'Praça do Comércio'],
+      coordinates: { lat: 38.7115, lng: -9.1393 },
+      priority: 1
+    },
+    {
+      name: 'Alfama',
+      neighborhoods: ['Alfama', 'São Jorge Castle', 'Mouraria', 'Graça'],
+      coordinates: { lat: 38.7129, lng: -9.1309 },
+      priority: 2
+    },
+    {
+      name: 'Belém',
+      neighborhoods: ['Belém', 'Jerónimos Monastery', 'Belém Tower', 'MAAT'],
+      coordinates: { lat: 38.6972, lng: -9.2064 },
+      priority: 3
+    },
+    {
+      name: 'Bairro Alto',
+      neighborhoods: ['Bairro Alto', 'Príncipe Real', 'Miradouro de São Pedro'],
+      coordinates: { lat: 38.7147, lng: -9.1459 },
+      priority: 4
+    },
+    {
+      name: 'Parque das Nações',
+      neighborhoods: ['Parque das Nações', 'Oceanário', 'Vasco da Gama Tower'],
+      coordinates: { lat: 38.7687, lng: -9.0944 },
+      priority: 5
+    }
+  ],
   rome: [
     {
       name: 'Ancient Rome',

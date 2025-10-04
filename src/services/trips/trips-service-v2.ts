@@ -40,7 +40,7 @@ export class TripsServiceV2 {
     const tripId = `trip_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Extract and clean data
-    const tripData: Trip = {
+    const tripData: any = {
       id: tripId,
       userId: input.userId,
       title: input.title || TripSanitizer.extractTitle(input),
@@ -49,7 +49,6 @@ export class TripsServiceV2 {
       startDate: input.startDate,
       endDate: input.endDate,
       duration: input.duration || TripSanitizer.extractDuration(input),
-      budget: input.budget,
       currency: input.currency || 'USD',
       travelStyle: input.travelStyle || 'mid-range',
       status: 'draft',
@@ -58,9 +57,16 @@ export class TripsServiceV2 {
       createdAt: Timestamp.now(),
       updatedAt: serverTimestamp() as Timestamp,
       isFavorite: false,
-      tags: input.tags || TripSanitizer.generateTags(input),
-      imageUrl: input.imageUrl
+      tags: input.tags || TripSanitizer.generateTags(input)
     };
+
+    // Only include optional fields if they have valid values (Firestore doesn't accept undefined)
+    if (input.budget !== undefined && input.budget !== null) {
+      tripData.budget = input.budget;
+    }
+    if (input.imageUrl !== undefined && input.imageUrl !== null) {
+      tripData.imageUrl = input.imageUrl;
+    }
 
     try {
       const tripRef = doc(db, this.COLLECTION_NAME, tripId);

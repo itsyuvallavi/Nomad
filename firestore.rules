@@ -63,7 +63,7 @@ service cloud.firestore {
       allow read, write: if isAuthenticated() && isOwner(userId);
     }
 
-    // Trips collection - keeping all original validation but fixing resource checks
+    // Trips collection - relaxed validation to allow additional fields
     match /trips/{tripId} {
       allow read: if isAuthenticated() &&
         (resource == null || isOwner(resource.data.userId));

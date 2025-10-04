@@ -109,7 +109,8 @@ export default function ChatDisplayV2({
         generationProgress,
         setGenerationProgress,
         setPartialItinerary,
-        setGenerationMetadata
+        setGenerationMetadata,
+        user
     });
 
     // Swipe gestures
