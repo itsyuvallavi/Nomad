@@ -9,7 +9,7 @@ import { localStorageMiddleware } from './middleware/localStorageMiddleware';
 
 // Import reducers
 import tripReducer from './slices/tripSlice';
-// import conversationReducer from './slices/conversationSlice';
+import conversationReducer from './slices/conversationSlice';
 // import uiReducer from './slices/uiSlice';
 
 /**
@@ -18,7 +18,7 @@ import tripReducer from './slices/tripSlice';
 export const store = configureStore({
   reducer: {
     trip: tripReducer,
-    // conversation: conversationReducer,
+    conversation: conversationReducer,
     // ui: uiReducer,
   },
   middleware: (getDefaultMiddleware) =>
