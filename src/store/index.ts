@@ -10,7 +10,7 @@ import { localStorageMiddleware } from './middleware/localStorageMiddleware';
 // Import reducers
 import tripReducer from './slices/tripSlice';
 import conversationReducer from './slices/conversationSlice';
-// import uiReducer from './slices/uiSlice';
+import uiReducer from './slices/uiSlice';
 
 /**
  * Configure the Redux store
@@ -19,7 +19,7 @@ export const store = configureStore({
   reducer: {
     trip: tripReducer,
     conversation: conversationReducer,
-    // ui: uiReducer,
+    ui: uiReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
