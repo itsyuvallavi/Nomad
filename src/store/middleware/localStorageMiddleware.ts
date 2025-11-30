@@ -13,7 +13,7 @@ import { LocalStorageManager, STORAGE_KEYS } from './localStorage-manager';
  *
  * Listens to Redux actions and syncs relevant state to localStorage
  */
-export const localStorageMiddleware: Middleware = (store) => (next) => (action) => {
+export const localStorageMiddleware: Middleware = (store) => (next) => (action: any) => {
   // Let the action pass through first
   const result = next(action);
 
@@ -157,7 +157,7 @@ export function loadPersistedState(): any {
 let throttleTimeout: NodeJS.Timeout | null = null;
 const throttledActions = new Set<string>();
 
-export const throttledLocalStorageMiddleware: Middleware = (store) => (next) => (action) => {
+export const throttledLocalStorageMiddleware: Middleware = (store) => (next) => (action: any) => {
   const result = next(action);
 
   // List of actions to throttle (high-frequency updates)

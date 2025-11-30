@@ -7,9 +7,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { localStorageMiddleware } from './middleware/localStorageMiddleware';
 
-// Import reducers (will be added as we create slices)
+// Import reducers
+import tripReducer from './slices/tripSlice';
 // import conversationReducer from './slices/conversationSlice';
-// import tripReducer from './slices/tripSlice';
 // import uiReducer from './slices/uiSlice';
 
 /**
@@ -17,9 +17,8 @@ import { localStorageMiddleware } from './middleware/localStorageMiddleware';
  */
 export const store = configureStore({
   reducer: {
-    // Slices will be added here as we create them
+    trip: tripReducer,
     // conversation: conversationReducer,
-    // trip: tripReducer,
     // ui: uiReducer,
   },
   middleware: (getDefaultMiddleware) =>
