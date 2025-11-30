@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/infrastructure/components/ErrorBoundary';
 import { PasswordGate } from '@/infrastructure/components/PasswordGate';
 import { OfflineProvider } from '@/infrastructure/providers/offline';
 import { MotionProvider } from '@/infrastructure/providers/motion';
+import { ReduxProvider } from '@/store/ReduxProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -35,16 +36,18 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground h-full">
         <ErrorBoundary>
-          {/* PasswordGate temporarily disabled for debugging */}
-          {/* <PasswordGate> */}
-            <AuthProvider>
-              <OfflineProvider>
-                <MotionProvider>
-                  {children}
-                </MotionProvider>
-              </OfflineProvider>
-            </AuthProvider>
-          {/* </PasswordGate> */}
+          <ReduxProvider>
+            {/* PasswordGate temporarily disabled for debugging */}
+            {/* <PasswordGate> */}
+              <AuthProvider>
+                <OfflineProvider>
+                  <MotionProvider>
+                    {children}
+                  </MotionProvider>
+                </OfflineProvider>
+              </AuthProvider>
+            {/* </PasswordGate> */}
+          </ReduxProvider>
         </ErrorBoundary>
       </body>
     </html>
