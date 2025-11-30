@@ -58,6 +58,10 @@ export function useMessageHandler({
     const generationIdRef = useRef<string | null>(null);
     const generationStartTime = useRef<number>(0);
 
+    // Use ref to avoid dependency issues - always has current messages
+    const messagesRef = useRef<Message[]>(messages);
+    messagesRef.current = messages;
+
     // Use the itinerary generation hook
     const { handleStreamingResponse } = useItineraryGeneration({
         conversationContext,
@@ -78,7 +82,7 @@ export function useMessageHandler({
     ) => {
         try {
             const chatState = {
-                messages,
+                messages: messagesRef.current,
                 itinerary: (itinerary || currentItinerary) as any,
                 timestamp: Date.now(),
                 searchId: currentSearchId.current,
@@ -106,7 +110,7 @@ export function useMessageHandler({
                 let duration = actualItinerary?.duration || initialPrompt?.duration;
 
                 // If we still don't have destination, try to extract from the prompt
-                const promptText = messages[0]?.content || initialPrompt?.prompt || '';
+                const promptText = messagesRef.current[0]?.content || initialPrompt?.prompt || '';
                 if (!destination && promptText) {
                     // Try to extract destination from prompt (e.g., "plan a 7 day trip to london")
                     const destinationMatch = promptText.match(/(?:to|in|visit|explore)\s+([a-zA-Z\s]+?)(?:\s+(?:on|for|in|during)|$)/i);
@@ -166,7 +170,7 @@ export function useMessageHandler({
         } catch (e) {
             logger.error('SYSTEM', 'Could not save chat state', e);
         }
-    }, [messages, currentItinerary, currentSearchId]);
+    }, [currentItinerary, currentSearchId]); // Removed 'messages' - using messagesRef instead
 
     const handleUserMessage = useCallback(async (
         message: string,
@@ -309,7 +313,7 @@ export function useMessageHandler({
                                     userId: user.uid,
                                     title: response.itinerary.title || `Trip to ${response.itinerary.destination}`,
                                     destination: response.itinerary.destination,
-                                    prompt: messages.find(m => m.role === 'user')?.content || '',
+                                    prompt: messagesRef.current.find(m => m.role === 'user')?.content || '',
                                     startDate,
                                     endDate,
                                     duration,
@@ -317,7 +321,7 @@ export function useMessageHandler({
                                     travelStyle: 'mid-range',
                                     itinerary: response.itinerary,
                                     chatState: {
-                                        messages,
+                                        messages: messagesRef.current,
                                         itinerary: response.itinerary,
                                         conversationContext
                                     }
@@ -385,8 +389,8 @@ export function useMessageHandler({
         setPartialItinerary,
         setGenerationMetadata,
         handleStreamingResponse,
-        user,
-        messages
+        user
+        // Removed 'messages' - using messagesRef instead to prevent unnecessary re-renders
     ]);
 
     return {
