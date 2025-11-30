@@ -4,8 +4,8 @@
  */
 import { logger } from '@/lib/monitoring/logger';
 
-// Client-safe API key access - will be undefined in browser
-const PEXELS_API_KEY = typeof process !== 'undefined' ? process.env.PEXELS_API_KEY : undefined;
+// Server-side API key access (this should only be called from API routes)
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 const PEXELS_API_URL = 'https://api.pexels.com/v1';
 
 export interface PexelsImage {
@@ -30,8 +30,15 @@ export async function searchPexelsImages(
   count: number = 3
 ): Promise<PexelsImage[]> {
   try {
+    console.log('🔑 [PEXELS] API Key check:', {
+      hasKey: !!PEXELS_API_KEY,
+      keyLength: PEXELS_API_KEY?.length || 0,
+      keyPrefix: PEXELS_API_KEY?.substring(0, 5) || 'missing'
+    });
+
     if (!PEXELS_API_KEY) {
       logger.warn('IMAGE', 'Pexels API key not configured, skipping image fetch');
+      console.error('❌ [PEXELS] No API key found in process.env.PEXELS_API_KEY');
       return [];
     }
 

@@ -35,7 +35,8 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground h-full">
         <ErrorBoundary>
-          <PasswordGate>
+          {/* PasswordGate temporarily disabled for debugging */}
+          {/* <PasswordGate> */}
             <AuthProvider>
               <OfflineProvider>
                 <MotionProvider>
@@ -43,7 +44,7 @@ export default function RootLayout({
                 </MotionProvider>
               </OfflineProvider>
             </AuthProvider>
-          </PasswordGate>
+          {/* </PasswordGate> */}
         </ErrorBoundary>
       </body>
     </html>

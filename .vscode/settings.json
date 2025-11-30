@@ -1,0 +1,14 @@
+{
+  "remote.autoForwardPorts": true,
+  "remote.autoForwardPortsSource": "process",
+  "remote.portsAttributes": {
+    "3000": {
+      "label": "Next.js Dev Server",
+      "onAutoForward": "notify"
+    },
+    "9000": {
+      "label": "Next.js Dev Server (Alt)",
+      "onAutoForward": "notify"
+    }
+  }
+}

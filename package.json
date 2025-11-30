@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "postinstall": "patch-package",
-    "dev": "next dev -p 9000",
+    "dev": "next dev -p 9000 -H 0.0.0.0",
     "build": "next build",
     "build:firebase": "next build",
     "deploy:firebase": "npm run build:firebase && firebase deploy --only hosting,firestore",

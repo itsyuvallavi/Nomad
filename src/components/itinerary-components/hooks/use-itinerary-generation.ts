@@ -246,7 +246,12 @@ export function useItineraryGeneration({
                             title: day.title,
                             activities: day.activities || [],
                             weather: day.weather
-                        }))  // New format
+                        })),  // New format
+                        // Explicitly preserve metadata fields that might have been set initially
+                        cost: partialItinerary.current.cost || progress.metadata?.estimatedCost,
+                        _costEstimate: partialItinerary.current._costEstimate,
+                        photoUrl: partialItinerary.current.photoUrl,
+                        quickTips: partialItinerary.current.quickTips
                     };
 
                     console.log(`📊 Updated itinerary now has ${allDays.length} total days`);

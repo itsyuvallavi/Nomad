@@ -26,7 +26,7 @@ export class GPTAnalyzer {
     message: string,
     existingIntent: Partial<ParsedIntent>
   ): Promise<Partial<ParsedIntent>> {
-    const systemPrompt = this.buildSystemPrompt();
+    const systemPrompt = this.buildSystemPrompt(existingIntent);
 
     try {
       const tokenConfig = getTokenConfig('INTENT_EXTRACTION');
@@ -71,61 +71,59 @@ export class GPTAnalyzer {
 
   /**
    * Build the system prompt for intent extraction
-   * ENHANCED: Now includes explicit rules for temporal word exclusion
+   * Includes existing intent so GPT knows what's already been collected
    */
-  private buildSystemPrompt(): string {
-    return `You are an expert travel intent extraction AI. Analyze natural language travel requests and extract structured information.
+  private buildSystemPrompt(existingIntent?: Partial<ParsedIntent>): string {
+    let contextSection = '';
 
-CRITICAL RULES FOR DESTINATION EXTRACTION:
-1. Extract ONLY the city/region name - IGNORE temporal words
-   ❌ WRONG: "Lisbon For" (captured temporal word)
-   ✅ CORRECT: "Lisbon"
+    // If we have existing intent, tell GPT what we already know
+    if (existingIntent && Object.keys(existingIntent).length > 0) {
+      contextSection = `\nIMPORTANT - Information already collected from previous messages:
+${JSON.stringify(existingIntent, null, 2)}
 
-   Examples:
-   - "Lisbon for tomorrow" → destination: "Lisbon"
-   - "Paris starting Monday" → destination: "Paris"
-   - "3 days in London for next week" → destination: "London"
+Your task: Extract NEW information from the current message and UPDATE the existing data. Keep all previously collected information unless the user explicitly changes it.\n\n`;
+    }
 
-2. Multi-word city names are OK:
-   - "New York" → destination: "New York"
-   - "San Francisco" → destination: "San Francisco"
+    return `You are a travel intent extraction AI. Extract structured information from natural language travel requests.
 
-TEMPORAL WORDS TO EXCLUDE (never part of destination):
-- Prepositions: for, starting, beginning, ending, from
-- Time references: tomorrow, today, yesterday, next, this, week, month, year
-- Days: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
-- Months: January, February, March, April, May, June, July, August, September, October, November, December
+Your job: Identify the city/destination name, travel dates, duration, and preferences from the user's message.
+${contextSection}
+CRITICAL RULE: Extract ONLY the city name. NEVER include temporal words (starting, for, tomorrow, next, on, from, etc.) in the destination field.
 
-EXTRACTION SCHEMA:
+Examples - PAY ATTENTION to what should NOT be included:
+- "plan a 7 day trip to Lisbon staring next monday" → destination: "Lisbon" (NOT "Lisbon Staring")
+- "3 days in London for tomorrow" → destination: "London" (NOT "London For")
+- "Paris starting Monday" → destination: "Paris" (NOT "Paris Starting")
+- "London starting tomorrow" → destination: "London" (NOT "London Starting")
+- "Lisbon starting next week" → destination: "Lisbon" (NOT "Lisbon Starting")
+- "New York for 5 days" → destination: "New York" (NOT "New York For")
+- "I want to visit Tokyo and Seoul" → destinations: ["Tokyo", "Seoul"]
+
+Conversation examples:
+- User: "plan a trip to Lisbon" → {destination: "Lisbon"}
+- User: "on November 15th" → {destination: "Lisbon", startDate: "2025-11-15"} (KEEP Lisbon!)
+
+Return JSON with these fields (only include fields mentioned in the request):
 {
-  "destination": "string",           // Single city (clean, no temporal words)
-  "destinations": ["string"],        // Multi-city trips
-  "startDate": "YYYY-MM-DD",        // ISO format
-  "endDate": "YYYY-MM-DD",          // ISO format
-  "duration": number,               // Days
+  "destination": "string",           // ONLY the city name (e.g., "Lisbon", "New York", "London")
+  "destinations": ["string"],        // For multi-city trips - ONLY city names
+  "startDate": "YYYY-MM-DD",        // ISO format date
+  "endDate": "YYYY-MM-DD",          // ISO format date
+  "duration": number,               // Number of days
   "travelers": {
     "adults": number,
     "children": number
   },
   "budget": "budget" | "medium" | "luxury",
-  "interests": ["string"]           // culture, food, adventure, etc.
+  "interests": ["string"]           // e.g., ["culture", "food", "nightlife"]
 }
 
-IMPORTANT:
-- Only include fields explicitly mentioned in the request
-- Destination must be clean (no temporal words)
-- Return valid JSON matching schema
-- If uncertain about destination, prefer shorter clean name
-
-Examples:
-Input: "plan a 3 days trip to Lisbon for tomorrow"
-Output: {"destination": "Lisbon", "duration": 3, "startDate": "2025-10-02"}
-
-Input: "I want to visit Paris and London next week"
-Output: {"destinations": ["Paris", "London"], "startDate": "2025-10-06"}
-
-Input: "Tokyo for 5 days starting Monday"
-Output: {"destination": "Tokyo", "duration": 5, "startDate": "2025-10-06"}`;
+Key rules:
+- Extract ONLY the city name - NEVER include "starting", "for", "tomorrow", "next", "from", "on" in destination
+- Temporal words go in startDate field, NOT in destination field
+- PRESERVE previously collected information - only add/update what's in the current message
+- Return valid JSON with ALL fields (existing + new)
+- Only include fields that are mentioned or clearly implied`;
   }
 
   /**
@@ -160,20 +158,19 @@ Output: {"destination": "Tokyo", "duration": 5, "startDate": "2025-10-06"}`;
   }
 
   /**
-   * Clean destination name by removing temporal words
-   * Safety net in case AI includes temporal words
+   * Clean destination name - minimal safety net
+   * The AI should handle this correctly, but just in case
    */
   private cleanDestinationName(destination: string): string {
-    // Remove temporal words and everything after them
+    // Simple cleanup: remove common temporal words that might slip through
+    // Updated regex to handle temporal words at end of string (e.g., "London Starting")
     const cleaned = destination
-      .replace(/\s+(for|starting|beginning|ending|from|tomorrow|today|yesterday|next|this|week|month|year)\b.*/gi, '')
-      .replace(/\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b.*/gi, '')
-      .replace(/\s+(january|february|march|april|may|june|july|august|september|october|november|december)\b.*/gi, '')
+      .replace(/\s+(for|starting|staring|beginning|ending|from|on|tomorrow|today|next)(\s+.*)?$/gi, '')
       .trim();
 
-    // Log if cleaning was needed
+    // Log if cleaning was needed (this should be rare)
     if (cleaned !== destination) {
-      logger.warn('GPT', 'Cleaned destination name', {
+      logger.warn('GPT', 'Had to clean destination name - AI should handle this', {
         original: destination,
         cleaned
       });

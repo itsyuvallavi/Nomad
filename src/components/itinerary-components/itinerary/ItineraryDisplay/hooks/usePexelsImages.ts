@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
-import { searchPexelsImages, type PexelsImage } from '@/services/api/media/pexels';
 import { logger } from '@/lib/monitoring/logger';
 
-export function usePexelsImages(
+// Generic image type that works with both Pexels and Unsplash
+export interface DestinationImage {
+  id: string | number;
+  url: string;
+  photographer?: string;
+  alt?: string;
+}
+
+export function useDestinationImages(
   destination: string | undefined,
   locations: string[]
-): Record<string, PexelsImage[]> {
-  const [destinationImages, setDestinationImages] = useState<Record<string, PexelsImage[]>>({});
+): Record<string, DestinationImage[]> {
+  const [destinationImages, setDestinationImages] = useState<Record<string, DestinationImage[]>>({});
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -15,18 +22,45 @@ export function usePexelsImages(
         ? destination.split(',').map(d => d.trim())
         : locations;
 
-      if (destinationsToFetch.length === 0) return;
+      console.log('🎨 [usePexelsImages] Hook triggered', {
+        destination,
+        locations,
+        destinationsToFetch,
+        willFetch: destinationsToFetch.length > 0
+      });
 
-      logger.info('IMAGE', 'Starting Pexels image fetch', { destinations: destinationsToFetch });
-      const newImages: Record<string, PexelsImage[]> = {};
+      if (destinationsToFetch.length === 0) {
+        console.warn('🎨 [usePexelsImages] No destinations to fetch - aborting');
+        return;
+      }
+
+      logger.info('IMAGE', 'Starting image fetch', { destinations: destinationsToFetch });
+      const newImages: Record<string, DestinationImage[]> = {};
 
       for (const location of destinationsToFetch) {
         try {
-          const images = await searchPexelsImages(location, 3);
+          // Call server-side API route
+          const response = await fetch(`/api/images?destination=${encodeURIComponent(location)}&count=3`);
+
+          if (!response.ok) {
+            throw new Error(`API returned ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Convert API response to generic format (works with both Pexels and Unsplash)
+          const images: DestinationImage[] = (data.images || []).map((img: any) => ({
+            id: img.id,
+            url: img.urls?.regular || img.src?.large || img.url,
+            photographer: img.user?.name || img.photographer,
+            alt: img.alt_description || img.alt || location
+          }));
+
           newImages[location] = images;
-          logger.info('IMAGE', `Pexels found ${images.length} images for ${location}`);
+          logger.info('IMAGE', `Found ${images.length} images for ${location}`);
+          console.log('✅ [useDest inationImages] Stored', images.length, 'images for', location);
         } catch (error) {
-          logger.error('IMAGE', `Pexels failed to fetch images for ${location}`, { error });
+          logger.error('IMAGE', `Failed to fetch images for ${location}`, { error });
           newImages[location] = [];
         }
       }

@@ -112,14 +112,14 @@ export class IntentExtractor {
 
     // Validate destination
     if (data.destination && typeof data.destination === 'string') {
-      validated.destination = data.destination.trim();
+      validated.destination = this.cleanDestinationName(data.destination.trim());
     }
 
     // Validate destinations (multi-city)
     if (data.destinations && Array.isArray(data.destinations)) {
       validated.destinations = data.destinations
         .filter((d: any) => typeof d === 'string' && d.length > 0)
-        .map((d: string) => d.trim());
+        .map((d: string) => this.cleanDestinationName(d.trim()));
     }
 
     // Validate dates
@@ -237,5 +237,16 @@ export class IntentExtractor {
     }
 
     return parts.join(' | ');
+  }
+
+  /**
+   * Clean destination name - remove temporal words
+   * Matches the cleaning logic in gpt-analyzer
+   */
+  private cleanDestinationName(destination: string): string {
+    // Remove common temporal words that might slip through
+    return destination
+      .replace(/\s+(for|starting|staring|beginning|ending|from|on|tomorrow|today|next)(\s+.*)?$/gi, '')
+      .trim();
   }
 }

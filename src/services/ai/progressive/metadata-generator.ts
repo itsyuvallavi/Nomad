@@ -5,7 +5,6 @@
 
 import { logger } from '@/lib/monitoring/logger';
 import { TripMetadata } from '../types/core.types';
-import { searchPexelsImages } from '@/services/api/media/pexels';
 
 export class MetadataGenerator {
   /**
@@ -131,36 +130,14 @@ export class MetadataGenerator {
   }
 
   /**
-   * Generate photo URLs for destinations using Pexels API
+   * Generate placeholder photo URLs
+   * Actual images are fetched client-side via /api/images
    */
   private async generatePhotoUrls(destinations: string[]): Promise<string[]> {
-    const photoUrls: string[] = [];
-
-    try {
-      // Fetch image for the first destination (main hero image)
-      if (destinations.length > 0) {
-        const images = await searchPexelsImages(destinations[0], 1);
-        if (images.length > 0) {
-          photoUrls.push(images[0].src.large);
-          logger.info('IMAGE', `Fetched Pexels image for ${destinations[0]}`);
-        }
-      }
-
-      // Optionally fetch images for additional destinations
-      if (destinations.length > 1) {
-        for (let i = 1; i < Math.min(destinations.length, 3); i++) {
-          const images = await searchPexelsImages(destinations[i], 1);
-          if (images.length > 0) {
-            photoUrls.push(images[0].src.large);
-          }
-        }
-      }
-    } catch (error) {
-      logger.error('IMAGE', 'Error fetching Pexels images', error);
-      // Continue without images - they're not critical
-    }
-
-    return photoUrls;
+    // Return empty array - images will be fetched by the frontend component
+    // This keeps metadata generation fast and doesn't make external API calls
+    logger.info('IMAGE', 'Metadata generated without images - frontend will fetch via /api/images');
+    return [];
   }
 
   /**

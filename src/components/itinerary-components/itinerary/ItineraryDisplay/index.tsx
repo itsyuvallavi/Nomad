@@ -9,6 +9,7 @@ import { ItineraryHeader } from './ItineraryHeader';
 import { DestinationSwitcher } from './DestinationSwitcher';
 import { DayActivities } from './DayActivities';
 import { useLocationGrouping } from './hooks/useLocationGrouping';
+import { useDestinationImages } from './hooks/usePexelsImages';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/types/core.types';
 import { parseLocalDate, getDateRange } from '@/lib/utils/date-helpers';
 import { ErrorBoundary, withErrorBoundary } from '@/components/common/ErrorBoundary';
@@ -85,6 +86,9 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
   const { daysByLocation, locations } = useLocationGrouping(itinerary);
   const [selectedLocation, setSelectedLocation] = useState(locations[0] || '');
 
+  // Fetch destination images using Unsplash API
+  const destinationImages = useDestinationImages(itinerary.destination, locations);
+
   // Extract all activities for coworking section
   const allActivities = hasDays ? daysArray.flatMap((day: any) => day.activities) : [];
 
@@ -103,6 +107,11 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
 
   const dayCount = itinerary.duration || daysArray.length || 0;
 
+  // Get photo URL from fetched images or fallback to itinerary photoUrl
+  const photoUrl = itinerary.photoUrl ||
+    destinationImages[selectedLocation]?.[0]?.url ||
+    destinationImages[itinerary.destination || '']?.[0]?.url;
+
   return (
     <div className="h-full overflow-y-auto bg-background">
       {/* Trip Overview Header */}
@@ -110,7 +119,7 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
         itinerary={itinerary}
         tripDuration={tripDuration}
         dayCount={dayCount}
-        photoUrl={itinerary.photoUrl}
+        photoUrl={photoUrl}
         selectedLocation={selectedLocation}
         hasMetadata={hasMetadata}
         isGenerating={isGenerating}
