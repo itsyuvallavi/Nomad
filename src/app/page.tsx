@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { Header } from '@/components/navigation/Header';
 import { ViewRenderer } from '@/components/home/ViewRenderer';
@@ -39,7 +39,8 @@ export interface TripContext {
   isModified: boolean;
 }
 
-export default function Home() {
+// Inner component that uses useSearchParams (needs Suspense)
+function HomeContent() {
   const { user } = useAuth();
 
   // State management
@@ -116,5 +117,14 @@ export default function Home() {
       {/* Redux Test Component - Remove after testing */}
       <ReduxTest />
     </>
+  );
+}
+
+// Main export wrapped in Suspense for useSearchParams
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <HomeContent />
+    </Suspense>
   );
 }

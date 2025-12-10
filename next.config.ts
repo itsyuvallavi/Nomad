@@ -10,42 +10,28 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 
   // Performance optimizations
   compress: true, // Enable gzip compression
   productionBrowserSourceMaps: false, // Disable source maps in production
   poweredByHeader: false, // Remove X-Powered-By header
   reactStrictMode: true, // Enable React strict mode for better debugging
-  
+
   // Optimize package imports
   experimental: {
     optimizePackageImports: ['lucide-react', 'react-icons', '@radix-ui/*'],
-    // Note: optimizeCss removed in Next.js 15, using built-in optimizations
     scrollRestoration: true, // Better scroll restoration
-    // Note: allowedDevOrigins removed in Next.js 15, use headers() for CORS instead
   },
-  
+
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
     } : false,
   },
-  // Add webpack configuration to handle problematic modules
-  webpack: (config, { isServer }) => {
-    // This prevents the 'handlebars' module from being bundled on the client
-    // where it's not needed and causes build errors.
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        'handlebars': false
-      };
-    }
-    return config;
-  },
+
+  // Turbopack config (Next.js 16+)
+  turbopack: {},
 
   // Allow Firebase Studio environment and fix Safari Google Auth
   async headers() {
