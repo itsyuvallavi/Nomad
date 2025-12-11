@@ -9,14 +9,17 @@ import { getTokenConfig, tokenTracker, calculateTokenCost } from '../config/toke
 import { IntentParser } from './intent-parser';
 import { ParsedIntent } from '../types/core.types';
 import { openAIBackoff } from '@/lib/middleware/rate-limiter';
+import { DateParser } from '../parsers/date-parser';
 
 export class GPTAnalyzer {
   private openai: OpenAI;
   private intentParser: IntentParser;
+  private dateParser: DateParser;
 
   constructor(openai: OpenAI) {
     this.openai = openai;
     this.intentParser = new IntentParser();
+    this.dateParser = new DateParser();
   }
 
   /**
@@ -84,7 +87,16 @@ ${JSON.stringify(existingIntent, null, 2)}
 Your task: Extract NEW information from the current message and UPDATE the existing data. Keep all previously collected information unless the user explicitly changes it.\n\n`;
     }
 
+    // Get current date for context
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][today.getDay()];
+
     return `You are a travel intent extraction AI. Extract structured information from natural language travel requests.
+
+CURRENT DATE CONTEXT:
+- Today is ${dayOfWeek}, ${todayStr}
+- Use this to understand relative dates like "tomorrow", "next Monday", etc.
 
 Your job: Identify the city/destination name, travel dates, duration, and preferences from the user's message.
 ${contextSection}
@@ -107,8 +119,8 @@ Return JSON with these fields (only include fields mentioned in the request):
 {
   "destination": "string",           // ONLY the city name (e.g., "Lisbon", "New York", "London")
   "destinations": ["string"],        // For multi-city trips - ONLY city names
-  "startDate": "YYYY-MM-DD",        // ISO format date
-  "endDate": "YYYY-MM-DD",          // ISO format date
+  "startDate": "YYYY-MM-DD or relative",  // ISO format (e.g., "2025-12-15") OR relative (e.g., "tomorrow", "next Monday")
+  "endDate": "YYYY-MM-DD or relative",    // ISO format OR relative
   "duration": number,               // Number of days
   "travelers": {
     "adults": number,
@@ -120,6 +132,7 @@ Return JSON with these fields (only include fields mentioned in the request):
 
 Key rules:
 - Extract ONLY the city name - NEVER include "starting", "for", "tomorrow", "next", "from", "on" in destination
+- For dates: extract relative dates like "tomorrow", "next Monday", "next week" AS-IS - don't convert them
 - Temporal words go in startDate field, NOT in destination field
 - PRESERVE previously collected information - only add/update what's in the current message
 - Return valid JSON with ALL fields (existing + new)
@@ -143,15 +156,31 @@ Key rules:
       );
     }
 
-    // Validate dates are proper ISO format
-    if (result.startDate && !/^\d{4}-\d{2}-\d{2}$/.test(result.startDate)) {
-      logger.warn('GPT', 'Invalid startDate format, removing', { startDate: result.startDate });
-      delete result.startDate;
+    // Convert relative dates to ISO format using DateParser
+    if (result.startDate) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(result.startDate)) {
+        // Try to parse relative dates like "tomorrow", "next Monday", etc.
+        const parsedDate = this.dateParser.extractStartDate(result.startDate);
+        if (parsedDate) {
+          logger.info('GPT', `Converted relative date "${result.startDate}" to ${parsedDate}`);
+          result.startDate = parsedDate;
+        } else {
+          logger.warn('GPT', 'Invalid startDate format, removing', { startDate: result.startDate });
+          delete result.startDate;
+        }
+      }
     }
 
     if (result.endDate && !/^\d{4}-\d{2}-\d{2}$/.test(result.endDate)) {
-      logger.warn('GPT', 'Invalid endDate format, removing', { endDate: result.endDate });
-      delete result.endDate;
+      // Try to parse relative dates
+      const parsedDate = this.dateParser.extractStartDate(result.endDate);
+      if (parsedDate) {
+        logger.info('GPT', `Converted relative endDate "${result.endDate}" to ${parsedDate}`);
+        result.endDate = parsedDate;
+      } else {
+        logger.warn('GPT', 'Invalid endDate format, removing', { endDate: result.endDate });
+        delete result.endDate;
+      }
     }
 
     return result;

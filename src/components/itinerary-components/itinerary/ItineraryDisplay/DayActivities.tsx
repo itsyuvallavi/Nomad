@@ -29,6 +29,13 @@ interface DayActivitiesProps {
 }
 
 const DayActivitiesComponent: React.FC<DayActivitiesProps> = ({ selectedDay }) => {
+  // Debug: Log activities to see if addresses are present
+  console.log('🔍 [DayActivities] Rendering day', selectedDay.day, {
+    activitiesCount: selectedDay.activities.length,
+    firstActivityAddress: selectedDay.activities[0]?.address,
+    firstActivityData: selectedDay.activities[0]
+  });
+
   return (
     <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6">
       <motion.div
