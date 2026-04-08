@@ -81,23 +81,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({
       router.push(redirectTo);
     } catch (error: any) {
       console.error('Signup error:', error);
-      
-      // Handle Firebase auth errors
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          setError('An account with this email already exists.');
-          break;
-        case 'auth/invalid-email':
-          setError('Please enter a valid email address.');
-          break;
-        case 'auth/weak-password':
-          setError('Password is too weak. Please choose a stronger password.');
-          break;
-        case 'auth/operation-not-allowed':
-          setError('Email/password accounts are not enabled. Please contact support.');
-          break;
-        default:
-          setError('Failed to create account. Please try again.');
+      const msg: string = error?.message ?? '';
+      if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('email_exists')) {
+        setError('An account with this email already exists.');
+      } else if (msg.includes('Password should be')) {
+        setError('Password is too weak. Please choose a stronger password.');
+      } else {
+        setError(msg || 'Failed to create account. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -109,22 +99,12 @@ export const SignupForm: React.FC<SignupFormProps> = ({
 
     await signInWithGoogle(
       () => {
-        // On success - navigate to redirect URL
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (!isMobile) {
-          router.push(redirectTo);
-        }
+        if (!isMobile) router.push(redirectTo);
       },
       (error: any) => {
-        // On error - show error message
         console.error('Google sign in error:', error);
-        if (error.code === 'auth/popup-closed-by-user') {
-          setError('Sign-in was cancelled.');
-        } else if (error.code === 'auth/popup-blocked') {
-          setError('Authentication in progress. If the page doesn\'t redirect, please try again.');
-        } else {
-          setError(error.message || 'Failed to sign in with Google. Please try again.');
-        }
+        setError(error?.message || 'Failed to sign in with Google. Please try again.');
       }
     );
   }, [signInWithGoogle, router, redirectTo]);

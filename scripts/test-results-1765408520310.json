@@ -1,0 +1,220 @@
+{
+  "timestamp": 1765408520310,
+  "summary": {
+    "SIMPLE": {
+      "total": 5,
+      "passed": 0
+    },
+    "NORMAL": {
+      "total": 5,
+      "passed": 0
+    },
+    "COMPLEX": {
+      "total": 5,
+      "passed": 1
+    }
+  },
+  "results": [
+    {
+      "id": "S1",
+      "level": "SIMPLE",
+      "prompt": "3 days in London",
+      "expected": {
+        "destination": "London",
+        "duration": 3
+      },
+      "notes": "Basic",
+      "pass": false,
+      "time": 588,
+      "issues": [
+        "Expected dest \"London\", got \"\"",
+        "Expected duration 3, got none"
+      ]
+    },
+    {
+      "id": "S2",
+      "level": "SIMPLE",
+      "prompt": "Plan a weekend trip to Paris",
+      "expected": {
+        "destination": "Paris"
+      },
+      "notes": "Weekend",
+      "pass": false,
+      "time": 8,
+      "issues": [
+        "Expected dest \"Paris\", got \"\""
+      ]
+    },
+    {
+      "id": "S3",
+      "level": "SIMPLE",
+      "prompt": "Visit Tokyo for 5 days starting tomorrow",
+      "expected": {
+        "destination": "Tokyo",
+        "duration": 5
+      },
+      "notes": "Complete",
+      "pass": false,
+      "time": 8,
+      "issues": [
+        "Expected dest \"Tokyo\", got \"\"",
+        "Expected duration 5, got none"
+      ]
+    },
+    {
+      "id": "S4",
+      "level": "SIMPLE",
+      "prompt": "I want to go to Barcelona next Monday for 4 days",
+      "expected": {
+        "destination": "Barcelona",
+        "duration": 4
+      },
+      "notes": "Natural",
+      "pass": false,
+      "time": 12,
+      "issues": [
+        "Expected dest \"Barcelona\", got \"\"",
+        "Expected duration 4, got none"
+      ]
+    },
+    {
+      "id": "S5",
+      "level": "SIMPLE",
+      "prompt": "Rome, 3 days, starting October 15",
+      "expected": {
+        "destination": "Rome",
+        "duration": 3
+      },
+      "notes": "Concise",
+      "pass": false,
+      "time": 7,
+      "issues": [
+        "Expected dest \"Rome\", got \"\"",
+        "Expected duration 3, got none"
+      ]
+    },
+    {
+      "id": "N1",
+      "level": "NORMAL",
+      "prompt": "Plan a trip to Lisbon for tomorrow",
+      "expected": {
+        "destination": "Lisbon",
+        "shouldAskFor": [
+          "duration"
+        ]
+      },
+      "notes": "Missing duration",
+      "pass": false,
+      "time": 6
+    },
+    {
+      "id": "N2",
+      "level": "NORMAL",
+      "prompt": "I'm thinking about visiting London and Paris next week",
+      "expected": {
+        "destinations": [
+          "London",
+          "Paris"
+        ]
+      },
+      "notes": "Multi-city",
+      "pass": false,
+      "time": 6
+    },
+    {
+      "id": "N3",
+      "level": "NORMAL",
+      "prompt": "Take me to Bali starting March 15, I have a week off",
+      "expected": {
+        "destination": "Bali",
+        "duration": 7
+      },
+      "notes": "Indirect duration",
+      "pass": false,
+      "time": 10
+    },
+    {
+      "id": "N4",
+      "level": "NORMAL",
+      "prompt": "Plan a cultural trip to Kyoto with temples and food",
+      "expected": {
+        "destination": "Kyoto"
+      },
+      "notes": "Preferences",
+      "pass": false,
+      "time": 5
+    },
+    {
+      "id": "N5",
+      "level": "NORMAL",
+      "prompt": "Budget trip to Thailand, leaving soon",
+      "expected": {
+        "destination": "Thailand"
+      },
+      "notes": "Vague",
+      "pass": false,
+      "time": 6
+    },
+    {
+      "id": "C1",
+      "level": "COMPLEX",
+      "prompt": "I want to travel",
+      "expected": {
+        "shouldAskFor": [
+          "destination",
+          "duration"
+        ]
+      },
+      "notes": "No info",
+      "pass": true,
+      "time": 8,
+      "issues": []
+    },
+    {
+      "id": "C2",
+      "level": "COMPLEX",
+      "prompt": "Plan my honeymoon",
+      "expected": {
+        "shouldAskFor": [
+          "destination"
+        ]
+      },
+      "notes": "Context only",
+      "pass": false,
+      "time": 7
+    },
+    {
+      "id": "C3",
+      "level": "COMPLEX",
+      "prompt": "I have 10 days off in December and want to visit someplace warm with beaches",
+      "expected": {
+        "duration": 10
+      },
+      "notes": "Complex preferences",
+      "pass": false,
+      "time": 6
+    },
+    {
+      "id": "C4",
+      "level": "COMPLEX",
+      "prompt": "Take me to Lisbon For tomorrow",
+      "expected": {
+        "destination": "Lisbon"
+      },
+      "notes": "🔥 CRITICAL: Tests \"For\" removal",
+      "pass": false,
+      "time": 8
+    },
+    {
+      "id": "C5",
+      "level": "COMPLEX",
+      "prompt": "I'm free next week Monday to Friday, maybe Italy or Spain",
+      "expected": {
+        "duration": 5
+      },
+      "notes": "Multiple options",
+      "pass": false,
+      "time": 8
+    }
+  ]
+}

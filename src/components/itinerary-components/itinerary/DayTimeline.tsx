@@ -5,13 +5,14 @@ import { parseLocalDate } from '@/lib/utils/date-helpers';
 
 interface DayTimelineProps {
   totalDays: number;
+  startDay?: number; // Starting day number (for multi-city trips, e.g., Paris starts at day 5)
   selectedDay: number;
   onDaySelect: (day: number) => void;
   location?: string;
   dates?: string[];
 }
 
-function DayTimelineV2Component({ totalDays, selectedDay, onDaySelect, location, dates }: DayTimelineProps) {
+function DayTimelineV2Component({ totalDays, startDay = 1, selectedDay, onDaySelect, location, dates }: DayTimelineProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -67,8 +68,10 @@ function DayTimelineV2Component({ totalDays, selectedDay, onDaySelect, location,
   };
 
   const getDateLabel = (day: number) => {
-    if (dates && dates[day - 1]) {
-      const date = parseLocalDate(dates[day - 1]);
+    // Calculate the array index based on the actual day number and startDay
+    const dateIndex = day - startDay;
+    if (dates && dates[dateIndex]) {
+      const date = parseLocalDate(dates[dateIndex]);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
     return '';
@@ -180,7 +183,7 @@ function DayTimelineV2Component({ totalDays, selectedDay, onDaySelect, location,
               maxHeight: '90px'
             }}
           >
-            {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => {
+            {Array.from({ length: totalDays }, (_, i) => startDay + i).map((day) => {
               const isSelected = day === selectedDay;
               const isPast = day < selectedDay;
               

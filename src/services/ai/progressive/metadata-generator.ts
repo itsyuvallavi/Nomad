@@ -14,17 +14,57 @@ export class MetadataGenerator {
     destinations: string[];
     duration: number;
     startDate: string;
+    daysPerCity?: number[];
     preferences?: any;
   }): Promise<TripMetadata> {
     const startTime = Date.now();
 
     logger.info('AI', 'Generating trip metadata', {
       destinations: params.destinations,
-      duration: params.duration
+      duration: params.duration,
+      daysPerCity: params.daysPerCity
     });
 
-    const endDate = this.calculateEndDate(params.startDate, params.duration);
-    const daysPerCity = this.distributeDays(params.duration, params.destinations.length);
+    // Use provided daysPerCity if available, otherwise distribute evenly
+    let daysPerCity: number[];
+    let finalDuration = params.duration;
+    
+    if (params.daysPerCity && params.daysPerCity.length === params.destinations.length) {
+      daysPerCity = params.daysPerCity;
+      const sumOfDays = daysPerCity.reduce((a, b) => a + b, 0);
+      
+      // If daysPerCity is provided, duration should match the sum
+      if (sumOfDays !== params.duration) {
+        logger.warn('AI', '⚠️ daysPerCity sum does not match duration, using sum as duration', {
+          providedDuration: params.duration,
+          daysPerCitySum: sumOfDays,
+          daysPerCity: params.daysPerCity
+        });
+        finalDuration = sumOfDays;
+      }
+    } else {
+      daysPerCity = this.distributeDays(params.duration, params.destinations.length);
+    }
+    
+    const endDate = this.calculateEndDate(params.startDate, finalDuration);
+    
+    console.log('🔍 [MetadataGenerator] Days distribution:', {
+      providedDaysPerCity: params.daysPerCity,
+      calculatedDaysPerCity: daysPerCity,
+      destinations: params.destinations,
+      totalDays: daysPerCity.reduce((a, b) => a + b, 0),
+      originalDuration: params.duration,
+      finalDuration: finalDuration
+    });
+
+    logger.debug('AI', '📊 Days distribution calculated', {
+      provided: params.daysPerCity,
+      calculated: daysPerCity,
+      totalDays: daysPerCity.reduce((a, b) => a + b, 0),
+      originalDuration: params.duration,
+      finalDuration: finalDuration,
+      destinations: params.destinations.length
+    });
 
     const photos = await this.generatePhotoUrls(params.destinations);
     const metadata: TripMetadata = {
@@ -32,9 +72,9 @@ export class MetadataGenerator {
       destinations: params.destinations,
       startDate: params.startDate,
       endDate: endDate,
-      duration: params.duration,
+      duration: finalDuration, // Use corrected duration if daysPerCity was provided
       daysPerCity: daysPerCity,
-      estimatedCost: this.estimateCost(params.duration, params.preferences?.budget),
+      estimatedCost: this.estimateCost(finalDuration, params.preferences?.budget),
       quickTips: this.getQuickTips(params.destinations),
       photos: photos,
       photoUrl: photos[0] // Add the first photo as the main photoUrl

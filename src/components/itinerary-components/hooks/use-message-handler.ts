@@ -8,7 +8,7 @@ import { offlineStorage } from '@/services/storage/offline-storage';
 import { tripsService } from '@/services/trips/trips-service';
 import { useItineraryGeneration } from './use-itinerary-generation';
 import type { ConversationalItineraryOutput } from './use-itinerary-generation';
-import type { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 
 type Message = {
     role: 'user' | 'assistant';
@@ -90,70 +90,9 @@ export function useMessageHandler({
                 isCompleted: isCompleted  // Add both for compatibility
             };
 
-            // Save chat state using the offline storage service
-            // Note: If saveChatState doesn't exist, we'll use the generic save method
-            if ('saveChatState' in offlineStorage && typeof offlineStorage.saveChatState === 'function') {
-                offlineStorage.saveChatState(currentSearchId.current, chatState);
-            } else if ('save' in offlineStorage && typeof offlineStorage.save === 'function') {
-                (offlineStorage as any).save(`chat-${currentSearchId.current}`, chatState);
-            }
+            // Chat state persistence is strictly tied to Remote Database Auth now
+            // Removed local storage fallback due to privacy and persistence requirements.
 
-            // Update recent searches
-            const existingSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-            const recentSearches = existingSearches.filter((s: any) => s.id !== currentSearchId.current);
-
-            if (initialPrompt || currentItinerary) {
-                // Build a descriptive title for the search
-                // Try to get destination and duration from the itinerary first, then from initialPrompt
-                const actualItinerary = itinerary || currentItinerary;
-                let destination = actualItinerary?.destination || actualItinerary?.title || initialPrompt?.destination;
-                let duration = actualItinerary?.duration || initialPrompt?.duration;
-
-                // If we still don't have destination, try to extract from the prompt
-                const promptText = messagesRef.current[0]?.content || initialPrompt?.prompt || '';
-                if (!destination && promptText) {
-                    // Try to extract destination from prompt (e.g., "plan a 7 day trip to london")
-                    const destinationMatch = promptText.match(/(?:to|in|visit|explore)\s+([a-zA-Z\s]+?)(?:\s+(?:on|for|in|during)|$)/i);
-                    if (destinationMatch) {
-                        destination = destinationMatch[1].trim();
-                        // Capitalize first letter of each word
-                        destination = destination.split(' ').map((word: string) =>
-                            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                        ).join(' ');
-                    }
-                }
-
-                // If we still don't have duration, try to extract from prompt
-                if (!duration && promptText) {
-                    const durationMatch = promptText.match(/(\d+)\s*(?:day|days|night|nights)/i);
-                    if (durationMatch) {
-                        duration = parseInt(durationMatch[1]);
-                    }
-                }
-
-                // Build title with what we have
-                let title = destination || 'Trip';
-                if (duration) {
-                    title += ` - ${duration} days`;
-                }
-
-                const prompt = promptText || initialPrompt?.destination || 'New trip';
-
-                recentSearches.unshift({
-                    id: currentSearchId.current,
-                    destination: destination || initialPrompt?.destination,
-                    startDate: actualItinerary?.startDate || initialPrompt?.startDate,
-                    duration: duration || initialPrompt?.duration,
-                    timestamp: Date.now(),
-                    hasItinerary: !!(itinerary || currentItinerary),
-                    title: title,
-                    prompt: prompt,
-                    chatState: chatState,
-                    lastUpdated: new Date().toISOString()
-                });
-            }
-
-            localStorage.setItem('recentSearches', JSON.stringify(recentSearches.slice(0, 5)));
 
             // Save to Firestore if authenticated
             if (user && firestoreTripId) {
@@ -287,14 +226,12 @@ export function useMessageHandler({
                             messageType: 'itinerary'
                         }]);
 
-                        // Cache to offline storage
-                        await offlineStorage.cacheItinerary(response.itinerary.destination, response.itinerary);
-
+                        // Local caching was disabled for privacy reasons.
                         // Save to Firestore if user is authenticated
                         if (user) {
                             try {
-                                logger.info('MessageHandler', 'Saving trip to Firestore', {
-                                    userId: user.uid,
+                                logger.info('MessageHandler', 'Saving trip to database', {
+                                    userId: user.id,
                                     destination: response.itinerary.destination
                                 });
 
@@ -310,7 +247,7 @@ export function useMessageHandler({
                                 const endDate = lastDay?.date ? new Date(lastDay.date) : new Date(now.getTime() + duration * 24 * 60 * 60 * 1000);
 
                                 const tripData: any = {
-                                    userId: user.uid,
+                                    userId: user.id,
                                     title: response.itinerary.title || `Trip to ${response.itinerary.destination}`,
                                     destination: response.itinerary.destination,
                                     prompt: messagesRef.current.find(m => m.role === 'user')?.content || '',
@@ -332,7 +269,9 @@ export function useMessageHandler({
                                     tripData.budget = response.itinerary.budget;
                                 }
 
-                                await tripsService.createTrip(tripData);
+                                tripsService.createTrip(tripData).catch(error => {
+                                    logger.error('MessageHandler', 'Failed to save trip to async storage', error);
+                                });
 
                                 logger.info('MessageHandler', 'Trip saved successfully to Firestore');
                             } catch (error) {

@@ -9,7 +9,7 @@ import { MetadataGenerator } from '../progressive/metadata-generator';
 import { CityGenerator } from '../progressive/city-generator';
 import { getNextDate } from '../utils/date.utils';
 import { RouteOptimizer } from './route-optimizer';
-import { CostEstimator } from './cost-estimator';
+ 
 import { ItineraryValidator } from './itinerary-validator';
 import { ItineraryEnricher } from './itinerary-enricher';
 import {
@@ -35,7 +35,7 @@ export class TripOrchestrator {
   private metadataGenerator: MetadataGenerator;
   private cityGenerator: CityGenerator;
   private routeOptimizer: RouteOptimizer;
-  private costEstimator: CostEstimator;
+ 
   private validator: ItineraryValidator;
   private enricher: ItineraryEnricher;
 
@@ -43,7 +43,7 @@ export class TripOrchestrator {
     this.metadataGenerator = new MetadataGenerator();
     this.cityGenerator = new CityGenerator(apiKey);
     this.routeOptimizer = new RouteOptimizer();
-    this.costEstimator = new CostEstimator();
+ 
     this.validator = new ItineraryValidator();
     this.enricher = new ItineraryEnricher();
   }
@@ -102,9 +102,25 @@ export class TripOrchestrator {
     params: GenerationParams,
     updates: StreamUpdate[]
   ): Promise<TripMetadata> {
-    logger.debug('AI', '📊 Generating metadata...');
+    console.log('🔍 [TripOrchestrator] Received params:', {
+      destinations: params.destinations,
+      duration: params.duration,
+      daysPerCity: params.daysPerCity,
+      fullParams: JSON.stringify(params, null, 2)
+    });
+
+    logger.debug('AI', '📊 Generating metadata...', {
+      destinations: params.destinations,
+      duration: params.duration,
+      daysPerCity: params.daysPerCity
+    });
 
     const metadata = await this.metadataGenerator.generate(params);
+    
+    logger.debug('AI', '📊 Metadata generated', {
+      daysPerCity: metadata.daysPerCity,
+      totalDays: metadata.daysPerCity?.reduce((a, b) => a + b, 0) || metadata.duration
+    });
 
     updates.push({
       type: 'metadata',
@@ -135,12 +151,30 @@ export class TripOrchestrator {
     let currentDate = params.startDate;
     let currentDay = 1;
 
+    // Ensure metadata.daysPerCity is set (metadata generator should always set it)
+    if (!metadata.daysPerCity || metadata.daysPerCity.length !== params.destinations.length) {
+      logger.warn('AI', '⚠️ metadata.daysPerCity missing or incorrect, recalculating', {
+        provided: metadata.daysPerCity,
+        destinations: params.destinations.length,
+        duration: params.duration
+      });
+      // This should not happen, but if it does, distribute evenly
+      const baseDays = Math.floor(params.duration / params.destinations.length);
+      const remainder = params.duration % params.destinations.length;
+      metadata.daysPerCity = params.destinations.map((_, idx) => baseDays + (idx < remainder ? 1 : 0));
+      logger.debug('AI', '📊 Recalculated daysPerCity', { daysPerCity: metadata.daysPerCity });
+    }
+
     for (let i = 0; i < params.destinations.length; i++) {
       const city = params.destinations[i];
-      const daysForCity = metadata.daysPerCity?.[i] ||
-        Math.floor(params.duration / params.destinations.length);
+      const daysForCity = metadata.daysPerCity[i];
 
-      logger.debug('AI', `🏙️ Generating ${city} itinerary for ${daysForCity} days`, { days: daysForCity });
+      logger.debug('AI', `🏙️ Generating ${city} itinerary for ${daysForCity} days`, {
+        city,
+        days: daysForCity,
+        dayIndex: i,
+        daysPerCity: metadata.daysPerCity
+      });
 
       const cityItinerary = await this.cityGenerator.generateCityItinerary({
         city,
@@ -200,6 +234,7 @@ export class TripOrchestrator {
     const dailyItineraries = allDays.map(day => ({
       dayNumber: day.day,
       date: day.date,
+      city: day.city, // Include city for multi-city filtering
       title: day.title || `Day ${day.day} - ${day.city}`,
       activities: day.activities.map((act: any) => ({
         time: act.time,
@@ -216,12 +251,14 @@ export class TripOrchestrator {
       weather: day.weather || 'Check local forecast'
     }));
 
-    const endDate = getNextDate(params.startDate, params.duration - 1);
+    // Use metadata.duration which may have been corrected based on daysPerCity
+    const finalDuration = metadata.duration || params.duration;
+    const endDate = getNextDate(params.startDate, finalDuration - 1);
 
     return {
       destination: params.destinations.join(', '),
       title: metadata.title,
-      duration: params.duration,
+      duration: finalDuration,
       startDate: params.startDate,
       endDate: endDate,
       dailyItineraries,
@@ -261,12 +298,7 @@ export class TripOrchestrator {
       });
     }
 
-    // Add cost estimates
-    logger.debug('AI', '💰 Calculating costs...');
-    const withCosts = await this.costEstimator.addCostEstimates(enriched, {
-      budget: (params.preferences?.budget || 'medium') as 'budget' | 'medium' | 'luxury',
-      travelers: params.travelers
-    });
+    // Cost estimation removed per user request (no flight API available)
 
     if (params.onProgress) {
       this.sendProgress(params.onProgress, {
@@ -276,7 +308,7 @@ export class TripOrchestrator {
     }
 
     // Final validation
-    const validated = this.validator.validateAndFixItinerary(withCosts);
+    const validated = this.validator.validateAndFixItinerary(enriched);
 
     if (params.onProgress) {
       this.sendProgress(params.onProgress, {

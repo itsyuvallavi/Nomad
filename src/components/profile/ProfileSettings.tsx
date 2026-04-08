@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Settings, Save, Loader2 } from 'lucide-react';
-import { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 import type { UserData } from '@/infrastructure/contexts/AuthProvider';
 
 const profileSchema = z.object({

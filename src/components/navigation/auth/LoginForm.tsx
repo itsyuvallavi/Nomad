@@ -44,6 +44,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
 
   const {
     register,
@@ -56,32 +57,27 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError('');
+    setShowSignupPrompt(false);
 
     try {
       await signIn(data.email, data.password);
       router.push(redirectTo);
     } catch (error: any) {
       console.error('Login error:', error);
-      
-      // Handle Firebase auth errors
-      switch (error.code) {
-        case 'auth/user-not-found':
-          setError('No account found with this email address.');
-          break;
-        case 'auth/wrong-password':
-          setError('Incorrect password. Please try again.');
-          break;
-        case 'auth/invalid-email':
-          setError('Please enter a valid email address.');
-          break;
-        case 'auth/user-disabled':
-          setError('This account has been disabled. Please contact support.');
-          break;
-        case 'auth/too-many-requests':
-          setError('Too many failed attempts. Please try again later.');
-          break;
-        default:
-          setError('Failed to sign in. Please try again.');
+      const msg: string = error?.message ?? '';
+      if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+        setError('Incorrect email or password. If you do not have an account yet, please sign up!');
+        if (onSwitchToSignup) {
+          setShowSignupPrompt(true);
+        }
+      } else if (msg.includes('Email not confirmed')) {
+        setError('Please check your email and confirm your account first.');
+      } else if (msg.includes('Too many requests')) {
+        setError('Too many failed attempts. Please try again later.');
+      } else if (msg.includes('User not found') || msg.includes('user_not_found')) {
+        setError('No account found with this email address.');
+      } else {
+        setError(msg || 'Failed to sign in. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -125,8 +121,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="flex flex-col gap-2">
               <AlertDescription>{error}</AlertDescription>
+              {showSignupPrompt && onSwitchToSignup && (
+                <Button 
+                  variant="outline"
+                  type="button"
+                  className="w-full mt-2 bg-red-50 text-red-700 hover:bg-red-100 border-red-200"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onSwitchToSignup();
+                  }}
+                >
+                  Create a new account
+                </Button>
+              )}
             </Alert>
           )}
 

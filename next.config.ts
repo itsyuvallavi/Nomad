@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
   // Turbopack config (Next.js 16+)
   turbopack: {},
 
-  // Allow Firebase Studio environment and fix Safari Google Auth
+  // Allow cross-origin headers; keep COOP unsafe-none for Google Auth popup on Safari
   async headers() {
     return [
       {
@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
             key: 'Access-Control-Allow-Origin',
             value: '*'
           },
-          // Set Cross-Origin-Opener-Policy to allow popups (fixes Safari Google Auth)
+          // Cross-Origin-Opener-Policy: unsafe-none is required for Google OAuth popup
           {
             key: 'Cross-Origin-Opener-Policy',
             value: 'unsafe-none'
@@ -53,6 +53,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    qualities: [25, 50, 75, 90, 100],
     remotePatterns: [
       {
         protocol: 'https',

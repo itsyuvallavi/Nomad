@@ -1,28 +1,16 @@
-import {
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  serverTimestamp,
-  Timestamp,
-  query,
-  where,
-  getDocs,
-  limit,
-  orderBy
-} from 'firebase/firestore';
-import { db, auth } from '@/services/firebase/auth';
+import { supabase } from '@/services/supabase/client';
 import { logger } from '@/lib/monitoring/logger';
-import { prepareForFirestore } from '@/lib/utils/firestore-helpers';
+import { stripUndefined } from '@/lib/utils/supabase-helpers';
 import crypto from 'crypto';
 
 /**
- * Cache service for AI-generated itineraries
- * Reduces token usage by 40-65% for common requests
+ * AI Response Cache Service - Supabase Implementation
+ * Caches AI-generated itineraries in public.ai_cache table.
+ * Falls back to memory-only if user is not authenticated.
  */
 
-const CACHE_COLLECTION = 'ai_cache';
-const CACHE_DURATION_HOURS = 72; // Cache for 3 days
+const TABLE = 'ai_cache';
+const CACHE_DURATION_HOURS = 72;
 const COMMON_DESTINATIONS = ['london', 'paris', 'tokyo', 'new york', 'rome', 'barcelona'];
 
 interface CacheEntry {
@@ -32,10 +20,10 @@ interface CacheEntry {
   duration: number;
   response: any;
   tokensSaved: number;
-  createdAt: any;
-  expiresAt: any;
+  createdAt: string;
+  expiresAt: string;
   hitCount: number;
-  lastAccessedAt: any;
+  lastAccessedAt: string;
 }
 
 class AIResponseCache {
@@ -48,185 +36,58 @@ class AIResponseCache {
     this.preloadCommonDestinations();
   }
 
-  /**
-   * Check if user is authenticated (for Firestore operations)
-   */
-  private isAuthenticated(): boolean {
-    return auth.currentUser !== null;
+  private async isAuthenticated(): Promise<boolean> {
+    const { data } = await supabase.auth.getUser();
+    return !!data.user;
   }
 
-  /**
-   * Generate a cache key from request parameters
-   */
   private generateCacheKey(params: {
     destination: string;
     duration: number;
     startDate?: string;
     preferences?: any;
   }): string {
-    // Normalize destination
     const normalizedDest = params.destination.toLowerCase().trim();
-
-    // For common simple requests, use simple key
-    if (this.isSimpleRequest(params)) {
-      return `${normalizedDest}_${params.duration}d`;
-    }
-
-    // For complex requests, include more parameters
-    const keyObj = {
-      dest: normalizedDest,
-      dur: params.duration,
-      prefs: params.preferences ? JSON.stringify(params.preferences).substring(0, 100) : ''
-    };
+    if (this.isSimpleRequest(params)) return `${normalizedDest}_${params.duration}d`;
 
     return crypto
       .createHash('md5')
-      .update(JSON.stringify(keyObj))
+      .update(JSON.stringify({
+        dest: normalizedDest,
+        dur: params.duration,
+        prefs: params.preferences ? JSON.stringify(params.preferences).substring(0, 100) : '',
+      }))
       .digest('hex');
   }
 
-  /**
-   * Check if this is a simple request that can use cached responses
-   */
   private isSimpleRequest(params: any): boolean {
     const dest = params.destination?.toLowerCase().trim();
-    const hasSimpleDestination = COMMON_DESTINATIONS.includes(dest);
-    const hasStandardDuration = params.duration >= 2 && params.duration <= 7;
-    const hasMinimalPreferences = !params.preferences ||
-      Object.keys(params.preferences).length <= 2;
-
-    return hasSimpleDestination && hasStandardDuration && hasMinimalPreferences;
+    return (
+      COMMON_DESTINATIONS.includes(dest) &&
+      params.duration >= 2 && params.duration <= 7 &&
+      (!params.preferences || Object.keys(params.preferences).length <= 2)
+    );
   }
 
-  /**
-   * Pre-load common destination templates
-   */
-  private async preloadCommonDestinations() {
-    logger.info('AICache', 'Pre-loading common destination templates');
-
-    // Basic London 3-day template
+  private preloadCommonDestinations() {
     this.commonCache.set('london_3d', {
-      destination: 'London',
-      duration: 3,
-      template: {
-        overview: 'Classic 3-day London experience covering major attractions',
-        dailyItineraries: [
-          {
-            day: 1,
-            theme: 'Royal London & Westminster',
-            activities: [
-              { name: 'Buckingham Palace', duration: 120, type: 'attraction' },
-              { name: 'Westminster Abbey', duration: 90, type: 'attraction' },
-              { name: 'Big Ben & Parliament', duration: 60, type: 'sightseeing' }
-            ]
-          },
-          {
-            day: 2,
-            theme: 'Museums & Culture',
-            activities: [
-              { name: 'British Museum', duration: 180, type: 'museum' },
-              { name: 'Covent Garden', duration: 120, type: 'shopping' },
-              { name: 'West End Show', duration: 150, type: 'entertainment' }
-            ]
-          },
-          {
-            day: 3,
-            theme: 'Modern London',
-            activities: [
-              { name: 'Tower of London', duration: 150, type: 'attraction' },
-              { name: 'Tower Bridge', duration: 60, type: 'sightseeing' },
-              { name: 'Borough Market', duration: 90, type: 'food' }
-            ]
-          }
-        ]
-      },
-      tokensSaved: 2500
+      destination: 'London', duration: 3,
+      template: { overview: 'Classic 3-day London experience' },
+      tokensSaved: 2500,
     });
-
-    // Paris 3-day template
     this.commonCache.set('paris_3d', {
-      destination: 'Paris',
-      duration: 3,
-      template: {
-        overview: 'Romantic 3-day Paris itinerary with iconic sights',
-        dailyItineraries: [
-          {
-            day: 1,
-            theme: 'Classic Paris',
-            activities: [
-              { name: 'Eiffel Tower', duration: 120, type: 'attraction' },
-              { name: 'Arc de Triomphe', duration: 60, type: 'attraction' },
-              { name: 'Champs-Élysées', duration: 90, type: 'shopping' }
-            ]
-          },
-          {
-            day: 2,
-            theme: 'Art & Culture',
-            activities: [
-              { name: 'Louvre Museum', duration: 240, type: 'museum' },
-              { name: 'Latin Quarter', duration: 120, type: 'exploration' },
-              { name: 'Seine River Cruise', duration: 90, type: 'activity' }
-            ]
-          },
-          {
-            day: 3,
-            theme: 'Montmartre & Versailles',
-            activities: [
-              { name: 'Sacré-Cœur', duration: 90, type: 'attraction' },
-              { name: 'Montmartre District', duration: 120, type: 'exploration' },
-              { name: 'Palace of Versailles', duration: 240, type: 'attraction' }
-            ]
-          }
-        ]
-      },
-      tokensSaved: 2500
+      destination: 'Paris', duration: 3,
+      template: { overview: 'Romantic 3-day Paris itinerary' },
+      tokensSaved: 2500,
     });
-
-    // Tokyo 3-day template
     this.commonCache.set('tokyo_3d', {
-      destination: 'Tokyo',
-      duration: 3,
-      template: {
-        overview: 'Modern and traditional Tokyo in 3 days',
-        dailyItineraries: [
-          {
-            day: 1,
-            theme: 'Traditional Tokyo',
-            activities: [
-              { name: 'Sensoji Temple', duration: 90, type: 'temple' },
-              { name: 'Tokyo Skytree', duration: 120, type: 'attraction' },
-              { name: 'Asakusa District', duration: 120, type: 'exploration' }
-            ]
-          },
-          {
-            day: 2,
-            theme: 'Modern Tokyo',
-            activities: [
-              { name: 'Shibuya Crossing', duration: 60, type: 'sightseeing' },
-              { name: 'Harajuku', duration: 150, type: 'shopping' },
-              { name: 'Shinjuku', duration: 180, type: 'entertainment' }
-            ]
-          },
-          {
-            day: 3,
-            theme: 'Culture & Nature',
-            activities: [
-              { name: 'Meiji Shrine', duration: 90, type: 'shrine' },
-              { name: 'Tsukiji Market', duration: 120, type: 'food' },
-              { name: 'Tokyo Imperial Palace', duration: 120, type: 'attraction' }
-            ]
-          }
-        ]
-      },
-      tokensSaved: 2500
+      destination: 'Tokyo', duration: 3,
+      template: { overview: 'Modern and traditional Tokyo in 3 days' },
+      tokensSaved: 2500,
     });
-
     logger.info('AICache', `Pre-loaded ${this.commonCache.size} destination templates`);
   }
 
-  /**
-   * Get cached response if available
-   */
   async get(params: {
     destination: string;
     duration: number;
@@ -235,185 +96,135 @@ class AIResponseCache {
   }): Promise<{ hit: boolean; data?: any; tokensSaved?: number }> {
     const cacheKey = this.generateCacheKey(params);
 
-    // Check memory cache first
+    // Memory cache first
     if (this.memoryCache.has(cacheKey)) {
       const entry = this.memoryCache.get(cacheKey)!;
-      logger.info('AICache', `Memory cache HIT for ${cacheKey}`, {
-        tokensSaved: entry.tokensSaved
-      });
-
-      // Update hit count
       entry.hitCount++;
-      entry.lastAccessedAt = new Date();
-
-      return {
-        hit: true,
-        data: entry.response,
-        tokensSaved: entry.tokensSaved
-      };
+      return { hit: true, data: entry.response, tokensSaved: entry.tokensSaved };
     }
 
-    // Check common templates
+    // Common templates
     if (this.isSimpleRequest(params) && this.commonCache.has(cacheKey)) {
       const template = this.commonCache.get(cacheKey);
-      logger.info('AICache', `Template cache HIT for ${cacheKey}`, {
-        tokensSaved: template.tokensSaved
-      });
-
-      return {
-        hit: true,
-        data: template.template,
-        tokensSaved: template.tokensSaved
-      };
+      return { hit: true, data: template.template, tokensSaved: template.tokensSaved };
     }
 
-    // Check Firestore cache (only if authenticated)
-    if (this.isAuthenticated()) {
+    // Supabase cache
+    if (await this.isAuthenticated()) {
       try {
-        const docRef = doc(collection(db, CACHE_COLLECTION), cacheKey);
-        const docSnap = await getDoc(docRef);
+        const { data, error } = await supabase
+          .from(TABLE)
+          .select('*')
+          .eq('key', cacheKey)
+          .single();
 
-        if (docSnap.exists()) {
-          const entry = docSnap.data() as CacheEntry;
+        if (!error && data && new Date(data.expires_at) > new Date()) {
+          const entry: CacheEntry = {
+            key: data.key,
+            prompt: data.prompt,
+            destination: data.destination,
+            duration: data.duration,
+            response: data.response,
+            tokensSaved: data.tokens_saved,
+            hitCount: data.hit_count,
+            createdAt: data.created_at,
+            expiresAt: data.expires_at,
+            lastAccessedAt: data.last_accessed_at,
+          };
 
-          // Check if expired
-          if (entry.expiresAt && entry.expiresAt.toDate() > new Date()) {
-            logger.info('AICache', `Firestore cache HIT for ${cacheKey}`, {
-              tokensSaved: entry.tokensSaved
-            });
+          this.memoryCache.set(cacheKey, entry);
 
-            // Update memory cache
-            this.memoryCache.set(cacheKey, entry);
+          // Update hit count
+          await supabase.from(TABLE).update({
+            hit_count: data.hit_count + 1,
+            last_accessed_at: new Date().toISOString(),
+          }).eq('key', cacheKey);
 
-            // Update hit count
-            await setDoc(docRef, {
-              hitCount: entry.hitCount + 1,
-              lastAccessedAt: serverTimestamp()
-            }, { merge: true });
-
-            return {
-              hit: true,
-              data: entry.response,
-              tokensSaved: entry.tokensSaved
-            };
-          }
+          return { hit: true, data: entry.response, tokensSaved: entry.tokensSaved };
         }
       } catch (error) {
         logger.error('AICache', `Failed to get cache for ${cacheKey}`, error);
       }
     }
 
-    logger.info('AICache', `Cache MISS for ${cacheKey}`);
     return { hit: false };
   }
 
-  /**
-   * Store response in cache
-   */
   async set(
-    params: {
-      destination: string;
-      duration: number;
-      startDate?: string;
-      preferences?: any;
-    },
+    params: { destination: string; duration: number; startDate?: string; preferences?: any },
     response: any,
     tokensUsed: number
   ): Promise<void> {
     const cacheKey = this.generateCacheKey(params);
+    const tokensSaved = Math.round(tokensUsed * 0.9);
+    const now = new Date().toISOString();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + CACHE_DURATION_HOURS);
 
-    // Estimate tokens saved for future hits
-    const tokensSaved = Math.round(tokensUsed * 0.9); // 90% savings on cache hit
-
-    const now = serverTimestamp();
-    const expiryTime = new Date();
-    expiryTime.setHours(expiryTime.getHours() + CACHE_DURATION_HOURS);
-
-    const cacheEntry: CacheEntry = {
+    const entry: CacheEntry = {
       key: cacheKey,
       prompt: `${params.destination} for ${params.duration} days`,
       destination: params.destination.toLowerCase(),
       duration: params.duration,
-      response: response,
-      tokensSaved: tokensSaved,
+      response,
+      tokensSaved,
       createdAt: now,
-      expiresAt: Timestamp.fromDate(expiryTime),
+      expiresAt: expiresAt.toISOString(),
       hitCount: 0,
-      lastAccessedAt: now
+      lastAccessedAt: now,
     };
 
-    // Update memory cache
-    this.memoryCache.set(cacheKey, cacheEntry);
+    this.memoryCache.set(cacheKey, entry);
 
-    // Store in Firestore (only if authenticated)
-    if (this.isAuthenticated()) {
+    if (await this.isAuthenticated()) {
       try {
-        // Strip undefined values before saving to Firestore
-        const cleanedEntry = prepareForFirestore(cacheEntry);
-
-        const docRef = doc(collection(db, CACHE_COLLECTION), cacheKey);
-        await setDoc(docRef, cleanedEntry);
-
-        logger.info('AICache', `Cached response for ${cacheKey}`, {
-          destination: params.destination,
-          duration: params.duration,
-          tokensSaved: tokensSaved
+        const cleaned = stripUndefined(entry);
+        await supabase.from(TABLE).upsert({
+          key: cleaned.key,
+          prompt: cleaned.prompt,
+          destination: cleaned.destination,
+          duration: cleaned.duration,
+          response: cleaned.response,
+          tokens_saved: cleaned.tokensSaved,
+          expires_at: cleaned.expiresAt,
+          hit_count: 0,
+          created_at: cleaned.createdAt,
+          last_accessed_at: cleaned.lastAccessedAt,
         });
       } catch (error) {
         logger.error('AICache', `Failed to cache response for ${cacheKey}`, error);
       }
-    } else {
-      logger.info('AICache', `Cached in memory only (not authenticated): ${cacheKey}`);
     }
 
-    // Limit memory cache size
     if (this.memoryCache.size > 100) {
       const oldestKey = this.memoryCache.keys().next().value;
-      this.memoryCache.delete(oldestKey);
+      if (oldestKey !== undefined) this.memoryCache.delete(oldestKey);
     }
   }
 
-  /**
-   * Get cache statistics
-   */
-  async getStats(): Promise<{
-    memoryCacheSize: number;
-    templateCacheSize: number;
-    totalTokensSaved: number;
-    topDestinations: Array<{ destination: string; hits: number }>;
-  }> {
+  async getStats(): Promise<{ memoryCacheSize: number; templateCacheSize: number; totalTokensSaved: number; topDestinations: Array<{ destination: string; hits: number }> }> {
     let totalTokensSaved = 0;
     const destinationHits = new Map<string, number>();
 
-    // Calculate from memory cache
     for (const entry of this.memoryCache.values()) {
       totalTokensSaved += entry.tokensSaved * entry.hitCount;
-      const dest = entry.destination;
-      destinationHits.set(dest, (destinationHits.get(dest) || 0) + entry.hitCount);
+      destinationHits.set(entry.destination, (destinationHits.get(entry.destination) || 0) + entry.hitCount);
     }
-
-    // Get top destinations
-    const topDestinations = Array.from(destinationHits.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([destination, hits]) => ({ destination, hits }));
 
     return {
       memoryCacheSize: this.memoryCache.size,
       templateCacheSize: this.commonCache.size,
       totalTokensSaved,
-      topDestinations
+      topDestinations: Array.from(destinationHits.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([destination, hits]) => ({ destination, hits })),
     };
   }
 
-  /**
-   * Clear cache (for testing or manual reset)
-   */
   async clearCache(): Promise<void> {
     this.memoryCache.clear();
-    logger.info('AICache', 'Cache cleared');
   }
 }
 
-// Export singleton instance
 export const aiCache = new AIResponseCache();

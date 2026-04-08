@@ -1,46 +1,23 @@
 'use client';
 
 /**
- * Authentication Provider Component
- * Provides global auth state management for the Nomad Navigator app
- * Optimized with memoization to prevent unnecessary re-renders
+ * Authentication Provider
+ * Provides global auth state using Supabase Auth.
  */
 
 import React, { createContext, useEffect, useState, useMemo, useCallback } from 'react';
-import {
-  User,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  updateProfile,
-  onAuthStateChanged,
-  UserCredential,
-  setPersistence,
-  browserLocalPersistence,
-  indexedDBLocalPersistence,
-  getRedirectResult
-} from 'firebase/auth';
-import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  serverTimestamp,
-  Timestamp
-} from 'firebase/firestore';
-import { auth, db } from '@/services/firebase/auth';
+import type { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/services/supabase/client';
 import { tripsService } from '@/services/trips/trips-service';
-import { useGoogleAuth } from '@/hooks/use-google-auth';
 
-// User data interface stored in Firestore
+// User data interface stored in public.users
 export interface UserData {
   uid: string;
   email: string;
   displayName: string;
   photoURL?: string;
-  createdAt: Timestamp;
-  lastLoginAt: Timestamp;
+  createdAt: string;
+  lastLoginAt: string;
   preferences: {
     travelStyle: 'budget' | 'mid-range' | 'luxury';
     interests: string[];
@@ -51,406 +28,184 @@ export interface UserData {
   stats: {
     totalTripsPlanned: number;
     favoriteDestinations: string[];
-    lastTripGenerated?: Timestamp;
+    lastTripGenerated?: string;
   };
 }
 
 // Auth context interface
 export interface AuthContextType {
-  // User state
   user: User | null;
   userData: UserData | null;
   loading: boolean;
-
-  // Authentication methods
-  signUp: (email: string, password: string, displayName: string) => Promise<UserCredential>;
-  signIn: (email: string, password: string) => Promise<UserCredential>;
+  signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-
-  // Profile methods
   updateUserProfile: (data: Partial<UserData>) => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Default user preferences
 const DEFAULT_PREFERENCES = {
   travelStyle: 'mid-range' as const,
   interests: [],
   preferredLanguage: 'en',
   currency: 'USD',
-  defaultTripLength: 7
+  defaultTripLength: 7,
 };
 
-// Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Use the Google auth hook
-  const { signInWithGoogle: googleSignIn } = useGoogleAuth();
-
-  // Create user document in Firestore (memoized)
-  const createUserDocument = useCallback(async (user: User, additionalData: any = {}) => {
-    const userRef = doc(db, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      const userData: any = {
-        email: user.email!,
-        displayName: user.displayName || additionalData.displayName || '',
-        createdAt: serverTimestamp(),
-        lastLoginAt: serverTimestamp(),
-        preferences: DEFAULT_PREFERENCES,
-        stats: {
-          totalTripsPlanned: 0,
-          favoriteDestinations: []
-        }
-      };
-
-      // Only add photoURL if it exists
-      if (user.photoURL) {
-        userData.photoURL = user.photoURL;
-      }
-
-      await setDoc(userRef, userData);
-      console.log('✅ User document created');
-    } else {
-      // Update last login time
-      await updateDoc(userRef, {
-        lastLoginAt: serverTimestamp()
-      });
-    }
-  }, []);
-
-  // Fetch user data from Firestore (memoized)
+  // Fetch user profile from public.users
   const fetchUserData = useCallback(async (uid: string): Promise<UserData | null> => {
     try {
-      const userRef = doc(db, 'users', uid);
-      const userSnap = await getDoc(userRef);
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', uid)
+        .single();
 
-      if (userSnap.exists()) {
-        return { uid, ...userSnap.data() } as UserData;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error fetching user data:', error);
+      if (error || !data) return null;
+
+      return {
+        uid: data.id,
+        email: data.email,
+        displayName: data.display_name ?? '',
+        photoURL: data.photo_url ?? undefined,
+        createdAt: data.created_at,
+        lastLoginAt: data.last_login_at,
+        preferences: data.preferences ?? DEFAULT_PREFERENCES,
+        stats: data.stats ?? { totalTripsPlanned: 0, favoriteDestinations: [] },
+      };
+    } catch {
       return null;
     }
   }, []);
 
-  // Sign up with email and password (memoized)
-  const signUp = useCallback(async (email: string, password: string, displayName: string): Promise<UserCredential> => {
-    console.log('📝 Attempting sign up for:', email);
-    console.log('🔑 Auth configuration:', {
-      projectId: auth.app.options.projectId,
-      authDomain: auth.app.options.authDomain,
-      apiKey: auth.app.options.apiKey ? '✅ Present' : '❌ Missing'
+  // Ensure user row exists in public.users (handled by DB trigger, but we upsert as fallback)
+  const ensureUserDocument = useCallback(async (user: User, displayName?: string) => {
+    await supabase.from('users').upsert({
+      id: user.id,
+      email: user.email!,
+      display_name: displayName ?? user.user_metadata?.full_name ?? user.user_metadata?.name ?? '',
+      photo_url: user.user_metadata?.avatar_url ?? null,
+      last_login_at: new Date().toISOString(),
+      preferences: DEFAULT_PREFERENCES,
+      stats: { totalTripsPlanned: 0, favoriteDestinations: [] },
+    }, {
+      onConflict: 'id',
+      ignoreDuplicates: false,
     });
-
-    try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('✅ Account created successfully');
-
-      // Update the user's display name
-      await updateProfile(result.user, { displayName });
-      console.log('✅ Display name updated');
-
-      // Create user document
-      await createUserDocument(result.user, { displayName });
-
-      console.log('✅ User signed up successfully');
-      return result;
-    } catch (error: any) {
-      console.error('❌ Sign up error:', {
-        code: error.code,
-        message: error.message,
-        details: error
-      });
-
-      if (error.code === 'auth/configuration-not-found') {
-        throw new Error('Authentication is not properly configured. Please contact support.');
-      } else if (error.code === 'auth/email-already-in-use') {
-        throw new Error('An account with this email already exists.');
-      } else if (error.code === 'auth/invalid-email') {
-        throw new Error('Please enter a valid email address.');
-      } else if (error.code === 'auth/operation-not-allowed') {
-        throw new Error('Email/password accounts are not enabled. Please contact support.');
-      } else if (error.code === 'auth/weak-password') {
-        throw new Error('Password should be at least 6 characters.');
-      }
-
-      throw error;
-    }
-  }, [createUserDocument]);
-
-  // Sign in with email and password (memoized)
-  const signIn = useCallback(async (email: string, password: string): Promise<UserCredential> => {
-    console.log('🔐 Attempting sign in for:', email);
-    console.log('🔑 Auth configuration:', {
-      projectId: auth.app.options.projectId,
-      authDomain: auth.app.options.authDomain,
-      apiKey: auth.app.options.apiKey ? '✅ Present' : '❌ Missing'
-    });
-
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log('✅ Sign in successful, user:', result.user.email);
-
-      // Update last login time
-      await updateDoc(doc(db, 'users', result.user.uid), {
-        lastLoginAt: serverTimestamp()
-      });
-
-      console.log('✅ User signed in successfully');
-      return result;
-    } catch (error: any) {
-      console.error('❌ Sign in error:', {
-        code: error.code,
-        message: error.message,
-        details: error
-      });
-
-      if (error.code === 'auth/configuration-not-found') {
-        throw new Error('Authentication is not properly configured. Please contact support.');
-      } else if (error.code === 'auth/user-not-found') {
-        throw new Error('No account found with this email address.');
-      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-        throw new Error('Incorrect email or password.');
-      } else if (error.code === 'auth/invalid-email') {
-        throw new Error('Please enter a valid email address.');
-      } else if (error.code === 'auth/user-disabled') {
-        throw new Error('This account has been disabled.');
-      } else if (error.code === 'auth/too-many-requests') {
-        throw new Error('Too many failed login attempts. Please try again later.');
-      }
-
-      throw error;
-    }
   }, []);
 
-  // Sign in with Google (using the hook)
-  const signInWithGoogle = useCallback(async (): Promise<void> => {
-    await googleSignIn(
-      async () => {
-        // On success callback
-        if (auth.currentUser) {
-          await createUserDocument(auth.currentUser);
-          const data = await fetchUserData(auth.currentUser.uid);
-          setUserData(data);
-        }
+  // Sign up with email and password
+  const signUp = useCallback(async (email: string, password: string, displayName: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: displayName } },
+    });
+
+    if (error) throw error;
+
+    // Create profile row immediately (trigger may not fire fast enough client-side)
+    if (data.user) {
+      await ensureUserDocument(data.user, displayName);
+    }
+  }, [ensureUserDocument]);
+
+  // Sign in with email and password
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, []);
+
+  // Sign in with Google OAuth
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: 'select_account' },
       },
-      (error) => {
-        // On error callback
-        console.error('Google sign-in error:', error);
-      }
-    );
-  }, [googleSignIn, createUserDocument, fetchUserData]);
-
-  // Log out (memoized)
-  const logout = useCallback(async (): Promise<void> => {
-    try {
-      await signOut(auth);
-      setUserData(null);
-      console.log('✅ User logged out');
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
+    });
+    if (error) throw error;
   }, []);
 
-  // Reset password (memoized)
-  const resetPassword = useCallback(async (email: string): Promise<void> => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      console.log('✅ Password reset email sent');
-    } catch (error) {
-      console.error('Password reset error:', error);
-      throw error;
-    }
+  // Logout
+  const logout = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setUserData(null);
   }, []);
 
-  // Update user profile (memoized)
-  const updateUserProfile = useCallback(async (data: Partial<UserData>): Promise<void> => {
+  // Reset password
+  const resetPassword = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    if (error) throw error;
+  }, []);
+
+  // Update user profile in public.users
+  const updateUserProfile = useCallback(async (data: Partial<UserData>) => {
     if (!user) throw new Error('No user logged in');
 
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, data);
+    const updatePayload: Record<string, any> = {};
+    if (data.displayName !== undefined) updatePayload.display_name = data.displayName;
+    if (data.photoURL !== undefined) updatePayload.photo_url = data.photoURL;
+    if (data.preferences !== undefined) updatePayload.preferences = data.preferences;
+    if (data.stats !== undefined) updatePayload.stats = data.stats;
 
-      // Refresh local user data
-      const newData = await fetchUserData(user.uid);
-      setUserData(newData);
+    const { error } = await supabase.from('users').update(updatePayload).eq('id', user.id);
+    if (error) throw error;
 
-      console.log('✅ User profile updated');
-    } catch (error) {
-      console.error('Update profile error:', error);
-      throw error;
-    }
+    const newData = await fetchUserData(user.id);
+    setUserData(newData);
   }, [user, fetchUserData]);
 
-  // Refresh user data from Firestore (memoized)
-  const refreshUserData = useCallback(async (): Promise<void> => {
+  // Refresh user data
+  const refreshUserData = useCallback(async () => {
     if (!user) return;
-
-    const data = await fetchUserData(user.uid);
+    const data = await fetchUserData(user.id);
     setUserData(data);
   }, [user, fetchUserData]);
 
-  // Handle auth state changes and redirect results
+  // Auth state listener
   useEffect(() => {
-    let mounted = true;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session: Session | null) => {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-    // Check for redirect result ALWAYS on page load (critical for Safari ITP)
-    // Safari's Intelligent Tracking Prevention may clear localStorage, so we check regardless
-    const pendingAuth = localStorage.getItem('pendingGoogleAuth');
-    const authTimestamp = localStorage.getItem('authTimestamp');
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasAuthProvider = urlParams.has('authProvider');
-
-    // Check if we might be returning from an auth redirect
-    const shouldCheckRedirect = pendingAuth === 'true' || hasAuthProvider || authTimestamp;
-
-    if (shouldCheckRedirect) {
-      console.log('🔍 Checking for auth redirect result...', {
-        pendingAuth,
-        hasAuthProvider,
-        authTimestamp,
-        browser: /safari/i.test(navigator.userAgent) ? 'Safari' : 'Other'
-      });
-
-      // Clear flags immediately to prevent duplicate checks
-      localStorage.removeItem('pendingGoogleAuth');
-      localStorage.removeItem('authTimestamp');
-
-      // Clean up URL parameters
-      if (hasAuthProvider) {
-        urlParams.delete('authProvider');
-        const newUrl = window.location.pathname + (urlParams.toString() ? `?${urlParams.toString()}` : '');
-        window.history.replaceState({}, '', newUrl);
-      }
-
-      // Set persistence and check for redirect result
-      // Use indexedDBLocalPersistence for Safari ITP compatibility
-      const persistenceType = /safari/i.test(navigator.userAgent)
-        ? indexedDBLocalPersistence
-        : browserLocalPersistence;
-
-      console.log('🔧 Setting auth persistence:', persistenceType.type);
-
-      // Add timeout to prevent hanging
-      const redirectResultPromise = setPersistence(auth, persistenceType)
-        .then(() => {
-          console.log('✅ Persistence set, checking redirect result...');
-          return getRedirectResult(auth);
-        });
-
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Redirect result timeout')), 10000)
-      );
-
-      Promise.race([redirectResultPromise, timeoutPromise])
-        .then(async (result: any) => {
-          if (!mounted) return;
-
-          console.log('📦 Redirect result received:', {
-            hasResult: !!result,
-            hasUser: !!(result?.user),
-            userEmail: result?.user?.email || 'none'
-          });
-
-          if (result && result.user) {
-            console.log('✅ Google sign-in redirect successful', {
-              user: result.user.email,
-              browser: /safari/i.test(navigator.userAgent) ? 'Safari' : 'Other'
-            });
-
-            // Create/update user document
-            await createUserDocument(result.user);
-            const data = await fetchUserData(result.user.uid);
-
-            if (mounted) {
-              setUser(result.user);
-              setUserData(data);
-
-              // Sync local trips
-              if (data) {
-                try {
-                  await tripsService.syncLocalStorageToFirestore(result.user.uid);
-                  console.log('✅ Local trips synced to Firestore');
-                } catch (syncError) {
-                  console.error('Error syncing local trips:', syncError);
-                }
-              }
-            }
-          } else {
-            console.log('ℹ️ No redirect result found (normal page load or cancelled)');
-          }
-
-          setLoading(false);
-        })
-        .catch((error: any) => {
-          if (!mounted) return;
-
-          console.error('❌ Error checking redirect result:', {
-            code: error.code,
-            message: error.message,
-            error
-          });
-
-          if (error.code && error.code !== 'auth/redirect-cancelled-by-user') {
-            console.error('❌ Redirect result error:', error);
-          }
-          setLoading(false);
-        });
-    }
-
-    // Set up auth state listener
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!mounted) return;
-
-      // Check if we're currently handling a redirect
-      const pendingAuth = localStorage.getItem('pendingGoogleAuth');
-
-      if (user) {
-        setUser(user);
-        const data = await fetchUserData(user.uid);
-
-        if (mounted) {
+        if (currentUser) {
+          // Ensure user document exists (handles OAuth sign-ins)
+          await ensureUserDocument(currentUser);
+          const data = await fetchUserData(currentUser.id);
           setUserData(data);
 
-          // Only sync trips if not handling redirect (to avoid duplicate syncs)
-          if (data && !pendingAuth) {
-            try {
-              await tripsService.syncLocalStorageToFirestore(user.uid);
-              console.log('✅ Local trips synced to Firestore on auth');
-            } catch (syncError) {
-              console.error('Error syncing local trips:', syncError);
-            }
+          // Sync localStorage trips
+          try {
+            await tripsService.syncLocalStorageToFirestore(currentUser.id);
+          } catch {
+            // Non-critical
           }
+        } else {
+          setUserData(null);
         }
-      } else {
-        setUser(null);
-        setUserData(null);
-      }
 
-      // Only set loading to false if we're not waiting for a redirect
-      if (!pendingAuth) {
         setLoading(false);
       }
-    });
+    );
 
-    return () => {
-      mounted = false;
-      unsubscribe();
-    };
-  }, [createUserDocument, fetchUserData]);
+    return () => subscription.unsubscribe();
+  }, [ensureUserDocument, fetchUserData]);
 
-  // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo<AuthContextType>(() => ({
     user,
     userData,
@@ -461,19 +216,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     resetPassword,
     updateUserProfile,
-    refreshUserData
-  }), [
-    user,
-    userData,
-    loading,
-    signUp,
-    signIn,
-    signInWithGoogle,
-    logout,
-    resetPassword,
-    updateUserProfile,
-    refreshUserData
-  ]);
+    refreshUserData,
+  }), [user, userData, loading, signUp, signIn, signInWithGoogle, logout, resetPassword, updateUserProfile, refreshUserData]);
 
   return (
     <AuthContext.Provider value={value}>

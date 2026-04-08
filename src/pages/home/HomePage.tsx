@@ -28,14 +28,7 @@ import type { FormValues } from '@/components/home/TripPlanningForm';
 import type { RecentSearch, ChatState } from '@/app/page';
 import { tripsService } from '@/services/trips/trips-service';
 
-// Conditional auth import to handle SSR
-let useAuth: any;
-if (typeof window !== 'undefined') {
-  const authModule = require('@/infrastructure/contexts/AuthContext');
-  useAuth = authModule.useAuth;
-} else {
-  useAuth = () => ({ user: null, logout: () => {} });
-}
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 
 type StartItineraryProps = {
     onItineraryRequest: (values: FormValues, chatState?: ChatState, searchId?: string) => void;
@@ -64,7 +57,7 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
       try {
         if (user) {
           // Load from Firestore for logged-in users
-          const trips = await tripsService.getUserTrips(user.uid);
+          const trips = await tripsService.getUserTrips(user.id);
           
           // Convert Firestore trips to RecentSearch format
           const recentFromFirestore: RecentSearch[] = trips
@@ -74,24 +67,13 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
               prompt: trip.prompt,
               title: trip.title,
               chatState: trip.chatState,
-              lastUpdated: trip.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+              lastUpdated: new Date(trip.updatedAt || trip.createdAt || Date.now()).toISOString()
             }));
           
           setRecentSearches(recentFromFirestore);
         } else {
-          // Fall back to localStorage for non-authenticated users
-          const storedSearches = localStorage.getItem('recentSearches');
-          if (storedSearches) {
-            const searches = JSON.parse(storedSearches);
-            // Fix old format that might not have title/prompt
-            const fixedSearches = searches.map((search: any) => ({
-              ...search,
-              title: search.title || `${search.destination || 'Trip'}${search.duration ? ` - ${search.duration} days` : ''}`,
-              prompt: search.prompt || search.destination || 'New trip',
-              lastUpdated: search.lastUpdated || search.timestamp ? new Date(search.timestamp).toISOString() : new Date().toISOString()
-            }));
-            setRecentSearches(fixedSearches);
-          }
+          // Only show recent searches if user is explicitly authenticated
+          setRecentSearches([]);
         }
       } catch (e) {
         console.error("Could not load recent searches", e);
@@ -130,9 +112,7 @@ export default function StartItinerary({ onItineraryRequest }: StartItineraryPro
       // The trips remain in Firestore and will reload on page refresh
       setRecentSearches([]);
     } else {
-      // For non-logged-in users, clear localStorage
       setRecentSearches([]);
-      localStorage.removeItem('recentSearches');
     }
   };
 

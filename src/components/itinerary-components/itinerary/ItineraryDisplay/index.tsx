@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CoworkingSection } from '../Coworking-spots';
 import { ItineraryLoadingSkeleton } from '../Loading-skeleton';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -48,10 +48,25 @@ interface ItineraryPanelProps {
   };
   onRefine?: (feedback: string) => void;
   isRefining?: boolean;
+  selectedDay?: number;
+  onDayChange?: (day: number) => void;
+  selectedLocation?: string;
+  onLocationChange?: (location: string) => void;
 }
 
-function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryPanelProps) {
-  const [selectedDayInTimeline, setSelectedDayInTimeline] = useState(1);
+function ItineraryPanelComponent({
+  itinerary,
+  isRefining,
+  onRefine,
+  selectedDay: externalSelectedDay,
+  onDayChange,
+  selectedLocation: externalSelectedLocation,
+  onLocationChange
+}: ItineraryPanelProps) {
+  // Use external selectedDay if provided, otherwise use internal state
+  const [internalSelectedDay, setInternalSelectedDay] = useState(1);
+  const selectedDayInTimeline = externalSelectedDay ?? internalSelectedDay;
+  const setSelectedDayInTimeline = onDayChange ?? setInternalSelectedDay;
 
   // Show loading skeleton while refining
   if (isRefining) {
@@ -79,12 +94,23 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
   // Support both legacy 'itinerary' and new 'dailyItineraries' formats
   const daysArray = itinerary.itinerary || itinerary.dailyItineraries || [];
   const hasDays = daysArray.length > 0;
-  const isGenerating = itinerary.title && !hasDays;
+  const isGenerating = !!(itinerary.title && !hasDays);
   const hasMetadata = !!(itinerary.title && itinerary.startDate && itinerary.endDate);
 
   // Use location grouping hook
   const { daysByLocation, locations } = useLocationGrouping(itinerary);
-  const [selectedLocation, setSelectedLocation] = useState(locations[0] || '');
+
+  // Use external selectedLocation if provided, otherwise use internal state
+  const [internalSelectedLocation, setInternalSelectedLocation] = useState('');
+  const selectedLocation = externalSelectedLocation ?? internalSelectedLocation;
+  const setSelectedLocation = onLocationChange ?? setInternalSelectedLocation;
+
+  // Initialize selectedLocation when locations become available
+  useEffect(() => {
+    if (locations.length > 0 && !selectedLocation) {
+      setSelectedLocation(locations[0]);
+    }
+  }, [locations, selectedLocation, setSelectedLocation]);
 
   // Fetch destination images using Unsplash API
   const destinationImages = useDestinationImages(itinerary.destination, locations);
@@ -144,15 +170,25 @@ function ItineraryPanelComponent({ itinerary, isRefining, onRefine }: ItineraryP
 
             {/* Horizontal Timeline - Show loading skeleton if days not ready */}
             {hasDays ? (
-              <DayTimelineV2
-                totalDays={(daysByLocation[selectedLocation]?.days || daysArray).length}
-                selectedDay={selectedDayInTimeline}
-                onDaySelect={(day) => {
-                  setSelectedDayInTimeline(day);
-                }}
-                location={locations.length > 1 ? selectedLocation : undefined}
-                dates={(daysByLocation[selectedLocation]?.days || daysArray).map((d: any) => d.date)}
-              />
+              (() => {
+                const currentDays = daysByLocation[selectedLocation]?.days || daysArray;
+                const dayNumbers = currentDays.map((d: any) => d.day || d.dayNumber);
+                const minDay = Math.min(...dayNumbers);
+                const maxDay = Math.max(...dayNumbers);
+
+                return (
+                  <DayTimelineV2
+                    totalDays={maxDay - minDay + 1}
+                    startDay={minDay}
+                    selectedDay={selectedDayInTimeline}
+                    onDaySelect={(day) => {
+                      setSelectedDayInTimeline(day);
+                    }}
+                    location={locations.length > 1 ? selectedLocation : undefined}
+                    dates={currentDays.map((d: any) => d.date)}
+                  />
+                );
+              })()
             ) : (
               <div className="py-4">
                 <div className="flex gap-2 animate-pulse">

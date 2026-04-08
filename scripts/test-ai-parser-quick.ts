@@ -50,7 +50,7 @@ async function runTest(test: TestScenario) {
   const start = Date.now();
 
   try {
-    const response = await fetch('http://localhost:9000/api/ai', {
+    const response = await fetch('http://localhost:3000/api/ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -67,15 +67,26 @@ async function runTest(test: TestScenario) {
       return { pass: false, time };
     }
 
-    // Wait briefly for intent extraction
-    await new Promise(r => setTimeout(r, 500));
+    // Poll for intent extraction with retries (AI extraction is async)
+    let intent = {};
+    let awaitingInput;
+    let pollData;
 
-    // Poll once for intent
-    const pollResp = await fetch(`http://localhost:9000/api/ai?generationId=${data.data.generationId}`);
-    const pollData = await pollResp.json();
+    // Try polling up to 5 times with 1 second between each
+    for (let i = 0; i < 5; i++) {
+      await new Promise(r => setTimeout(r, 1000));
 
-    const intent = pollData.data?.intent || {};
-    const awaitingInput = pollData.data?.awaitingInput;
+      const pollResp = await fetch(`http://localhost:3000/api/ai?generationId=${data.data.generationId}`);
+      pollData = await pollResp.json();
+
+      intent = pollData.data?.intent || {};
+      awaitingInput = pollData.data?.awaitingInput;
+
+      // If we have an intent or awaiting input, we're done
+      if (Object.keys(intent).length > 0 || awaitingInput) {
+        break;
+      }
+    }
 
     // Validation
     let pass = true;
@@ -149,9 +160,9 @@ async function main() {
 
   // Check server
   try {
-    await fetch('http://localhost:9000');
+    await fetch('http://localhost:3000');
   } catch {
-    console.error('❌ Server not running on port 9000');
+    console.error('❌ Server not running on port 3000');
     process.exit(1);
   }
 
@@ -170,8 +181,9 @@ async function main() {
       results.push({ ...test, ...result });
       console.log('');
 
-      // Small delay between tests
-      await new Promise(r => setTimeout(r, 1000));
+      // Delay between tests to avoid OpenAI rate limits
+      console.log('   ⏳ Waiting 3s to avoid rate limits...');
+      await new Promise(r => setTimeout(r, 3000));
     }
   }
 

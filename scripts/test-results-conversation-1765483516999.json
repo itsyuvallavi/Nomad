@@ -1,0 +1,498 @@
+{
+  "timestamp": 1765483516999,
+  "summary": {
+    "SIMPLE": {
+      "total": 2,
+      "passed": 0
+    },
+    "NORMAL": {
+      "total": 0,
+      "passed": 0
+    },
+    "COMPLEX": {
+      "total": 0,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "S1",
+      "level": "SIMPLE",
+      "initialPrompt": "3 days in London starting tomorrow",
+      "followUpAnswers": {
+        "startDate": "tomorrow",
+        "destination": "London",
+        "duration": "3 days"
+      },
+      "expectedFinalIntent": {
+        "destination": "London",
+        "duration": 3
+      },
+      "notes": "Basic trip request with complete info",
+      "pass": false,
+      "issues": [
+        "Expected dest \"London\", got \"\"",
+        "Expected duration 3, got undefined",
+        "No cities in itinerary"
+      ],
+      "intent": {},
+      "itinerary": {
+        "destination": "London",
+        "title": "London",
+        "duration": 3,
+        "startDate": "2025-12-11",
+        "endDate": "2025-12-13",
+        "dailyItineraries": [
+          {
+            "dayNumber": 1,
+            "date": "2025-12-11",
+            "title": "Day 1 - London",
+            "activities": [
+              {
+                "time": "11:00",
+                "description": "Explore Tower Bridge Exhibition",
+                "venue_name": "Tower Bridge, London, United Kingdom",
+                "category": "Attraction",
+                "address": "Tower Bridge, London, United Kingdom",
+                "coordinates": {
+                  "lat": 51.5043,
+                  "lng": -0.07618
+                }
+              },
+              {
+                "time": "09:00",
+                "description": "Visit Tower of London",
+                "venue_name": "Tower of London",
+                "category": "Leisure",
+                "address": "Tower of London, Tower Hill, London, EC3N 4AB, United Kingdom",
+                "coordinates": {
+                  "lat": 51.5097,
+                  "lng": -0.07552
+                },
+                "zone": "City of London"
+              },
+              {
+                "time": "12:30",
+                "description": "Lunch at Borough Market",
+                "venue_name": "Leon (Borough Market)",
+                "category": "Food",
+                "address": "Leon, 8 Southwark Street, London, SE1 0TH, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50518,
+                  "lng": -0.09042
+                },
+                "zone": "South Bank"
+              },
+              {
+                "time": "14:00",
+                "description": "Visit the Shard viewing platform",
+                "venue_name": "The Shard",
+                "category": "Leisure",
+                "address": "The Shard, 32 London Bridge Street, London, SE1 9SG, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50464,
+                  "lng": -0.08698
+                }
+              },
+              {
+                "time": "16:00",
+                "description": "Stroll along the South Bank",
+                "venue_name": "South Bank, London, United Kingdom",
+                "category": "Leisure",
+                "address": "South Bank, London, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50825,
+                  "lng": -0.10983
+                },
+                "zone": "City of London"
+              },
+              {
+                "time": "19:00",
+                "description": "Dinner at Dishoom",
+                "venue_name": "Dishoom Covent Garden (Dishoom)",
+                "category": "Food",
+                "address": "Dishoom Covent Garden, 12 Upper St Martin's Lane, London, WC2H 9FB, United Kingdom",
+                "coordinates": {
+                  "lat": 51.51319,
+                  "lng": -0.1271
+                }
+              }
+            ],
+            "weather": "Check local forecast"
+          },
+          {
+            "dayNumber": 2,
+            "date": "2025-12-12",
+            "title": "Day 2 - London",
+            "activities": [
+              {
+                "time": "09:00",
+                "description": "Visit British Museum",
+                "venue_name": "The British Museum",
+                "category": "Attraction",
+                "address": "The British Museum, Great Russell Street, London, WC1B 3DG, United Kingdom",
+                "coordinates": {
+                  "lat": 51.51937,
+                  "lng": -0.12712
+                }
+              },
+              {
+                "time": "12:30",
+                "description": "Lunch at The Ivy",
+                "venue_name": "The Ivy",
+                "category": "Food",
+                "address": "The Ivy, 1-5 West Street, London, WC2H 9, United Kingdom",
+                "coordinates": {
+                  "lat": 51.51283,
+                  "lng": -0.12808
+                }
+              },
+              {
+                "time": "11:00",
+                "description": "Explore Covent Garden Market",
+                "venue_name": "Covent Garden, London, United Kingdom",
+                "category": "Leisure",
+                "address": "Covent Garden, London, United Kingdom",
+                "coordinates": {
+                  "lat": 51.51226,
+                  "lng": -0.12315
+                },
+                "zone": "Covent Garden"
+              },
+              {
+                "time": "14:00",
+                "description": "Visit the National Gallery",
+                "venue_name": "National Portrait Gallery (National Gallery)",
+                "category": "Attraction",
+                "address": "National Portrait Gallery, 2 St Martin's Place, London, WC2N 5, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50943,
+                  "lng": -0.12772
+                }
+              },
+              {
+                "time": "16:00",
+                "description": "Walk through St. James's Park",
+                "venue_name": "St James's Park, London, England, United Kingdom",
+                "category": "Leisure",
+                "address": "St James's Park, London, England, United Kingdom",
+                "coordinates": {
+                  "lat": 51.4972,
+                  "lng": -0.13773
+                }
+              },
+              {
+                "time": "19:00",
+                "description": "Dinner at Sketch",
+                "venue_name": "Sketch",
+                "category": "Food",
+                "address": "Sketch, 9 Conduit Street, London, W1S 2XG, United Kingdom",
+                "coordinates": {
+                  "lat": 51.51281,
+                  "lng": -0.14152
+                }
+              }
+            ],
+            "weather": "Check local forecast"
+          },
+          {
+            "dayNumber": 3,
+            "date": "2025-12-13",
+            "title": "Day 3 - London",
+            "activities": [
+              {
+                "time": "09:00",
+                "description": "Visit Buckingham Palace",
+                "venue_name": "Buckingham Palace",
+                "category": "Leisure",
+                "address": "Buckingham Palace, 1 Spur Road, London, SW1A 1AA, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50136,
+                  "lng": -0.14191
+                },
+                "zone": "Westminster"
+              },
+              {
+                "time": "11:00",
+                "description": "Explore Westminster Abbey",
+                "venue_name": "Westminster Abbey",
+                "category": "Leisure",
+                "address": "Westminster Abbey, 20 Dean's Yard, London, SW1P 3, United Kingdom",
+                "coordinates": {
+                  "lat": 51.4993,
+                  "lng": -0.12736
+                },
+                "zone": "Westminster"
+              },
+              {
+                "time": "12:30",
+                "description": "Lunch at The Cinnamon Club",
+                "venue_name": "The Cinnamon Club",
+                "category": "Food",
+                "address": "The Cinnamon Club, 30 Great Smith Street, London, SW1P 3BP, United Kingdom",
+                "coordinates": {
+                  "lat": 51.49752,
+                  "lng": -0.12969
+                }
+              },
+              {
+                "time": "14:00",
+                "description": "Visit Houses of Parliament",
+                "venue_name": "Houses of Parliament, London, SW1A 2, United Kingdom",
+                "category": "Attraction",
+                "address": "Houses of Parliament, London, SW1A 2, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50059,
+                  "lng": -0.12613
+                },
+                "zone": "Westminster"
+              },
+              {
+                "time": "16:00",
+                "description": "Take a River Thames Cruise",
+                "venue_name": "The River Thames",
+                "category": "Leisure",
+                "address": "The River Thames, Riverside Walk, London, SE1 8, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50304,
+                  "lng": -0.11928
+                }
+              },
+              {
+                "time": "19:00",
+                "description": "Dinner at Aqua Shard",
+                "venue_name": "Aqua Shard",
+                "category": "Food",
+                "address": "Aqua Shard, 31 St Thomas Street, London, SE1 9QU, United Kingdom",
+                "coordinates": {
+                  "lat": 51.50427,
+                  "lng": -0.08646
+                }
+              }
+            ],
+            "weather": "Check local forecast"
+          }
+        ],
+        "estimatedCost": 1615,
+        "travelTips": [
+          "Get an Oyster card for London transport",
+          "Check visa requirements for your nationality",
+          "Get travel insurance before departure"
+        ],
+        "costBreakdown": {
+          "flights": 1000,
+          "accommodation": 240,
+          "dailyExpenses": 180,
+          "activities": 120,
+          "localTransport": 75,
+          "total": 1615,
+          "currency": "USD",
+          "perPerson": 1615
+        }
+      },
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "S2",
+      "level": "SIMPLE",
+      "initialPrompt": "Plan a 2 day weekend trip to Paris starting next Friday",
+      "followUpAnswers": {
+        "startDate": "next Friday",
+        "destination": "Paris",
+        "duration": "2 days"
+      },
+      "expectedFinalIntent": {
+        "destination": "Paris",
+        "duration": 2
+      },
+      "notes": "Weekend trip with complete info",
+      "pass": false,
+      "issues": [
+        "Expected dest \"Paris\", got \"\"",
+        "Expected duration 2, got undefined",
+        "No cities in itinerary"
+      ],
+      "intent": {},
+      "itinerary": {
+        "destination": "Paris",
+        "title": "Paris",
+        "duration": 2,
+        "startDate": "2025-12-18",
+        "endDate": "2025-12-19",
+        "dailyItineraries": [
+          {
+            "dayNumber": 1,
+            "date": "2025-12-18",
+            "title": "Day 1 - Paris",
+            "activities": [
+              {
+                "time": "12:30",
+                "description": "Lunch at Café de l'Homme",
+                "venue_name": "Cafe de L'Homme",
+                "category": "Leisure",
+                "address": "Cafe de L'Homme, 17 Place du Trocadéro et du 11 Novembre, 75116 Paris, France",
+                "coordinates": {
+                  "lat": 48.86253,
+                  "lng": 2.28743
+                }
+              },
+              {
+                "time": "09:00",
+                "description": "Visit the Eiffel Tower",
+                "venue_name": "Eiffel Tower",
+                "category": "Leisure",
+                "address": "Eiffel Tower, 5 Avenue Anatole France, 75007 Paris, France",
+                "coordinates": {
+                  "lat": 48.85824,
+                  "lng": 2.2945
+                },
+                "zone": "Eiffel Tower Area"
+              },
+              {
+                "time": "11:00",
+                "description": "Explore the Trocadéro Gardens",
+                "venue_name": "Fontaine du Trocadero",
+                "category": "Leisure",
+                "address": "Fontaine du Trocadero, Avenue Hussein 1er de Jordanie, 75116 Paris, France",
+                "coordinates": {
+                  "lat": 48.86191,
+                  "lng": 2.28904
+                },
+                "zone": "Eiffel Tower Area"
+              },
+              {
+                "time": "16:00",
+                "description": "Stroll through the Tuileries Garden",
+                "venue_name": "Jardin des Tuileries (Tuileries Garden)",
+                "category": "Leisure",
+                "address": "Jardin des Tuileries, 113 Rue de Rivoli, 75001 Paris, France",
+                "coordinates": {
+                  "lat": 48.86384,
+                  "lng": 2.33144
+                }
+              },
+              {
+                "time": "14:00",
+                "description": "Visit the Louvre Museum",
+                "venue_name": "Louvre Museum",
+                "category": "Attraction",
+                "address": "Louvre Museum, 99 Musée du Louvre, 75001 Paris, France",
+                "coordinates": {
+                  "lat": 48.86098,
+                  "lng": 2.33583
+                },
+                "zone": "Central Paris"
+              },
+              {
+                "time": "19:00",
+                "description": "Dinner at Le Meurice",
+                "venue_name": "Tables & Auberges de France (Le Meurice)",
+                "category": "Leisure",
+                "address": "Tables & Auberges de France, 228 Rue de Rivoli, 75001 Paris, France",
+                "coordinates": {
+                  "lat": 48.8652,
+                  "lng": 2.3281
+                }
+              }
+            ],
+            "weather": "Check local forecast"
+          },
+          {
+            "dayNumber": 2,
+            "date": "2025-12-19",
+            "title": "Day 2 - Paris",
+            "activities": [
+              {
+                "time": "11:00",
+                "description": "Explore the artists' square at Place du Tertre",
+                "venue_name": "Place du Tertre, 75018 Paris, France",
+                "category": "Leisure",
+                "address": "Place du Tertre, 75018 Paris, France",
+                "coordinates": {
+                  "lat": 48.88654,
+                  "lng": 2.3406
+                }
+              },
+              {
+                "time": "12:30",
+                "description": "Lunch at Le Consulat",
+                "venue_name": "Section Consulaire Tchèquia",
+                "category": "Leisure",
+                "address": "Section Consulaire Tchèquia, 18 Rue Bonaparte, 75006 Paris, France",
+                "coordinates": {
+                  "lat": 48.85607,
+                  "lng": 2.33425
+                }
+              },
+              {
+                "time": "09:00",
+                "description": "Morning visit to Montmartre",
+                "venue_name": "Montmartre, Paris, Ile-de-France, France",
+                "category": "Attraction",
+                "address": "Montmartre, Paris, Ile-de-France, France",
+                "coordinates": {
+                  "lat": 48.88617,
+                  "lng": 2.33796
+                },
+                "zone": "Montmartre"
+              },
+              {
+                "time": "14:00",
+                "description": "Visit the Musée d'Orsay",
+                "venue_name": "Cafe Campana (Musée d'Orsay)",
+                "category": "Attraction",
+                "address": "Cafe Campana, 1 Rue de la Légion d'Honneur, 75007 Paris, France",
+                "coordinates": {
+                  "lat": 48.86036,
+                  "lng": 2.32515
+                }
+              },
+              {
+                "time": "16:00",
+                "description": "Walk along the Seine River",
+                "venue_name": "Seine River",
+                "category": "Leisure",
+                "address": "Seine River, 75006 Paris, France",
+                "coordinates": {
+                  "lat": 48.85827,
+                  "lng": 2.33497
+                }
+              },
+              {
+                "time": "19:00",
+                "description": "Dinner on a Seine River Cruise",
+                "venue_name": "Bateaux Parisiens",
+                "category": "Attraction",
+                "address": "Bateaux Parisiens, Quai Jacques Chirac, 75007 Paris, France",
+                "coordinates": {
+                  "lat": 48.86001,
+                  "lng": 2.29418
+                }
+              }
+            ],
+            "weather": "Check local forecast"
+          }
+        ],
+        "estimatedCost": 1370,
+        "travelTips": [
+          "Book Eiffel Tower tickets in advance",
+          "Check visa requirements for your nationality",
+          "Get travel insurance before departure"
+        ],
+        "costBreakdown": {
+          "flights": 1000,
+          "accommodation": 120,
+          "dailyExpenses": 120,
+          "activities": 80,
+          "localTransport": 50,
+          "total": 1370,
+          "currency": "USD",
+          "perPerson": 1370
+        }
+      },
+      "canGenerate": false,
+      "turns": 1
+    }
+  ]
+}

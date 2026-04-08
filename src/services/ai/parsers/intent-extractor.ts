@@ -13,6 +13,7 @@ import { logger } from '@/lib/monitoring/logger';
 export interface ParsedIntent {
   destination?: string;
   destinations?: string[];  // For multi-city trips
+  daysPerCity?: number[];   // Days to spend in each city (for multi-city trips)
   startDate?: string;
   endDate?: string;
   duration?: number;
@@ -124,11 +125,21 @@ export class IntentExtractor {
 
     // Validate dates
     if (data.startDate && this.dateParser.validateDate(data.startDate)) {
-      validated.startDate = this.dateParser.formatDate(new Date(data.startDate));
+      // If already in ISO format (YYYY-MM-DD), keep it as-is to avoid timezone issues
+      if (/^\d{4}-\d{2}-\d{2}$/.test(data.startDate)) {
+        validated.startDate = data.startDate;
+      } else {
+        validated.startDate = this.dateParser.formatDate(new Date(data.startDate));
+      }
     }
 
     if (data.endDate && this.dateParser.validateDate(data.endDate)) {
-      validated.endDate = this.dateParser.formatDate(new Date(data.endDate));
+      // If already in ISO format (YYYY-MM-DD), keep it as-is to avoid timezone issues
+      if (/^\d{4}-\d{2}-\d{2}$/.test(data.endDate)) {
+        validated.endDate = data.endDate;
+      } else {
+        validated.endDate = this.dateParser.formatDate(new Date(data.endDate));
+      }
     }
 
     // Validate duration

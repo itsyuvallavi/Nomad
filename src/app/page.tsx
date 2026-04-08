@@ -10,7 +10,6 @@ import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { Header } from '@/components/navigation/Header';
 import { ViewRenderer } from '@/components/home/ViewRenderer';
 import { useTripLoader } from '@/components/home/hooks/use-trip-loader';
-import { ReduxTest } from '@/components/ReduxTest';
 import type { FormValues } from '@/components/home/TripPlanningForm';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/types/core.types';
 
@@ -113,9 +112,6 @@ function HomeContent() {
         onChatError={handleChatError}
         onReturn={handleReturnToStart}
       />
-
-      {/* Redux Test Component - Remove after testing */}
-      <ReduxTest />
     </>
   );
 }

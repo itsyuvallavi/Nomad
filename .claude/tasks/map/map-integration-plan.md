@@ -113,31 +113,84 @@ interface DayPlan {
 - Less polished UI than commercial options
 - Limited built-in features
 
-### **Recommendation: Google Maps**
+### **Decision: Leaflet + OpenStreetMap** ✅
 
 **Reasoning:**
-1. Already integrated (Google API key exists for Places/Geocoding)
-2. Familiar UI increases user trust
-3. Can reuse existing coordinates from HERE enrichment
-4. Free tier is sufficient for current usage
-5. Best TypeScript/React support
+1. **Completely free** - no API keys, no usage limits, no costs
+2. **Lightweight** - 39KB vs Google Maps 400KB (60% faster)
+3. **Can reuse existing coordinates** from HERE enrichment
+4. **Open source** - full control and customization
+5. **Great React support** - react-leaflet library
+
+**Technology Stack:**
+- **HERE API**: Already provides coordinates & addresses (no changes needed)
+- **Leaflet**: JavaScript library to display and control the map
+- **OpenStreetMap (OSM)**: Free map tile provider (the map imagery)
 
 ## Architecture Design
+
+### Layout Structure (Desktop)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         App Header                              │
+├──────────────┬──────────────────────────┬──────────────────────┤
+│              │                          │                      │
+│   Chat       │   Itinerary Panel        │      Map Panel       │
+│   Panel      │   ─────────────────      │                      │
+│              │   Header                 │   (Leaflet + OSM)    │
+│   (Left)     │   - Destination          │                      │
+│   ~25%       │   - Duration             │   Shows markers for  │
+│              │   - Budget               │   all activities     │
+│              │                          │   with coordinates   │
+│              │   Day Selector           │                      │
+│              │   ─────────────          │   Selected day       │
+│              │   Day 1 | Day 2 | Day 3  │   highlighted        │
+│              │                          │                      │
+│              │   Activities List        │   Click marker →     │
+│              │   - Activity 1 ●─────────┼─→ Highlight on map  │
+│              │   - Activity 2           │                      │
+│              │   - Activity 3           │                      │
+│              │                          │                      │
+│   (Center)   │                          │   (Right)            │
+│   ~45%       │                          │   ~30%               │
+└──────────────┴──────────────────────────┴──────────────────────┘
+```
+
+### Layout Structure (Mobile)
+
+```
+┌──────────────────┐
+│   Chat Panel     │
+│   (Collapsible)  │
+├──────────────────┤
+│ Itinerary Header │
+├──────────────────┤
+│ Day Selector     │
+├──────────────────┤
+│ Map Panel        │
+│ (Bottom sheet    │
+│  - swipeable)    │
+├──────────────────┤
+│ Activities List  │
+└──────────────────┘
+```
 
 ### Component Structure
 
 ```
-ItineraryPanel
-├── ItineraryHeader (existing)
-├── DestinationSwitcher (existing - enhance for map sync)
-├── DaySelector (new - unified day selection)
-├── MapAndActivitiesView (new)
-│   ├── ItineraryMap (new)
-│   │   ├── GoogleMapWrapper (new)
-│   │   ├── ActivityMarker[] (new)
-│   │   └── MarkerInfoWindow (new)
-│   └── DayActivities (existing - modified)
-└── TravelTips (existing)
+MainLayout (new - 3-column grid)
+├── ChatPanel (existing - left column)
+├── ItineraryPanel (center column)
+│   ├── ItineraryHeader (existing)
+│   ├── DestinationSwitcher (existing - enhance)
+│   ├── DaySelector (existing tabs)
+│   └── DayActivities (existing)
+└── MapPanel (new - right column)
+    └── ItineraryMap (new)
+        ├── LeafletMapWrapper (new)
+        ├── ActivityMarker[] (new)
+        └── MarkerPopup (new)
 ```
 
 ### New Components
@@ -233,14 +286,18 @@ const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
 ### Phase 1: Setup & Basic Map (2-3 hours)
 1. ✅ Install dependencies
    ```bash
-   npm install @vis.gl/react-google-maps
+   npm install leaflet react-leaflet
+   npm install --save-dev @types/leaflet
    ```
 
 2. ✅ Create basic map component
-   - Render map centered on city coordinates
-   - Add API key from environment
+   - Render Leaflet map centered on city coordinates
+   - Configure OpenStreetMap tile layer
+   - No API key needed!
 
-3. ✅ Test with Brussels itinerary data
+3. ✅ Create 3-column layout (chat left, itinerary center, map right)
+
+4. ✅ Test with Brussels itinerary data
 
 ### Phase 2: Activity Markers (3-4 hours)
 4. ✅ Create ActivityMarker component
@@ -328,28 +385,36 @@ src/
 
 ## API Integration
 
-### Google Maps API Setup
+### Leaflet + OpenStreetMap Setup
 
-1. **Enable APIs** (already done):
-   - Maps JavaScript API
-   - Places API (already enabled)
+**No API keys needed!** ✅
 
-2. **Environment Variables**:
-   ```env
-   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=<existing-key>
-   ```
+**OpenStreetMap Tile Server URL**:
+```typescript
+const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+```
 
-3. **Map Configuration**:
-   ```typescript
-   const mapConfig = {
-     center: { lat: cityLat, lng: cityLng },
-     zoom: 13, // City level
-     mapId: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID, // For custom styling
-     gestureHandling: 'greedy', // Allow one-finger pan on mobile
-     disableDefaultUI: true, // Custom controls
-     zoomControl: true,
-   };
-   ```
+**Map Configuration**:
+```typescript
+const mapConfig = {
+  center: [cityLat, cityLng] as [number, number],
+  zoom: 13, // City level
+  scrollWheelZoom: true,
+  dragging: true,
+  touchZoom: true,
+};
+```
+
+**Tile Layer Options**:
+```typescript
+<TileLayer
+  attribution={OSM_ATTRIBUTION}
+  url={OSM_TILE_URL}
+  maxZoom={19}
+  minZoom={3}
+/>
+```
 
 ## Edge Cases & Error Handling
 
@@ -399,9 +464,11 @@ src/
 ## Performance Considerations
 
 ### Bundle Size Impact
-- `@vis.gl/react-google-maps`: ~50KB gzipped
-- Google Maps JS API: ~400KB (loaded from CDN)
-- **Total added**: ~450KB
+- `leaflet`: ~39KB gzipped
+- `react-leaflet`: ~10KB gzipped
+- OpenStreetMap tiles: ~50-100KB (cached)
+- **Total added**: ~49KB + tiles (tiles are cached by browser)
+- **Comparison**: 89% smaller than Google Maps!
 
 ### Optimization Strategies
 1. **Code Splitting**: Lazy load map component

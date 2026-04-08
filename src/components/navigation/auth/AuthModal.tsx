@@ -5,7 +5,7 @@
  * Combined login/signup modal with tab switching
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -36,6 +36,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState<AuthView>(initialView);
+
+  useEffect(() => {
+    if (open) {
+      setCurrentView(initialView);
+    }
+  }, [open, initialView]);
 
   const handleClose = () => {
     onClose();

@@ -141,7 +141,7 @@ export default function ItineraryForm({
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" suppressHydrationWarning>
                       {attachedFile && (
                         <div className="flex items-center gap-2 bg-muted rounded-full pl-3 pr-2 py-1 text-xs text-foreground">
                           <Paperclip size={12} />
@@ -192,13 +192,14 @@ export default function ItineraryForm({
                 control={form.control}
                 name="file"
                 render={({ field }) => (
-                    <FormItem>
+                    <FormItem suppressHydrationWarning>
                         <FormControl>
                             <input
                                 type="file"
                                 ref={fileInputRef}
                                 className="hidden"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
+                                suppressHydrationWarning
                             />
                         </FormControl>
                     </FormItem>

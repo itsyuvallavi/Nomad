@@ -9,7 +9,7 @@
  * - User input awaiting
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import type { RootState } from '../index';
 
 /**
@@ -270,15 +270,16 @@ export const selectHasMessages = (state: RootState) => {
 };
 
 // Count messages by type
-export const selectMessageCount = (state: RootState) => {
-  const messages = selectMessages(state);
-  return {
+// Memoized selector to avoid unnecessary rerenders
+export const selectMessageCount = createSelector(
+  [selectMessages],
+  (messages) => ({
     total: messages.length,
     user: messages.filter(m => m.role === 'user').length,
     assistant: messages.filter(m => m.role === 'assistant').length,
     system: messages.filter(m => m.role === 'system').length,
-  };
-};
+  })
+);
 
 // Get the initial user message (first message)
 export const selectInitialMessage = (state: RootState) => {

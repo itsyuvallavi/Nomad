@@ -59,6 +59,71 @@ class HEREPlacesService {
   }
 
   /**
+   * Geocode a city/location name to coordinates
+   * Uses HERE Geocoding API which doesn't require location context
+   */
+  async geocodeCity(cityName: string): Promise<{ lat: number; lng: number } | null> {
+    if (!this.isConfigured()) {
+      logger.warn('API', 'HERE API key not configured');
+      return null;
+    }
+
+    // Check cache
+    const cacheKey = `geocode:${cityName}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached && cached.length > 0) {
+      logger.info('API', 'Geocode cache hit', { cityName });
+      return cached[0].position;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        apiKey: this.apiKey || '',
+        q: cityName,
+        limit: '1'
+      });
+
+      const url = `https://geocode.search.hereapi.com/v1/geocode?${params}`;
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        logger.error('API', `HERE Geocoding API request failed`, {
+          status: response.status,
+          cityName,
+          error: errorText
+        });
+        return null;
+      }
+
+      const data = await response.json();
+
+      if (data.items && data.items.length > 0) {
+        const position = data.items[0].position;
+
+        // Cache as HEREPlace format for consistency
+        const place: HEREPlace = {
+          id: data.items[0].id || cityName,
+          name: cityName,
+          address: { label: data.items[0].address?.label || cityName },
+          position: { lat: position.lat, lng: position.lng },
+        };
+        this.addToCache(cacheKey, [place]);
+
+        logger.info('API', `Geocoded ${cityName}`, position);
+        return position;
+      }
+
+      logger.warn('API', `No geocoding results for ${cityName}`);
+      return null;
+    } catch (error) {
+      logger.error('API', 'HERE Geocoding failed', { cityName, error });
+      return null;
+    }
+  }
+
+  /**
    * Search for places/venues
    */
   async searchPlaces(query: string, options: HERESearchOptions = {}): Promise<HEREPlace[]> {
@@ -101,34 +166,52 @@ class HEREPlacesService {
       const url = `${this.baseUrl}/discover?${params}`;
 
       const startTime = Date.now();
-      const response = await fetch(url);
-      const fetchTime = Date.now() - startTime;
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        logger.error('API', `HERE API request failed`, {
-          status: response.status,
-          statusText: response.statusText,
-          query,
-          url: url.replace(this.apiKey || '', 'REDACTED'),
-          error: errorText
-        });
-        throw new Error(`HERE API error: ${response.status} - ${response.statusText}`);
+      // Add timeout to prevent hanging (30 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        const fetchTime = Date.now() - startTime;
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          logger.error('API', `HERE API request failed`, {
+            status: response.status,
+            statusText: response.statusText,
+            query,
+            url: url.replace(this.apiKey || '', 'REDACTED'),
+            error: errorText
+          });
+          throw new Error(`HERE API error: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const places = this.transformResponse(data);
+
+        if (fetchTime > 1000) {
+          logger.warn('API', 'HERE slow response', { query, fetchTime: `${fetchTime}ms` });
+        }
+
+        // Cache the result
+        this.addToCache(cacheKey, places);
+
+        return places;
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+
+        // Handle abort timeout specifically
+        if (error.name === 'AbortError') {
+          logger.error('API', `HERE API timeout after 30s for query: ${query}`);
+        } else {
+          logger.error('API', 'HERE Places search failed', error);
+        }
+        return [];
       }
-
-      const data = await response.json();
-      const places = this.transformResponse(data);
-
-      if (fetchTime > 1000) {
-        logger.warn('API', 'HERE slow response', { query, fetchTime: `${fetchTime}ms` });
-      }
-
-      // Cache the result
-      this.addToCache(cacheKey, places);
-
-      return places;
     } catch (error) {
-      logger.error('API', 'HERE Places search failed', error);
+      logger.error('API', 'HERE Places search failed (outer)', error);
       return [];
     }
   }
@@ -153,7 +236,8 @@ class HEREPlacesService {
       const batchPromises = batch.map(async ({ query, location }) => {
         const searchOptions = { ...options };
         if (location) {
-          searchOptions.at = location;
+          // Use 'in' (strict boundary) instead of 'at' (loose bias) to prevent cross-continent nonsense
+          searchOptions.in = `circle:${location.lat},${location.lng};r=150000`;
         }
 
         const places = await this.searchPlaces(query, searchOptions);

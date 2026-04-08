@@ -53,7 +53,21 @@ export class CityGenerator {
         days: params.days,
         cacheHit: true
       });
-      return cached;
+
+      // CRITICAL: Re-number days even for cached results to ensure sequential numbering
+      // This fixes old cached entries that might have wrong day numbers
+      const correctedDays = cached.days.map((day, index) => ({
+        ...day,
+        day: params.startDayNumber + index,
+        title: day.title || `Day ${params.startDayNumber + index} - ${params.city}`
+      }));
+
+      return {
+        ...cached,
+        days: correctedDays,
+        startDay: params.startDayNumber,
+        endDay: params.startDayNumber + params.days - 1
+      };
     }
 
     logger.info('AI', 'Generating city itinerary', {
@@ -67,9 +81,9 @@ export class CityGenerator {
     try {
       console.log(`🤖 [CityGenerator] Calling OpenAI for ${params.city}...`);
 
-      // Add timeout to prevent hanging - increased to 120s for complex requests
+      // Add timeout to prevent hanging - increased to 240s for complex/multi-day requests
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Failed to generate itinerary for ${params.city}: OpenAI request timeout after 120s`)), 120000)
+        setTimeout(() => reject(new Error(`Failed to generate itinerary for ${params.city}: OpenAI request timeout after 240s`)), 240000)
       );
 
       const tokenConfig = getTokenConfig('CITY_GENERATION');
@@ -219,16 +233,64 @@ export class CityGenerator {
 Start date: ${params.startDate}
 Start day number: ${params.startDayNumber}
 
-IMPORTANT: You MUST generate EXACTLY ${params.days} days. Each day must have a complete set of activities.
+CRITICAL REQUIREMENTS:
 
-Generate ${params.days} days with 5-6 activities per day including:
-- Morning activity (9:00-10:00)
-- Mid-morning activity (11:00)
-- Lunch (12:30-13:00)
-- Afternoon activities (14:00, 16:00)
-- Evening/dinner (19:00)
+1. GEOGRAPHIC ROUTE OPTIMIZATION
+   - Activities within each day MUST be geographically close to each other
+   - Order activities to create a LOGICAL, EFFICIENT route (no zigzagging across the city)
+   - Group activities by neighborhood/area.
+   - STRICT NEIGHBORHOOD RULE: EVERY day MUST have a specific "neighborhood" field (e.g., "Downtown" or "West End"). ALL activities plotted for that ONE day MUST physically reside within roughly a ~5km radius of each other in that exact neighborhood.
+   - FATAL ERROR if you generate activities on opposite sides of a vast city (e.g., Downtown LA in the morning and Santa Monica in the afternoon) during the same single day.
+   - NO backtracking (don't go downtown → north → south → back downtown)
+   - Create a smooth flow: Morning area → Move to adjacent area → Evening area nearby
 
-Include specific venue names for each activity.
+2. REALISTIC TIME ALLOCATION
+   - Allocate realistic duration based on activity type:
+
+   FULL DAY activities (6-8 hours):
+   - Theme parks, water parks
+   - Day trips outside the city
+
+   HALF DAY activities (3-5 hours):
+   - Major museums (Louvre, British Museum, etc.)
+   - Zoos, aquariums, large parks
+   - Beach visits
+   - Major hiking trails
+   - Shopping districts (if exploring multiple stores)
+
+   2-3 HOUR activities:
+   - Mid-size museums/galleries
+   - Walking tours
+   - Botanical gardens
+   - Historic sites
+
+   1-1.5 HOUR activities:
+   - Small museums/galleries
+   - Churches, temples
+   - Markets
+   - Viewpoints
+
+   30-45 MINUTE activities:
+   - Coffee breaks
+   - Quick photo stops
+   - Small monuments
+
+   MEALS:
+   - Breakfast: 30-45 min
+   - Lunch: 1-1.5 hours
+   - Dinner: 1.5-2 hours
+
+   - NEVER schedule more than 2-3 major (3+ hour) activities per day
+   - Account for travel time between locations (add 15-30 min buffer)
+   - Don't overschedule - realistic days only!
+
+3. DAILY STRUCTURE
+   - Limit to 4-6 activities per day (including meals)
+   - If day has a zoo (4h), museum (3h), it can only fit 2-3 other activities MAX
+   - Balance activity intensity (don't stack all major attractions in one day)
+
+CRITICAL: Include specific venue names for each activity in the "venue_name" field (NOT "venueName").
+This field is used to search for addresses and coordinates, so be specific (e.g., "Tower of London" not just "Tower").
 
 Return a JSON object with EXACTLY ${params.days} days numbered from ${params.startDayNumber} to ${params.startDayNumber + params.days - 1}:
 {
@@ -238,13 +300,15 @@ Return a JSON object with EXACTLY ${params.days} days numbered from ${params.sta
       "day": ${params.startDayNumber},
       "date": "${params.startDate}",
       "title": "Day ${params.startDayNumber} - ${params.city}",
+      "neighborhood": "Specific neighborhood name (e.g., 'Beverly Hills & West Hollywood')",
       "activities": [
         {
           "time": "09:00",
           "description": "Visit Tower of London",
-          "venueName": "Tower of London",
+          "venue_name": "Tower of London",
+          "address": "London EC3N 4AB, UK",
           "category": "Attraction",
-          "duration": "2 hours",
+          "duration": "2.5 hours",
           "tips": "Book tickets online to skip lines"
         }
       ]
@@ -345,14 +409,23 @@ Categories: Attraction, Food, Leisure, Work, Travel, Accommodation`;
   private validateAndFix(parsed: Partial<CityItinerary>, params: CityGenerationParams): { days: DayPlan[] } {
     // Ensure all days have required fields
     if (parsed.days) {
-      parsed.days = parsed.days.map((day: Partial<DayPlan>, index: number) => ({
-        day: day.day ?? (params.startDayNumber + index),
-        date: day.date ?? getNextDate(params.startDate, index),
-        title: day.title ?? `Day ${params.startDayNumber + index} - ${params.city}`,
-        city: day.city || params.city,
-        activities: day.activities || [],
-        weather: day.weather
-      })) as DayPlan[];
+      parsed.days = parsed.days.map((day: Partial<DayPlan>, index: number) => {
+        const correctedDay = params.startDayNumber + index;
+
+        // Log if GPT returned wrong day number
+        if (day.day && day.day !== correctedDay) {
+          console.log(`⚠️ [CityGenerator] GPT returned day ${day.day}, correcting to ${correctedDay} for ${params.city}`);
+        }
+
+        return {
+          day: correctedDay, // ALWAYS use startDayNumber + index (don't trust GPT's numbering)
+          date: day.date ?? getNextDate(params.startDate, index),
+          title: day.title ?? `Day ${correctedDay} - ${params.city}`,
+          city: day.city || params.city,
+          activities: day.activities || [],
+          weather: day.weather
+        };
+      }) as DayPlan[];
     }
 
     // Validate we got the right number of days
@@ -369,12 +442,13 @@ Categories: Attraction, Food, Leisure, Work, Travel, Accommodation`;
 
   /**
    * Add missing days with default activities
+   * CRITICAL: Uses params.startDayNumber to ensure sequential numbering across multi-city trips
    */
   private addMissingDays(days: DayPlan[], params: CityGenerationParams): void {
     const existingDays = days.length;
 
     for (let i = existingDays; i < params.days; i++) {
-      const dayNumber = params.startDayNumber + i;
+      const dayNumber = params.startDayNumber + i; // Sequential numbering from startDayNumber
       const dayDate = this.getNextDate(params.startDate, i);
 
       days.push({

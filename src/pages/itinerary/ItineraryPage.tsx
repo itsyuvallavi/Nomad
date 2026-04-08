@@ -22,14 +22,7 @@ import { ShortcutsModal } from '@/components/itinerary-components/layout/Shortcu
 // Hooks
 import { useMessageHandler } from '@/components/itinerary-components/hooks/use-message-handler';
 
-// Conditional auth import for SSR
-let useAuth: any;
-if (typeof window !== 'undefined') {
-    const authModule = require('@/infrastructure/contexts/AuthContext');
-    useAuth = authModule.useAuth;
-} else {
-    useAuth = () => ({ user: null });
-}
+import { useAuth } from '@/infrastructure/contexts/AuthContext';
 
 type ChatDisplayProps = {
     initialPrompt: FormValues;

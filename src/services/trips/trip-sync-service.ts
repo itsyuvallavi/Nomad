@@ -1,180 +1,118 @@
 /**
- * Trip Sync Service
- * Handles syncing between localStorage and Firestore
+ * Trip Sync Service - Supabase Implementation
+ * Handles syncing between localStorage and Supabase (public.trips table)
  */
 
-import {
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
-  Timestamp
-} from 'firebase/firestore';
-import { db } from '@/services/firebase/auth';
+import { supabase } from '@/services/supabase/client';
 import { logger } from '@/lib/monitoring/logger';
 import { TripSanitizer } from './trip-sanitizer';
 import type { LocalSearchData, Trip } from './trip-types';
 
 export class TripSyncService {
-  private readonly COLLECTION_NAME = 'trips';
-  private readonly SYNC_FLAG_KEY = 'trips_synced_to_firestore';
+  private readonly TABLE = 'trips';
+  private readonly SYNC_FLAG_KEY = 'trips_synced_to_supabase';
 
   /**
-   * Sync local storage searches to Firestore
+   * Sync local storage searches to Supabase
    */
   async syncLocalStorageToFirestore(userId: string): Promise<{ synced: number; errors: number }> {
-    if (typeof window === 'undefined') {
-      return { synced: 0, errors: 0 };
-    }
+    if (typeof window === 'undefined') return { synced: 0, errors: 0 };
 
     const stats = { synced: 0, errors: 0 };
 
     try {
-      // Check if already synced
       const alreadySynced = localStorage.getItem(this.SYNC_FLAG_KEY);
       if (alreadySynced) {
-        logger.info('TripSync', 'LocalStorage already synced to Firestore');
+        logger.info('TripSync', 'LocalStorage already synced to Supabase');
         return stats;
       }
 
-      // Get local searches
       const localSearches = localStorage.getItem('nomadSearches');
-      if (!localSearches) {
-        logger.info('TripSync', 'No local searches to sync');
-        return stats;
-      }
+      if (!localSearches) return stats;
 
       const searches: LocalSearchData[] = JSON.parse(localSearches);
-      logger.info('TripSync', `Syncing ${searches.length} local searches to Firestore`);
+      logger.info('TripSync', `Syncing ${searches.length} local searches`);
 
-      // Process each search
       for (const search of searches) {
         try {
           // Check if trip already exists
-          const existingTrip = await this.checkTripExists(search.id);
-          if (existingTrip) {
-            logger.debug('TripSync', `Trip ${search.id} already exists, skipping`);
-            continue;
-          }
+          const { data } = await supabase.from(this.TABLE).select('id').eq('id', search.id).single();
+          if (data) continue; // already exists
 
-          // Create trip from search
           await this.createTripFromSearch(userId, search);
           stats.synced++;
-
-          logger.info('TripSync', `Synced trip ${search.id} to Firestore`);
         } catch (error) {
           logger.error('TripSync', `Failed to sync trip ${search.id}`, error);
           stats.errors++;
         }
       }
 
-      // Mark as synced if at least some were successful
       if (stats.synced > 0) {
         localStorage.setItem(this.SYNC_FLAG_KEY, 'true');
-        logger.info('TripSync', `Successfully synced ${stats.synced} trips to Firestore`);
+        logger.info('TripSync', `Synced ${stats.synced} trips`);
       }
-
     } catch (error) {
-      logger.error('TripSync', 'Failed to sync localStorage to Firestore', error);
+      logger.error('TripSync', 'Failed to sync localStorage', error);
     }
 
     return stats;
   }
 
-  /**
-   * Check if a trip already exists
-   */
-  private async checkTripExists(tripId: string): Promise<boolean> {
-    try {
-      const tripRef = doc(db, this.COLLECTION_NAME, tripId);
-      const tripSnap = await getDoc(tripRef);
-      return tripSnap.exists();
-    } catch (error) {
-      logger.error('TripSync', `Failed to check if trip ${tripId} exists`, error);
-      return false;
-    }
-  }
-
-  /**
-   * Create a trip from local search data
-   */
   private async createTripFromSearch(userId: string, search: LocalSearchData): Promise<void> {
-    const tripData = {
+    const now = new Date(search.timestamp || Date.now()).toISOString();
+
+    await supabase.from(this.TABLE).insert({
       id: search.id,
-      userId,
+      user_id: userId,
       title: TripSanitizer.extractTitle(search),
       destination: search.destination || 'Unknown',
       prompt: search.message || '',
       duration: search.duration || 3,
       currency: 'USD',
-      travelStyle: 'mid-range' as const,
-      status: 'draft' as const,
-      chatState: TripSanitizer.cleanForFirestore(search.response),
-      createdAt: Timestamp.fromDate(new Date(search.timestamp || Date.now())),
-      updatedAt: serverTimestamp(),
-      isFavorite: false,
-      tags: TripSanitizer.generateTags(search)
-    };
-
-    const tripRef = doc(db, this.COLLECTION_NAME, search.id);
-    await setDoc(tripRef, tripData);
+      travel_style: 'mid-range',
+      status: 'draft',
+      chat_state: TripSanitizer.cleanForFirestore(search.response),
+      created_at: now,
+      updated_at: now,
+      is_favorite: false,
+      tags: TripSanitizer.generateTags(search),
+    });
   }
 
   /**
-   * Check for new trips in Firestore that aren't in localStorage
+   * Check for new trips in Supabase that aren't in localStorage
    */
   async checkForNewTrips(userId: string): Promise<Trip[]> {
-    if (typeof window === 'undefined') {
-      return [];
-    }
-
-    const newTrips: Trip[] = [];
+    if (typeof window === 'undefined') return [];
 
     try {
-      // Get local trip IDs
       const localSearches = localStorage.getItem('nomadSearches');
-      const localTripIds = new Set<string>();
-
-      if (localSearches) {
-        const searches: LocalSearchData[] = JSON.parse(localSearches);
-        searches.forEach(s => localTripIds.add(s.id));
-      }
-
-      // Get Firestore trips
-      const tripsQuery = query(
-        collection(db, this.COLLECTION_NAME),
-        where('userId', '==', userId)
+      const localIds = new Set<string>(
+        localSearches ? (JSON.parse(localSearches) as LocalSearchData[]).map(s => s.id) : []
       );
-      const querySnapshot = await getDocs(tripsQuery);
 
-      // Find trips not in localStorage
-      querySnapshot.forEach((doc) => {
-        if (!localTripIds.has(doc.id)) {
-          newTrips.push({ id: doc.id, ...doc.data() } as Trip);
-        }
-      });
+      const { data, error } = await supabase
+        .from(this.TABLE)
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      const newTrips: Trip[] = (data ?? [])
+        .filter(row => !localIds.has(row.id))
+        .map(this.rowToTrip);
 
       if (newTrips.length > 0) {
-        logger.info('TripSync', `Found ${newTrips.length} new trips in Firestore`);
-
-        // Optionally update localStorage with new trips
         await this.updateLocalStorageWithNewTrips(newTrips);
       }
 
+      return newTrips;
     } catch (error) {
       logger.error('TripSync', 'Failed to check for new trips', error);
+      return [];
     }
-
-    return newTrips;
   }
 
-  /**
-   * Update localStorage with new trips from Firestore
-   */
   private async updateLocalStorageWithNewTrips(trips: Trip[]): Promise<void> {
     try {
       const localSearches = localStorage.getItem('nomadSearches');
@@ -185,33 +123,50 @@ export class TripSyncService {
           id: trip.id,
           message: trip.prompt,
           response: trip.chatState,
-          timestamp: trip.createdAt.toDate().toISOString(),
+          timestamp: trip.createdAt,
           synced: true,
           destination: trip.destination,
-          duration: trip.duration
+          duration: trip.duration,
         });
       }
 
       localStorage.setItem('nomadSearches', JSON.stringify(searches));
-      logger.info('TripSync', `Updated localStorage with ${trips.length} new trips`);
     } catch (error) {
-      logger.error('TripSync', 'Failed to update localStorage with new trips', error);
+      logger.error('TripSync', 'Failed to update localStorage', error);
     }
   }
 
-  /**
-   * Perform bidirectional sync
-   */
   async performFullSync(userId: string): Promise<{
     localToFirestore: { synced: number; errors: number };
     firestoreToLocal: number;
   }> {
     const localToFirestore = await this.syncLocalStorageToFirestore(userId);
     const newTrips = await this.checkForNewTrips(userId);
+    return { localToFirestore, firestoreToLocal: newTrips.length };
+  }
 
+  private rowToTrip(row: any): Trip {
     return {
-      localToFirestore,
-      firestoreToLocal: newTrips.length
-    };
+      id: row.id,
+      userId: row.user_id,
+      title: row.title ?? '',
+      destination: row.destination ?? '',
+      prompt: row.prompt ?? '',
+      startDate: row.start_date,
+      endDate: row.end_date,
+      duration: row.duration ?? 0,
+      currency: row.currency ?? 'USD',
+      travelStyle: row.travel_style ?? 'mid-range',
+      status: row.status ?? 'draft',
+      chatState: row.chat_state,
+      itinerary: row.itinerary,
+      budget: row.budget,
+      imageUrl: row.image_url,
+      isFavorite: row.is_favorite ?? false,
+      tags: row.tags ?? [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      lastOpenedAt: row.last_opened_at,
+    } as any;
   }
 }

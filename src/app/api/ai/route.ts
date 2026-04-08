@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AIController } from '@/services/ai/ai-controller';
 import { TripGenerator } from '@/services/ai/trip-generator';
 import { logger } from '@/lib/monitoring/logger';
-import { progressStore, type ProgressData } from '@/services/firebase/progress-store';
+import { progressStore, type ProgressData } from '@/services/supabase/progress-store';
 import { aiCache } from '@/services/ai/cache-service';
 import { aiGenerationLimiter, openAIBackoff } from '@/lib/middleware/rate-limiter';
 
@@ -206,6 +206,15 @@ async function generateProgressively(
       missingFields: response.missingFields
     });
 
+    // DEBUG: Log what GPT extracted
+    if (response.intent) {
+      console.log('🤖 [DEBUG] GPT Extracted Intent:', {
+        destinations: response.intent.destinations,
+        daysPerCity: response.intent.daysPerCity,
+        duration: response.intent.duration
+      });
+    }
+
     await updateProgress({
       type: 'processing',
       status: 'intent_extracted',
@@ -261,13 +270,16 @@ async function generateProgressively(
       console.log('🚀 [generateProgressively] Starting progressive generation with:', {
         destinations,
         duration: tripParams.duration,
-        startDate: tripParams.startDate
+        startDate: tripParams.startDate,
+        daysPerCity: tripParams.daysPerCity,
+        intentDaysPerCity: response.intent.daysPerCity
       });
 
       const generationResult = await tripGenerator.generateProgressive({
           destinations,
           duration: tripParams.duration,
           startDate: tripParams.startDate,
+          daysPerCity: tripParams.daysPerCity, // Pass through per-city duration
           preferences: tripParams.preferences,
           onProgress: async (update: any) => {
             console.log(`📡 Progress callback received: ${update.type}`, {
@@ -354,6 +366,8 @@ async function generateProgressively(
         status: 'awaiting_input',
         progress: 100,
         message: response.message,
+        intent: response.intent, // Include intent so tests can validate it
+        missingFields: response.missingFields,
         awaitingInput: response.missingFields?.[0],
         conversationContext: response.context
       });

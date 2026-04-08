@@ -169,6 +169,7 @@ export class TripFormatter {
       destination: params.destinations.join(', '),
       startDate: params.startDate,
       duration: params.duration,
+      daysPerCity: params.daysPerCity, // CRITICAL: Pass through for multi-city trips
       travelers: params.travelers,
       preferences: params.preferences,
       budget: params.preferences?.budget

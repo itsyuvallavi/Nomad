@@ -1,0 +1,204 @@
+{
+  "timestamp": 1765409838002,
+  "summary": {
+    "SIMPLE": {
+      "total": 3,
+      "passed": 0
+    },
+    "NORMAL": {
+      "total": 2,
+      "passed": 0
+    },
+    "COMPLEX": {
+      "total": 3,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "S1",
+      "level": "SIMPLE",
+      "initialPrompt": "3 days in London",
+      "followUpAnswers": {
+        "startDate": "tomorrow",
+        "destination": "London",
+        "duration": "3 days"
+      },
+      "expectedFinalIntent": {
+        "destination": "London",
+        "duration": 3
+      },
+      "notes": "Basic trip request",
+      "pass": false,
+      "issues": [
+        "Expected dest \"London\", got \"\"",
+        "Expected duration 3, got undefined"
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "S2",
+      "level": "SIMPLE",
+      "initialPrompt": "Plan a weekend trip to Paris",
+      "followUpAnswers": {
+        "startDate": "next Friday",
+        "destination": "Paris",
+        "duration": "2 days"
+      },
+      "expectedFinalIntent": {
+        "destination": "Paris",
+        "duration": 2
+      },
+      "notes": "Weekend trip",
+      "pass": false,
+      "issues": [
+        "Expected dest \"Paris\", got \"\"",
+        "Expected duration 2, got undefined"
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "S3",
+      "level": "SIMPLE",
+      "initialPrompt": "Visit Tokyo for 5 days starting tomorrow",
+      "followUpAnswers": {
+        "startDate": "tomorrow",
+        "destination": "Tokyo",
+        "duration": "5 days"
+      },
+      "expectedFinalIntent": {
+        "destination": "Tokyo",
+        "duration": 5
+      },
+      "notes": "Complete information",
+      "pass": false,
+      "issues": [
+        "Expected dest \"Tokyo\", got \"\"",
+        "Expected duration 5, got undefined"
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "N1",
+      "level": "NORMAL",
+      "initialPrompt": "I want to visit London and Paris",
+      "followUpAnswers": {
+        "startDate": "next week",
+        "duration": "7 days",
+        "destination": "London and Paris"
+      },
+      "expectedFinalIntent": {
+        "destinations": [
+          "London",
+          "Paris"
+        ]
+      },
+      "notes": "Multi-city trip",
+      "pass": false,
+      "issues": [
+        "Expected 2 cities, got 0"
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "N2",
+      "level": "NORMAL",
+      "initialPrompt": "Plan a cultural trip to Kyoto with temples and food",
+      "followUpAnswers": {
+        "startDate": "March 15",
+        "duration": "4 days",
+        "destination": "Kyoto"
+      },
+      "expectedFinalIntent": {
+        "destination": "Kyoto",
+        "interests": [
+          "culture",
+          "food"
+        ]
+      },
+      "notes": "Trip with preferences",
+      "pass": false,
+      "issues": [
+        "Expected dest \"Kyoto\", got \"\""
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "C1",
+      "level": "COMPLEX",
+      "initialPrompt": "I want to travel",
+      "followUpAnswers": {
+        "destination": "Barcelona",
+        "duration": "5 days",
+        "startDate": "next Monday"
+      },
+      "expectedFinalIntent": {
+        "destination": "Barcelona",
+        "duration": 5
+      },
+      "notes": "Minimal info - AI must ask for everything",
+      "pass": false,
+      "issues": [
+        "Expected dest \"Barcelona\", got \"\"",
+        "Expected duration 5, got undefined"
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "C2",
+      "level": "COMPLEX",
+      "initialPrompt": "Plan my honeymoon",
+      "followUpAnswers": {
+        "destination": "Maldives",
+        "duration": "10 days",
+        "startDate": "December 1st"
+      },
+      "expectedFinalIntent": {
+        "destination": "Maldives",
+        "duration": 10
+      },
+      "notes": "Context only - needs all details",
+      "pass": false,
+      "issues": [
+        "Expected dest \"Maldives\", got \"\"",
+        "Expected duration 10, got undefined"
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "C3",
+      "level": "COMPLEX",
+      "initialPrompt": "Take me to Lisbon For tomorrow",
+      "followUpAnswers": {
+        "duration": "3 days",
+        "startDate": "tomorrow",
+        "destination": "Lisbon"
+      },
+      "expectedFinalIntent": {
+        "destination": "Lisbon"
+      },
+      "notes": "🔥 CRITICAL: Test temporal word removal (\"For\" should not be in destination)",
+      "pass": false,
+      "issues": [
+        "Expected dest \"Lisbon\", got \"\""
+      ],
+      "intent": {},
+      "canGenerate": false,
+      "turns": 1
+    }
+  ]
+}

@@ -37,20 +37,20 @@ export const UserMenu: React.FC = () => {
     setIsLoggingOut(true);
     try {
       await logout();
-      router.push('/');
+      // Force hard reload rather than router.push to ensure clean auth state in context
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
       setIsLoggingOut(false);
     }
   };
 
   if (!user) return null;
 
-  const displayName = userData?.displayName || user.displayName || '';
+  const displayName = userData?.displayName || user.user_metadata?.full_name || user.user_metadata?.name || '';
   const initials = displayName
     .split(' ')
-    .map(name => name[0])
+    .map((name: string) => name[0])
     .join('')
     .toUpperCase()
     .slice(0, 2) || user.email?.[0]?.toUpperCase() || 'U';
@@ -62,7 +62,7 @@ export const UserMenu: React.FC = () => {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
               <AvatarImage 
-                src={userData?.photoURL || user.photoURL || ''} 
+                src={userData?.photoURL || user.user_metadata?.avatar_url || ''} 
                 alt={displayName}
               />
               <AvatarFallback className="bg-blue-600 text-white text-xs sm:text-sm">

@@ -11,6 +11,7 @@ import { logger } from '@/lib/monitoring/logger';
 export class ItineraryEnricher {
   /**
    * Enrich itinerary with real location data
+   * FIXED: For multi-city trips, enrich each city separately to avoid geocoding "Miami, Orlando" as one location
    */
   async enrichItinerary(
     itinerary: GeneratePersonalizedItineraryOutput
@@ -20,17 +21,18 @@ export class ItineraryEnricher {
       return itinerary;
     }
 
-    const destination = itinerary.destination || '';
-    const zones = getCityZones(destination);
+    // Get unique cities from daily itineraries
+    const cities = Array.from(
+      new Set(itinerary.dailyItineraries.map(day => day.city || itinerary.destination).filter(Boolean))
+    );
 
     console.log('🤖 [AI] Starting enrichment', {
-      destination,
+      cities,
       days: itinerary.dailyItineraries.length,
-      hasZones: zones.length > 0,
       firstDayActivities: itinerary.dailyItineraries[0]?.activities?.length || 0
     });
 
-    // Collect activities needing enrichment
+    // Collect activities needing enrichment (now with city info)
     const activitiesToEnrich = this.collectActivitiesToEnrich(itinerary);
 
     if (activitiesToEnrich.length === 0) {
@@ -38,8 +40,18 @@ export class ItineraryEnricher {
       return itinerary;
     }
 
-    // Enrich with HERE Places
-    await this.enrichWithHERE(itinerary, activitiesToEnrich, destination);
+    // Enrich each city separately to avoid geocoding "Miami, Orlando" as one location
+    for (const city of cities) {
+      const cityActivities = activitiesToEnrich.filter(item => {
+        const dayCity = itinerary.dailyItineraries?.[item.dayIndex]?.city || itinerary.destination;
+        return dayCity === city;
+      });
+
+      if (cityActivities.length > 0) {
+        console.log(`🤖 [AI] Enriching ${cityActivities.length} activities for ${city}`);
+        await this.enrichWithHERE(itinerary, cityActivities, city);
+      }
+    }
 
     return itinerary;
   }
@@ -118,7 +130,22 @@ export class ItineraryEnricher {
 
     try {
       // Get city coordinates for location context
-      const cityCoords = getCityCoordinates(destination);
+      // First try from predefined zones, then fallback to geocoding
+      let cityCoords = getCityCoordinates(destination);
+
+      // If city not in zones, geocode it using HERE Geocoding API
+      if (!cityCoords && destination) {
+        try {
+          cityCoords = await herePlacesService.geocodeCity(destination);
+          if (cityCoords) {
+            logger.info('AI', `Geocoded coordinates for ${destination}:`, cityCoords);
+          } else {
+            logger.warn('AI', `Failed to geocode ${destination}, enrichment may be less accurate`);
+          }
+        } catch (error) {
+          logger.warn('AI', `Error geocoding ${destination}`, { error });
+        }
+      }
 
       logger.info('AI', `City coordinates for ${destination}:`, cityCoords);
 
@@ -178,10 +205,17 @@ export class ItineraryEnricher {
             };
           }
 
-          // Always update address if available
+          // Only overwrite address if HERE returns a full street OR if the activity doesn't have an address
           if (place.address && place.address.label) {
-            activity.address = place.address.label;
-            console.log('🤖 [AI] Updated address for', item.searchQuery, '→', place.address.label);
+            const hasStreet = !!place.address.street;
+            const hasExistingValidAddress = activity.address && activity.address !== 'Address N/A' && activity.address !== 'Address not available' && !activity.address.startsWith('Near');
+            
+            if (hasStreet || !hasExistingValidAddress) {
+              activity.address = place.address.label;
+              console.log('🤖 [AI] Updated address for', item.searchQuery, '→', place.address.label);
+            } else {
+              console.log('🤖 [AI] Kept original AI address for', item.searchQuery, 'because HERE result lacked street info:', place.address.label);
+            }
           }
 
           if (place.categories && place.categories.length > 0) {
@@ -204,8 +238,18 @@ export class ItineraryEnricher {
 
           enrichedCount++;
         } else {
-          // Fallback: If no search result found, at least remove the placeholder
+          // Fallback: If no search result found, use city coordinates and set fallback data
           const activity = itinerary.dailyItineraries![item.dayIndex].activities![item.activityIndex];
+
+          // Use city center coordinates as fallback so map shows something
+          if (cityCoords && !activity.coordinates) {
+            activity.coordinates = {
+              lat: cityCoords.lat,
+              lng: cityCoords.lng
+            };
+            console.log('🤖 [AI] Using city center coordinates for', item.searchQuery);
+          }
+
           if (activity.address === 'Address N/A' || activity.address === 'Address not available') {
             // For debugging: set a test address to see if it appears
             activity.address = `Near ${destination} city center`;

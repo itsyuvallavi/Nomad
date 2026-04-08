@@ -23,6 +23,7 @@ export interface Activity {
 export interface DailyItinerary {
   dayNumber: number;
   date: string;
+  city?: string; // City for this day (for multi-city trips)
   title?: string;
   activities: Activity[];
   meals?: {
@@ -56,6 +57,15 @@ export interface Accommodation {
 // ========================================
 // Additional Types for AI Processing
 // ========================================
+
+export interface UserIntent {
+  destination?: string;
+  destinations?: string[];
+  daysPerCity?: number[]; // Days to spend in each city (for multi-city trips)
+  startDate?: string;
+  endDate?: string;
+  duration?: number;
+}
 
 export interface ParsedIntent extends UserIntent {
   confidence: number;
@@ -198,6 +208,7 @@ export interface DayPlan {
   date: string;
   city: string;
   title: string;
+  neighborhood?: string;
   activities: Activity[];
   weather?: string;
 }
@@ -211,6 +222,7 @@ export interface ProgressUpdate {
 
 export interface GenerationParams {
   destinations: string[];
+  daysPerCity?: number[];  // Days to spend in each city (for multi-city trips)
   duration: number;
   startDate: string;
   preferences?: any;

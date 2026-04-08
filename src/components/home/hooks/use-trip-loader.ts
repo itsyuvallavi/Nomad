@@ -65,24 +65,7 @@ export function useTripLoader({
   };
 
   const loadTripFromLocalStorage = () => {
-    const viewingTrip = localStorage.getItem('viewingTrip');
-    if (viewingTrip) {
-      try {
-        const tripData = JSON.parse(viewingTrip);
-        setInitialPrompt({ prompt: tripData.prompt });
-        setSavedChatState(tripData.chatState);
-        setCurrentSearchId(tripData.id);
-        setTripContext({
-          mode: 'view',
-          tripId: tripData.id,
-          isModified: false
-        });
-        setCurrentView('chat');
-        localStorage.removeItem('viewingTrip'); // Clean up
-      } catch (error) {
-        console.error('Error loading trip data:', error);
-      }
-    }
+    // Legacy fallback method removed 
   };
 
   useEffect(() => {

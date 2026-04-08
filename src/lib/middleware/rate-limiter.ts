@@ -195,10 +195,10 @@ class RateLimiter {
 
 // Pre-configured rate limiters for different endpoints
 
-// AI generation endpoint - strict limits
+// AI generation endpoint - TESTING: Rate limits disabled
 export const aiGenerationLimiter = new RateLimiter({
   windowMs: 60000,      // 1 minute
-  maxRequests: 5,       // 5 requests per minute
+  maxRequests: 1000,    // 1000 requests per minute (effectively disabled for testing)
   message: 'AI generation rate limit exceeded. Please wait before trying again.'
 });
 

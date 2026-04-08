@@ -1,32 +1,16 @@
 /**
- * Trips Service V2 - Refactored
- * Core CRUD operations for trips in Firestore
- * Delegates complex operations to specialized modules
+ * Trips Service V2 - Supabase Implementation
+ * Core CRUD operations for trips stored in Supabase (public.trips table)
  */
 
-import {
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit as firestoreLimit,
-  serverTimestamp,
-  Timestamp
-} from 'firebase/firestore';
-import { db } from '@/services/firebase/auth';
+import { supabase } from '@/services/supabase/client';
 import { logger } from '@/lib/monitoring/logger';
 import { TripSanitizer } from './trip-sanitizer';
 import { TripSyncService } from './trip-sync-service';
 import type { Trip, CreateTripInput, TripQueryOptions } from './trip-types';
 
 export class TripsServiceV2 {
-  private readonly COLLECTION_NAME = 'trips';
+  private readonly TABLE = 'trips';
   private readonly syncService: TripSyncService;
 
   constructor() {
@@ -38,168 +22,134 @@ export class TripsServiceV2 {
    */
   async createTrip(input: CreateTripInput): Promise<Trip> {
     const tripId = `trip_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date().toISOString();
 
-    // Extract and clean data
     const tripData: any = {
       id: tripId,
-      userId: input.userId,
+      user_id: input.userId,
       title: input.title || TripSanitizer.extractTitle(input),
       destination: input.destination || TripSanitizer.extractDestination(input),
       prompt: input.prompt,
-      startDate: input.startDate,
-      endDate: input.endDate,
+      start_date: input.startDate,
+      end_date: input.endDate,
       duration: input.duration || TripSanitizer.extractDuration(input),
       currency: input.currency || 'USD',
-      travelStyle: input.travelStyle || 'mid-range',
+      travel_style: input.travelStyle || 'mid-range',
       status: 'draft',
-      chatState: TripSanitizer.cleanForFirestore(input.chatState),
+      chat_state: TripSanitizer.cleanForFirestore(input.chatState),
       itinerary: TripSanitizer.cleanForFirestore(input.itinerary),
-      createdAt: Timestamp.now(),
-      updatedAt: serverTimestamp() as Timestamp,
-      isFavorite: false,
-      tags: input.tags || TripSanitizer.generateTags(input)
+      created_at: now,
+      updated_at: now,
+      is_favorite: false,
+      tags: input.tags || TripSanitizer.generateTags(input),
     };
 
-    // Only include optional fields if they have valid values (Firestore doesn't accept undefined)
-    if (input.budget !== undefined && input.budget !== null) {
-      tripData.budget = input.budget;
-    }
-    if (input.imageUrl !== undefined && input.imageUrl !== null) {
-      tripData.imageUrl = input.imageUrl;
-    }
+    if (input.budget != null) tripData.budget = input.budget;
+    if (input.imageUrl != null) tripData.image_url = input.imageUrl;
 
-    try {
-      const tripRef = doc(db, this.COLLECTION_NAME, tripId);
-      await setDoc(tripRef, tripData);
+    const { error } = await supabase.from(this.TABLE).insert(tripData);
 
-      logger.info('TripsService', `Created trip ${tripId}`, {
-        destination: tripData.destination,
-        duration: tripData.duration
-      });
-
-      return tripData;
-    } catch (error) {
+    if (error) {
       logger.error('TripsService', `Failed to create trip ${tripId}`, error);
-      throw new Error(`Failed to create trip: ${error}`);
+      throw new Error(`Failed to create trip: ${error.message}`);
     }
+
+    logger.info('TripsService', `Created trip ${tripId}`);
+    return this.rowToTrip(tripData);
   }
 
   /**
-   * Get trips for a user with flexible query options
+   * Get trips for a user
    */
   async getUserTrips(options: TripQueryOptions): Promise<Trip[]> {
     const {
       userId,
       limit = 50,
-      orderBy: orderField = 'createdAt',
+      orderBy: orderField = 'created_at',
       orderDirection = 'desc',
       status,
-      isFavorite
+      isFavorite,
     } = options;
 
-    try {
-      // Build query constraints
-      const constraints = [
-        where('userId', '==', userId),
-        orderBy(orderField, orderDirection),
-        firestoreLimit(limit)
-      ];
+    // Map camelCase fields to snake_case DB columns
+    const columnMap: Record<string, string> = {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      lastOpenedAt: 'last_opened_at',
+    };
+    const dbColumn = columnMap[orderField] ?? orderField;
 
-      // Add optional filters
-      if (status) {
-        constraints.splice(1, 0, where('status', '==', status));
-      }
-      if (typeof isFavorite === 'boolean') {
-        constraints.splice(1, 0, where('isFavorite', '==', isFavorite));
-      }
+    let q = supabase
+      .from(this.TABLE)
+      .select('*')
+      .eq('user_id', userId)
+      .order(dbColumn, { ascending: orderDirection === 'asc' })
+      .limit(limit);
 
-      const tripsQuery = query(collection(db, this.COLLECTION_NAME), ...constraints);
-      const querySnapshot = await getDocs(tripsQuery);
+    if (status) q = q.eq('status', status);
+    if (typeof isFavorite === 'boolean') q = q.eq('is_favorite', isFavorite);
 
-      const trips: Trip[] = [];
-      querySnapshot.forEach((doc) => {
-        trips.push({ id: doc.id, ...doc.data() } as Trip);
-      });
+    const { data, error } = await q;
 
-      logger.info('TripsService', `Retrieved ${trips.length} trips for user ${userId}`);
-      return trips;
-
-    } catch (error: any) {
-      // Handle missing index error
-      if (error.code === 'failed-precondition' || error.message?.includes('index')) {
-        logger.warn('TripsService', 'Index not available, falling back to simple query');
-        return this.getUserTripsSimple(userId, limit);
-      }
-
-      logger.error('TripsService', `Failed to get trips for user ${userId}`, error);
+    if (error) {
+      logger.error('TripsService', `Failed to get trips for ${userId}`, error);
       throw error;
     }
-  }
 
-  /**
-   * Simplified query without ordering (fallback for missing indexes)
-   */
-  private async getUserTripsSimple(userId: string, limit: number): Promise<Trip[]> {
-    const tripsQuery = query(
-      collection(db, this.COLLECTION_NAME),
-      where('userId', '==', userId)
-    );
-
-    const querySnapshot = await getDocs(tripsQuery);
-    const trips: Trip[] = [];
-
-    querySnapshot.forEach((doc) => {
-      trips.push({ id: doc.id, ...doc.data() } as Trip);
-    });
-
-    // Manual sorting and limiting
-    trips.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
-    return trips.slice(0, limit);
+    const trips = (data ?? []).map(this.rowToTrip);
+    logger.info('TripsService', `Retrieved ${trips.length} trips for ${userId}`);
+    return trips;
   }
 
   /**
    * Get a single trip by ID
    */
   async getTrip(tripId: string): Promise<Trip | null> {
-    try {
-      const tripRef = doc(db, this.COLLECTION_NAME, tripId);
-      const tripSnap = await getDoc(tripRef);
+    const { data, error } = await supabase
+      .from(this.TABLE)
+      .select('*')
+      .eq('id', tripId)
+      .single();
 
-      if (!tripSnap.exists()) {
-        logger.warn('TripsService', `Trip ${tripId} not found`);
-        return null;
-      }
-
-      // Update last opened timestamp
-      await updateDoc(tripRef, {
-        lastOpenedAt: serverTimestamp()
-      });
-
-      return { id: tripSnap.id, ...tripSnap.data() } as Trip;
-
-    } catch (error) {
+    if (error) {
+      if (error.code === 'PGRST116') return null; // not found
       logger.error('TripsService', `Failed to get trip ${tripId}`, error);
       throw error;
     }
+
+    // Update last opened
+    await supabase
+      .from(this.TABLE)
+      .update({ last_opened_at: new Date().toISOString() })
+      .eq('id', tripId);
+
+    return this.rowToTrip(data);
   }
 
   /**
    * Update a trip
    */
   async updateTrip(tripId: string, updates: Partial<Trip>): Promise<void> {
-    try {
-      // Clean and validate updates
-      const cleanedUpdates = TripSanitizer.validateUpdate(updates);
-      cleanedUpdates.updatedAt = serverTimestamp();
+    const cleanedUpdates = TripSanitizer.validateUpdate(updates);
 
-      const tripRef = doc(db, this.COLLECTION_NAME, tripId);
-      await updateDoc(tripRef, cleanedUpdates);
+    // Map camelCase to snake_case for DB
+    const dbUpdates: Record<string, any> = { updated_at: new Date().toISOString() };
+    if (cleanedUpdates.title !== undefined) dbUpdates.title = cleanedUpdates.title;
+    if (cleanedUpdates.destination !== undefined) dbUpdates.destination = cleanedUpdates.destination;
+    if (cleanedUpdates.status !== undefined) dbUpdates.status = cleanedUpdates.status;
+    if (cleanedUpdates.isFavorite !== undefined) dbUpdates.is_favorite = cleanedUpdates.isFavorite;
+    if (cleanedUpdates.chatState !== undefined) dbUpdates.chat_state = cleanedUpdates.chatState;
+    if (cleanedUpdates.itinerary !== undefined) dbUpdates.itinerary = cleanedUpdates.itinerary;
+    if (cleanedUpdates.tags !== undefined) dbUpdates.tags = cleanedUpdates.tags;
+    if (cleanedUpdates.imageUrl !== undefined) dbUpdates.image_url = cleanedUpdates.imageUrl;
+    if (cleanedUpdates.budget !== undefined) dbUpdates.budget = cleanedUpdates.budget;
+    if (cleanedUpdates.duration !== undefined) dbUpdates.duration = cleanedUpdates.duration;
+    if (cleanedUpdates.currency !== undefined) dbUpdates.currency = cleanedUpdates.currency;
+    if (cleanedUpdates.travelStyle !== undefined) dbUpdates.travel_style = cleanedUpdates.travelStyle;
 
-      logger.info('TripsService', `Updated trip ${tripId}`, {
-        fields: Object.keys(cleanedUpdates)
-      });
+    const { error } = await supabase.from(this.TABLE).update(dbUpdates).eq('id', tripId);
 
-    } catch (error) {
+    if (error) {
       logger.error('TripsService', `Failed to update trip ${tripId}`, error);
       throw error;
     }
@@ -209,71 +159,39 @@ export class TripsServiceV2 {
    * Delete a trip
    */
   async deleteTrip(tripId: string): Promise<void> {
-    try {
-      const tripRef = doc(db, this.COLLECTION_NAME, tripId);
-      await deleteDoc(tripRef);
-
-      logger.info('TripsService', `Deleted trip ${tripId}`);
-    } catch (error) {
+    const { error } = await supabase.from(this.TABLE).delete().eq('id', tripId);
+    if (error) {
       logger.error('TripsService', `Failed to delete trip ${tripId}`, error);
       throw error;
     }
   }
 
-  /**
-   * Toggle favorite status
-   */
   async toggleFavorite(tripId: string, isFavorite: boolean): Promise<void> {
     await this.updateTrip(tripId, { isFavorite });
   }
 
-  /**
-   * Update trip status
-   */
   async updateTripStatus(tripId: string, status: Trip['status']): Promise<void> {
     await this.updateTrip(tripId, { status });
   }
 
-  /**
-   * Get recent trips
-   */
   async getRecentTrips(userId: string, limit: number = 5): Promise<Trip[]> {
-    return this.getUserTrips({
-      userId,
-      limit,
-      orderBy: 'lastOpenedAt',
-      orderDirection: 'desc'
-    });
+    return this.getUserTrips({ userId, limit, orderBy: 'lastOpenedAt', orderDirection: 'desc' });
   }
 
-  /**
-   * Get favorite trips
-   */
   async getFavoriteTrips(userId: string, limit: number = 10): Promise<Trip[]> {
-    return this.getUserTrips({
-      userId,
-      limit,
-      isFavorite: true
-    });
+    return this.getUserTrips({ userId, limit, isFavorite: true });
   }
 
-  /**
-   * Search trips by destination or tags
-   */
   async searchTrips(userId: string, searchTerm: string): Promise<Trip[]> {
     const allTrips = await this.getUserTrips({ userId, limit: 100 });
-
-    const searchLower = searchTerm.toLowerCase();
-    return allTrips.filter(trip =>
-      trip.destination.toLowerCase().includes(searchLower) ||
-      trip.title.toLowerCase().includes(searchLower) ||
-      trip.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    const lower = searchTerm.toLowerCase();
+    return allTrips.filter(t =>
+      t.destination.toLowerCase().includes(lower) ||
+      t.title.toLowerCase().includes(lower) ||
+      t.tags?.some(tag => tag.toLowerCase().includes(lower))
     );
   }
 
-  /**
-   * Sync operations (delegated to TripSyncService)
-   */
   async syncLocalStorageToFirestore(userId: string) {
     return this.syncService.syncLocalStorageToFirestore(userId);
   }
@@ -285,7 +203,32 @@ export class TripsServiceV2 {
   async performFullSync(userId: string) {
     return this.syncService.performFullSync(userId);
   }
+
+  /** Convert snake_case DB row to camelCase Trip object */
+  private rowToTrip(row: any): Trip {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      title: row.title ?? '',
+      destination: row.destination ?? '',
+      prompt: row.prompt ?? '',
+      startDate: row.start_date,
+      endDate: row.end_date,
+      duration: row.duration ?? 0,
+      currency: row.currency ?? 'USD',
+      travelStyle: row.travel_style ?? 'mid-range',
+      status: row.status ?? 'draft',
+      chatState: row.chat_state,
+      itinerary: row.itinerary,
+      budget: row.budget,
+      imageUrl: row.image_url,
+      isFavorite: row.is_favorite ?? false,
+      tags: row.tags ?? [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      lastOpenedAt: row.last_opened_at,
+    } as any;
+  }
 }
 
-// Export singleton instance
 export const tripsServiceV2 = new TripsServiceV2();

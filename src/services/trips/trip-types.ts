@@ -3,7 +3,6 @@
  * Centralized type definitions for trip-related services
  */
 
-import { Timestamp } from 'firebase/firestore';
 import type { GeneratePersonalizedItineraryOutput } from '@/services/ai/schemas';
 import type { ChatState } from '@/app/page';
 
@@ -13,8 +12,8 @@ export interface Trip {
   title: string;
   destination: string;
   prompt: string;
-  startDate?: Date | Timestamp | string;
-  endDate?: Date | Timestamp | string;
+  startDate?: string;
+  endDate?: string;
   duration: number;
   budget?: number;
   currency: string;
@@ -22,9 +21,9 @@ export interface Trip {
   status: 'draft' | 'confirmed' | 'completed' | 'cancelled';
   chatState?: ChatState;
   itinerary?: GeneratePersonalizedItineraryOutput;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  lastOpenedAt?: Timestamp;
+  createdAt: string;
+  updatedAt: string;
+  lastOpenedAt?: string;
   isFavorite: boolean;
   tags: string[];
   imageUrl?: string;
@@ -35,8 +34,8 @@ export interface CreateTripInput {
   title?: string;
   destination?: string;
   prompt: string;
-  startDate?: Date | Timestamp | string;
-  endDate?: Date | Timestamp | string;
+  startDate?: string;
+  endDate?: string;
   duration?: number;
   budget?: number;
   currency?: string;
@@ -67,7 +66,6 @@ export interface TripQueryOptions {
 }
 
 export interface TripUpdateInput extends Partial<Trip> {
-  // Ensure certain fields cannot be updated
   id?: never;
   userId?: never;
   createdAt?: never;

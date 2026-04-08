@@ -283,7 +283,7 @@ export class ResponseFormatter {
       type: 'question',
       message: `Hello! I'm your AI travel assistant. 🌍\n\nTell me about your dream trip! You can say things like:\n• "3 days in Paris next month"\n• "Week-long adventure in Japan"\n• "Family trip to London in July"\n\nWhat destination are you thinking about?`,
       canGenerate: false,
-      missingFields: ['destination', 'duration', 'startDate']
+      missingFields: ['destination', 'duration']
     };
   }
 

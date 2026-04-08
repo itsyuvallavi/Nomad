@@ -2,7 +2,6 @@
  * PDF export formatter for itineraries
  */
 
-import jsPDF from 'jspdf';
 import type { FormatterOptions, FormatterResult } from './types';
 
 interface PDFConfig {
@@ -13,12 +12,12 @@ interface PDFConfig {
 }
 
 class PDFBuilder {
-  private doc: jsPDF;
+  private doc: any;
   private config: PDFConfig;
   private yPosition: number;
 
-  constructor() {
-    this.doc = new jsPDF();
+  constructor(jsPDFClass: any) {
+    this.doc = new jsPDFClass();
     this.config = {
       margin: 20,
       lineHeight: 7,
@@ -147,7 +146,9 @@ class PDFBuilder {
 
 export async function formatAsPDF({ itinerary }: FormatterOptions): Promise<FormatterResult> {
   try {
-    const builder = new PDFBuilder();
+    // Lazy load jsPDF only when exporting to prevent massive bundle sizes on load
+    const jsPDFFactory = (await import('jspdf')).default;
+    const builder = new PDFBuilder(jsPDFFactory);
     const pdfBlob = builder.build(itinerary);
 
     return {

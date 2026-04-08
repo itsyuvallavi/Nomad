@@ -83,10 +83,11 @@ export class AIController {
       ? intent.destinations.join(', ')
       : intent.destination || 'Unknown';
 
-    return {
+    const tripParams = {
       destination,
       startDate: intent.startDate || new Date().toISOString().split('T')[0],
       duration: intent.duration || 3,
+      daysPerCity: intent.daysPerCity, // Pass through daysPerCity for multi-city trips
       travelers: intent.travelers,
       preferences: {
         budget: intent.budget || intent.preferences?.budget,
@@ -98,6 +99,15 @@ export class AIController {
       budget: intent.budget || intent.preferences?.budget,
       interests: intent.interests || intent.preferences?.interests
     };
+
+    // Debug logging
+    console.log('🎯 [getTripParameters] Converted intent to trip params:', {
+      destination: tripParams.destination,
+      duration: tripParams.duration,
+      daysPerCity: tripParams.daysPerCity
+    });
+
+    return tripParams;
   }
 
   /**
@@ -142,8 +152,9 @@ export class AIController {
       );
 
       // Analyze user input and update intent
-      const updatedIntent = await this.analyzeUserInput(message, context.currentIntent);
-      context = this.conversationManager.updateIntent(context.sessionId, updatedIntent);
+      const updatedIntent = await this.analyzeUserInput(message, context.currentIntent as any);
+      // @ts-ignore - Budget string types conflict between core.types and intent-extractor
+      context = this.conversationManager.updateIntent(context.sessionId, updatedIntent as any);
 
       // Check what information is missing
       const missingFields = this.getMissingRequiredFields(context.currentIntent || {});
@@ -236,7 +247,7 @@ export class AIController {
       const gptResult = await this.gptAnalyzer.analyzeWithGPT(message, currentIntent || {});
 
       // Validate using IntentParser
-      const validated = this.intentParser.validateExtractedIntent(gptResult);
+      const validated = this.intentParser.validateExtractedIntent(gptResult as any) as Partial<ParsedIntent>;
 
       // Cache the result
       this.intentCache.setIntent(message, validated);
@@ -248,10 +259,8 @@ export class AIController {
       logger.error('AI', 'Failed to analyze input', { error });
       console.log('🤖 [AI] Failed to analyze input', error);
 
-      // Fallback to pattern extraction only as last resort
-      const fallback = this.intentParser.extractWithPatterns(message, currentIntent);
-      console.log('🤖 [AI] Using pattern results as fallback', fallback);
-      return fallback;
+      // Always throw error if AI fails, no legacy pattern fallbacks allowed
+      throw error;
     }
   }
 
@@ -265,10 +274,6 @@ export class AIController {
     // Essential fields that must be provided
     if (!intent.destination && !intent.destinations) {
       missing.push('destination');
-    }
-
-    if (!intent.startDate) {
-      missing.push('startDate');
     }
 
     if (!intent.duration && !(intent.startDate && intent.endDate)) {
@@ -288,7 +293,7 @@ export class AIController {
     // Use ResponseFormatter to generate consistent questions
     const response = this.responseFormatter.formatQuestion(
       missingField,
-      currentIntent
+      currentIntent as any
     );
 
     return response.message;

@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Plane, Home, Utensils } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import { ExportMenu } from '../Export-menu';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { getIconicImageSearch } from '@/lib/constants/city-landmarks';
@@ -109,68 +109,7 @@ const ItineraryHeaderComponent: React.FC<ItineraryHeaderProps> = ({
               </div>
             </div>
 
-            {/* Cost Breakdown - Compact */}
-            {(itinerary.costBreakdown || itinerary._costEstimate || itinerary.cost || isGenerating) && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-foreground">Cost breakdown</h3>
-                {(itinerary.costBreakdown || itinerary._costEstimate || itinerary.cost) ? (
-                <>
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between py-0.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
-                        <Plane className="w-3 h-3 text-muted-foreground" />
-                      </div>
-                      <span className="text-xs text-foreground">Flights</span>
-                    </div>
-                    <span className="text-xs text-foreground font-medium">
-                      ${(itinerary.costBreakdown?.flights || itinerary._costEstimate?.flights || (itinerary.cost?.total ? Math.round(itinerary.cost.total * 0.4) : 0)).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
-                        <Home className="w-3 h-3 text-muted-foreground" />
-                      </div>
-                      <span className="text-xs text-foreground">Stay</span>
-                    </div>
-                    <span className="text-xs text-foreground font-medium">
-                      ${(itinerary.costBreakdown?.accommodation || itinerary._costEstimate?.accommodation || (itinerary.cost?.total ? Math.round(itinerary.cost.total * 0.35) : 0)).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between py-0.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
-                        <Utensils className="w-3 h-3 text-muted-foreground" />
-                      </div>
-                      <span className="text-xs text-foreground">Food & Daily</span>
-                    </div>
-                    <span className="text-xs text-foreground font-medium">
-                      ${(itinerary.costBreakdown?.dailyExpenses || itinerary._costEstimate?.dailyExpenses || (itinerary.cost?.total ? Math.round(itinerary.cost.total * 0.25) : 0)).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-                <div className="pt-1.5 border-t border-border">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-foreground">Total estimated</span>
-                    <span className="text-sm text-foreground font-bold">
-                      ${(itinerary.costBreakdown?.total || itinerary._costEstimate?.total || itinerary.cost?.total || 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Per person • {dayCount} days</p>
-                </div>
-                </>
-                ) : (
-                  // Loading skeleton for cost breakdown
-                  <div className="space-y-2 animate-pulse">
-                    <div className="h-8 bg-muted rounded-lg"/>
-                    <div className="h-8 bg-muted rounded-lg"/>
-                    <div className="h-8 bg-muted rounded-lg"/>
-                    <div className="h-10 bg-muted rounded-lg mt-2"/>
-                  </div>
-                )}
-              </div>
-            )}
+ 
           </div>
 
           {/* Right Side - Single Destination Image - Full width on mobile */}

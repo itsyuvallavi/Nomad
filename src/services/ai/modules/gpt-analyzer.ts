@@ -64,6 +64,10 @@ export class GPTAnalyzer {
 
       const parsed = JSON.parse(content);
       const cleaned = this.validateAndCleanResult(parsed);
+
+      // Debug logging to see what GPT extracted
+      console.log('🤖 [GPT-Analyzer] Extracted intent:', JSON.stringify(cleaned, null, 2));
+
       return cleaned;
 
     } catch (error) {
@@ -94,14 +98,14 @@ Your task: Extract NEW information from the current message and UPDATE the exist
 
     return `You are a travel intent extraction AI. Extract structured information from natural language travel requests.
 
-CURRENT DATE CONTEXT:
-- Today is ${dayOfWeek}, ${todayStr}
-- Use this to understand relative dates like "tomorrow", "next Monday", etc.
+CURRENT DATE: Today is ${dayOfWeek}, ${todayStr}
+
+CRITICAL: For dates, return them AS-IS (like "tomorrow", "next Monday", "Dec 15"). Do NOT convert to ISO format yourself.
 
 Your job: Identify the city/destination name, travel dates, duration, and preferences from the user's message.
 ${contextSection}
 CRITICAL RULE: Extract ONLY the city name. NEVER include temporal words (starting, for, tomorrow, next, on, from, etc.) in the destination field.
-
+CRITICAL RULE 2: ALWAYS convert common city abbreviations/nicknames to their FULL historically recognized formal name (e.g., "LA" -> "Los Angeles", "NYC" -> "New York City", "sf" -> "San Francisco").
 Examples - PAY ATTENTION to what should NOT be included:
 - "plan a 7 day trip to Lisbon staring next monday" → destination: "Lisbon" (NOT "Lisbon Staring")
 - "3 days in London for tomorrow" → destination: "London" (NOT "London For")
@@ -109,7 +113,14 @@ Examples - PAY ATTENTION to what should NOT be included:
 - "London starting tomorrow" → destination: "London" (NOT "London Starting")
 - "Lisbon starting next week" → destination: "Lisbon" (NOT "Lisbon Starting")
 - "New York for 5 days" → destination: "New York" (NOT "New York For")
-- "I want to visit Tokyo and Seoul" → destinations: ["Tokyo", "Seoul"]
+
+Multi-city examples (PRESERVE ORDER - first city mentioned gets first days value):
+- "3 days in San Francisco and 3 days in Seattle" → {destinations: ["San Francisco", "Seattle"], daysPerCity: [3, 3], duration: 6}
+- "Paris for 4 days, then London for 2 days" → {destinations: ["Paris", "London"], daysPerCity: [4, 2], duration: 6}
+- "plan a 7 day trip in paris then 3 days in Amsterdam" → {destinations: ["Paris", "Amsterdam"], daysPerCity: [7, 3], duration: 10}
+- "3 days in Phoenix and then 4 days in San Francisco" → {destinations: ["Phoenix", "San Francisco"], daysPerCity: [3, 4], duration: 7}
+- "I want to visit Tokyo and Seoul" → {destinations: ["Tokyo", "Seoul"]} (no days specified)
+- "5 days in Barcelona and 3 days in Madrid" → {destinations: ["Barcelona", "Madrid"], daysPerCity: [5, 3], duration: 8}
 
 Conversation examples:
 - User: "plan a trip to Lisbon" → {destination: "Lisbon"}
@@ -119,9 +130,10 @@ Return JSON with these fields (only include fields mentioned in the request):
 {
   "destination": "string",           // ONLY the city name (e.g., "Lisbon", "New York", "London")
   "destinations": ["string"],        // For multi-city trips - ONLY city names
-  "startDate": "YYYY-MM-DD or relative",  // ISO format (e.g., "2025-12-15") OR relative (e.g., "tomorrow", "next Monday")
-  "endDate": "YYYY-MM-DD or relative",    // ISO format OR relative
-  "duration": number,               // Number of days
+  "daysPerCity": [number],          // Days in each city (MUST match destinations array length)
+  "startDate": "YYYY-MM-DD or relative",  // OPTIONAL: ISO format or relative (only if the user explicitly provided one!)
+  "endDate": "YYYY-MM-DD or relative",    // OPTIONAL
+  "duration": number,               // Total number of days (sum of daysPerCity for multi-city)
   "travelers": {
     "adults": number,
     "children": number
@@ -134,6 +146,9 @@ Key rules:
 - Extract ONLY the city name - NEVER include "starting", "for", "tomorrow", "next", "from", "on" in destination
 - For dates: extract relative dates like "tomorrow", "next Monday", "next week" AS-IS - don't convert them
 - Temporal words go in startDate field, NOT in destination field
+- For multi-city: daysPerCity array MUST have same length as destinations array
+- For multi-city: PRESERVE ORDER - the first city mentioned gets the first days value, second city gets second days value
+- If daysPerCity is provided, duration MUST equal the sum of all days
 - PRESERVE previously collected information - only add/update what's in the current message
 - Return valid JSON with ALL fields (existing + new)
 - Only include fields that are mentioned or clearly implied`;

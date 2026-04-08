@@ -1,0 +1,67 @@
+{
+  "timestamp": 1765483324757,
+  "summary": {
+    "SIMPLE": {
+      "total": 2,
+      "passed": 2
+    },
+    "NORMAL": {
+      "total": 0,
+      "passed": 0
+    },
+    "COMPLEX": {
+      "total": 0,
+      "passed": 0
+    }
+  },
+  "results": [
+    {
+      "id": "S1",
+      "level": "SIMPLE",
+      "initialPrompt": "3 days in London starting tomorrow",
+      "followUpAnswers": {
+        "startDate": "tomorrow",
+        "destination": "London",
+        "duration": "3 days"
+      },
+      "expectedFinalIntent": {
+        "destination": "London",
+        "duration": 3
+      },
+      "notes": "Basic trip request with complete info",
+      "pass": true,
+      "issues": [],
+      "intent": {
+        "destination": "London",
+        "duration": 3
+      },
+      "itinerary": null,
+      "canGenerate": false,
+      "turns": 1
+    },
+    {
+      "id": "S2",
+      "level": "SIMPLE",
+      "initialPrompt": "Plan a 2 day weekend trip to Paris starting next Friday",
+      "followUpAnswers": {
+        "startDate": "next Friday",
+        "destination": "Paris",
+        "duration": "2 days"
+      },
+      "expectedFinalIntent": {
+        "destination": "Paris",
+        "duration": 2
+      },
+      "notes": "Weekend trip with complete info",
+      "pass": true,
+      "issues": [],
+      "intent": {
+        "destination": "Paris",
+        "duration": 2
+      },
+      "itinerary": null,
+      "canGenerate": false,
+      "turns": 1
+    }
+  ]
+}

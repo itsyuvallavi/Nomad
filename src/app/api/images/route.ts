@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
 
     logger.info('API', `Fetching images for: ${destination}`);
 
-    const images = await searchUnsplashImages(destination, count);
+    // Directly use Unsplash since Teleport API is deprecated/offline
+    let images = await searchUnsplashImages(destination, count);
 
     console.log('🖼️ [API/IMAGES] Response:', {
       destination,

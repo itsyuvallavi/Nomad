@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Mail, Calendar, TrendingUp, Heart, Camera } from 'lucide-react';
-import { User } from 'firebase/auth';
+import type { User } from '@supabase/supabase-js';
 import type { UserData } from '@/infrastructure/contexts/AuthProvider';
 
 interface ProfileStatsProps {
@@ -28,7 +28,7 @@ export const ProfileStats = memo<ProfileStatsProps>(({ user, userData }) => {
     .slice(0, 2) || user?.email?.[0]?.toUpperCase() || 'U';
 
   const memberSince = userData?.createdAt
-    ? new Date(userData.createdAt.toDate?.() || userData.createdAt).toLocaleDateString()
+    ? new Date(userData.createdAt).toLocaleDateString()
     : 'N/A';
 
   return (
@@ -37,7 +37,7 @@ export const ProfileStats = memo<ProfileStatsProps>(({ user, userData }) => {
         <div className="relative mx-auto w-24 h-24 mb-4">
           <Avatar className="w-24 h-24">
             <AvatarImage
-              src={userData?.photoURL || user?.photoURL || ''}
+              src={userData?.photoURL || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ''}
               alt={userData?.displayName || 'User'}
             />
             <AvatarFallback className="bg-blue-600 text-white text-xl">

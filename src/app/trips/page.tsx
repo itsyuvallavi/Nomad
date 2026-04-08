@@ -12,7 +12,7 @@ import dynamic from 'next/dynamic';
 import { useAuth } from '@/infrastructure/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
-import { Timestamp } from 'firebase/firestore';
+
 import { tripsService, type Trip as FirestoreTrip } from '@/services/trips/trips-service';
 import { clearAllTrips } from '@/lib/helpers/clear-all-trips';
 
@@ -62,24 +62,16 @@ export default function TripsPage() {
       try {
         setLoading(true);
 
-        // Load all trips from Firestore
-        const firestoreTrips = await tripsService.getUserTrips(user.uid);
+        // Load all trips from database
+        const firestoreTrips = await tripsService.getUserTrips(user.id);
 
-        // Convert Firestore timestamps to Date objects
+        // Convert Postgres timestamps to Date objects
         const convertedTrips = firestoreTrips.map(trip => ({
           ...trip,
-          createdAt: trip.createdAt?.toDate() || new Date(),
-          updatedAt: trip.updatedAt?.toDate() || new Date(),
-          startDate: trip.startDate ? (
-            trip.startDate instanceof Timestamp
-              ? trip.startDate.toDate()
-              : new Date(trip.startDate)
-          ) : undefined,
-          endDate: trip.endDate ? (
-            trip.endDate instanceof Timestamp
-              ? trip.endDate.toDate()
-              : new Date(trip.endDate)
-          ) : undefined
+          createdAt: trip.createdAt ? new Date(trip.createdAt) : new Date(),
+          updatedAt: trip.updatedAt ? new Date(trip.updatedAt) : new Date(),
+          startDate: trip.startDate ? new Date(trip.startDate) : undefined,
+          endDate: trip.endDate ? new Date(trip.endDate) : undefined
         }));
 
         setTrips(convertedTrips);
