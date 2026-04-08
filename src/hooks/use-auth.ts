@@ -15,6 +15,10 @@ import { AuthContext, AuthContextType } from '@/infrastructure/contexts/AuthProv
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
+    // Prevent crashing Next.js prerendering on statically compiled components
+    if (typeof window === 'undefined') {
+      return { user: null, userData: null, loading: true } as unknown as AuthContextType;
+    }
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
